@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Safety Layer Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: an app that fills the screen and never scrolls itself. One bar on top (title, share closed, the route),
+   then the story and the product side by side; on a phone the product takes the screen and the story is a short
+   card under it. Only the product screen scrolls. */
+:root{
+  --bg:#EEF1F6; --panel:#FFFFFF; --ink:#142030; --muted:#56637A; --line:#D9E0EA;
+  --net:#1F3A93; --prog:#6B48B8; --both:#3D4855; --ok:#0E7C66; --mark:#B8860B; --markbg:#FFF6D6;
+  --frame:#C9D3E3; --soft:#E8EDF7;
+  --body:'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1622; --panel:#172131; --ink:#E7ECF4; --muted:#9AA8BD; --line:#2A374B;
+  --net:#8EA8FF; --prog:#B59BF0; --both:#B7C1D0; --ok:#4FC3A1; --mark:#E3B341; --markbg:#3A3017;
+  --frame:#33425A; --soft:#1F2B3F; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1622; --panel:#172131; --ink:#E7ECF4; --muted:#9AA8BD; --line:#2A374B;
+  --net:#8EA8FF; --prog:#B59BF0; --both:#B7C1D0; --ok:#4FC3A1; --mark:#E3B341; --markbg:#3A3017;
+  --frame:#33425A; --soft:#1F2B3F; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;overflow:hidden}
+.app{height:100vh;height:100dvh;display:flex;flex-direction:column;gap:10px;max-width:1500px;margin:0 auto;
+  padding:12px max(16px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
+/* top bar */
+.top{flex:none;display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:18px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px}
+.top h1{font-size:16px;line-height:1.2;margin:0;letter-spacing:-.01em;white-space:nowrap}
+.top h1 span{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.pct{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.pct b{font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ok)}
+.pct span{font-size:12px;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;min-width:0}
+.step{border-radius:7px;padding:4px 7px;background:var(--soft);font-size:11.5px;color:var(--muted);min-width:0;transition:background .35s ease}
+.step b{display:block;font-size:12.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step i{display:block;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step .short{display:none}
+.step.done{background:color-mix(in srgb, var(--ok) 16%, var(--soft))}
+.step.now{background:var(--net)}.step.now b,.step.now i{color:var(--panel)}
+/* story and product */
+.stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(280px,350px) minmax(0,1fr);gap:12px}
+.story{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-height:0;overflow:auto;display:flex;flex-direction:column}
+.where{font-size:13px;font-weight:700;color:var(--c)}
+.story h2{font-size:22px;line-height:1.2;letter-spacing:-.015em;margin:3px 0 8px;text-wrap:balance}
+.more p{margin:0 0 9px}
+.msg{display:grid;gap:7px;margin:4px 0 10px}
+.msg div{background:var(--soft);border-radius:9px;padding:8px 11px;font-size:13.5px;color:var(--muted)}
+.msg b{display:block;color:var(--ink);font-size:14px}
+.todo{margin-top:8px;padding:10px 13px;border-radius:10px;background:var(--markbg);border:1px solid var(--mark);font-size:14.5px}
+.todo b{display:block;margin-bottom:1px}
+.look{display:flex;gap:9px;align-items:flex-start;margin-top:8px;padding:9px 12px;border-radius:10px;background:var(--soft);font-size:13.5px}
+.look i{flex:none;width:12px;height:12px;margin-top:4px;border-radius:3px;border:2px solid var(--mark)}
+.toggle{display:none}
+#sHead,#sAct{flex:none}#sAct{margin-top:auto}
+.foot{margin-top:auto;padding-top:12px}
+.prog{height:4px;border-radius:2px;background:var(--line);overflow:hidden}.prog i{display:block;height:100%;background:var(--net);transition:width .3s ease}
+.nav{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center}
+.nav button{font:inherit;font-weight:600;font-size:14px;padding:9px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.nav button.pri{background:var(--net);border-color:var(--net);color:var(--panel)}
+.nav button:disabled{opacity:.45;cursor:default}
+.nav button:focus-visible,.toggle:focus-visible{outline:2px solid var(--net);outline-offset:2px}
+.wait{font-size:13.5px;font-weight:600;color:var(--mark);flex:1;min-width:0}
+.nav button.go:not(:disabled){animation:nudge 1.6s ease-out infinite}
+@keyframes nudge{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--net) 55%, transparent)}100%{box-shadow:0 0 0 12px transparent}}
+.count{font-size:13px;color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums}
+.frame{position:relative;background:var(--panel);border:1px solid var(--frame);border-radius:12px;overflow:hidden;min-height:0;display:flex;flex-direction:column}
+.bar{flex:none;display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.bar i{width:10px;height:10px;border-radius:50%;background:var(--line);display:inline-block}
+.bar span{margin-left:6px}
+.bar em{margin-left:auto;font-style:normal}
+iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
+.busy{position:absolute;inset:34px 0 0;display:grid;place-items:center;background:color-mix(in srgb, var(--panel) 72%, transparent);font-weight:700;font-size:16px;color:var(--ink)}
+.busy[hidden]{display:none}
+.busy span{display:flex;align-items:center;gap:10px;background:#17296B;color:#fff;border-radius:99px;padding:12px 20px;box-shadow:0 12px 30px rgba(15,27,72,.3)}
+.busy span::before{content:'';width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#5FE0B5;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* phone and narrow windows: product on top, the story as a short card under it */
+/* the live posture card: a small copy of the opening picture that follows the tour */
+.viz{flex:none;margin:12px 0 0;border-radius:14px;padding:10px 12px;color:#fff;background:radial-gradient(120% 90% at 85% 0%, #2B4FC4 0%, #17296B 55%, #0F1B48 100%)}
+.vtop{display:flex;justify-content:space-between;gap:8px;font-size:12px;align-items:baseline}.vtop span{color:#9DF0D2;font-weight:700;font-size:11px;letter-spacing:.04em}
+.viz svg{width:100%;height:auto;display:block;margin-top:4px}
+.viz line,.viz path{transition:opacity .45s ease,stroke .4s}
+.viz .ew{stroke:#FF6B5B;stroke-width:.8;opacity:.5}
+.viz .need{stroke:#FF8A7D;stroke-width:1.2;fill:none;opacity:.75;transition:stroke .6s,stroke-width .6s}
+.viz.c3 .need{stroke:#5FE0B5;stroke-width:2;opacity:.95}
+.viz .node{transition:stroke .6s}.viz:not(.c3) .node{stroke:#FF8A7D}
+.viz .api{stroke:#FFB547;stroke-width:.9;stroke-dasharray:3 3;opacity:.7}
+.viz .web{stroke:#FF6B5B;stroke-width:.9;stroke-dasharray:2 3;opacity:.7}
+.viz .node{fill:#0F1B48;stroke:#5FE0B5;stroke-width:2}
+.viz text{fill:#C9D4F5;font:600 9px var(--body);text-anchor:middle;paint-order:stroke;stroke:#13235E;stroke-width:3px}
+.viz .hub{stroke-width:2.2;fill:#0F1B48;transition:stroke .5s,opacity .5s}
+.viz .x{stroke:#FF6B5B;stroke-width:3;stroke-linecap:round;opacity:0;transition:opacity .4s ease .5s}
+.viz.c1 .api,.viz.c2 .web,.viz.c3 .ew{opacity:0}
+.viz.c1 .xa,.viz.c2 .xw{opacity:1}
+#vNet{transition:opacity .5s}#vIn{opacity:0;transition:opacity .5s}
+.viz.inprog #vNet{opacity:0}.viz.inprog #vIn{opacity:1}
+#vIn text{text-anchor:start;stroke:none;font-size:10.5px}
+#vIn .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;fill:#E4EAFB}
+#vIn .tag{font-weight:800;font-size:9.5px;letter-spacing:.06em;text-anchor:middle}
+#vIn .t{transition:fill .5s}#vIn .tag{transition:fill .5s}
+#vIn .ok .t{fill:rgba(95,224,181,.18)}#vIn .ok .tag{fill:#9DF0D2}
+#vIn .no .t{fill:rgba(255,107,91,.22)}#vIn .no .tag{fill:#FFB3AA}
+#vIn .ask .t{fill:rgba(255,181,71,.22)}#vIn .ask .tag{fill:#FFD08A}
+.vleg{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin-top:6px;font-size:11.5px;color:#C9D4F5}
+.vleg span{display:flex;justify-content:space-between;gap:6px}.vleg b{font-weight:700}
+.vleg .o{color:#FFB3AA}.vleg .c{color:#9DF0D2}.vleg .p{color:#FFD08A}
+@media (max-width:900px){.viz{display:none}}
+@media (prefers-reduced-motion: reduce){.viz line,.viz path,.viz .x,#vNet,#vIn{transition:none}}
+/* the opening */
+.cover{position:fixed;inset:0;z-index:5;background:var(--bg);overflow:auto;display:flex;justify-content:center;align-items:flex-start;
+  padding:max(28px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 28px max(16px, env(safe-area-inset-left, 0px))}
+.cover[hidden]{display:none}
+.cv{max-width:1040px;width:100%;display:grid;gap:16px;padding-top:min(6vh,48px)}
+.cv .kick{font-size:13px;font-weight:700;color:var(--net);letter-spacing:.02em}
+.cv h1{font-size:clamp(28px,4.4vw,42px);line-height:1.1;letter-spacing:-.025em;margin:0;text-wrap:balance}
+.cv .lead{font-size:17px;color:var(--muted);margin:0;max-width:60ch}
+.cv .msg{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
+.cv .msg div{background:var(--panel);border:1px solid var(--line);padding:12px 14px;font-size:14px}
+.cv .msg b{font-size:15px;margin-bottom:2px}
+.cv .how{font-size:14px;color:var(--muted);margin:0}
+.cv button{justify-self:start;font:inherit;font-weight:700;font-size:16px;padding:12px 22px;border-radius:10px;border:0;background:var(--net);color:var(--panel);cursor:pointer}
+.cv button:focus-visible{outline:2px solid var(--net);outline-offset:3px}
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:center}
+.hero .txt{display:grid;gap:14px;min-width:0}
+.brand{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--net);letter-spacing:.02em}
+.brand svg{width:34px;height:34px;flex:none}
+/* the opening picture: one map of the shop that changes from "today" to "after", the way the product changes it */
+.ba{position:relative;border-radius:18px;padding:16px 16px 12px;color:#fff;
+  background:radial-gradient(120% 90% at 85% 0%, #2B4FC4 0%, #17296B 55%, #0F1B48 100%);box-shadow:0 18px 40px rgba(15,27,72,.28)}
+.ba svg{width:100%;height:auto;display:block}
+.ba svg{width:100%;height:auto;display:block;overflow:hidden}
+.ba .bad{stroke:#FF6B5B;stroke-width:1;opacity:.55;transition:opacity .45s ease}
+.ba .good{stroke:#5FE0B5;stroke-width:2.6;fill:none;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .7s ease-out .15s}
+.ba .node{fill:#0F1B48;stroke:#FF8A7D;stroke-width:2;transition:stroke .6s ease,fill .6s ease}
+.ba text{fill:#C9D4F5;font:600 8.5px var(--body);text-anchor:middle;paint-order:stroke;stroke:#13235E;stroke-width:3px;stroke-linejoin:round}
+.ba:not(.s0) .bad{opacity:0}.ba:not(.s0) .good{stroke-dashoffset:0}.ba:not(.s0) .node{stroke:#5FE0B5}
+#gNet{transform-box:view-box;transform-origin:156px 26px;transition:transform .6s cubic-bezier(.6,0,.3,1),opacity .4s ease .2s}
+.ba.s2 #gNet,.ba.s3 #gNet{transform:scale(4);opacity:0}
+.ba.s1 #nAd{fill:#5FE0B5}
+#gIn{opacity:0;transition:opacity .3s ease}
+.ba.s3 #gIn{opacity:1}
+#gIn .row{opacity:0;transform:translateX(-6px);transition:opacity .35s ease,transform .35s ease;transition-delay:calc(var(--i)*.3s + .15s)}
+.ba.s3 #gIn .row{opacity:1;transform:none}
+#gIn text{text-anchor:start;stroke:none;font-size:10px}
+#gIn .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;fill:#E4EAFB}
+#gIn .verb{fill:#8FA2DA;font-weight:600}
+#gIn .tag{font-weight:800;font-size:9px;letter-spacing:.06em;text-anchor:middle}
+#gIn .ok rect.t{fill:rgba(95,224,181,.18)}#gIn .ok .tag{fill:#9DF0D2}
+#gIn .no rect.t{fill:rgba(255,107,91,.22)}#gIn .no .tag{fill:#FFB3AA}
+#gIn .layer{fill:#8FA2DA;font-size:8.5px;font-weight:600}
+.ba .cap{display:grid;align-content:start;gap:1px;margin-top:4px;min-height:62px}
+.ba .cap b{font-size:15px}.ba .cap span{font-size:12.5px;color:#C9D4F5}
+.ba .baN{font-style:normal;font-size:11px;color:#8FA2DA;margin-top:2px}
+.ba .pill{position:absolute;top:12px;left:14px;z-index:1;font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:4px 9px;border-radius:99px;background:rgba(255,107,91,.2);color:#FFB3AA;transition:background .6s,color .6s}
+.ba:not(.s0) .pill{background:rgba(95,224,181,.18);color:#9DF0D2}
+.ba .dots{position:absolute;top:16px;right:16px;display:flex;gap:5px}
+.ba .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .3s}
+.ba .dots i.on{background:#fff}
+@media (prefers-reduced-motion: reduce){.ba .bad,.ba .good,.ba .node,#gNet,#gIn,#gIn .row{transition:none}}
+@media (max-width:760px){.hero{grid-template-columns:1fr;gap:14px}.ba{order:-1;width:100%;max-width:420px;justify-self:center;padding:12px 10px 10px}.cv h1{font-size:28px}}
+.go1{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.go1 span{font-size:13.5px;color:var(--muted)}
+.lh{font-size:15px;margin:2px 0 -4px}
+.layers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.layers div{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:10px 13px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:1px}
+.layers div.on{border:1px solid var(--net)}
+.layers b{color:var(--ink);font-size:14.5px}
+.layers em{font-style:normal;font-weight:700;font-size:11.5px;margin-top:6px;color:var(--muted);letter-spacing:.02em}
+.layers .on em{color:var(--net)}
+.layers .done em{color:var(--ok)}.layers div.done{border:1px solid var(--ok)}
+@media (max-width:640px){.layers{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:7px 14px;font-size:13.5px;font-weight:600}
+.chips i{font-style:normal;color:var(--net)}
+.lrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lrow span{font-size:13px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px dashed var(--line);color:var(--muted);background:transparent}
+.lrow span.on{border:1px solid var(--net);color:var(--net);background:color-mix(in srgb, var(--net) 8%, var(--panel))}
+.lrow em{font-style:normal;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-left:4px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;border:1px dashed var(--muted)}.dot.on{background:var(--net);border:0}
+.cv .why{margin:0;padding:12px 16px;border-left:4px solid var(--net);background:var(--panel);border-radius:0 10px 10px 0;font-size:15.5px;font-weight:600}
+.yours{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;color:#fff;border-radius:16px;padding:18px 22px;background:radial-gradient(120% 120% at 90% 0%, #2B4FC4 0%, #17296B 55%, #0F1B48 100%);box-shadow:0 18px 40px rgba(15,27,72,.25)}
+.yours span{color:#C9D4F5}
+.yours b{font-size:clamp(30px,5vw,44px);letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.yours span{font-size:16px;font-weight:600}
+.nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.nums div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--muted)}
+.nums b{display:block;font-size:26px;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.15}
+.nums .key{border-color:var(--ok)}.nums .key b{color:var(--ok)}
+.cv h3{font-size:15px;margin:4px 0 0}
+.cv ul{margin:0;padding-left:20px;color:var(--muted);font-size:14.5px}
+.cv .row{display:flex;gap:10px;flex-wrap:wrap}
+.cv button.sec{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+@media (max-width:640px){.nums{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.cv .msg{grid-template-columns:1fr}.cv{padding-top:8px;gap:14px}.cv .lead{font-size:16px}}
+@media (max-width:900px){
+  .app{gap:8px;padding-top:8px}
+  .top{grid-template-columns:auto minmax(0,1fr);gap:10px;padding:7px 10px}
+  .top h1{display:none}
+  .steps{gap:3px}.step{padding:5px 2px;text-align:center}.step i,.step .long{display:none}.step .short{display:inline}.step b{font-size:12.5px}
+  /* the story and its buttons sit on top: the app's viewer may hide the bottom of the page, never the top */
+  .stage{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:8px}
+  .bar{display:none}.busy{inset:0}
+  .story{max-height:44vh;max-height:44dvh;padding:12px 14px;border-radius:12px}
+  .story h2{font-size:18px;margin:2px 0 4px}
+  .more p{margin:0 0 4px;font-size:14px}
+  .toggle{display:inline-block;align-self:flex-start;font:inherit;font-size:13px;font-weight:600;color:var(--net);background:none;border:0;padding:2px 0;cursor:pointer}
+  .todo{margin-top:6px;padding:8px 11px;font-size:14px}.todo b{display:inline;margin-right:6px}
+  .look{display:none}
+  .foot{padding-top:8px;margin-top:0}.prog{display:none}.nav{margin-top:0;gap:8px;flex-wrap:nowrap}
+  .nav button{padding:8px 13px}
+}
+@media (prefers-reduced-motion: reduce){.step,.prog i{transition:none}.nav button.go{animation:none}}
+</style>
+</head>
+<body>
+
+<section class="cover" id="cover" aria-label="Opening">
+  <div class="cv">
+    <div class="hero">
+      <div class="txt">
+        <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="var(--net)"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#4FC3A1"/></svg>DECISION &amp; SAFETY LAYER · 5-MINUTE TOUR</div>
+        <h1>Least privilege for every Kubernetes workload, without breaking production</h1>
+        <p class="lead">Workloads get far more access than they use. The product builds an allow-list from manifests and observed behavior, then enforces it step by step.</p>
+        <p class="why">Cilium and Tetragon can enforce. Deciding what to allow without breaking production is the hard part. That is what this product does.</p>
+        <div class="go1"><button id="start">Start the tour →</button><span>5 min · you act as the platform engineer · lab data</span></div>
+      </div>
+      <figure class="ba" id="ba" aria-label="The shop's 12 workloads: by default every one can reach every other one; with least privilege only the required flows remain; inside one workload only known binaries run">
+        <div class="pill" id="baPill" aria-hidden="true">DEFAULT · ALLOW ALL</div>
+        <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <svg id="baSvg" viewBox="0 0 330 244" aria-hidden="true"></svg>
+        <figcaption class="cap"><b id="baT"></b><span id="baS"></span><i class="baN" id="baN"></i></figcaption>
+      </figure>
+    </div>
+    <div class="chips" aria-label="How it works">
+      <span><i>◎</i>No new agents</span><span><i>⬡</i>Engine-native policies</span><span><i>✓</i>Human-approved, reversible</span>
+    </div>
+    <div class="lrow" aria-label="Runtime layers">
+      <span class="on">Network</span><span class="on">Process execution</span><span>File access</span><span>Privileges</span>
+      <em><b class="dot on"></b>in this tour <b class="dot"></b>roadmap</em>
+    </div>
+  </div>
+</section>
+<section class="cover" id="end" aria-label="Summary" hidden>
+  <div class="cv">
+    <div class="kick">WHAT YOU JUST DID</div>
+    <h1>Zero Trust approach</h1>
+    <div class="yours"><b id="took"></b><span id="tookd"></span></div>
+    <div class="nums">
+      <div class="key"><b>0</b>required flows denied</div>
+      <div><b>Denied</b>Kubernetes API and cross-namespace access</div>
+      <div><b>12 / 12</b>workloads: open egress removed</div>
+      <div><b>116</b>unused east-west paths denied</div>
+      <div><b>25</b>binaries on the process allow-list</div>
+      <div><b>9</b>ambiguous binaries escalated to a human, not guessed</div>
+    </div>
+        <h3 class="lh">Coverage by runtime layer</h3>
+    <div class="layers">
+      <div class="done"><b>Network</b>ingress, egress, east-west<em>Enforced</em></div>
+      <div class="on"><b>Process execution</b>which binaries may run<em>Allow-list ready · preview</em></div>
+      <div><b>File access</b>read and write paths<em>Roadmap</em></div>
+      <div><b>Privileges</b>capabilities, mounts, root<em>Roadmap</em></div>
+    </div>
+    <p class="why">See it on your own cluster: it starts from the telemetry Cilium and Tetragon already collect.</p>
+    <div class="row"><button id="again">Take the tour again</button><button id="back2" class="sec">Back to the last screen</button></div>
+  </div>
+</section>
+<div class="app">
+  <header class="top">
+    <h1>Decision &amp; Safety Layer<span>Product tour · boutique, 12 workloads</span></h1>
+    <div class="pct" aria-label="Share of the exposure closed"><b id="pct"></b><span>closed</span></div>
+    <div class="steps" id="steps" aria-label="Progress"></div>
+  </header>
+  <main class="stage">
+    <section class="story" id="story">
+      <div id="sHead" aria-live="polite"></div>
+      <figure class="viz" id="viz" aria-label="Live posture of boutique">
+        <div class="vtop"><b>Live posture · boutique</b><span id="vState"></span></div>
+        <svg id="vSvg" viewBox="0 0 330 250" aria-hidden="true"></svg>
+        <div class="vleg" id="vLeg"></div>
+      </figure>
+      <div id="sAct"></div>
+    </section>
+    <section class="frame" aria-label="Product screen">
+      <div class="bar"><i></i><i></i><i></i><span id="crumb"></span><em>Lab data · nothing you click changes a real cluster</em></div>
+      <iframe id="screen" title="Product screen"></iframe>
+      <div class="busy" id="busy" hidden><span id="busyt">Working…</span></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const C = {net:'var(--net)', prog:'var(--prog)', both:'var(--both)'};
+const ROUTE = [['Baseline','allow all','Start'],['Step 1','Namespace isolation','1'],['Step 2','Egress allow-list','2'],['Step 3','East-west isolation','3'],['Step 4','Process execution','4'],['Posture','least privilege','End']];
+const CH = [
+ {page:'a0-home', step:0, pct:0, world:'both', where:'Baseline', title:'Default: allow all',
+  text:['Every workload can reach the Kubernetes API, the internet and every other service, and run any binary.'],
+  hl:'.card.flush', top:'.expo-sum'},
+ {page:'s1a-review', step:1, pct:0, world:'net', where:'Step 1 · Network', title:'Namespace isolation',
+  text:['No workload uses the Kubernetes API or other namespaces. Deny both, validate first.'],
+  todo:'Run the safety check.', action:'check', hl:'#runchecks', top:'.dh', after:'Validating against observed traffic…'},
+ {page:'s1b-checked', step:1, pct:0, world:'net', where:'Step 1 · Validated', title:'Validation passed',
+  text:['Replayed against observed traffic: all 17 required flows stay allowed.'],
+  todo:'Open See the policy (YAML).', action:'click', hl:'#yamlP', top:'.dh'},
+ {page:'s1b-checked', step:1, pct:0, world:'net', where:'Step 1 · Policy', title:'Engine-native policy',
+  text:['A standard CiliumNetworkPolicy. Remove the product and it keeps enforcing.'],
+  hl:'#dy'},
+ {page:'s1b-checked', step:1, pct:0, world:'net', where:'Step 1 · Approval', title:'Human approval',
+  text:['Nothing is enforced until you approve. Audited and reversible.'],
+  todo:'Approve stage 1, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing step 1…'},
+ {page:'s1e-home', step:1, pct:25, world:'net', where:'Step 1 · Enforced', title:'Namespace isolated',
+  text:['Kubernetes API and other namespaces: Closed.'],
+  hl:'.card.flush', top:'.expo-sum'},
+ {page:'s2b-checked', step:2, pct:25, world:'net', where:'Step 2 · Egress', title:'Egress allow-list',
+  text:['No workload needs open internet. Validated: 12 of 12 lose it, 0 required flows denied.'],
+  todo:'Approve stage 2, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing step 2…'},
+ {page:'s3b-checked', step:3, pct:50, world:'net', where:'Step 3 · East-west', title:'East-west isolation',
+  text:['116 paths are allowed but never used. Validated: none is required.'],
+  todo:'Approve stage 3, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing step 3…'},
+ {page:'s3d-map', step:3, pct:75, world:'net', where:'Step 3 · Enforced', title:'Blast radius, before and after',
+  text:['Red: allowed but unused. Green: required. Only green remains.'],
+  hl:'.mapwrap'},
+ {page:'p0-before', step:4, pct:75, world:'prog', where:'Step 4 · Runtime', title:'Process execution',
+  text:['Next layer: which binaries may run. 16 match the manifests, 9 need review.','Review only in this version: no Approve yet.'],
+  hl:'.delta', top:'.dh'},
+ {page:'p0-before', step:4, pct:75, world:'prog', where:'Step 4 · Review', title:'Escalate to a human',
+  text:['adservice ran 6 undeclared binaries from its entrypoint script. No guessing: you decide.'],
+  todo:'Mark all 6 as needed.', action:'programs', hl:'[data-pall]', top:'.delta', after:'Recording your decision…'},
+ {page:'p2-confirmed-2', step:4, pct:75, world:'prog', where:'Step 4 · Allow-list', title:'Allow-list complete',
+  text:['25 binaries allowed, 0 pending. Once enforced, anything else is denied.'],
+  hl:'.delta', top:'.dh'},
+ {page:'z-home', step:5, pct:75, world:'both', where:'Posture', title:'Current posture',
+  text:['Network: enforced. Processes: allow-list ready. Next: file access and privileges.'],
+  hl:'.card.flush', top:'.expo-sum', tidy:true},
+];
+const $=id=>document.getElementById(id), screen=$('screen');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let at=0;
+let deep=false; try{ const h=location.hash.replace('#',''); const i=CH.findIndex(c=>c.page===h); if(i>=0){ at=i; deep=true; } }catch(e){}
+function route(c){
+  $('pct').textContent=c.pct+'%';
+  $('steps').innerHTML=ROUTE.map(([n,l,k],i)=>`<div class="step${i<c.step?' done':i===c.step?' now':''}" title="${n} · ${l}"><b><span class="long">${i<c.step&&i>0?'✓ ':''}${n}</span><span class="short">${i<c.step&&i>0?'✓':k}</span></b><i>${l}</i></div>`).join('');
+}
+// The arrow: lives inside the product screen and follows the button to click. After Approve, the product asks
+// "Yes, approve" - the arrow moves to that button.
+const HL_CSS=`.demo-hl{outline:3px solid #B8860B!important;outline-offset:5px;border-radius:9px}
+.demo-go{animation:demoPulse 1.4s ease-out infinite}
+@keyframes demoPulse{0%{box-shadow:0 0 0 0 rgba(184,134,11,.55)}100%{box-shadow:0 0 0 16px rgba(184,134,11,0)}}
+#demo-arrow{position:absolute;z-index:99999;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;transition:left .25s ease,top .25s ease}
+#demo-arrow b{font:700 14px/1 'Public Sans',system-ui,sans-serif;background:#B8860B;color:#fff;padding:7px 11px;border-radius:8px;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+#demo-arrow i{width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:18px solid #B8860B}
+#demo-arrow.up{flex-direction:column-reverse}#demo-arrow.up i{border-top:0;border-bottom:18px solid #B8860B}
+#demo-arrow.side{flex-direction:row}#demo-arrow.side i{border-top:13px solid transparent;border-bottom:13px solid transparent;border-left:18px solid #B8860B;border-right:0}
+#demo-arrow{animation:demoBob 1s ease-in-out infinite}#demo-arrow.side{animation-name:demoNudge}
+@keyframes demoBob{50%{transform:translateY(-7px)}}@keyframes demoNudge{50%{transform:translateX(-7px)}}
+@media (prefers-reduced-motion: reduce){.demo-go,#demo-arrow{animation:none}#demo-arrow{transition:none}}`;
+let follow=null;
+function visible(el){ const r=el.getBoundingClientRect(); return r.width>0&&r.height>0; }
+function target(d,c){
+  const yes=[...d.querySelectorAll('button')].find(x=>x.textContent.trim()==='Yes, approve'&&visible(x));
+  return yes||d.querySelector(c.hl);
+}
+function mark(){
+  const c=CH[at]; clearInterval(follow);
+  try{
+    const d=screen.contentDocument; if(!d||!c.hl) return;
+    if(!d.getElementById('demo-hl-style')){ const st=d.createElement('style'); st.id='demo-hl-style'; st.textContent=HL_CSS+'#nav,.fresh{display:none!important}'; d.head.appendChild(st);
+      // the tour stays on its path: only the button the step asks for (and closing the policy panel) can be clicked
+      d.addEventListener('click',e=>{ const t=e.target.closest('button,a,input,label,summary,[data-pall],[onclick]'); if(!t) return;
+        if(t.closest('.demo-go')||t.id==='dclose'||t.tagName==='SUMMARY') return;
+        e.preventDefault(); e.stopPropagation(); },true); }
+    d.querySelectorAll('.demo-hl,.demo-go').forEach(x=>x.classList.remove('demo-hl','demo-go'));
+    const ar0=d.getElementById('demo-arrow'); if(ar0) ar0.remove();
+    const dr=d.getElementById('drawer'); if(dr&&!dr.hidden&&!(c.hl==='#dy')) dr.hidden=true;
+    if(c.tidy) d.querySelectorAll('h2.h2s').forEach(h=>{ h.style.display='none'; const n=h.nextElementSibling; if(n) n.style.display='none'; });
+    const el=d.querySelector(c.hl); if(!el) return;
+    el.classList.add('demo-hl');
+    if(c.action==='click') el.addEventListener('click',()=>{ const k=at; setTimeout(()=>{ if(at===k) go(at+1); },500); },{once:true});
+    const w=d.defaultView, r=el.getBoundingClientRect(), A=c.top&&d.querySelector(c.top);
+    let top;
+    if(A){ const q=A.getBoundingClientRect(); if(r.bottom-q.top+24<=w.innerHeight) top=q.top+w.scrollY-12; }
+    if(top===undefined){ const off=r.height>w.innerHeight*.55?Math.min(120,w.innerHeight*.15):Math.max(80,(w.innerHeight-r.height)/2); top=r.top+w.scrollY-off; }
+    w.scrollTo({top:Math.max(0,top),behavior:reduce?'auto':'smooth'});
+    if(!c.action) return;                                    // the arrow only where the viewer must click
+    let ar=d.getElementById('demo-arrow');
+    if(!ar){ ar=d.createElement('div'); ar.id='demo-arrow'; ar.setAttribute('aria-hidden','true'); ar.innerHTML='<b>'+(w.innerWidth<600?'Tap':'Click here')+'</b><i></i>'; d.body.appendChild(ar); }
+    let last=null;
+    const place=()=>{ const t=target(d,c); if(!t) return;
+      if(t!==last){ if(last) last.classList.remove('demo-go','demo-hl'); t.classList.add('demo-go','demo-hl'); last=t;
+        if(t!==el){ ar.querySelector('b').textContent=w.innerWidth<600?'Now tap':'Now click here'; const q=t.getBoundingClientRect();
+          if(q.top<60||q.bottom>w.innerHeight-20) w.scrollTo({top:q.top+w.scrollY-w.innerHeight/2,behavior:'auto'}); } }
+      // beside the button, pointing at it, so nothing it explains is covered; above or below when there is no room
+      const q=t.getBoundingClientRect(); ar.classList.remove('up','side');
+      const X=w.scrollX, Y=w.scrollY;     // page coordinates: a fixed position drifts on phones when the page is zoomed
+      if(q.left>190){ ar.classList.add('side'); ar.style.left=(X+q.left-ar.offsetWidth-10)+'px'; ar.style.top=(Y+q.top+q.height/2-ar.offsetHeight/2)+'px'; }
+      else { const up=q.top<70; ar.classList.toggle('up',up); ar.style.left=(X+Math.max(4,q.left+q.width/2-ar.offsetWidth/2))+'px'; ar.style.top=(Y+(up?q.bottom+6:q.top-ar.offsetHeight-6))+'px'; } };
+    place(); follow=setInterval(place,200);
+  }catch(e){}
+}
+screen.addEventListener('load',()=>setTimeout(mark,350));
+window.addEventListener('message',e=>{            // the viewer clicked the product's own button
+  // The viewer may act ahead of the story (e.g. approve while reading about the policy): find the step on this
+  // screen that expects this action and continue after it, so a click on the product is never lost.
+  const m=e.data||{}; if(m.demo!=='action') return;
+  const want=m.kind==='program'||m.kind==='programs'?'programs':m.kind;
+  let j=at; while(j<CH.length&&CH[j].page===CH[at].page&&CH[j].action!==want) j++;
+  if(j>=CH.length||CH[j].page!==CH[at].page) return;
+  acts++; const c=CH[j];
+  $('busyt').textContent=c.after||'Working…'; $('busy').hidden=false;
+  setTimeout(()=>{ $('busy').hidden=true; go(j+1); }, reduce?200:1100);
+});
+let open=false;
+function draw(){
+  const c=CH[at];
+  const st=$('story'); st.style.setProperty('--c',C[c.world]); st.classList.toggle('open',open);
+  $('sHead').innerHTML=`<div class="where">${c.where}</div><h2>${c.title}</h2>
+    <div class="more">${c.text.map(t=>`<p>${t}</p>`).join('')}</div>`;
+  $('sAct').innerHTML=`${c.todo?`<div class="todo"><b>Your turn</b>${c.todo}</div>`:''}
+    <div class="foot"><div class="prog"><i style="width:${Math.round(100*(at+1)/CH.length)}%"></i></div>
+    <div class="nav"><button id="prev">Back</button>${c.action?'<span class="wait">Click the outlined button</span>':`<button id="next" class="pri go">${at<CH.length-1?'Next →':'See what you did →'}</button>`}<span class="count">${at+1}/${CH.length}</span></div></div>`;
+  $('prev').onclick=()=>at?go(at-1):cover(true); if($('next')) $('next').onclick=()=>at<CH.length-1?go(at+1):finish();
+  st.scrollTop=0;
+  if(screen.dataset.page!==c.page){ screen.src='pages/'+c.page+'.html'; screen.dataset.page=c.page; } else mark();
+  $('crumb').textContent=c.where;
+  route(c); posture(c);
+}
+(function(){                     // the shop as it runs: clients on the left, data on the right
+  const N={loadgen:[22,118],frontend:[82,118],ad:[156,26],recommend:[156,72],checkout:[156,164],email:[156,212],
+    catalog:[236,30],currency:[236,76],cart:[236,122],shipping:[236,168],payment:[236,212],redis:[306,122]};
+  const K=Object.keys(N);
+  const NEED=[['loadgen','frontend'],['frontend','ad'],['frontend','recommend'],['frontend','checkout'],['frontend','catalog'],['frontend','currency'],['frontend','cart'],['frontend','shipping'],
+    ['recommend','catalog'],['checkout','catalog'],['checkout','currency'],['checkout','cart'],['checkout','shipping'],['checkout','payment'],['checkout','email'],['cart','redis']];
+  const curve=(a,b)=>{ const [x1,y1]=N[a],[x2,y2]=N[b]; if(x1===x2) return `M${x1} ${y1}L${x2} ${y2}`; const m=(x1+x2)/2; return `M${x1} ${y1}C${m} ${y1} ${m} ${y2} ${x2} ${y2}`; };
+  let bad=''; for(let i=0;i<K.length;i++) for(let j=i+1;j<K.length;j++){ const [x1,y1]=N[K[i]],[x2,y2]=N[K[j]]; bad+=`<line class="bad" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`; }
+  const good=NEED.map(([a,b])=>`<path class="good" pathLength="1" d="${curve(a,b)}"/>`).join('');
+  const nodes=K.map(k=>{ const [x,y]=N[k]; return `<circle class="node"${k==='ad'?' id="nAd"':''} cx="${x}" cy="${y}" r="7.5"/><text x="${x}" y="${y+19}">${k}</text>`; }).join('');
+  // inside adservice: what the runtime layers allow and deny (programs are in the tour; files and privileges come next)
+  const ROWS=[['exec','/opt/java/…/bin/java',1,''],['exec','/bin/sed',1,''],['exec','/usr/bin/curl',0,''],['exec','/bin/nc',0,''],
+    ['open','/etc/shadow',0,'file access · next'],['mount','/host',0,'privileges · next']];
+  const rows=ROWS.map(([v,a,ok,l],i)=>{ const y=78+i*26; return `<g class="row ${ok?'ok':'no'}" style="--i:${i}">
+    <text class="verb" x="30" y="${y}">${v}</text><text class="mono" x="70" y="${y}">${a}</text>
+    ${l?`<text class="layer" x="190" y="${y}">${l}</text>`:''}
+    <rect class="t" x="262" y="${y-11}" width="46" height="15" rx="7.5"/><text class="tag" x="285" y="${y}">${ok?'ALLOW':'DENY'}</text></g>`; }).join('');
+  const inside=`<rect x="14" y="40" width="302" height="196" rx="12" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.18)"/>
+    <text x="28" y="58" style="fill:#fff;font-size:11px;font-weight:700;text-anchor:start;stroke:none">adservice</text>
+    <text x="84" y="58" style="fill:#8FA2DA;font-size:9.5px;text-anchor:start;stroke:none">container · runtime events</text>${rows}`;
+  $('baSvg').innerHTML=`<g id="gNet">${bad}${good}${nodes}</g><g id="gIn">${inside}</g>`;
+  const SC=[ {pill:'DEFAULT · ALLOW ALL', t:'Every path is open', s:'any workload can reach any other', n:'Network layer', d:0, ms:1700},
+             {pill:'LEAST PRIVILEGE', t:'Only required flows', s:'everything else is denied', n:'Network layer', d:1, ms:2000},
+             {pill:'INSIDE adservice', t:'Same method, inside the container', s:'every runtime event checked against an allow-list', n:'Runtime layer', d:2, ms:650},
+             {pill:'INSIDE adservice', t:'Only known binaries execute', s:'process allow-list · file access and privileges next', n:'Runtime layer', d:2, ms:3400} ];
+  const dots=[...$('ba').querySelectorAll('.dots i')];
+  const set=i=>{ const c=SC[i]; const el=$('ba'); el.classList.remove('s0','s1','s2','s3'); el.classList.add('s'+i);
+    $('baPill').textContent=c.pill; $('baT').textContent=c.t; $('baS').textContent=c.s; $('baN').textContent=c.n; dots.forEach((d,k)=>d.classList.toggle('on',k===c.d)); };
+  if(reduce){ set(1); return; }
+  let i=0; set(0);
+  const next=()=>{ if(!$('cover').hidden){ i=(i+1)%SC.length; set(i); } setTimeout(next, SC[i].ms); };
+  setTimeout(next, SC[0].ms);
+})();
+// ---------- live posture: the shop's network, the Kubernetes API and the internet; then inside adservice
+const VN={loadgen:[22,128],frontend:[80,128],ad:[156,46],recommend:[156,90],checkout:[156,172],email:[156,226],
+  catalog:[236,50],currency:[236,94],cart:[236,138],shipping:[236,182],payment:[236,226],redis:[304,138]};
+const VNEED=[['loadgen','frontend'],['frontend','ad'],['frontend','recommend'],['frontend','checkout'],['frontend','catalog'],['frontend','currency'],['frontend','cart'],['frontend','shipping'],
+  ['recommend','catalog'],['checkout','catalog'],['checkout','currency'],['checkout','cart'],['checkout','shipping'],['checkout','payment'],['checkout','email'],['cart','redis']];
+(function(){
+  const K=Object.keys(VN), A=[24,22], W=[304,22];
+  const cv=(a,b)=>{ const [x1,y1]=VN[a],[x2,y2]=VN[b]; if(x1===x2) return `M${x1} ${y1}L${x2} ${y2}`; const m=(x1+x2)/2; return `M${x1} ${y1}C${m} ${y1} ${m} ${y2} ${x2} ${y2}`; };
+  let ew=''; for(let i=0;i<K.length;i++) for(let j=i+1;j<K.length;j++){ const [x1,y1]=VN[K[i]],[x2,y2]=VN[K[j]]; ew+=`<line class="ew" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`; }
+  const api=K.map(k=>`<line class="api" x1="${VN[k][0]}" y1="${VN[k][1]}" x2="${A[0]}" y2="${A[1]}"/>`).join('');
+  const web=K.map(k=>`<line class="web" x1="${VN[k][0]}" y1="${VN[k][1]}" x2="${W[0]}" y2="${W[1]}"/>`).join('');
+  const need=VNEED.map(([a,b])=>`<path class="need" d="${cv(a,b)}"/>`).join('');
+  const nodes=K.map(k=>{ const [x,y]=VN[k]; return `<circle class="node" cx="${x}" cy="${y}" r="7"/><text x="${x}" y="${y+18}">${k}</text>`; }).join('');
+  const hub=([x,y],lab,cls)=>`<circle class="hub" cx="${x}" cy="${y}" r="11" stroke="${cls==='xa'?'#FFB547':'#FF8A7D'}"/><text x="${x}" y="${y+4}" style="font-size:9px">${cls==='xa'?'API':'www'}</text>
+    <path class="x ${cls}" d="M${x-7} ${y-7}L${x+7} ${y+7}M${x+7} ${y-7}L${x-7} ${y+7}"/><text x="${x+(cls==='xa'?36:-38)}" y="${y+4}" style="font-size:9px;fill:#8FA2DA">${lab}</text>`;
+  const rows=[['java','/opt/java/…/java','ok'],['sed','/bin/sed','ask'],['uname','/bin/uname','ask'],['curl','/usr/bin/curl','no'],['nc','/bin/nc','no']];
+  const inside=`<rect x="10" y="14" width="310" height="222" rx="12" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.18)"/>
+    <text x="24" y="38" style="fill:#fff;font-size:12px;font-weight:700">adservice</text><text x="86" y="38" style="fill:#8FA2DA;font-size:10px">container · process execution</text>`+
+    rows.map(([n,a,k],i)=>{ const y=72+i*34; return `<g class="row ${k}" data-k="${n}"><text x="24" y="${y}" style="fill:#8FA2DA;font-weight:600">exec</text><text class="mono" x="62" y="${y}">${a}</text>
+      <rect class="t" x="246" y="${y-12}" width="62" height="17" rx="8.5"/><text class="tag" x="277" y="${y+1}">${k==='ok'?'ALLOW':k==='no'?'DENY':'REVIEW'}</text></g>`; }).join('');
+  $('vSvg').innerHTML=`<g id="vNet">${ew}${api}${web}${need}${hub(A,'K8s API','xa')}${hub(W,'internet','xw')}${nodes}</g><g id="vIn">${inside}</g>`;
+})();
+function posture(c){
+  const v=$('viz'), lvl=c.pct>=75?3:c.pct>=50?2:c.pct>=25?1:0, prog=c.world==='prog';
+  v.classList.remove('c1','c2','c3'); for(let i=1;i<=lvl;i++) v.classList.add('c'+i);
+  v.classList.toggle('inprog',prog);
+  const answered=c.page==='p2-confirmed-2';
+  v.querySelectorAll('#vIn .row').forEach(r=>{ if(r.dataset.k==='sed'||r.dataset.k==='uname'){ r.classList.toggle('ask',!answered); r.classList.toggle('ok',answered); r.querySelector('.tag').textContent=answered?'ALLOW':'REVIEW'; } });
+  $('vState').textContent=prog?(answered?'ALLOW-LIST READY':'PENDING REVIEW'):['ALLOW ALL','NAMESPACE ISOLATED','EGRESS LOCKED','LEAST PRIVILEGE'][lvl];
+  const L=[['Kubernetes API',lvl>=1],['Egress',lvl>=2],['East-west',lvl>=3],['Process exec',answered?'p':false]];
+  $('vLeg').innerHTML=L.map(([n,ok])=>`<span>${n}<b class="${ok==='p'?'p':ok?'c':'o'}">${ok==='p'?'Ready':ok?'Closed':'Open'}</b></span>`).join('');
+}
+let t0=Date.now(), acts=0;
+function finish(){
+  const sec=Math.max(1,Math.round((Date.now()-t0)/1000)), m=Math.floor(sec/60), r=sec%60;
+  $('took').textContent=m?`${m} min ${r} s`:`${r} s`;
+  $('tookd').textContent=`to least privilege, with ${acts} decision${acts===1?'':'s'} of yours`;
+  $('end').hidden=false; $('end').scrollTop=0; $('again').focus({preventScroll:true});
+}
+$('again').onclick=()=>{ $('end').hidden=true; acts=0; go(0); cover(true); };
+$('back2').onclick=()=>{ $('end').hidden=true; };
+function cover(on){ $('cover').hidden=!on; if(on){ $('cover').scrollTop=0; $('start').focus({preventScroll:true}); } }
+$('start').onclick=()=>{ t0=Date.now(); acts=0; cover(false); mark(); };
+function go(i){ if(i<0||i>=CH.length) return; at=i; draw(); }
+document.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'&&!CH[at].action) go(at+1); if(e.key==='ArrowLeft') go(at-1); });
+draw(); cover(!deep);
+</script>
+
+</body>
+</html>
