@@ -170,7 +170,7 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
 .ba .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .3s}
 .ba .dots i.on{background:#fff}
 @media (prefers-reduced-motion: reduce){.ba .bad,.ba .good,.ba .node,#gNet,#gIn,#gIn .row{transition:none}}
-@media (max-width:760px){.hero{grid-template-columns:1fr;gap:14px}.ba{order:-1;width:100%;max-width:420px;justify-self:center;padding:12px 10px 10px}.cv h1{font-size:28px}}
+@media (max-width:760px){.hero .txt .go1{order:3}.hero .txt .lead{order:4}.hero .txt .why{order:5}.hero .txt h1{order:2}.hero .txt .brand{order:1}.hero{grid-template-columns:1fr;gap:14px}.ba{order:-1;width:100%;max-width:420px;justify-self:center;padding:12px 10px 10px}.cv h1{font-size:28px}}
 .go1{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.go1 span{font-size:13.5px;color:var(--muted)}
 .lh{font-size:15px;margin:2px 0 -4px}
 .layers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
@@ -192,6 +192,11 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
 .cv .why{margin:0;padding:12px 16px;border-left:4px solid var(--net);background:var(--panel);border-radius:0 10px 10px 0;font-size:15.5px;font-weight:600}
 .yours{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;color:#fff;border-radius:16px;padding:18px 22px;background:radial-gradient(120% 120% at 90% 0%, #2B4FC4 0%, #17296B 55%, #0F1B48 100%);box-shadow:0 18px 40px rgba(15,27,72,.25)}
 .yours span{color:#C9D4F5}
+.yours{display:grid!important;grid-template-columns:minmax(0,1fr) 220px;align-items:center}
+.yt{display:flex;flex-direction:column;gap:6px}
+#endSvg{width:220px;height:auto}
+#endSvg path{stroke:#5FE0B5;stroke-width:2.2;fill:none}#endSvg circle{fill:#0F1B48;stroke:#5FE0B5;stroke-width:2}
+@media (max-width:640px){.yours{grid-template-columns:1fr}#endSvg{width:100%;max-width:170px;justify-self:center}}
 .yours b{font-size:clamp(30px,5vw,44px);letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
 .yours span{font-size:16px;font-weight:600}
 .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -232,7 +237,7 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
       <div class="txt">
         <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="var(--net)"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#4FC3A1"/></svg>DECISION &amp; SAFETY LAYER · 5-MINUTE TOUR</div>
         <h1>Zero Trust for every Kubernetes workload, without breaking production</h1>
-        <p class="lead">Workloads get far more access than they use. The product builds an allow-list from manifests and observed behavior, then enforces it step by step.</p>
+        <p class="lead">Workloads get far more access than they use. The product builds an allow-list from manifests and observed behavior, then enforces it stage by stage.</p>
         <p class="why">Cilium and Tetragon can enforce. Deciding what to allow without breaking production is the hard part. That is what this product does.</p>
         <div class="go1"><button id="start">Start the tour →</button><span>5 min · you act as the platform engineer · lab data</span></div>
       </div>
@@ -256,7 +261,7 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
   <div class="cv">
     <div class="kick">WHAT YOU JUST DID</div>
     <h1>Zero Trust approach</h1>
-    <div class="yours"><b id="took"></b><span id="tookd"></span></div>
+    <div class="yours"><div class="yt"><b id="took"></b><span id="tookd"></span></div><svg id="endSvg" viewBox="0 0 330 250" aria-hidden="true"></svg></div>
     <div class="nums">
       <div class="key"><b>0</b>required flows denied</div>
       <div><b>Denied</b>Kubernetes API and cross-namespace access</div>
@@ -302,53 +307,53 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
 
 <script>
 const C = {net:'var(--net)', prog:'var(--prog)', both:'var(--both)'};
-const ROUTE = [['Baseline','allow all','Start'],['Step 1','Namespace isolation','1'],['Step 2','Egress allow-list','2'],['Step 3','East-west isolation','3'],['Step 4','Process execution','4'],['Posture','least privilege','End']];
+const ROUTE = [['Baseline','allow all','Start'],['Stage 1','Namespace isolation','1'],['Stage 2','Egress allow-list','2'],['Stage 3','East-west isolation','3'],['Stage 4','Process execution','4'],['Posture','least privilege','End']];
 const CH = [
  {page:'a0-home', step:0, pct:0, world:'both', where:'Baseline', title:'Default: allow all',
   find:[['Read','12 Deployment manifests, 33,411 flows from Cilium, every exec from Tetragon'],
         ['Found','All 4 attack surfaces open to every workload']],
   hl:'.card.flush', top:'.expo-sum'},
- {page:'s1a-review', step:1, pct:0, world:'net', where:'Step 1 · Network', title:'Namespace isolation',
+ {page:'s1a-review', step:1, pct:0, world:'net', where:'Stage 1 · Network', title:'Namespace isolation',
   find:[['Checked','Which workloads call the Kubernetes API or other namespaces'],
         ['Found','None of the 12'],
         ['Proposes','Deny both, validated before rollout']],
   todo:'Run the safety check.', action:'check', hl:'#runchecks', top:'.dh', after:'Validating against observed traffic…'},
- {page:'s1b-checked', step:1, pct:0, world:'net', where:'Step 1 · Validated', title:'Validation passed',
+ {page:'s1b-checked', step:1, pct:0, world:'net', where:'Stage 1 · Validated', title:'Validation passed',
   find:[['Checked','The policy replayed against all 33,411 observed flows'],
         ['Found','0 required flows denied, all 17 stay allowed']],
   todo:'Open See the policy (YAML).', action:'click', hl:'#yamlP', top:'.dh'},
- {page:'s1b-checked', step:1, pct:0, world:'net', where:'Step 1 · Policy', title:'Engine-native policy',
+ {page:'s1b-checked', step:1, pct:0, world:'net', where:'Stage 1 · Policy', title:'Engine-native policy',
   text:['A standard CiliumNetworkPolicy. Remove the product and it keeps enforcing.'],
   hl:'#dy'},
- {page:'s1b-checked', step:1, pct:0, world:'net', where:'Step 1 · Approval', title:'Human approval',
+ {page:'s1b-checked', step:1, pct:0, world:'net', where:'Stage 1 · Approval', title:'Human approval',
   text:['Nothing is enforced until you approve. Audited and reversible.'],
-  todo:'Approve stage 1, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing step 1…'},
- {page:'s1e-home', step:1, pct:25, world:'net', where:'Step 1 · Enforced', title:'Namespace isolated',
+  todo:'Approve stage 1, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing stage 1…'},
+ {page:'s1e-home', step:1, pct:25, world:'net', where:'Stage 1 · Enforced', title:'Namespace isolated',
   find:[['Result','Kubernetes API and other namespaces: Closed']],
   hl:'.card.flush', top:'.expo-sum'},
- {page:'s2b-checked', step:2, pct:25, world:'net', where:'Step 2 · Egress', title:'Egress allow-list',
+ {page:'s2b-checked', step:2, pct:25, world:'net', where:'Stage 2 · Egress', title:'Egress allow-list',
   find:[['Checked','Every outbound connection to the internet'],
         ['Found','No workload calls an external endpoint'],
         ['Result','Open egress removed for 12 of 12. Validated: 0 required flows denied']],
-  todo:'Approve stage 2, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing step 2…'},
- {page:'s3b-checked', step:3, pct:50, world:'net', where:'Step 3 · East-west', title:'East-west isolation',
+  todo:'Approve stage 2, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing stage 2…'},
+ {page:'s3b-checked', step:3, pct:50, world:'net', where:'Stage 3 · East-west', title:'East-west isolation',
   find:[['Checked','Every path between the 12 workloads, configured and observed'],
         ['Found','17 required flows. 116 paths open but never used'],
         ['Result','Deny the 116. Validated: 0 required flows denied']],
-  todo:'Approve stage 3, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing step 3…'},
- {page:'s3d-map', step:3, pct:75, world:'net', where:'Step 3 · Enforced', title:'Blast radius, before and after',
+  todo:'Approve stage 3, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing stage 3…'},
+ {page:'s3d-map', step:3, pct:75, world:'net', where:'Stage 3 · Enforced', title:'Blast radius, before and after',
   text:['Red: allowed but unused. Green: required. Only green remains.'],
   hl:'.mapwrap'},
- {page:'p0-before', step:4, pct:75, world:'prog', where:'Step 4 · Runtime', title:'Process execution',
+ {page:'p0-before', step:4, pct:75, world:'prog', where:'Stage 4 · Runtime', title:'Process execution',
   find:[['Checked','Every binary Tetragon saw each container execute, against its manifest'],
         ['Found','16 expected. 9 undeclared: 6 in adservice, 3 in redis-cart'],
         ['Next','Undeclared binaries go to a person, not into the allow-list']],
   hl:'.delta', top:'.dh'},
- {page:'p0-before', step:4, pct:75, world:'prog', where:'Step 4 · Review', title:'Escalate to a human',
+ {page:'p0-before', step:4, pct:75, world:'prog', where:'Stage 4 · Review', title:'Escalate to a human',
   find:[['Found','adservice’s 6 come from its entrypoint script, which could not be parsed'],
         ['Asks','Are they part of normal startup?']],
   todo:'They are. Click Mark all 6 as needed.', action:'programs', hl:'[data-pall]', top:'.delta', after:'Recording your decision…'},
- {page:'p2-confirmed-2', step:4, pct:75, world:'prog', where:'Step 4 · Allow-list', title:'Allow-list complete',
+ {page:'p2-confirmed-2', step:4, pct:75, world:'prog', where:'Stage 4 · Allow-list', title:'Allow-list complete',
   find:[['Result','25 binaries allowed, 0 pending (redis-cart’s 3 reviewed the same way)'],
         ['Then','Once enforced, any other binary is denied. Review only in this version']],
   hl:'.delta', top:'.dh'},
@@ -503,6 +508,8 @@ const VNEED=[['loadgen','frontend'],['frontend','ad'],['frontend','recommend'],[
       <rect class="t" x="246" y="${y-12}" width="62" height="17" rx="8.5"/><text class="tag" x="277" y="${y+1}">${k==='ok'?'ALLOW':k==='no'?'DENY':'REVIEW'}</text></g>`; }).join('');
   $('vSvg').innerHTML=`<g id="vNet">${ew}${api}${web}${need}${hub(A,'K8s API','xa')}${hub(W,'internet','xw')}${nodes}</g><g id="vIn">${inside}</g>`;
 })();
+(function(){ const cv=(a,b)=>{ const [x1,y1]=VN[a],[x2,y2]=VN[b]; if(x1===x2) return `M${x1} ${y1}L${x2} ${y2}`; const m=(x1+x2)/2; return `M${x1} ${y1}C${m} ${y1} ${m} ${y2} ${x2} ${y2}`; };
+  $('endSvg').innerHTML=VNEED.map(([a,b])=>`<path d="${cv(a,b)}"/>`).join('')+Object.values(VN).map(([x,y])=>`<circle cx="${x}" cy="${y}" r="8"/>`).join(''); })();
 function posture(c){
   const v=$('viz'), lvl=c.pct>=75?3:c.pct>=50?2:c.pct>=25?1:0, prog=c.world==='prog';
   v.classList.remove('c1','c2','c3'); for(let i=1;i<=lvl;i++) v.classList.add('c'+i);
@@ -517,7 +524,7 @@ let t0=Date.now(), acts=0;
 function finish(){
   const sec=Math.max(1,Math.round((Date.now()-t0)/1000)), m=Math.floor(sec/60), r=sec%60;
   $('took').textContent=m?`${m} min ${r} s`:`${r} s`;
-  $('tookd').textContent=`to least privilege, with ${acts} decision${acts===1?'':'s'} of yours`;
+  $('tookd').textContent=`to Zero Trust, with ${acts} decision${acts===1?'':'s'} of yours`;
   $('end').hidden=false; $('end').scrollTop=0; $('again').focus({preventScroll:true});
 }
 $('again').onclick=()=>{ $('end').hidden=true; acts=0; go(0); cover(true); };
