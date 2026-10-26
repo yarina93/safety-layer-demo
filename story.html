@@ -660,7 +660,7 @@ let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
 function refreshFoot(){ const c=CARDS[at]; $('wf').innerHTML=c.foot?c.foot():''; }
 function refreshTxt(){ const c=CARDS[at], t=$('txt'), y=t.scrollTop;
-  t.innerHTML=`<div class="kick">${c.kick}</div><h1>${c.title}</h1>${c.why?`<div class="whyline"><b>Why this step</b>${c.why}</div>`:''}${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
+  t.innerHTML=`<div class="kick">${c.kick}</div><h1>${c.title}</h1>${c.why?`<div class="whyline"><b>Goal</b>${c.why}</div>`:''}${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
 function refresh(win){ const c=CARDS[at]; if(win&&!c.map){ const wb=$('wb'), y=wb.scrollTop; wb.innerHTML=c.win(); wb.scrollTop=y; c.bind&&c.bind(); } refreshFoot(); refreshTxt(); }
 const WHY=[
   'See the starting point: what is enforced in the cluster today.',
