@@ -66,14 +66,19 @@ button{font:inherit;color:inherit}
 /* map */
 .wbody svg{display:block;width:100%;height:100%}
 svg text{font-family:var(--mono)}
-.mp.before .ew{opacity:.55;stroke-width:.9}
-.mp.before .need{stroke:#FF8A7D}
+.mp.before .ew{opacity:.6;stroke-width:.9}
+.mp.before .need{stroke:#3DD68C;opacity:.9;stroke-width:1.6}
+.mp.before .nd circle.v{stroke:#FF8A7D}
 .mp .ew{stroke:#FF5C5C;stroke-width:.5;opacity:.12;transition:opacity .5s}
 .mp.l3 .ew{opacity:0}
 .mp .need{stroke:#566175;stroke-width:1;fill:none;opacity:.6;transition:stroke .5s,opacity .5s}
 .mp.l3 .need{stroke:var(--ok);opacity:.55}
 .mp .rl{stroke:var(--amber);stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .5s ease forwards}
-.mp .rl.g{stroke:var(--ok);stroke-width:2.2}
+.mp .rl.g{stroke:#3DD68C;stroke-width:2.4}
+.mp .rl.rx{stroke:#FF5C5C;stroke-width:2}
+.mp .need{opacity:.25}
+.wbody.map{background:radial-gradient(120% 90% at 80% 0%, #1E2F66 0%, #142049 55%, #0E1736 100%)}
+.mp text{fill:#D5DDF0}
 @keyframes draw{to{stroke-dashoffset:0}}
 .mp .nd{cursor:pointer}
 .mp .nd circle.v{fill:#10151F;stroke:#8893A8;stroke-width:1.6;transition:stroke .3s,fill .3s}
@@ -256,6 +261,7 @@ svg text{font-family:var(--mono)}
 .guide{outline:2px solid var(--warn)!important;outline-offset:-2px;border-radius:10px;animation:gpulse 1.5s ease-out infinite;position:relative;overflow:visible!important}
 .guide.gin{padding-right:96px!important}
 .guide.gin::after{top:50%;right:10px;transform:translateY(-50%)}
+.guide:not(.gin)::after{right:-6px;top:-10px;font-size:9px;padding:2px 5px}
 .guide::after{content:attr(data-tap);position:absolute;right:6px;top:-9px;z-index:3;font:800 11px var(--body);letter-spacing:.02em;background:var(--warn);color:#0A0D14;padding:3px 8px;border-radius:6px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.4);pointer-events:none}
 @keyframes gpulse{0%{box-shadow:0 0 0 0 rgba(245,185,71,.45)}100%{box-shadow:0 0 0 12px rgba(245,185,71,0)}}
 #gtip{position:absolute;z-index:8;pointer-events:none;display:flex;flex-direction:column;align-items:center;transition:left .25s ease,top .25s ease}
@@ -328,7 +334,7 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textContent+$('bW').textContent; $('bW').textContent=SHORT[w]||w; $('bN').textContent=n;
   b.classList.toggle('zero',S.lvl>=3); if(n+(SHORT[w]||w)!==was){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }
@@ -347,9 +353,9 @@ function drawReach(w){
   m.querySelectorAll('.nd').forEach(n=>n.classList.toggle('sel',n.dataset.w===w));
   const [ax,ay]=POS[w]; let h='';
   if(S.lvl>=3) h=needsOut(w).map(k=>`<line class="rl g" pathLength="1" x1="${ax}" y1="${ay}" x2="${POS[k][0]}" y2="${POS[k][1]}"/>`).join('');
-  else { h=Object.keys(POS).filter(k=>k!==w).map((k,i)=>`<line class="rl" pathLength="1" style="animation-delay:${i*40}ms" x1="${ax}" y1="${ay}" x2="${POS[k][0]}" y2="${POS[k][1]}"/>`).join('');
-    if(S.lvl<1) h+=`<line class="rl" pathLength="1" style="animation-delay:480ms" x1="${ax}" y1="${ay}" x2="${API[0]}" y2="${API[1]}"/>`;
-    if(S.lvl<2) h+=`<line class="rl" pathLength="1" style="animation-delay:520ms" x1="${ax}" y1="${ay}" x2="${WORLD[0]}" y2="${WORLD[1]}"/>`; }
+  else { const nd=needsOut(w); h=Object.keys(POS).filter(k=>k!==w).map((k,i)=>`<line class="rl ${nd.includes(k)?'g':'rx'}" pathLength="1" style="animation-delay:${i*40}ms" x1="${ax}" y1="${ay}" x2="${POS[k][0]}" y2="${POS[k][1]}"/>`).join('');
+    if(S.lvl<1) h+=`<line class="rl rx" pathLength="1" style="animation-delay:480ms" x1="${ax}" y1="${ay}" x2="${API[0]}" y2="${API[1]}"/>`;
+    if(S.lvl<2) h+=`<line class="rl rx" pathLength="1" style="animation-delay:520ms" x1="${ax}" y1="${ay}" x2="${WORLD[0]}" y2="${WORLD[1]}"/>`; }
   $('reach').innerHTML=h; blast(w);
 }
 function ringOn(w){ const r=$('ring'); if(!r) return; if(!w){ r.innerHTML=''; return; } const [x,y]=POS[w]; r.innerHTML=`<circle class="hint-ring" cx="${x}" cy="${y}" r="9"/>`; }
@@ -409,11 +415,11 @@ const CARDS=[
    pipe:-1, wt:'boutique · reachability', wm:'default-allow', map:true,
    win(){ return mapSVG(); },
    bind(){ const keep=S.lvl; S.lvl=0; drawReach(S.sel); S.lvl=keep; if(!S.explored.size){ S.sel='frontend'; ringOn('frontend'); } bindMap(w=>{ S.explored.add(w); refreshFoot(); refreshTxt(); }); },
-   foot:()=>`<span>${SHORT[S.sel]}</span><span>can reach <b style="color:var(--bad)">13</b> · needs <b style="color:var(--ok)">${W[S.sel].out.length}</b></span>`,
-   kick:'2 · Zoom into boutique', title:'Reachability versus actual need, per workload.',
+   foot:()=>`<span>${SHORT[S.sel]}</span><span>can reach <b style="color:var(--bad)">13</b> · needs <b style="color:var(--ok)">${needsOut(S.sel).length}</b> + DNS</span>`,
+   kick:'2 · Zoom into boutique', title:'Reachability vs actual need, per workload.',
    body:()=>{ const w=S.sel, d=W[w];
      return `<div class="task ${S.explored.size?'done':''}">Tap a workload on the map. Start with frontend.</div>
-       ${S.explored.size?`<p><b>${w}</b> can connect to <b>13 places</b> today (the amber lines). It actually needs <b>${d.out.length}</b> of them, listed below. <b>The other ${13-d.out.length} are attack surface</b>: open, unused, and available to anyone who takes over this pod. Tap a row to see the evidence.</p>
+       ${S.explored.size?`<p><b>${w}</b> can connect to <b>13 places</b> today. <b style="color:var(--ok)">Green</b>: the ${needsOut(w).length} it needs, plus DNS (listed below). <b style="color:var(--bad)">Red</b>: <b>the other ${13-needsOut(w).length}, the attack surface</b>: open, unused, and available to anyone who takes over this pod. Tap a row to see the evidence.</p>
        <div class="list">${d.out.map((r,i)=>`<div class="row tap" data-ev="out:${i}"><span class="a">→ ${esc(r[0]==='dns'?'kube-dns':r[0])}:${esc(r[1])}</span><span class="e">${r[2].toLocaleString('en-US')} flows · ${r[3].startsWith('platform')?'platform rule':'manifest env'}</span><span class="v"><i class="tag ${r[3].startsWith('platform')?'b':'g'}">NEED</i></span></div>`).join('')}</div>`
        :`<p>This is boutique's map. Tap a workload: the map shows what it <b>can</b> reach today, and the list below shows what it <b>needs</b>. The difference is the attack surface.</p>`}`; },
    bindTxt(){ document.querySelectorAll('[data-ev]').forEach(r=>r.onclick=()=>{ S.mapEv=true; const [dir,i]=r.dataset.ev.split(':'); const row=W[S.sel][dir][+i];
@@ -449,17 +455,17 @@ const CARDS=[
    win(){ return `<div class="list">${PATHS.map((p,i)=>{ const on=S.cls>i;
        return `<div class="row tap" data-k="${p.k}" style="${S.cls===i?'border-color:var(--info)':''}"><span class="a">${p.a}</span><span class="e">${p.e}</span>
          <span class="v">${on?`<i class="tag ${p.truth==='keep'?(p.k==='out-dns'?'b':'g'):'x'} stamp">${p.truth==='keep'?(p.k==='out-dns'?'NEEDED':'CONFIRMED'):'EXCESS'}</i>`:'<span class="c">…</span>'}</span></div>`; }).join('')}</div>`; },
-   bind(){ document.querySelectorAll('.row.tap').forEach(a=>a.onclick=()=>{ const p=PATHS.find(x=>x.k===a.dataset.k); sheet(`adservice · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'evidence',p.ev()); }); },
+   bind(){ document.querySelectorAll('.row.tap').forEach(a=>a.onclick=()=>{ S.clsEv=true; refreshTxt(); const p=PATHS.find(x=>x.k===a.dataset.k); sheet(`adservice · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'evidence',p.ev()); }); },
    foot:()=>`<span>classified <b>${Math.min(S.cls,5)}/5</b></span><span>keep <b>3</b> · excess <b style="color:var(--bad)">21</b></span>`,
    kick:'5 · Classify', title:'Evidence-based classification of every path.',
-   body:()=>S.cls>=5?`<div class="task done">Classified. Tap any path to see the evidence behind its verdict.</div>
+   body:()=>S.cls>=5?`<div class="task ${S.clsEv?'done':''}">Classified. Now tap a path to see the evidence behind its verdict.</div>
        <p>Declared in a manifest and seen in Hubble: <b>confirmed</b>. Platform needs such as DNS and kubelet probes: <b>needed</b>, even with no traffic in the window. No declaration and no traffic: <b>excess</b>, attack surface with no reason to exist.</p>`
      :`<div class="task">Run the classification for adservice.</div>
        <p>adservice is allowed 24 paths today. The product checks each one against its evidence: the manifests and the Hubble flows.</p>
        <button class="btn" id="cls" ${S.cls>0?'disabled':''}>Classify adservice</button>`,
    bindTxt(){ if($('cls')) $('cls').onclick=()=>{ $('cls').disabled=true; PATHS.forEach(p=>S.dec[p.k]=p.truth);
        for(let i=1;i<=5;i++) later(i*520,()=>{ S.cls=i; refresh(true); }); }; },
-   gate:()=>S.cls>=5 },
+   gate:()=>S.cls>=5&&S.clsEv },
  { // 6. compile: the policy built from those decisions, each rule opens its evidence
    pipe:2, wt:'level3-adservice.yaml', wm:'generated',
    win(){ const d=S.dec, L=[];
@@ -607,17 +613,17 @@ const CARDS=[
  { // 10. result: compare any workload before and after
    pipe:-1, wt:'boutique · blast radius', wm:'before / after', map:true,
    win(){ return mapSVG(); },
-   bind(){ const show=()=>{ const keep=S.lvl; S.lvl=S.ba==='before'?0:3; drawReach(S.sel); const m=$('mp'); if(m) m.classList.toggle('before',S.ba==='before'); S.lvl=keep; };
+   bind(){ const show=()=>{ const keep=S.lvl; S.lvl=S.ba==='before'?0:3; drawReach(S.sel); const m=$('mp'); if(m){ m.classList.toggle('before',S.ba==='before'); if(S.ba==='before') $('reach').innerHTML=''; } S.lvl=keep; };
      show(); bindMap(()=>{ show(); refreshFoot(); refreshTxt(); });
      if(!S.baSeen){ S.ba='before'; show(); later(1600,()=>{ S.ba='after'; S.baSeen=true; show(); refreshFoot(); refreshTxt(); }); } CARDS[at]._show=show; },
-   foot:()=>`<span>${S.ba==='before'?'<b style="color:var(--bad)">before</b> · every path open':'<b style="color:var(--ok)">after</b> · only required flows'}</span><span>unused closed <b>116</b></span>`,
+   foot:()=>`<span>${S.ba==='before'?'<b style="color:var(--bad)">before</b> · every path open':'<b style="color:var(--ok)">after</b> · only required flows'}</span><span>unused ${S.ba==='before'?'open <b style="color:var(--bad)">116</b>':'closed <b style="color:var(--ok)">116</b>'}</span>`,
    kick:'15 · Result · network', title:'Network exposure: before and after.',
    body:()=>{ const w=S.sel, n=needsOut(w);
      return `<div class="facts"><div><span>workload</span><b>${w}</b></div><div><span>reach before</span><b style="color:var(--bad)">13 targets · any binary</b></div>
        <div><span>reach now</span><b style="color:var(--ok)">${n.length?n.map(k=>SHORT[k]).join(', '):'kube-dns only'}</b></div>
        ${w==='adservice'?'<div><span>binaries</span><b>8, reviewed · ready</b></div>':''}</div>
        <div class="two"><button class="btn ${S.ba==='before'?'':'sec'}" id="vb4">Before</button><button class="btn ${S.ba==='after'?'':'sec'}" id="vaf">After</button></div>
-       <p>Red: allowed but never used. Green: required. After enforcement only green remains. Tap any workload to compare.</p>`; },
+       <p><b style="color:var(--bad)">Red</b>: 116 paths allowed but never used. <b style="color:var(--ok)">Green</b>: the 16 flows the app needs. After enforcement only green remains.</p>`; },
    bindTxt(){ const set=v=>{ S.ba=v; CARDS[at]._show&&CARDS[at]._show(); refreshFoot(); refreshTxt(); }; $('vb4').onclick=()=>{ S.baT.add('b'); set('before'); }; $('vaf').onclick=()=>{ S.baT.add('a'); set('after'); }; },
    gate:()=>S.baT.size===2,
    },
@@ -676,7 +682,7 @@ function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='R
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
   later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
@@ -709,7 +715,7 @@ const GUIDE=[
   ()=>S.explored.size?null:$('wb').querySelector('.nd[data-w="frontend"]'),
   ()=>null,
   ()=>null,
-  ()=>$('cls'),
+  ()=>S.cls>=5?$('wb').querySelector('.row.tap[data-k="out-ex"]'):$('cls'),
   ()=>S.evOpened?null:document.querySelector('.rule'),
   ()=>$('run'),
   ()=>S.lvl>=3&&!S.rb?$('rbk'):$('appr'),
@@ -732,7 +738,7 @@ function guide(){
   if(gEl&&gEl!==el){ gEl.classList.remove('guide','gin'); }
   gEl=el; const tip=$('gtip');
   if(!el){ tip.hidden=true; return; }
-  const svg=el instanceof SVGElement; if(!svg){ el.classList.add('guide'); el.dataset.tap=el===$('next')?'Next':'Tap here'; el.classList.toggle('gin', el.getBoundingClientRect().width>200); }
+  const svg=el instanceof SVGElement; if(!svg){ el.classList.add('guide'); const wd=el.getBoundingClientRect().width>200; el.dataset.tap=el===$('next')?'Next':wd?'Tap here':'TAP'; el.classList.toggle('gin', wd); }
   { const box=el.closest&&el.closest('#txt,#wb'); if(box){ const b=box.getBoundingClientRect(), q=el.getBoundingClientRect();
       if(q.bottom>b.bottom-4||q.top<b.top+30) box.scrollTop+=q.top-b.top-Math.max(36,(b.height-q.height)/2); } }
   const ph=$('phone').getBoundingClientRect(), r=el.getBoundingClientRect();
