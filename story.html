@@ -171,6 +171,32 @@ svg text{font-family:var(--mono)}
 .nav button:disabled{opacity:.4;cursor:default}
 .nav .next{margin-left:auto;background:var(--ink);color:#0A0D14;border-color:var(--ink)}
 .nav .next:disabled{background:var(--panel2);color:var(--dim);border-color:var(--line);opacity:1}
+/* opening screen */
+.cover{position:absolute;inset:0;z-index:20;background:var(--bg);overflow:auto;display:flex;flex-direction:column;gap:12px;
+  padding:max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left))}
+.cover[hidden]{display:none}
+.cover .ck{font:700 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.cover .ck svg{width:22px;height:22px}
+.cover h1{font-size:clamp(24px,7.4vw,30px);line-height:1.12;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.cover .lead{margin:0;color:var(--text);font-size:15px}
+.cover .why{margin:0;padding:10px 12px;border-left:3px solid var(--ok);background:var(--panel);border-radius:0 10px 10px 0;font-size:14px;font-weight:600;color:var(--ink)}
+.cover .cmap{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:4px;height:clamp(170px,30dvh,250px)}
+.cover .cmap svg{display:block;width:100%;height:100%}
+.cover .cap{display:flex;justify-content:space-between;font:600 10.5px var(--mono);color:var(--muted);margin-top:-6px}
+.cover .cap b{color:var(--bad)}
+.cover .chips{display:flex;flex-wrap:wrap;gap:6px}
+.cover .chips span{font-size:12px;font-weight:600;padding:5px 10px;border-radius:99px;border:1px solid var(--line);color:var(--text)}
+.cover .go{margin-top:auto}
+.cover .go small{display:block;text-align:center;font:600 10.5px var(--mono);color:var(--muted);margin-top:6px}
+/* the guide: outline + "Tap here" on exactly what to press next */
+.guide{outline:2px solid var(--warn)!important;outline-offset:3px;border-radius:10px;animation:gpulse 1.5s ease-out infinite}
+@keyframes gpulse{0%{box-shadow:0 0 0 0 rgba(245,185,71,.45)}100%{box-shadow:0 0 0 12px rgba(245,185,71,0)}}
+#gtip{position:absolute;z-index:8;pointer-events:none;display:flex;flex-direction:column;align-items:center;transition:left .25s ease,top .25s ease}
+#gtip b{font:800 12px var(--body);background:var(--warn);color:#0A0D14;padding:5px 9px;border-radius:7px;white-space:nowrap;box-shadow:0 6px 16px rgba(0,0,0,.4)}
+#gtip i{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid var(--warn)}
+#gtip.up{flex-direction:column-reverse}#gtip.up i{border-top:0;border-bottom:9px solid var(--warn)}
+#gtip{animation:bob 1s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-4px)}}
+#gtip[hidden]{display:none}
 .nav span{font:600 10.5px var(--mono);color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* evidence sheet */
 .sheet{position:absolute;left:0;right:0;bottom:0;z-index:10;max-height:72%;display:flex;flex-direction:column;background:#121826;border-top:1px solid #34405A;border-radius:18px 18px 0 0;
@@ -192,6 +218,17 @@ svg text{font-family:var(--mono)}
 </head>
 <body>
 <div class="phone" id="phone">
+  <section class="cover" id="cover" aria-label="Start">
+    <div class="ck"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#2B3A55"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#E6EAF2" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#3DD68C"/></svg>Decision &amp; Safety Layer · guided tour</div>
+    <h1>Zero Trust for every Kubernetes workload, without breaking production</h1>
+    <p class="lead">Workloads are allowed far more than they use. The product builds each one's allow-list from manifests and observed behavior, then enforces it on Cilium and Tetragon, stage by stage.</p>
+    <div class="cmap" id="cmap"></div>
+    <div class="cap"><span>boutique · default-allow today</span><span>adservice reaches <b id="cN">0</b></span></div>
+    <p class="why">Cilium and Tetragon can enforce. Deciding what to allow without breaking production is the hard part. That is what this product does.</p>
+    <div class="chips"><span>No new agents</span><span>Engine-native policies</span><span>Human-approved, reversible</span></div>
+    <div class="go"><button class="btn" id="start">Start the tour →</button><small>about 3 min · you act as the platform engineer · lab data</small></div>
+  </section>
+  <div id="gtip" hidden aria-hidden="true"><b id="gtipT">Tap here</b><i></i></div>
   <div class="bars" id="bars" aria-hidden="true"></div>
   <div class="head">
     <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#2B3A55"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#E6EAF2" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#3DD68C"/></svg>Safety Layer <span>· boutique</span></div>
@@ -457,7 +494,7 @@ function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='R
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
   later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); }
+function reset(){ Object.assign(S,{cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
@@ -465,6 +502,37 @@ function refreshFoot(){ const c=CARDS[at]; $('wf').innerHTML=c.foot?c.foot():'';
 function refreshTxt(){ const c=CARDS[at], t=$('txt'), y=t.scrollTop;
   t.innerHTML=`<div class="kick">${c.kick}</div><h1>${c.title}</h1>${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
 function refresh(win){ const c=CARDS[at]; if(win&&!c.map){ const wb=$('wb'), y=wb.scrollTop; wb.innerHTML=c.win(); wb.scrollTop=y; c.bind&&c.bind(); } refreshFoot(); refreshTxt(); }
+const GUIDE=[
+  ()=>document.querySelector('.cmd'),
+  ()=>S.explored.size?null:$('wb').querySelector('.nd[data-w="adservice"]'),
+  ()=>$('apply'),
+  ()=>document.querySelector('.tile.go')||document.querySelector('.tile:not(.on)'),
+  ()=>$('cls'),
+  ()=>S.evOpened?null:document.querySelector('.rule'),
+  ()=>$('run'),
+  ()=>$('appr'),
+  ()=>$('chk'),
+  ()=>null,
+];
+let gEl=null;
+function guide(){
+  const c=CARDS[at]; let el=c.gate()?(at<CARDS.length-1?$('next'):null):(GUIDE[at]&&GUIDE[at]());
+  if(el&&el.disabled) el=null;
+  if($('sheet').classList.contains('open')||!$('cover').hidden) el=null;
+  if(gEl&&gEl!==el){ gEl.classList.remove('guide'); }
+  gEl=el; const tip=$('gtip');
+  if(!el){ tip.hidden=true; return; }
+  if(!(el instanceof SVGElement)) el.classList.add('guide');
+  const ph=$('phone').getBoundingClientRect(), r=el.getBoundingClientRect();
+  if(r.width===0||r.bottom<ph.top||r.top>ph.bottom){ tip.hidden=true; return; }
+  if(r.width>ph.width*.6){ tip.hidden=true; return; }   // wide buttons: the outline is enough, a label would cover the text
+  $('gtipT').textContent=el===$('next')?'Next':'Tap here';
+  tip.hidden=false; const up=r.top-ph.top<70;
+  tip.classList.toggle('up',up);
+  tip.style.left=(r.left-ph.left+r.width/2-tip.offsetWidth/2)+'px';
+  tip.style.top=(up?r.bottom-ph.top+4:r.top-ph.top-tip.offsetHeight-4)+'px';
+}
+setInterval(()=>{ try{ guide(); }catch(e){} }, 250);
 function nav(){ const c=CARDS[at], ok=c.gate(), last=at===CARDS.length-1; $('next').disabled=!ok||last; $('next').textContent='Next';
   $('back').disabled=at===0; $('hint').textContent=ok||last?`${at+1} / ${CARDS.length}`:'your turn ↑'; }
 function show(i){
@@ -479,7 +547,15 @@ function show(i){
 $('next').onclick=()=>{ if(CARDS[at].gate()) show(at+1); };
 $('back').onclick=()=>show(at-1);
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.target.closest('button')) return; if(e.key==='ArrowRight'&&CARDS[at].gate()) show(at+1); if(e.key==='ArrowLeft') show(at-1); });
-show(0);
+function cover(on){ $('cover').hidden=!on; if(!on) return;
+  $('cmap').innerHTML=mapSVG(); const m=$('cmap').querySelector('svg'); m.removeAttribute('id');
+  const [ax,ay]=POS.adservice, tg=Object.keys(POS).filter(k=>k!=='adservice').map(k=>POS[k]).concat([API,WORLD]);
+  const g=m.querySelector('#reach'); g.removeAttribute('id'); m.querySelectorAll('.nd').forEach(n=>n.classList.toggle('sel',n.dataset.w==='adservice'));
+  let i=0; const draw=()=>{ if($('cover').hidden) return; if(i>=tg.length){ i=0; g.innerHTML=''; $('cN').textContent='0'; setTimeout(draw,900); return; }
+    const [x,y]=tg[i]; g.insertAdjacentHTML('beforeend',`<line class="rl" pathLength="1" x1="${ax}" y1="${ay}" x2="${x}" y2="${y}"/>`); i++; $('cN').textContent=i; setTimeout(draw, i===tg.length?2200:reduce?0:160); };
+  draw(); $('start').focus({preventScroll:true}); }
+$('start').onclick=()=>{ cover(false); show(0); };
+show(0); cover(!/skip/.test(location.search));
 </script>
 </body>
 </html>
