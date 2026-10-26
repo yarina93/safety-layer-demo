@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="eBPF Safety Layer · Zero Trust for Kubernetes workloads">
 <meta property="og:description" content="A guided tour: from default-allow to least privilege on Cilium and Tetragon, network and runtime, without breaking production. Lab data.">
-<meta property="og:url" content="https://yarina93.github.io/ebpf-safety-layer/">
+<meta property="og:url" content="https://yarina93.github.io/safety-layer-demo/">
 <meta name="twitter:card" content="summary">
 
 <meta name="description" content="Hands-on: take a Kubernetes namespace from default-allow to least privilege on Cilium and Tetragon. You explore, decide and verify; every value is lab evidence.">
@@ -244,6 +244,13 @@ svg text{font-family:var(--mono)}
 .pin .pr.ok em{color:var(--ok);background:rgba(61,214,140,.12)}.pin .pr.no em{color:var(--bad);background:rgba(255,92,92,.12)}
 .cover .cap b.okb{color:var(--ok)}
 .cover .btn:disabled{opacity:.45;cursor:default}
+/* summary numbers */
+.sum2{display:grid;gap:4px}
+.sum2 .sh,.sum2 .sr{display:grid;grid-template-columns:minmax(0,1fr) 70px 78px;gap:6px;align-items:center}
+.sum2 .sh b{font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;text-align:center}
+.sum2 .sr{padding:3px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font-size:11px}
+.sum2 .sr span{color:var(--text)}
+.sum2 em{font-style:normal;font:800 13px var(--mono);text-align:center}.sum2 em.b{color:#FF9C9C}.sum2 em.a{color:#8FEBBE}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -636,8 +643,8 @@ const CARDS=[
    },
  { // runtime before / after for adservice: side by side, one row per layer
    pipe:-1, wt:'adservice · inside the pod', wm:'before → after',
-   win(){ const L=[['Programs','any binary in the image','8 known programs','lab'],['Process network','any process can connect','only the application','design'],
-       ['Files','can write anywhere','only its own paths','design'],['Privileges','14 Linux capabilities','only what it uses','design']];
+   win(){ const L=[['Programs','any binary · ∞','8 programs','lab'],['Process network','any process · ∞','1 binary: the app','design'],
+       ['Files','writable: / (everything)','its own paths only','design'],['Privileges','14 capabilities','0 capabilities','design']];
      return `<div class="cmp"><div class="ch"><span></span><b class="bad">Before</b><b class="ok">After</b></div>${L.map(([n,b,a,st],i)=>`<div class="cr" style="--i:${i}"><span>${n}<small class="${st==='lab'?'lab':'des'}">${st.toUpperCase()}</small></span><em class="b">${b}</em><em class="a">${a}</em></div>`).join('')}</div>`; },
    bind(){ $('wb').querySelectorAll('.cr').forEach((d,i)=>{ d.style.opacity=0; later(150+i*300,()=>{ d.style.transition='opacity .3s'; d.style.opacity=1; }); }); },
    foot:()=>`<span>adservice</span><span>open layers <b style="color:var(--bad)">4</b> → <b style="color:var(--ok)">0</b></span>`,
@@ -645,20 +652,15 @@ const CARDS=[
    body:()=>`<p><b>What it means:</b> before, anything that runs inside adservice can start any program, connect anywhere the pod can, write files and use 14 root powers. After, only adservice's own programs run, only the application connects, it writes only where it needs to, and unused privileges are gone.</p>
      <p class="note">Programs are measured in the lab. The other three layers are the product's design and the next lab steps.</p>`,
    gate:()=>true },
- { // 15. summary, the v2 way: adservice's effective permissions as a diff, and where each layer stands
-   pipe:-1, wt:'adservice · effective permissions', wm:'diff', end:true,
-   win(){ const m=t=>`<div class="m">- ${t}</div>`, p=t=>`<div class="pl">+ ${t}</div>`, h=t=>`<div class="h">@@ ${t} @@</div>`;
-     return `<div class="diff">${h('network · enforced · lab')}${m('egress   11 workloads, any port')}${m('egress   kube-apiserver, internet')}${m('ingress  any pod in the namespace')}${p('egress   kube-dns:53')}${p('ingress  frontend → :9555/TCP')}
-       ${h('programs · allow-list ready · lab')}${m('exec     any binary in the image')}${p('exec     8 binaries, exec replay passed')}
-       ${h('network per process · design')}${m('connect  any process in the pod')}${p('connect  the application binary only')}
-       ${h('files · privileges · design')}${m('write    anywhere · 14 capabilities')}${p('write    its own paths · capabilities it uses')}</div>`; },
-   bind(){ $('wb').querySelectorAll('.diff div').forEach((d,i)=>{ d.style.opacity=0; later(120+i*110,()=>{ d.style.transition='opacity .25s'; d.style.opacity=1; }); }); },
-   foot:()=>`<span>required flows dropped <b>0</b></span><span>unused paths closed <b>116</b></span>`,
+ { // 15. summary: the numbers, before -> after, for the namespace and for adservice
+   pipe:-1, wt:'boutique · attack surface', wm:'before → after', end:true,
+   win(){ const R=[['Reachable targets · adservice','13','DNS only'],['Unused network paths · namespace','116','0'],['Required flows dropped','—','0'],
+       ['Programs adservice may run','any','8'],['Processes that may connect','any','1'],['Writable paths','/','own paths'],['Linux capabilities','14','0']];
+     return `<div class="sum2"><div class="sh"><span></span><b class="bad">Before</b><b class="ok">After</b></div>${R.map(([n,b,a])=>`<div class="sr"><span>${n}</span><em class="b">${b}</em><em class="a">${a}</em></div>`).join('')}</div>`; },
+   bind(){ $('wb').querySelectorAll('.sr').forEach((d,i)=>{ d.style.opacity=0; later(150+i*220,()=>{ d.style.transition='opacity .3s'; d.style.opacity=1; }); }); },
+   foot:()=>`<span>boutique · 12 workloads</span><span>network + runtime</span>`,
    kick:'17 · Summary', title:'From default-allow to least privilege.',
-   body:()=>`<div class="facts"><div><span>Network</span><b style="color:var(--ok)">enforced · lab</b></div>
-       <div><span>Programs · 25 binaries</span><b style="color:var(--prog)">ready · lab</b></div>
-       <div><span>Net per process · files · privileges</span><b style="color:var(--des)">design</b></div></div>
-     <p>One evidence profile per workload drives every layer. Every rule traces back to evidence, every change is verified first, and nothing the app needs was dropped.</p>
+   body:()=>`<p>Every workload is limited to what it needs: on the network, and inside the pod. Every rule traces back to evidence, every change is tested before it is applied, and <b>nothing the application needs was dropped</b>.</p>
      <button class="btn" id="again">Start over</button>`,
    bindTxt(){ $('again').onclick=reset; },
    gate:()=>true },
@@ -714,7 +716,7 @@ const WHY=[
   'Remove privileges the workload was given but never uses.',
   'See the blast radius shrink: every path open, then only what is needed.',
   'Compare what can happen inside the pod, before and after.',
-  'One page: where each layer stands.',
+  'The whole result in numbers.',
 ];
 CARDS.forEach((c,i)=>{ c.why=WHY[i]; });
 const GUIDE=[
