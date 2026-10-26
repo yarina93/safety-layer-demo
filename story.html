@@ -225,7 +225,7 @@ svg text{font-family:var(--mono)}
     <div class="cmap" id="cmap"></div>
     <div class="cap"><span>boutique · default-allow today</span><span>adservice reaches <b id="cN">0</b></span></div>
     <p class="why">Cilium and Tetragon can enforce. Deciding what to allow without breaking production is the hard part. That is what this product does.</p>
-    <div class="chips"><span>No new agents</span><span>Engine-native policies</span><span>Human-approved, reversible</span></div>
+    <div class="chips"><span>Engine-native policies</span><span>Human-approved, reversible</span></div>
     <div class="go"><button class="btn" id="start">Start the tour →</button><small>about 3 min · you act as the platform engineer · lab data</small></div>
   </section>
   <div id="gtip" hidden aria-hidden="true"><b id="gtipT">Tap here</b><i></i></div>
@@ -369,10 +369,10 @@ const CARDS=[
        <div class="c" style="margin-top:8px"># evidence profiles</div><div class="profiles">${Object.keys(POS).map(w=>`<span class="${S.src.size===3?'on':''}">${SHORT[w]}</span>`).join('')}</div>`; },
    bind(){ document.querySelectorAll('.tile').forEach(t=>t.onclick=()=>{ if(S.src.has(t.dataset.s)) return; S.src.add(t.dataset.s); refresh(true);
        if(S.src.size===3){ const ps=[...document.querySelectorAll('.profiles span')]; ps.forEach(p=>p.classList.remove('on')); ps.forEach((p,i)=>later(150+i*90,()=>p.classList.add('on'))); } }); },
-   foot:()=>`<span>no new agents</span><span>sources <b>${S.src.size}/3</b></span>`,
+   foot:()=>`<span>reads existing telemetry</span><span>sources <b>${S.src.size}/3</b></span>`,
    kick:'Step 1 · Collect', title:'Read what the cluster already produces.',
    body:()=>`<div class="task ${S.src.size===3?'done':''}">Connect the three sources.</div>
-     <p>Nothing new is installed. The product reads the manifests, Hubble flow logs and Tetragon exec events you already have, and builds <b>one evidence profile per workload</b>: what it declares and what it actually does.</p>`,
+     <p>The product reads the manifests, Hubble flow logs and Tetragon exec events you already have, and builds <b>one evidence profile per workload</b>: what it declares and what it actually does.</p>`,
    gate:()=>S.src.size===3 },
  { // 5. classify: the viewer decides, the evidence is one tap away
    pipe:1, wt:'classify · adservice', wm:'24 paths',
