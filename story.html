@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Safety Layer Story</title>
+<meta name="description" content="Decision & Safety Layer in 2 minutes: what an attacker inside one pod can reach, and how the product shrinks it to what each workload needs. Lab data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Phone-first story: one idea per full-screen card, the shop's map on every card, taps where the viewer decides.
+   On a computer it shows as a phone-width column. Lab data only. */
+:root{
+  --bg:#0B1020; --bg2:#121A33; --ink:#E7ECF4; --muted:#9AA8BD; --dim:#5D6B85; --line:rgba(255,255,255,.12);
+  --ok:#5FE0B5; --bad:#FF6B5B; --warn:#FFB547; --net:#8EA8FF; --prog:#B59BF0;
+  --body:'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono:ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg)}
+body{color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;overflow:hidden;
+  background:radial-gradient(120% 70% at 80% 0%, #1B2B6B 0%, #0F1735 45%, var(--bg) 100%) fixed}
+.phone{position:relative;height:100vh;height:100dvh;max-width:460px;margin:0 auto;display:flex;flex-direction:column;
+  padding:max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))}
+@media (min-width:600px){.phone{height:min(100dvh, 900px);top:50%;transform:translateY(-50%);border-left:1px solid var(--line);border-right:1px solid var(--line);background:rgba(11,16,32,.55)}}
+/* top: progress like stories, brand, the reach counter */
+.bars{display:flex;gap:4px;flex:none}
+.bars i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.18);overflow:hidden}
+.bars i b{display:block;height:100%;width:0;background:#fff;transition:width .35s ease}
+.bars i.pd b,.bars i.pn b{width:100%}.bars i.pn b{background:var(--ok)}
+.head{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 6px}
+.brand{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.04em;color:#C9D4F5;text-transform:uppercase}
+.brand svg{width:22px;height:22px}
+.reach{display:flex;align-items:baseline;gap:6px;padding:5px 10px;border-radius:99px;background:rgba(255,107,91,.14);border:1px solid rgba(255,107,91,.35);white-space:nowrap}
+.reach b{font-size:17px;font-variant-numeric:tabular-nums;color:#FFB3AA}
+.reach span{font-size:11.5px;color:#FFD5CF}
+.reach.zero{background:rgba(95,224,181,.12);border-color:rgba(95,224,181,.4)}.reach.zero b{color:var(--ok)}.reach.zero span{color:#C8F5E5}
+.reach.pop{animation:pop .5s ease}
+@keyframes pop{40%{transform:scale(1.12)}}
+/* the map */
+.map{flex:none;position:relative;border-radius:18px;padding:6px 8px 4px;background:radial-gradient(120% 90% at 85% 0%, #2B4FC4 0%, #17296B 55%, #0F1B48 100%);
+  box-shadow:0 14px 36px rgba(0,0,0,.35)}
+.map svg{display:block;width:100%;height:auto;max-height:34vh;max-height:34dvh}
+.state{position:absolute;top:8px;right:10px;font-size:10px;font-weight:800;letter-spacing:.06em;color:#9DF0D2}
+.leg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:6px 0 2px}
+.leg span{display:flex;flex-direction:column;align-items:center;padding:4px 2px;border-radius:8px;background:rgba(255,255,255,.06);font-size:10px;color:#AFC0EA;text-align:center;line-height:1.2}
+.leg b{font-size:12.5px;color:#FFB3AA;transition:color .4s}.leg b.c{color:var(--ok)}.leg b.p{color:#FFD08A}
+svg text{font-family:var(--body)}
+.m line,.m path{transition:opacity .5s ease,stroke .5s ease,stroke-width .5s ease}
+.m .ew{stroke:#FF6B5B;stroke-width:.7;opacity:.22}
+.m .need{stroke:#FF8A7D;stroke-width:1.1;fill:none;opacity:.55}
+.m.l3 .need{stroke:#5FE0B5;stroke-width:2;opacity:.95}
+.m .reachl{stroke:#FFB547;stroke-width:1.5;opacity:.9;stroke-dasharray:4 3;animation:flow 1.2s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-14}}
+.m .r-api,.m .r-web{stroke:#FFB547}
+.m.l1 .r-api,.m.l2 .r-web,.m.l3 .r-ew{opacity:0}
+.m.l1 .api,.m.l2 .web,.m.l3 .ew{opacity:0}
+.m .api{stroke:#FFB547;stroke-width:.8;stroke-dasharray:3 3;opacity:.35}
+.m .web{stroke:#FF6B5B;stroke-width:.8;stroke-dasharray:2 3;opacity:.35}
+.m .node{fill:#0F1B48;stroke:#FF8A7D;stroke-width:2;transition:stroke .6s}
+.m.l3 .node{stroke:#5FE0B5}
+.m .atk{fill:none;stroke:#FFB547;stroke-width:1.8;stroke-dasharray:3 2.5}
+.m text{fill:#C9D4F5;font-size:9px;font-weight:600;text-anchor:middle;paint-order:stroke;stroke:#13235E;stroke-width:3px}
+.m .hub{fill:#0F1B48;stroke-width:2.2}
+.m .x{stroke:#FF6B5B;stroke-width:3;stroke-linecap:round;opacity:0;transition:opacity .4s ease .4s}
+.m.l1 .xa,.m.l2 .xw{opacity:1}
+.m .trace{stroke:#FFB547;stroke-width:3.2;fill:none;opacity:0;stroke-linecap:round}
+.m.tr .trace{opacity:1}.m.tr .need,.m.tr .ew,.m.tr .reachl{opacity:.12}
+#net,#inn{transition:opacity .45s ease}#inn{opacity:0}
+.m.inside #net{opacity:0}.m.inside #inn{opacity:1}
+#inn text{text-anchor:start;stroke:none;font-size:10.5px}
+#inn .mono{font-family:var(--mono);font-weight:500;fill:#E4EAFB}
+#inn .tag{font-weight:800;font-size:9.5px;letter-spacing:.06em;text-anchor:middle}
+#inn .t{transition:fill .5s}
+#inn .ok .t{fill:rgba(95,224,181,.2)}#inn .ok .tag{fill:#9DF0D2}
+#inn .no .t{fill:rgba(255,107,91,.24)}#inn .no .tag{fill:#FFB3AA}
+#inn .ask .t{fill:rgba(255,181,71,.24)}#inn .ask .tag{fill:#FFD08A}
+/* the card */
+.card{flex:1;min-height:0;overflow:auto;padding:14px 2px 8px;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch}
+.card.in{animation:rise .35s ease}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+.kick{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--k,var(--net))}
+.card h1{font-size:clamp(24px,7vw,30px);line-height:1.12;letter-spacing:-.02em;margin:6px 0 8px;text-wrap:balance}
+.card p{margin:0 0 10px;color:#C3CDE0;font-size:15.5px}
+.card p strong{color:var(--ink)}
+.big{display:flex;gap:10px;margin:4px 0 12px}
+.big div{flex:1;border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.big b{display:block;font-size:28px;line-height:1.05;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.big span{font-size:12.5px;color:var(--muted)}
+.big .r b{color:#FFB3AA}.big .g b{color:var(--ok)}.big .y b{color:#FFD08A}
+.chain{list-style:none;margin:2px 0 12px;padding:0}
+.chain li{position:relative;padding:0 0 12px 26px;opacity:0;transform:translateY(6px);transition:opacity .35s ease,transform .35s ease}
+.chain li.on{opacity:1;transform:none}
+.chain li::before{content:'';position:absolute;left:5px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--warn)}
+.chain li:not(:last-child)::after{content:'';position:absolute;left:9.5px;top:18px;bottom:0;width:1.5px;background:var(--line)}
+.chain li:last-child::before{background:var(--ok)}
+.chain b{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.chain span{font-size:14.5px}
+code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:5px;color:#E4EAFB}
+pre{margin:0 0 12px;padding:12px;border-radius:12px;background:#070B17;border:1px solid var(--line);font:12px/1.5 var(--mono);color:#C9D4F5;overflow:auto;white-space:pre}
+pre .k{color:#8EA8FF}pre .v{color:#9DF0D2}pre .c{color:var(--dim)}
+.list{margin:0 0 12px;border-radius:12px;border:1px solid var(--line);overflow:hidden}
+.list div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;font-size:13.5px;border-top:1px solid var(--line)}
+.list div:first-child{border-top:0}
+.list code{background:none;padding:0}
+.list em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:99px}
+.list .q{color:#FFD08A;background:rgba(255,181,71,.16)}.list .y{color:#9DF0D2;background:rgba(95,224,181,.16)}
+.layers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.layers div{border-radius:12px;padding:9px 11px;border:1px dashed var(--line);font-size:13px;color:var(--muted)}
+.layers b{display:block;color:var(--ink);font-size:14px}
+.layers .on{border:1px solid rgba(95,224,181,.5)}.layers .on em{color:var(--ok)}
+.layers .rd{border:1px solid rgba(181,155,240,.5)}.layers .rd em{color:var(--prog)}
+.layers em{font-style:normal;font-weight:700;font-size:12px}
+.note{font-size:13px!important;color:var(--muted)!important}
+/* actions */
+.act{margin-top:auto;padding-top:10px;display:grid;gap:8px}
+.btn{font:inherit;font-weight:700;font-size:16px;padding:14px 18px;border-radius:14px;border:0;background:#fff;color:#0F1B48;cursor:pointer;width:100%;
+  animation:pulse 1.6s ease-out infinite}
+.btn.sec{background:rgba(255,255,255,.08);color:var(--ink);border:1px solid var(--line);animation:none}
+.btn:disabled{opacity:.6;animation:none}
+.btn:focus-visible{outline:3px solid var(--ok);outline-offset:3px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}100%{box-shadow:0 0 0 14px rgba(255,255,255,0)}}
+.done{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:14px;background:rgba(95,224,181,.12);border:1px solid rgba(95,224,181,.35);font-size:14.5px;animation:rise .35s ease}
+.done i{font-style:normal;color:var(--ok);font-weight:800}
+.busy::after{content:'';display:inline-block;width:14px;height:14px;margin-left:10px;vertical-align:-2px;border-radius:50%;border:2px solid rgba(15,27,72,.25);border-top-color:#0F1B48;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.foot{flex:none;display:flex;justify-content:space-between;align-items:center;padding-top:6px;font-size:12px;color:var(--dim)}
+.foot .hint{color:var(--muted)}
+.foot a{color:var(--muted)}
+.phone.small .map svg{max-height:20vh;max-height:20dvh}.phone.small .leg{display:none}
+@media (max-height:700px){.phone.small .map{display:none}}
+@media (max-height:700px){.map svg{max-height:28vh;max-height:28dvh}.card h1{font-size:23px;margin:4px 0 6px}.card p{font-size:14.5px;margin-bottom:8px}.big b{font-size:24px}.leg{display:none}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="bars" id="bars" aria-hidden="true"></div>
+  <div class="head">
+    <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#3D5BD9"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#5FE0B5"/></svg>Safety Layer</div>
+    <div class="reach" id="reach" aria-live="polite"><b id="rN">13</b><span id="rL">targets reachable</span></div>
+  </div>
+  <figure class="map" aria-label="The shop's 12 workloads and what an attacker inside adservice can reach" style="margin:0">
+    <svg class="m" id="m" viewBox="0 0 330 250" aria-hidden="true"></svg>
+    <div class="leg" id="leg"></div>
+  </figure>
+  <section class="card" id="card" aria-live="polite"></section>
+  <div class="foot"><span class="hint" id="hint"></span><span id="count"></span></div>
+</div>
+<script>
+// ---------- lab data (boutique, 12 workloads) - every number below comes from the lab run in the demo pages
+const VN={loadgen:[22,128],frontend:[80,128],ad:[156,46],recommend:[156,90],checkout:[156,172],email:[156,226],
+  catalog:[236,50],currency:[236,94],cart:[236,138],shipping:[236,182],payment:[236,226],redis:[304,138]};
+const NEED=[['loadgen','frontend'],['frontend','ad'],['frontend','recommend'],['frontend','checkout'],['frontend','catalog'],['frontend','currency'],['frontend','cart'],['frontend','shipping'],
+  ['recommend','catalog'],['checkout','catalog'],['checkout','currency'],['checkout','cart'],['checkout','shipping'],['checkout','payment'],['checkout','email'],['cart','redis']];
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+(function draw(){
+  const K=Object.keys(VN), A=[24,22], W=[304,22];
+  const cv=(a,b)=>{ const [x1,y1]=VN[a],[x2,y2]=VN[b]; if(x1===x2) return `M${x1} ${y1}L${x2} ${y2}`; const m=(x1+x2)/2; return `M${x1} ${y1}C${m} ${y1} ${m} ${y2} ${x2} ${y2}`; };
+  let ew=''; for(let i=0;i<K.length;i++) for(let j=i+1;j<K.length;j++){ const [x1,y1]=VN[K[i]],[x2,y2]=VN[K[j]]; ew+=`<line class="ew" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`; }
+  const api=K.map(k=>`<line class="api" x1="${VN[k][0]}" y1="${VN[k][1]}" x2="${A[0]}" y2="${A[1]}"/>`).join('');
+  const web=K.map(k=>`<line class="web" x1="${VN[k][0]}" y1="${VN[k][1]}" x2="${W[0]}" y2="${W[1]}"/>`).join('');
+  const need=NEED.map(([a,b])=>`<path class="need" d="${cv(a,b)}"/>`).join('');
+  const [ax,ay]=VN.ad;   // the attacker's reach from adservice
+  const reach=K.filter(k=>k!=='ad').map(k=>`<line class="reachl r-ew" x1="${ax}" y1="${ay}" x2="${VN[k][0]}" y2="${VN[k][1]}"/>`).join('')+
+    `<line class="reachl r-api" x1="${ax}" y1="${ay}" x2="${A[0]}" y2="${A[1]}"/><line class="reachl r-web" x1="${ax}" y1="${ay}" x2="${W[0]}" y2="${W[1]}"/>`;
+  const nodes=K.map(k=>{ const [x,y]=VN[k]; return `${k==='ad'?`<circle class="atk" cx="${x}" cy="${y}" r="12"/>`:''}<circle class="node" cx="${x}" cy="${y}" r="7"/><text x="${x}" y="${y+18}">${k}</text>`; }).join('');
+  const hub=([x,y],lab,cls,c)=>`<circle class="hub" cx="${x}" cy="${y}" r="11" stroke="${c}"/><text x="${x}" y="${y+3.5}" style="font-size:8.5px">${cls==='xa'?'API':'www'}</text>
+    <path class="x ${cls}" d="M${x-7} ${y-7}L${x+7} ${y+7}M${x+7} ${y-7}L${x-7} ${y+7}"/><text x="${x+(cls==='xa'?34:-36)}" y="${y+4}" style="font-size:9px;fill:#8FA2DA">${lab}</text>`;
+  const trace=`<path class="trace" d="${cv('frontend','ad')}"/>`;
+  // inside adservice: the programs it runs (from Tetragon) and what the allow-list does with them
+  const rows=[['AdService','entrypoint','ok'],['/bin/sh','#! line','ok'],['java · sed · uname','startup script','ask'],['tr · xargs · echo','startup script','ask'],['any other binary','not seen, not declared','no']];
+  const inn=`<rect x="10" y="14" width="310" height="222" rx="12" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.18)"/>
+    <text x="24" y="38" style="fill:#fff;font-size:12px;font-weight:700">adservice</text><text x="88" y="38" style="fill:#8FA2DA;font-size:10px">inside the container · programs</text>`+
+    rows.map(([n,why,k],i)=>{ const y=72+i*36; return `<g class="row ${k}" data-i="${i}"><text class="mono" x="24" y="${y}">${n}</text><text x="24" y="${y+14}" style="fill:#8FA2DA;font-size:9.5px">${why}</text>
+      <rect class="t" x="246" y="${y-9}" width="62" height="17" rx="8.5"/><text class="tag" x="277" y="${y+4}">${k==='ok'?'ALLOW':k==='no'?'DENY':'REVIEW'}</text></g>`; }).join('');
+  $('m').innerHTML=`<g id="net">${ew}${api}${web}${need}${reach}${trace}${hub(A,'K8s API','xa','#FFB547')}${hub(W,'internet','xw','#FF8A7D')}${nodes}</g><g id="inn">${inn}</g>`;
+})();
+
+// ---------- the story: one idea per card
+// lvl = how much of the network is closed (0 open, 1 API, 2 internet, 3 east-west); prog = programs reviewed
+const CARDS=[
+ {lvl:0, kick:'Kubernetes · Zero Trust', title:'Take over one pod. What can you reach?',
+  body:`<p>This is a real shop running in our lab: 12 workloads on Kubernetes. Say an attacker gets into <strong>adservice</strong>, the one that shows ads.</p>
+        <div class="big"><div class="r"><b>13</b><span>targets it can reach: 11 workloads, the Kubernetes API, the internet</span></div><div class="r"><b>Any</b><span>program it can run</span></div></div>
+        <p class="note">Tap the right side to continue. Lab data, about 2 minutes.</p>`},
+ {lvl:0, kick:'The gap', title:'It needs almost none of it.',
+  body:`<p>We read the manifests and watched the traffic and the processes. To do its job, adservice needs:</p>
+        <div class="big"><div class="g"><b>DNS</b><span>the only place it calls out to</span></div><div class="g"><b>8</b><span>programs it actually runs</span></div></div>
+        <p>Everything between what a workload <strong>can do</strong> and what it <strong>needs</strong> is attack surface. Every workload has this gap.</p>`},
+ {lvl:0, kick:'Why it stays open', title:'Closing it is easy. Not breaking production is hard.',
+  body:`<p>Cilium and Tetragon can already enforce. The hard part is deciding what to allow, for every workload, without cutting off something it needs.</p>
+        <p><strong>That decision is the product.</strong> It runs on the engines you already have. No new agents.</p>`},
+ {lvl:0, trace:true, small:true, kick:'How it decides', title:'Every rule has evidence behind it.', chain:true,
+  body:`<ol class="chain" id="chain">
+          <li><b>Observed · Hubble</b><span>frontend → adservice on 9555/TCP, 144 flows</span></li>
+          <li><b>Declared · manifest</b><span>frontend sets <code>AD_SERVICE_ADDR=adservice:9555</code></span></li>
+          <li><b>Need</b><span>declared and seen: confirmed</span></li>
+          <li><b>Rule</b><span>adservice accepts only <code>app: frontend</code> on 9555</span></li></ol>
+        <p class="note">Its 11 outbound paths had no declaration and no traffic, so they will be denied.</p>`},
+ {lvl:0, kick:'Before anything changes', title:'Test it against real traffic first.',
+  body:`<p>Each proposal is replayed against every flow the cluster has seen. It passes only if nothing needed would be blocked. The cluster is not touched.</p>`,
+  act:{label:'Run the safety check', busy:'Replaying 33,411 flows', done:'Passed. 0 required flows denied, all 17 stay allowed.'}},
+ {lvl:0, to:1, kick:'Stage 1 of 3 · network', title:'Cut off the Kubernetes API.',
+  body:`<p>None of the 12 workloads calls the Kubernetes API or another namespace. An attacker would. You approve, then it is enforced.</p>`,
+  act:{label:'Approve stage 1', busy:'Enforcing', done:'Kubernetes API and other namespaces: closed.'}},
+ {lvl:1, to:2, kick:'Stage 2 of 3 · network', title:'Lock outbound internet.',
+  body:`<p>No workload calls an external site. Open egress is how data leaves, so it goes, for all 12 workloads.</p>`,
+  act:{label:'Approve stage 2', busy:'Enforcing', done:'Internet: closed for 12 of 12. Still 0 required flows denied.'}},
+ {lvl:2, to:3, kick:'Stage 3 of 3 · network', title:'Each workload talks only to what it needs.',
+  body:`<div class="big"><div class="g"><b>17</b><span>required flows stay open</span></div><div class="r"><b>116</b><span>paths open but never used</span></div></div>`,
+  act:{label:'Approve stage 3', busy:'Enforcing', done:'116 unused paths denied. adservice now reaches DNS only.'}},
+ {lvl:3, inside:true, kick:'Inside the container · runtime', title:'Same method, one level down: programs.',
+  body:`<p>Tetragon saw adservice run 8 programs. 2 are declared in the image. The other 6 come from a startup script the product could not read.</p>
+        <p><strong>It does not guess.</strong> Unclear cases go to a person.</p>`},
+ {lvl:3, inside:true, prog:'ask', kick:'Your call', title:'Are these part of normal startup?',
+  body:`<div class="list"><div><code>java · sed · uname</code><em class="q" data-q>REVIEW</em></div><div><code>tr · xargs · echo</code><em class="q" data-q>REVIEW</em></div></div>`,
+  act:{label:'Yes, mark all 6 as needed', busy:'Recording your decision', done:'Allow-list ready: 8 programs. Any other binary will be denied once enforced.'}},
+ {lvl:3, small:true, kick:'No lock-in', title:'Plain engine policy. Yours to keep.',
+  body:`<pre><span class="k">kind:</span> <span class="v">CiliumNetworkPolicy</span>
+<span class="k">metadata:</span>
+  <span class="k">name:</span> <span class="v">level3-adservice</span>
+<span class="k">spec:</span>
+  <span class="k">endpointSelector:</span> {app: <span class="v">adservice</span>}
+  <span class="k">egress:</span>   <span class="c"># DNS only</span>
+  - toEndpoints: [{k8s-app: <span class="v">kube-dns</span>}]
+  <span class="k">ingress:</span>  <span class="c"># frontend on 9555</span>
+  - fromEndpoints: [{app: <span class="v">frontend</span>}]
+    toPorts: [{port: <span class="v">'9555'</span>}]</pre>
+        <p>Every change is audited and can be rolled back. Remove the product and the policy keeps enforcing.</p>`},
+ {lvl:3, prog:'ok', end:true, small:true, kick:'Where adservice stands', title:'From 13 targets to DNS only.',
+  body:`<div class="big"><div class="r"><b>13</b><span>targets before · any program</span></div><div class="g"><b>0</b><span>targets beyond DNS · 8 programs</span></div></div>
+        <div class="layers"><div class="on"><b>Network</b><em>Enforced</em></div><div class="rd"><b>Programs</b><em>Allow-list ready</em></div><div><b>File writes</b>Next</div><div><b>Privileges</b>Next</div></div>
+        <p class="note">Next in the lab: run a real attack from adservice, before and after, and show it blocked.</p>`,
+},
+];
+let at=0, did={};
+const seg=$('bars'); seg.innerHTML=CARDS.map(()=>'<i><b></b></i>').join('');
+function setMap(c, lvlOverride){
+  const lvl=lvlOverride??c.lvl, m=$('m');
+  m.classList.remove('l1','l2','l3'); for(let i=1;i<=lvl;i++) m.classList.add('l'+i);
+  m.classList.toggle('inside',!!c.inside); m.classList.toggle('tr',!!c.trace);
+  const progOk=c.prog==='ok'||(c.prog==='ask'&&did[at])||(!c.prog&&at>CARDS.findIndex(x=>x.prog==='ask')&&did[CARDS.findIndex(x=>x.prog==='ask')]);
+  m.querySelectorAll('#inn .row.ask, #inn .row.okd').forEach(r=>{ r.classList.toggle('ask',!progOk); r.classList.toggle('ok',progOk); r.classList.add('okd'); r.querySelector('.tag').textContent=progOk?'ALLOW':'REVIEW'; });
+  const n=(lvl<3?11:0)+(lvl<1?1:0)+(lvl<2?1:0), r=$('reach'), was=$('rN').textContent;
+  $('rN').textContent=n; $('rL').textContent=n?'targets reachable':'beyond DNS'; r.classList.toggle('zero',!n);
+  if(String(n)!==was){ r.classList.remove('pop'); void r.offsetWidth; r.classList.add('pop'); }
+  const L=[['Workloads',lvl>=3?['c','0']:['o','11']],['K8s API',lvl>=1?['c','No']:['o','Yes']],['Internet',lvl>=2?['c','No']:['o','Yes']],['Programs',progOk?['p','8']:['o','Any']]];
+  $('leg').innerHTML=L.map(([k,[cl,v]])=>`<span><b class="${cl}">${v}</b>${k}</span>`).join('');
+}
+function show(i){
+  if(i<0||i>=CARDS.length) return;
+  at=i; const c=CARDS[i], card=$('card'); $('phone').classList.toggle('small',!!c.small);
+  [...seg.children].forEach((s,k)=>{ s.className=k<i?'pd':k===i?'pn':''; });
+  const done=did[i];
+  card.style.setProperty('--k', c.inside||c.prog?'var(--prog)':c.lvl===3&&c.end?'var(--ok)':'var(--net)');
+  card.innerHTML=`<div class="kick">${c.kick}</div><h1>${c.title}</h1>${c.body}
+    <div class="act">${c.act?(done?`<div class="done"><i>✓</i><span>${c.act.done}</span></div>`:`<button class="btn" id="go">${c.act.label}</button>`):''}
+    ${c.end?`<button class="btn" id="again">Watch it again</button><button class="btn sec" id="desk">Open the full product tour</button>`:''}</div>`;
+  card.classList.remove('in'); void card.offsetWidth; card.classList.add('in'); card.scrollTop=0;
+  setMap(c, c.to&&done?c.to:c.lvl);
+  if(c.prog==='ask'&&done) card.querySelectorAll('[data-q]').forEach(e=>{ e.className='y'; e.textContent='NEEDED'; });
+  if(c.chain){ const li=[...card.querySelectorAll('#chain li')]; li.forEach((l,k)=>setTimeout(()=>l.classList.add('on'), reduce?0:250+k*550)); }
+  const g=$('go'); if(g) g.onclick=e=>{ e.stopPropagation(); act(); };
+  if($('again')) $('again').onclick=e=>{ e.stopPropagation(); did={}; show(0); };
+  if($('desk')) $('desk').onclick=e=>{ e.stopPropagation(); location.href='index.html?desktop'; };
+  $('count').textContent=`${i+1} / ${CARDS.length}`;
+  $('hint').textContent=c.act&&!done?'Your turn: tap the button':c.end?'':'Tap right to continue';
+}
+function act(){
+  const c=CARDS[at], g=$('go'); if(!g) return;
+  g.disabled=true; g.classList.add('busy'); g.textContent=c.act.busy;
+  setTimeout(()=>{ did[at]=true; show(at); }, reduce?150:1100);
+}
+function next(){ const c=CARDS[at]; if(c.act&&!did[at]){ const g=$('go'); if(g){ g.animate?.([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:300}); } return; } show(at+1); }
+function prev(){ show(at-1); }
+// tap right to go on, left to go back (like stories); buttons and text selection are left alone
+let sx=null, sy=null;
+$('phone').addEventListener('pointerdown',e=>{ sx=e.clientX; sy=e.clientY; });
+$('phone').addEventListener('click',e=>{
+  if(e.target.closest('button,a,pre,code')) return;
+  if(sx!==null&&(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10)) return;   // a scroll or a swipe, not a tap
+  const r=$('phone').getBoundingClientRect(); (e.clientX-r.left<r.width*.3)?prev():next();
+});
+$('phone').addEventListener('pointerup',e=>{ if(sx===null) return; const dx=e.clientX-sx, dy=e.clientY-sy;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){ dx<0?next():prev(); sx=null; } });
+document.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); next(); } if(e.key==='ArrowLeft') prev(); });
+show(0);
+</script>
+</body>
+</html>
