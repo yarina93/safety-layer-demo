@@ -218,6 +218,20 @@ svg text{font-family:var(--mono)}
 .cmp small{font:800 8px var(--mono);letter-spacing:.05em;padding:0 4px;border-radius:3px;border:1px solid}
 .cmp small.lab{color:var(--ok);border-color:rgba(61,214,140,.45)}.cmp small.des{color:#7FA7D9;border-color:rgba(127,167,217,.55);border-style:dashed}
 .cmp em{font-style:normal;line-height:1.35}.cmp em.b{color:#FF9C9C}.cmp em.a{color:#8FEBBE}
+/* cover: zoom into the pod */
+.cover .cmap{position:relative;overflow:hidden}
+.cover .cmap svg.cz{transition:transform .7s cubic-bezier(.6,0,.3,1),opacity .4s ease .3s}
+.cover .cmap svg.cz.zoom{transform:scale(4);opacity:0}
+.pin{position:absolute;inset:8px;display:flex;flex-direction:column;gap:5px;justify-content:center;opacity:0;transition:opacity .4s;pointer-events:none;
+  border:1px solid rgba(245,185,71,.5);border-radius:12px;background:rgba(245,185,71,.04);padding:8px 10px}
+.cmap.inside .pin{opacity:1}
+.pin .pt{display:flex;gap:8px;align-items:baseline;margin-bottom:2px}.pin .pt b{font-size:12px;color:var(--ink)}.pin .pt span{font:600 9.5px var(--mono);color:var(--muted)}
+.pin .pr{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:8px;align-items:center;font:600 10.5px var(--mono);opacity:0;transform:translateX(-6px);transition:opacity .3s,transform .3s}
+.pin .pr.on{opacity:1;transform:none}
+.pin .pr i{font-style:normal;color:var(--muted)}.pin .pr span{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pin .pr em{font-style:normal;font-weight:800;font-size:9px;letter-spacing:.06em;padding:2px 6px;border-radius:5px}
+.pin .pr.ok em{color:var(--ok);background:rgba(61,214,140,.12)}.pin .pr.no em{color:var(--bad);background:rgba(255,92,92,.12)}
+.cover .cap b.okb{color:var(--ok)}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -275,8 +289,8 @@ svg text{font-family:var(--mono)}
     <div class="ck"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#2B3A55"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#E6EAF2" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#3DD68C"/></svg>Decision &amp; Safety Layer · guided tour</div>
     <h1>Zero Trust for every Kubernetes workload, without breaking production</h1>
     <p class="lead">Workloads are allowed far more than they use. The product builds each one's allow-list from manifests and observed behavior, then enforces it on Cilium and Tetragon, stage by stage.</p>
-    <div class="cmap" id="cmap"></div>
-    <div class="cap"><span>boutique · default-allow today</span><span>adservice reaches <b id="cN">0</b></span></div>
+    <div class="cmap" id="cmap"><div class="pin" id="pin"></div></div>
+    <div class="cap"><span id="cL">boutique · default-allow today</span><span id="cR">adservice reaches <b id="cN">0</b></span></div>
     <p class="why">Cilium and Tetragon can enforce. Deciding what to allow without breaking production is the hard part. That is what this product does.</p>
     <div class="go"><button class="btn" id="start">Start the tour →</button><small>about 3 min · you act as the platform engineer · lab data</small></div>
   </section>
@@ -747,12 +761,28 @@ $('next').onclick=()=>{ if(CARDS[at].gate()) show(at+1); };
 $('back').onclick=()=>show(at-1);
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.target.closest('button')) return; if(e.key==='ArrowRight'&&CARDS[at].gate()) show(at+1); if(e.key==='ArrowLeft') show(at-1); });
 function cover(on){ $('cover').hidden=!on; if(!on) return;
-  $('cmap').innerHTML=mapSVG(); const m=$('cmap').querySelector('svg'); m.removeAttribute('id');
+  const box=$('cmap'); box.querySelectorAll('svg').forEach(x=>x.remove()); box.insertAdjacentHTML('afterbegin',mapSVG());
+  const m=box.querySelector('svg'); m.removeAttribute('id'); m.classList.add('cz');
   const [ax,ay]=POS.adservice, tg=Object.keys(POS).filter(k=>k!=='adservice').map(k=>POS[k]).concat([API,WORLD]);
   const g=m.querySelector('#reach'); g.removeAttribute('id'); m.querySelectorAll('.nd').forEach(n=>n.classList.toggle('sel',n.dataset.w==='adservice'));
-  let i=0; const draw=()=>{ if($('cover').hidden) return; if(i>=tg.length){ i=0; g.innerHTML=''; $('cN').textContent='0'; setTimeout(draw,900); return; }
-    const [x,y]=tg[i]; g.insertAdjacentHTML('beforeend',`<line class="rl" pathLength="1" x1="${ax}" y1="${ay}" x2="${x}" y2="${y}"/>`); i++; $('cN').textContent=i; setTimeout(draw, i===tg.length?2200:reduce?0:160); };
-  draw(); $('start').focus({preventScroll:true}); }
+  m.style.transformOrigin=`${ax/330*100}% ${ay/246*100}%`;
+  // inside adservice: what the runtime allow-list does (programs from the lab; the rest is the product's design)
+  const ROWS=[['exec','AdService · java','ALLOW','ok'],['exec','any other binary','DENY','no'],['connect','a process other than the app','DENY','no'],['write','outside its own paths','DENY','no'],['privileges','unused capabilities','DROP','no']];
+  $('pin').innerHTML=`<div class="pt"><b>adservice</b><span>inside the pod · runtime</span></div>`+ROWS.map(([v,a,t,k])=>`<div class="pr ${k}"><i>${v}</i><span>${a}</span><em>${t}</em></div>`).join('');
+  const T=f=>timers.push(setTimeout(()=>{ if(!$('cover').hidden) f(); }, reduce?0:0)) ;
+  let cancel=false; const at2=(ms,f)=>setTimeout(()=>{ if(!$('cover').hidden&&!cancel) f(); }, ms);
+  const cap=(l,r)=>{ $('cL').textContent=l; $('cR').innerHTML=r; };
+  const loop=()=>{ if($('cover').hidden) return;
+    // 1. default-allow: draw adservice's reach
+    m.classList.remove('l1','l2','l3','zoom'); box.classList.remove('inside'); g.innerHTML=''; cap('boutique · default-allow today','adservice reaches <b id="cN">0</b>');
+    tg.forEach(([x,y],i)=>at2(300+i*150,()=>{ g.insertAdjacentHTML('beforeend',`<line class="rl" pathLength="1" x1="${ax}" y1="${ay}" x2="${x}" y2="${y}"/>`); $('cN').textContent=i+1; }));
+    // 2. least privilege on the network
+    at2(300+tg.length*150+1600,()=>{ g.innerHTML=''; m.classList.add('l1','l2','l3'); cap('network · least privilege','adservice reaches <b class="okb">DNS only</b>'); });
+    // 3. into the pod: runtime limits
+    at2(300+tg.length*150+4000,()=>{ m.classList.add('zoom'); cap('inside adservice · runtime','allow-list <b class="okb">8 programs</b>'); });
+    at2(300+tg.length*150+4600,()=>{ box.classList.add('inside'); [...$('pin').querySelectorAll('.pr')].forEach((r,i)=>{ r.classList.remove('on'); at2(250+i*420,()=>r.classList.add('on')); }); });
+    at2(300+tg.length*150+9200,loop); };
+  loop(); $('start').focus({preventScroll:true}); }
 $('start').onclick=()=>{ cover(false); show(0); };
 show(0); cover(!/skip/.test(location.search));
 </script>
