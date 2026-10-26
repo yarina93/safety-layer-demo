@@ -66,6 +66,8 @@ button{font:inherit;color:inherit}
 /* map */
 .wbody svg{display:block;width:100%;height:100%}
 svg text{font-family:var(--mono)}
+.mp.before .ew{opacity:.55;stroke-width:.9}
+.mp.before .need{stroke:#FF8A7D}
 .mp .ew{stroke:#FF5C5C;stroke-width:.5;opacity:.12;transition:opacity .5s}
 .mp.l3 .ew{opacity:0}
 .mp .need{stroke:#566175;stroke-width:1;fill:none;opacity:.6;transition:stroke .5s,opacity .5s}
@@ -221,7 +223,8 @@ svg text{font-family:var(--mono)}
 .cover .go{margin-top:auto}
 .cover .go small{display:block;text-align:center;font:600 10.5px var(--mono);color:var(--muted);margin-top:6px}
 /* the guide: outline + "Tap here" on exactly what to press next */
-.guide{outline:2px solid var(--warn)!important;outline-offset:3px;border-radius:10px;animation:gpulse 1.5s ease-out infinite}
+.guide{outline:2px solid var(--warn)!important;outline-offset:3px;border-radius:10px;animation:gpulse 1.5s ease-out infinite;position:relative;overflow:visible!important}
+.guide::after{content:attr(data-tap);position:absolute;right:8px;top:-11px;z-index:3;font:800 11px var(--body);letter-spacing:.02em;background:var(--warn);color:#0A0D14;padding:3px 8px;border-radius:6px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.4);pointer-events:none}
 @keyframes gpulse{0%{box-shadow:0 0 0 0 rgba(245,185,71,.45)}100%{box-shadow:0 0 0 12px rgba(245,185,71,0)}}
 #gtip{position:absolute;z-index:8;pointer-events:none;display:flex;flex-direction:column;align-items:center;transition:left .25s ease,top .25s ease}
 #gtip b{font:800 12px var(--body);background:var(--warn);color:#0A0D14;padding:5px 9px;border-radius:7px;white-space:nowrap;box-shadow:0 6px 16px rgba(0,0,0,.4)}
@@ -293,7 +296,7 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textContent+$('bW').textContent; $('bW').textContent=SHORT[w]||w; $('bN').textContent=n;
   b.classList.toggle('zero',S.lvl>=3); if(n+(SHORT[w]||w)!==was){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }
@@ -393,7 +396,7 @@ const CARDS=[
      $('wb').querySelectorAll('.t>div').forEach((d,i)=>{ d.style.opacity=0; later(i*160,()=>{ d.style.transition='opacity .2s'; d.style.opacity=1; }); });
      later(2600,()=>{ S.handApplied=true; refresh(true); }); },
    foot:()=>`<span>rules <b>${HAND.size}</b> of 8 needed</span><span>${S.handApplied?'applied':'writing…'}</span>`,
-   kick:'3 · Why it stays open', title:'How it is done today: by hand.',
+   kick:'3 · Why it stays open', title:'One missed line breaks checkout.',
    body:()=>S.handApplied?`<p>The policy is applied and Hubble shows the result: <b>frontend → checkout is DROPPED</b>. Customers can browse but can't check out.</p>
        <p>One missed line, one broken page. Multiply by every service and every release, and teams decide it is safer to <b>leave default-allow on</b>. That is the gap the product closes.</p>`
      :`<p>An engineer writes frontend's allow-list by hand. It needs 8 destinations; the list has 7. It looks complete.</p><p class="c">Applying it…</p>`,
@@ -454,7 +457,7 @@ const CARDS=[
    body:()=>S.replay==='pass'?`<div class="task done">PASS: no required flow would be dropped.</div><p>Safe to enforce. The replay also confirms what it closes: 21 unused paths for adservice.</p>`
      :S.replay?`<div class="task">The replay caught a problem. Fix it from the evidence and run it again.</div>
        <p>${replayIssues().map(i=>i.why).join(' ')}</p><button class="btn" id="fix">Apply the evidence verdicts and re-run</button>`
-     :`<div class="task">Run the replay.</div><button class="btn" id="run">Run the replay</button><p><b>What is a replay?</b> Hubble recorded every connection the namespace made: ${FLOWS.toLocaleString('en-US')} flows. Each one is run through the proposed policy, offline: <b>allowed or dropped?</b> If anything the app needs would be dropped, nothing is applied.</p>`,
+     :`<div class="task">Run the flow replay.</div><button class="btn" id="run">Run the flow replay</button><p><b>What is a flow replay?</b> Hubble recorded every connection the namespace made: ${FLOWS.toLocaleString('en-US')} flows. Each one is run through the proposed policy, offline: <b>allowed or dropped?</b> If anything the app needs would be dropped, nothing is applied.</p>`,
    bindTxt(){ if($('run')) $('run').onclick=runReplay; if($('fix')) $('fix').onclick=()=>{ PATHS.forEach(p=>S.dec[p.k]=p.truth); S.replay=null; refresh(true); later(250,runReplay); }; },
    gate:()=>S.replay==='pass' },
  { // 8. enforce: approve the stages, then check any workload's reach
@@ -483,10 +486,10 @@ const CARDS=[
    bind(){ document.querySelectorAll('.tree .tap').forEach(t=>t.onclick=()=>{ const b=BINS.find(x=>x[0]===t.dataset.b);
        sheet(`adservice · ${b[0]}`,'process_exec evidence',`<div class="verdict"><i class="tag y">REVIEW</i> the product does not guess</div><div class="ev"><h4>Tetragon · process_exec</h4><pre>binary   ${b[1]}\nparent   ${b[2]}\nwhen     ${b[3]}\nseen     ${b[4]}×</pre></div>
          <div class="ev"><h4>Image config</h4><pre>ENTRYPOINT  …/hipstershop/bin/AdService\n            a shell script (#!/bin/sh)\n${b[0]} is not declared in the image;\nthe script starts it, and a script\ncan't be resolved statically</pre></div>`); }); },
-   foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b> binaries${S.binChk?' · startup <b style="color:var(--ok)">PASS</b>':''}</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
+   foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b> binaries${S.binChk?' · exec replay <b style="color:var(--ok)">PASS</b>':''}</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
    kick:'9 · Runtime · programs', title:'Six binaries the image doesn’t declare.',
-   body:()=>S.binOk&&S.binChk?`<div class="task done">Startup check passed. Allow-list ready: 8 programs.</div><p>Every program adservice ran when it started is on the allow-list, so enforcing it won't stop the container from starting. Any other program will be blocked once Tetragon enforces it.</p>`
-     :S.binOk?`<div class="task">Run the startup check.</div><button class="btn" id="bchk">Run the startup check</button><p><b>What is the startup check?</b> When adservice starts, its script runs these 8 programs. If the allow-list missed one, Tetragon would block it and <b>the container would fail to start</b>. The check replays every program Tetragon recorded at startup against the allow-list, offline, and passes only if all of them are allowed.</p>`
+   body:()=>S.binOk&&S.binChk?`<div class="task done">Exec replay passed. Allow-list ready: 8 programs.</div><p>Every program adservice ran when it started is on the allow-list, so enforcing it won't stop the container from starting. Any other program will be blocked once Tetragon enforces it.</p>`
+     :S.binOk?`<div class="task">Run the exec replay.</div><button class="btn" id="bchk">Run the exec replay</button><p><b>What is an exec replay?</b> When adservice starts, its script runs these 8 programs. If the allow-list missed one, Tetragon would block it and <b>the container would fail to start</b>. The check replays every program Tetragon recorded at startup against the allow-list, offline, and passes only if all of them are allowed.</p>`
      :`<div class="task">Review them and confirm. Tap a binary for its evidence.</div>
        <p>Tetragon saw adservice's entrypoint <b>script</b> start these six. A script can't be resolved statically, so the product <b>escalates to a person instead of guessing</b>. Here they are part of normal startup.</p>
        <button class="btn" id="chk">Confirm all 6 as needed</button>`,
@@ -557,22 +560,26 @@ const CARDS=[
    bindTxt(){ if($('prv')) $('prv').onclick=()=>{ $('prv').disabled=true; later(500,()=>{ S.prv=true; refresh(true); }); }; },
    gate:()=>S.prv },
  { // 10. result: compare any workload before and after
-   pipe:-1, wt:'boutique · least privilege', wm:'tap a workload', map:true,
+   pipe:-1, wt:'boutique · blast radius', wm:'before / after', map:true,
    win(){ return mapSVG(); },
-   bind(){ drawReach(S.sel); bindMap(()=>{ refreshFoot(); refreshTxt(); }); },
-   foot:()=>`<span>required flows dropped <b>0</b></span><span>unused paths closed <b>116</b></span>`,
+   bind(){ const show=()=>{ const keep=S.lvl; S.lvl=S.ba==='before'?0:3; drawReach(S.sel); const m=$('mp'); if(m) m.classList.toggle('before',S.ba==='before'); S.lvl=keep; };
+     show(); bindMap(()=>{ show(); refreshFoot(); refreshTxt(); });
+     if(!S.baSeen){ S.ba='before'; show(); later(1600,()=>{ S.ba='after'; S.baSeen=true; show(); refreshFoot(); refreshTxt(); }); } CARDS[at]._show=show; },
+   foot:()=>`<span>${S.ba==='before'?'<b style="color:var(--bad)">before</b> · every path open':'<b style="color:var(--ok)">after</b> · only required flows'}</span><span>unused closed <b>116</b></span>`,
    kick:'14 · Result', title:'Every workload, before and after.',
    body:()=>{ const w=S.sel, n=needsOut(w);
      return `<div class="facts"><div><span>workload</span><b>${w}</b></div><div><span>reach before</span><b style="color:var(--bad)">13 targets · any binary</b></div>
        <div><span>reach now</span><b style="color:var(--ok)">${n.length?n.map(k=>SHORT[k]).join(', '):'kube-dns only'}</b></div>
        ${w==='adservice'?'<div><span>binaries</span><b>8, reviewed · ready</b></div>':''}</div>
-       <p>Tap any workload on the map to compare. Next: the summary.</p>`; },
+       <div class="two"><button class="btn ${S.ba==='before'?'':'sec'}" id="vb4">Before</button><button class="btn ${S.ba==='after'?'':'sec'}" id="vaf">After</button></div>
+       <p>Red: allowed but never used. Green: required. After enforcement only green remains. Tap any workload to compare.</p>`; },
+   bindTxt(){ const set=v=>{ S.ba=v; CARDS[at]._show&&CARDS[at]._show(); refreshFoot(); refreshTxt(); }; $('vb4').onclick=()=>set('before'); $('vaf').onclick=()=>set('after'); },
    gate:()=>true },
  { // 15. summary, the v2 way: adservice's effective permissions as a diff, and where each layer stands
    pipe:-1, wt:'adservice · effective permissions', wm:'diff', end:true,
    win(){ const m=t=>`<div class="m">- ${t}</div>`, p=t=>`<div class="pl">+ ${t}</div>`, h=t=>`<div class="h">@@ ${t} @@</div>`;
      return `<div class="diff">${h('network · enforced · lab')}${m('egress   11 workloads, any port')}${m('egress   kube-apiserver, internet')}${m('ingress  any pod in the namespace')}${p('egress   kube-dns:53')}${p('ingress  frontend → :9555/TCP')}
-       ${h('programs · allow-list ready · lab')}${m('exec     any binary in the image')}${p('exec     8 binaries, startup check passed')}
+       ${h('programs · allow-list ready · lab')}${m('exec     any binary in the image')}${p('exec     8 binaries, exec replay passed')}
        ${h('network per process · design')}${m('connect  any process in the pod')}${p('connect  the application binary only')}
        ${h('files · privileges · design')}${m('write    anywhere · 14 capabilities')}${p('write    its own paths · capabilities it uses')}</div>`; },
    bind(){ $('wb').querySelectorAll('.diff div').forEach((d,i)=>{ d.style.opacity=0; later(120+i*110,()=>{ d.style.transition='opacity .25s'; d.style.opacity=1; }); }); },
@@ -612,7 +619,7 @@ function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='R
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
   later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
@@ -664,11 +671,11 @@ function guide(){
   if(gEl&&gEl!==el){ gEl.classList.remove('guide'); }
   gEl=el; const tip=$('gtip');
   if(!el){ tip.hidden=true; return; }
-  if(!(el instanceof SVGElement)) el.classList.add('guide');
+  const svg=el instanceof SVGElement; if(!svg){ el.classList.add('guide'); el.dataset.tap=el===$('next')?'Next':'Tap here'; }
   { const box=el.closest&&el.closest('#txt,#wb'); if(box){ const b=box.getBoundingClientRect(), q=el.getBoundingClientRect();
       if(q.bottom>b.bottom-4||q.top<b.top+30) box.scrollTop+=q.top-b.top-Math.max(36,(b.height-q.height)/2); } }
   const ph=$('phone').getBoundingClientRect(), r=el.getBoundingClientRect();
-  if(r.width===0||r.bottom<ph.top||r.top>ph.bottom){ tip.hidden=true; return; }
+  if(!svg||r.width===0||r.bottom<ph.top||r.top>ph.bottom){ tip.hidden=true; return; }   // buttons carry their own badge; the floating tip is only for map nodes
   $('gtipT').textContent=el===$('next')?'Next':'Tap here';
   tip.hidden=false; const up=r.top-ph.top<70;
   tip.classList.toggle('up',up);
