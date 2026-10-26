@@ -209,6 +209,15 @@ svg text{font-family:var(--mono)}
 .ly em{font-style:normal;font:800 9.5px var(--mono);letter-spacing:.05em}.ly small{grid-column:1 / -1;font:600 9.5px var(--mono);color:var(--dim)}
 .ly.closed{border-color:rgba(61,214,140,.5)}.ly.closed em{color:var(--ok)}
 .ly.open{border-color:rgba(255,92,92,.4)}.ly.open em{color:var(--bad)}
+/* runtime before/after table */
+.cmp{display:grid;gap:5px;font-size:11px}
+.cmp .ch,.cmp .cr{display:grid;grid-template-columns:96px 1fr 1fr;gap:6px;align-items:center}
+.cmp .ch b{font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.cmp .cr{padding:7px 8px;border-radius:9px;border:1px solid var(--line);background:var(--panel2)}
+.cmp .cr span{color:var(--ink);font-weight:700;font-size:11.5px;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.cmp small{font:800 8px var(--mono);letter-spacing:.05em;padding:0 4px;border-radius:3px;border:1px solid}
+.cmp small.lab{color:var(--ok);border-color:rgba(61,214,140,.45)}.cmp small.des{color:#7FA7D9;border-color:rgba(127,167,217,.55);border-style:dashed}
+.cmp em{font-style:normal;line-height:1.35}.cmp em.b{color:#FF9C9C}.cmp em.a{color:#8FEBBE}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -598,18 +607,17 @@ const CARDS=[
    bindTxt(){ const set=v=>{ S.ba=v; CARDS[at]._show&&CARDS[at]._show(); refreshFoot(); refreshTxt(); }; $('vb4').onclick=()=>{ S.baT.add('b'); set('before'); }; $('vaf').onclick=()=>{ S.baT.add('a'); set('after'); }; },
    gate:()=>S.baT.size===2,
    },
- { // runtime before / after for adservice
-   pipe:-1, wt:'adservice · inside the pod', wm:'before / after',
-   win(){ const B=S.rba==='before', L=[['Programs','any binary in the image','8 programs, exec replay passed','ready · lab'],['Process network','any process can connect','only the application binary','design'],
-       ['Files','write anywhere','its own paths only','design'],['Privileges','14 capabilities','only what it uses','design']];
-     return `<div class="layers2">${L.map(([n,b,a,st])=>`<div class="ly ${B?'open':'closed'}"><div><b>${n} <span>· ${B?'today':st}</span></b><span>${B?b:a}</span></div><em>${B?'OPEN':st.startsWith('ready')?'READY':'DESIGN'}</em></div>`).join('')}</div>`; },
-   foot:()=>`<span>${S.rba==='before'?'<b style="color:var(--bad)">before</b> · everything open':'<b style="color:var(--ok)">after</b> · only what it needs'}</span><span>adservice</span>`,
+ { // runtime before / after for adservice: side by side, one row per layer
+   pipe:-1, wt:'adservice · inside the pod', wm:'before → after',
+   win(){ const L=[['Programs','any binary in the image','8 known programs','lab'],['Process network','any process can connect','only the application','design'],
+       ['Files','can write anywhere','only its own paths','design'],['Privileges','14 Linux capabilities','only what it uses','design']];
+     return `<div class="cmp"><div class="ch"><span></span><b class="bad">Before</b><b class="ok">After</b></div>${L.map(([n,b,a,st],i)=>`<div class="cr" style="--i:${i}"><span>${n}<small class="${st==='lab'?'lab':'des'}">${st.toUpperCase()}</small></span><em class="b">${b}</em><em class="a">${a}</em></div>`).join('')}</div>`; },
+   bind(){ $('wb').querySelectorAll('.cr').forEach((d,i)=>{ d.style.opacity=0; later(150+i*300,()=>{ d.style.transition='opacity .3s'; d.style.opacity=1; }); }); },
+   foot:()=>`<span>adservice</span><span>open layers <b style="color:var(--bad)">4</b> → <b style="color:var(--ok)">0</b></span>`,
    kick:'16 · Result · runtime', title:'Runtime exposure: before and after.',
-   why:'',
-   body:()=>`<div class="two"><button class="btn ${S.rba==='before'?'':'sec'}" id="rb4">Before</button><button class="btn ${S.rba==='after'?'':'sec'}" id="raf">After</button></div>
-     <p>The same evidence profile that closed the network now limits what runs inside the pod. Programs are measured in the lab; the other layers are the product's design, the next lab steps.</p>`,
-   bindTxt(){ const set=v=>{ S.rba=v; S.rbaT.add(v); $('wb').innerHTML=CARDS[at].win(); refreshFoot(); refreshTxt(); }; $('rb4').onclick=()=>set('before'); $('raf').onclick=()=>set('after'); },
-   gate:()=>S.rbaT.size===2 },
+   body:()=>`<p><b>What it means:</b> before, anything that runs inside adservice can start any program, connect anywhere the pod can, write files and use 14 root powers. After, only adservice's own programs run, only the application connects, it writes only where it needs to, and unused privileges are gone.</p>
+     <p class="note">Programs are measured in the lab. The other three layers are the product's design and the next lab steps.</p>`,
+   gate:()=>true },
  { // 15. summary, the v2 way: adservice's effective permissions as a diff, and where each layer stands
    pipe:-1, wt:'adservice · effective permissions', wm:'diff', end:true,
    win(){ const m=t=>`<div class="m">- ${t}</div>`, p=t=>`<div class="pl">+ ${t}</div>`, h=t=>`<div class="h">@@ ${t} @@</div>`;
@@ -678,7 +686,7 @@ const WHY=[
   'Limit where each workload can write and what it can read.',
   'Remove privileges the workload was given but never uses.',
   'See the blast radius shrink: every path open, then only what is needed.',
-  'See the same for what runs inside the pod.',
+  'Compare what can happen inside the pod, before and after.',
   'One page: where each layer stands.',
 ];
 CARDS.forEach((c,i)=>{ c.why=WHY[i]; });
@@ -698,7 +706,7 @@ const GUIDE=[
   ()=>$('fil'),
   ()=>$('prv'),
   ()=>S.baT.has('b')?(S.baT.has('a')?null:$('vaf')):$('vb4'),
-  ()=>S.rbaT.has('before')?(S.rbaT.has('after')?null:$('raf')):$('rb4'),
+  ()=>null,
   ()=>$('again'),
 ];
 let gEl=null;
