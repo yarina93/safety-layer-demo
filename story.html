@@ -237,6 +237,7 @@ svg text{font-family:var(--mono)}
 .pin .pr em{font-style:normal;font-weight:800;font-size:9px;letter-spacing:.06em;padding:2px 6px;border-radius:5px}
 .pin .pr.ok em{color:var(--ok);background:rgba(61,214,140,.12)}.pin .pr.no em{color:var(--bad);background:rgba(255,92,92,.12)}
 .cover .cap b.okb{color:var(--ok)}
+.cover .btn:disabled{opacity:.45;cursor:default}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -788,7 +789,10 @@ function cover(on){ $('cover').hidden=!on; if(!on) return;
     at2(300+tg.length*150+4000,()=>{ m.classList.add('zoom'); cap('inside adservice · runtime','allow-list <b class="okb">8 programs</b>'); });
     at2(300+tg.length*150+4600,()=>{ box.classList.add('inside'); [...$('pin').querySelectorAll('.pr')].forEach((r,i)=>{ r.classList.remove('on'); at2(250+i*420,()=>r.classList.add('on')); }); });
     at2(300+tg.length*150+9200,loop); };
-  loop(); $('start').focus({preventScroll:true}); }
+  // the tour can start only after the intro has played once
+  const st=$('start'); if(!reduce){ st.disabled=true; st.textContent='Watch the intro…'; }
+  at2(reduce?0:300+tg.length*150+4600+5*420+700,()=>{ st.disabled=false; st.textContent='Start the tour →'; st.focus({preventScroll:true}); });
+  loop(); }
 $('start').onclick=()=>{ cover(false); show(0); };
 show(0); cover(!/skip/.test(location.search));
 </script>
