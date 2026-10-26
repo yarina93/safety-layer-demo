@@ -218,8 +218,10 @@ const POS={loadgenerator:[22,128],frontend:[80,128],adservice:[156,44],recommend
   productcatalogservice:[236,48],currencyservice:[236,92],cartservice:[236,136],shippingservice:[236,180],paymentservice:[236,224],'redis-cart':[304,136]};
 const API=[24,20], WORLD=[306,20];
 const needsOut=w=>W[w].out.filter(r=>r[0]!=='dns').map(r=>r[0]);
+// the hand-written example: every frontend dependency except checkoutservice
+const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textContent+$('bW').textContent; $('bW').textContent=SHORT[w]||w; $('bN').textContent=n;
   b.classList.toggle('zero',S.lvl>=3); if(n+(SHORT[w]||w)!==was){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }
@@ -312,18 +314,16 @@ const CARDS=[
    gate:()=>S.explored.size>0 },
  { // 3. write frontend's policy by hand
    pipe:-1, wt:'frontend-cnp.yaml · by hand', wm:'egress',
-   win(){ const opts=Object.keys(POS).filter(k=>k!=='frontend').concat(['dns']);
-     if(S.handApplied) return handResult();
-     return `<div class="c"># allow-list for frontend: which destinations does it call?</div><div class="ed">${opts.map(o=>`<button class="chk ${S.hand.has(o)?'on':''}" data-o="${o}"><i></i>${o==='dns'?'kube-dns:53':SHORT[o]}</button>`).join('')}</div>`; },
-   bind(){ document.querySelectorAll('.chk').forEach(c=>c.onclick=()=>{ const o=c.dataset.o; S.hand.has(o)?S.hand.delete(o):S.hand.add(o); c.classList.toggle('on'); refreshFoot(); }); },
-   foot:()=>`<span>selected <b>${S.hand.size}</b></span><span>${S.handApplied?'applied':'not applied'}</span>`,
-   kick:'Why it stays open', title:'Write frontend’s allow-list by hand.',
+   win(){ if(S.handApplied) return handResult();
+     const t=o=>o==='dns'?'k8s-app: kube-dns':`app: ${o}`;
+     return `<div class="t"><div class="c"># frontend-cnp.yaml · written by hand</div><div>egress:</div>${[...HAND].map(o=>`<div>- toEndpoints: [{${t(o)}}]</div>`).join('')}<div class="c">  # checkoutservice: forgotten</div></div>`; },
+   foot:()=>`<span>rules <b>${HAND.size}</b></span><span>${S.handApplied?'applied':'not applied'}</span>`,
+   kick:'Why it stays open', title:'A hand-written allow-list for frontend.',
    body:()=>S.handApplied?`<div class="task done">Applied. Hubble shows what happened.</div>
-       <p>That was one workload, with the topology in front of you. Real teams do this for every service on every release, without the map. <b>One miss drops production traffic</b>, so most leave default-allow in place.</p>
-       <button class="btn sec" id="redo">Edit and apply again</button>`
-     :`<div class="task">Tick the destinations frontend calls, then apply.</div><p>This is what securing a namespace means today: list every dependency by hand, then hope the rollout drops nothing.</p>
+       <p>One destination was missed, so checkout traffic is dropped. Real teams write these for every service on every release. <b>One miss drops production traffic</b>, so most leave default-allow in place.</p>`
+     :`<div class="task">Apply the policy and watch Hubble.</div><p>This is how a namespace is secured today: list every dependency by hand, then hope the rollout drops nothing. This one looks complete.</p>
        <button class="btn" id="apply">kubectl apply</button>`,
-   bindTxt(){ if($('apply')) $('apply').onclick=()=>{ S.handApplied=true; refresh(true); }; if($('redo')) $('redo').onclick=()=>{ S.handApplied=false; refresh(true); }; },
+   bindTxt(){ if($('apply')) $('apply').onclick=()=>{ S.handApplied=true; refresh(true); }; },
    gate:()=>S.handApplied },
  { // 4. collect: connect the three sources
    pipe:0, wt:'decision-layer · sources', wm:'read-only',
@@ -339,21 +339,22 @@ const CARDS=[
    gate:()=>S.src.size===3 },
  { // 5. classify: the viewer decides, the evidence is one tap away
    pipe:1, wt:'classify · adservice', wm:'24 paths',
-   win(){ return `<div class="list">${PATHS.map(p=>{ const d=S.dec[p.k], show=decided();
-       return `<div class="row ${show&&d!==p.truth?'diff':''}"><span class="a tapev" data-k="${p.k}" style="cursor:pointer">${p.a} <span class="c">ⓘ</span></span><span class="e">${p.e}</span>
-         <span class="v">${show?`<i class="tag ${p.truth==='keep'?(p.k==='out-dns'?'b':'g'):'x'} stamp">${p.truth==='keep'?(p.k==='out-dns'?'NEED':'CONF'):'EXCESS'}</i>`:''}
-         <span class="seg"><button class="k ${d==='keep'?'on':''}" data-k="${p.k}" data-d="keep">KEEP</button><button class="d ${d==='deny'?'on':''}" data-k="${p.k}" data-d="deny">DENY</button></span></span></div>`; }).join('')}</div>`; },
-   bind(){ document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{ S.dec[b.dataset.k]=b.dataset.d; S.replay=null; refresh(true); });
-     document.querySelectorAll('.tapev').forEach(a=>a.onclick=()=>{ const p=PATHS.find(x=>x.k===a.dataset.k); sheet(`adservice · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'evidence',p.ev()); }); },
-   foot:()=>`<span>decided <b>${Object.keys(S.dec).length}/5</b></span><span>${decided()?`differs from evidence <b style="color:${wrong().length?'var(--warn)':'var(--ok)'}">${wrong().length}</b>`:'tap a path for evidence'}</span>`,
-   kick:'Step 2 · Classify · your call', title:'Keep or deny each path. The evidence is one tap away.',
-   body:()=>decided()?`<div class="task done">All 5 decided. The product's verdicts are now shown.</div>
-       ${wrong().length?`<p>${wrong().length} of your choices differ from the evidence (outlined). Keep them for now: the next steps show what they cause.</p>`:`<p>Same verdicts as the product: declared and observed paths are confirmed, platform needs are kept, paths with no evidence are excess.</p>`}`
-     :`<div class="task">Mark each of adservice's paths KEEP or DENY. Tap a path to see its evidence.</div>
-       <p>The product does this for every workload: a manifest declaration plus traffic in Hubble means <b>confirmed</b>; no declaration and no traffic means <b>excess</b>.</p>`,
-   gate:decided },
+   win(){ return `<div class="list">${PATHS.map((p,i)=>{ const on=S.cls>i;
+       return `<div class="row tap" data-k="${p.k}" style="${S.cls===i?'border-color:var(--info)':''}"><span class="a">${p.a}</span><span class="e">${p.e}</span>
+         <span class="v">${on?`<i class="tag ${p.truth==='keep'?(p.k==='out-dns'?'b':'g'):'x'} stamp">${p.truth==='keep'?(p.k==='out-dns'?'NEEDED':'CONFIRMED'):'EXCESS'}</i>`:'<span class="c">…</span>'}</span></div>`; }).join('')}</div>`; },
+   bind(){ document.querySelectorAll('.row.tap').forEach(a=>a.onclick=()=>{ const p=PATHS.find(x=>x.k===a.dataset.k); sheet(`adservice · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'evidence',p.ev()); }); },
+   foot:()=>`<span>classified <b>${Math.min(S.cls,5)}/5</b></span><span>keep <b>3</b> · excess <b style="color:var(--bad)">21</b></span>`,
+   kick:'Step 2 · Classify', title:'Every path gets a verdict from evidence.',
+   body:()=>S.cls>=5?`<div class="task done">Classified. Tap any path to see the evidence behind its verdict.</div>
+       <p>Declared in a manifest and seen in Hubble: <b>confirmed</b>. Platform needs such as DNS and kubelet probes: <b>needed</b>, even with no traffic in the window. No declaration and no traffic: <b>excess</b>, attack surface with no reason to exist.</p>`
+     :`<div class="task">Run the classification for adservice.</div>
+       <p>adservice is allowed 24 paths today. The product checks each one against its evidence: the manifests and the Hubble flows.</p>
+       <button class="btn" id="cls" ${S.cls>0?'disabled':''}>Classify adservice</button>`,
+   bindTxt(){ if($('cls')) $('cls').onclick=()=>{ $('cls').disabled=true; PATHS.forEach(p=>S.dec[p.k]=p.truth);
+       for(let i=1;i<=5;i++) later(i*520,()=>{ S.cls=i; refresh(true); }); }; },
+   gate:()=>S.cls>=5 },
  { // 6. compile: the policy built from those decisions, each rule opens its evidence
-   pipe:2, wt:'level3-adservice.yaml', wm:'from your decisions',
+   pipe:2, wt:'level3-adservice.yaml', wm:'generated',
    win(){ const d=S.dec, L=[];
      L.push(['','<span class="k">kind:</span> CiliumNetworkPolicy']); L.push(['','<span class="k">metadata:</span> {name: level3-adservice}']); L.push(['','<span class="k">spec:</span>']); L.push(['','  <span class="k">endpointSelector:</span> {app: adservice}']);
      L.push(['','  <span class="k">ingress:</span>']);
@@ -368,9 +369,9 @@ const CARDS=[
        <div><span class="c">  # denied paths: no rule → dropped</span></div></div>`; },
    bind(){ document.querySelectorAll('.rule').forEach(r=>r.onclick=()=>{ const p=PATHS.find(x=>x.k===r.dataset.k); S.evOpened=true; document.querySelectorAll('.rule.go').forEach(g=>g.classList.remove('go')); sheet(`rule · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'why this rule exists',p.ev()); refreshTxt(); }); },
    foot:()=>`<span>engine-native · no product CRDs</span><span>rules <b>${PATHS.filter(p=>S.dec[p.k]==='keep').length}</b></span>`,
-   kick:'Step 3 · Compile', title:'Your decisions become plain Cilium policy.',
+   kick:'Step 3 · Compile', title:'The verdicts become plain Cilium policy.',
    body:()=>`<div class="task ${S.evOpened?'done':''}">Tap any rule to see the evidence behind it.</div>
-     <p>Kept paths compile into a standard <code>CiliumNetworkPolicy</code>, and each rule keeps a link to its evidence. Denied paths get no rule, so they are dropped.</p>
+     <p>Confirmed and needed paths compile into a standard <code>CiliumNetworkPolicy</code>, and each rule keeps a link to its evidence. Denied paths get no rule, so they are dropped.</p>
      <p>It is ordinary YAML: <b>remove the product and the policy keeps enforcing.</b></p>`,
    gate:()=>S.evOpened },
  { // 7. verify: replay; wrong choices are caught here
@@ -399,26 +400,21 @@ const CARDS=[
    gate:()=>S.lvl>=3 },
  { // 9. runtime: the viewer reviews binaries; denying a startup binary is caught
    pipe:1, wt:'tetragon · process_exec · adservice', wm:'runtime',
-   win(){ const row=(b,pre)=>{ const v=S.bin[b[0]];
-       return `<div><span class="tap" data-b="${b[0]}"><span class="g">${pre}</span><span class="n">${b[0]}</span> <span class="c">ⓘ</span></span><span class="seg"><button class="k ${v==='keep'?'on':''}" data-b="${b[0]}" data-d="keep">NEEDED</button><button class="d ${v==='deny'?'on':''}" data-b="${b[0]}" data-d="deny">NO</button></span></div>`; };
+   win(){ const row=(b,pre)=>`<div><span class="tap" data-b="${b[0]}"><span class="g">${pre}</span><span class="n">${b[0]}</span> <span class="c">ⓘ</span></span>${S.binOk?'<i class="tag g">NEEDED</i>':'<i class="tag y">REVIEW</i>'}</div>`;
      return `<div class="tree"><div><span class="g">containerd-shim-runc-v2</span></div>
        <div><span><span class="g">└─ </span><span class="n">AdService</span> <span class="w">ENTRYPOINT</span></span><i class="tag g">DECLARED</i></div>
        <div><span><span class="g">   │  </span><span class="n">/bin/sh</span> <span class="w">#! line</span></span><i class="tag g">DECLARED</i></div>
-       ${BINS.map((b,i)=>row(b, b[0]==='echo'?'      └─ ':i===4?'   └─ ':'   ├─ ')).join('')}</div>
-       ${S.binChecked&&!S.binOk?`<div class="bad" style="margin-top:6px;white-space:normal">${BINS.filter(b=>S.bin[b[0]]==='deny').map(b=>`✗ ${b[0]}: ${b[3]==='container start'?`exec'd at container start (${b[4]}×)`:'runs in the startup script'}`).join('<br>')}</div>`:''}`; },
-   bind(){ document.querySelectorAll('.tree .seg button').forEach(b=>b.onclick=()=>{ S.bin[b.dataset.b]=b.dataset.d; S.binChecked=false; S.binOk=false; refresh(true); });
-     document.querySelectorAll('.tree .tap').forEach(t=>t.onclick=()=>{ const b=BINS.find(x=>x[0]===t.dataset.b);
+       ${BINS.map((b,i)=>row(b, b[0]==='echo'?'      └─ ':i===4?'   └─ ':'   ├─ ')).join('')}</div>`; },
+   bind(){ document.querySelectorAll('.tree .tap').forEach(t=>t.onclick=()=>{ const b=BINS.find(x=>x[0]===t.dataset.b);
        sheet(`adservice · ${b[0]}`,'process_exec evidence',`<div class="verdict"><i class="tag y">REVIEW</i> the product does not guess</div><div class="ev"><h4>Tetragon · process_exec</h4><pre>binary   ${b[1]}\nparent   ${b[2]}\nwhen     ${b[3]}\nseen     ${b[4]}×</pre></div>
          <div class="ev"><h4>Image config</h4><pre>ENTRYPOINT  …/hipstershop/bin/AdService\n            a shell script (#!/bin/sh)\n${b[0]} is not declared in the image;\nthe script starts it, and a script\ncan't be resolved statically</pre></div>`); }); },
-   foot:()=>`<span>allow-list <b>${2+BINS.filter(b=>S.bin[b[0]]==='keep').length}</b> binaries</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
-   kick:'Runtime · same pipeline · your call', title:'Six binaries the image doesn’t declare. Are they needed?',
-   body:()=>{ const all=BINS.every(b=>S.bin[b[0]]);
-     return S.binOk?`<div class="task done">Allow-list ready: 8 binaries. Anything else will be denied once enforced.</div><p>The decision is recorded with who made it, and it feeds the Tetragon policy the same way the network decisions fed Cilium.</p>`
-       :S.binChecked?`<div class="task">The startup check failed: denied binaries are part of how adservice starts.</div><p>Blocking them would stop the container from starting. Change them to NEEDED and check again.</p><button class="btn" id="chk">Check against startup</button>`
-       :`<div class="task ${all?'done':''}">Mark each binary, then check. Tap a binary for its evidence.</div>
-         <p>Tetragon saw adservice's entrypoint <b>script</b> start these. The product can't resolve a script statically, so it escalates instead of guessing.</p>
-         <button class="btn" id="chk" ${all?'':'disabled'}>Check against startup</button>`; },
-   bindTxt(){ if($('chk')) $('chk').onclick=()=>{ S.binChecked=true; S.binOk=BINS.every(b=>S.bin[b[0]]==='keep'); refresh(true); }; },
+   foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b> binaries</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
+   kick:'Runtime · same pipeline', title:'Six binaries the image doesn’t declare.',
+   body:()=>S.binOk?`<div class="task done">Allow-list ready: 8 binaries. Anything else will be denied once enforced.</div><p>Checked against startup: all 8 run when adservice starts. The decision is recorded with who made it, and it feeds the Tetragon policy the same way the network verdicts fed Cilium.</p>`
+     :`<div class="task">Review them and confirm. Tap a binary for its evidence.</div>
+       <p>Tetragon saw adservice's entrypoint <b>script</b> start these six. A script can't be resolved statically, so the product <b>escalates to a person instead of guessing</b>. Here they are part of normal startup.</p>
+       <button class="btn" id="chk">Confirm all 6 as needed</button>`,
+   bindTxt(){ if($('chk')) $('chk').onclick=()=>{ $('chk').disabled=true; later(500,()=>{ S.binOk=true; refresh(true); }); }; },
    gate:()=>S.binOk },
  { // 10. result: compare any workload before and after
    pipe:-1, wt:'boutique · least privilege', wm:'tap a workload', map:true, end:true,
@@ -438,9 +434,9 @@ const CARDS=[
 function handResult(){
   const need=needsOut('frontend').concat(['dns']), port=Object.fromEntries(W.frontend.out.map(r=>[r[0],r])), L=[];
   L.push(`<div class="p">kubectl apply -f frontend-cnp.yaml</div><div>ciliumnetworkpolicy/frontend <span class="ok">created</span></div><div class="p">hubble observe --from-label app=frontend</div>`);
-  const miss=need.filter(n=>!S.hand.has(n)), extra=[...S.hand].filter(n=>!need.includes(n));
+  const miss=need.filter(n=>!HAND.has(n)), extra=[...HAND].filter(n=>!need.includes(n));
   need.forEach(n=>{ const r=port[n]; const to=n==='dns'?'kube-dns:53':`${SHORT[n]}:${r[1].split('/')[0]}`;
-    L.push(`<div>frontend → ${to.padEnd(15)} ${S.hand.has(n)?'<span class="ok">FORWARDED</span>':'<span class="bad">DROPPED</span>'}</div>`); });
+    L.push(`<div>frontend → ${to.padEnd(15)} ${HAND.has(n)?'<span class="ok">FORWARDED</span>':'<span class="bad">DROPPED</span>'}</div>`); });
   if(extra.length) L.push(`<div class="warn"># allowed, never used: ${extra.map(e=>e==='dns'?'dns':SHORT[e]).join(', ')}</div>`);
   L.push(miss.length?`<div class="bad"># ${miss.length} required destination${miss.length>1?'s':''} dropped: pages break</div>`:`<div class="ok"># all ${need.length} required destinations allowed</div>`);
   return `<div class="t">${L.join('')}</div>`;
@@ -461,7 +457,7 @@ function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='R
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
   later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); }
+function reset(){ Object.assign(S,{cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
