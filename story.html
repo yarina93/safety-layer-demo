@@ -451,13 +451,13 @@ const CARDS=[
    gate:()=>S.evOpened },
  { // 7. verify: replay; wrong choices are caught here
    pipe:3, wt:'decision-layer verify', wm:'dry-run',
-   win(){ return `<div class="t" id="vt"><div class="p">decision-layer verify adservice --replay</div>${S.replay?replayOut():'<div class="c"># each recorded flow → proposed policy</div><div class="c">#   → allowed or dropped?</div><div class="c"># offline · the cluster is not touched</div>'}</div>`; },
+   win(){ return `<div class="t" id="vt"><div class="p">decision-layer verify adservice --replay</div>${S.replay?replayOut():'<div class="c"># a test run on real traffic, before applying</div><div>&nbsp;</div><div class="c">recorded connection           new policy says</div><div>frontend → adservice:9555     <span class="ok">still allowed ✓</span></div><div>kubelet  → adservice:9555     <span class="ok">still allowed ✓</span></div><div>… 33,411 recorded connections</div><div>&nbsp;</div><div class="c"># one needed connection blocked = not applied</div>'}</div>`; },
    foot:()=>`<span>cluster not touched</span><span>result <b style="color:${S.replay==='pass'?'var(--ok)':S.replay?'var(--bad)':'var(--ink)'}">${S.replay?S.replay.toUpperCase():'–'}</b></span>`,
    kick:'7 · Verify', title:'Replay the proposal before it touches the cluster.',
    body:()=>S.replay==='pass'?`<div class="task done">PASS: no required flow would be dropped.</div><p>Safe to enforce. The replay also confirms what it closes: 21 unused paths for adservice.</p>`
      :S.replay?`<div class="task">The replay caught a problem. Fix it from the evidence and run it again.</div>
        <p>${replayIssues().map(i=>i.why).join(' ')}</p><button class="btn" id="fix">Apply the evidence verdicts and re-run</button>`
-     :`<div class="task">Run the flow replay.</div><button class="btn" id="run">Run the flow replay</button><p><b>What is a flow replay?</b> Hubble recorded every connection the namespace made: ${FLOWS.toLocaleString('en-US')} flows. Each one is run through the proposed policy, offline: <b>allowed or dropped?</b> If anything the app needs would be dropped, nothing is applied.</p>`,
+     :`<div class="task">Run the flow replay.</div><button class="btn" id="run">Run the flow replay</button><p><b>What is a flow replay?</b> A test run before anything changes. Hubble already recorded every real connection in boutique: ${FLOWS.toLocaleString('en-US')} of them. We send each one through the new policy and ask: <b>would it still get through?</b> If even one connection the app needs would be blocked, the policy is <b>not applied</b>.</p>`,
    bindTxt(){ if($('run')) $('run').onclick=runReplay; if($('fix')) $('fix').onclick=()=>{ PATHS.forEach(p=>S.dec[p.k]=p.truth); S.replay=null; refresh(true); later(250,runReplay); }; },
    gate:()=>S.replay==='pass' },
  { // 8. enforce: approve the stages, then check any workload's reach
