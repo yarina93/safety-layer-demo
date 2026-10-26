@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Safety Layer Walkthrough</title>
+<script>// phones get the phone-first story; ?desktop keeps this tour
+try{ if(innerWidth<700&&!/desktop/.test(location.search)&&!location.hash) location.replace('story.html'); }catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
 <style>
@@ -86,7 +88,7 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
 .find dt{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
 .find dd{margin:0;font-size:14px;line-height:1.4}
 .find .f-found dd,.find .f-result dd{font-weight:650}
-.find .f-found dt{color:var(--mark)}.find .f-result dt{color:var(--ok)}
+.find .f-found dt{color:var(--mark)}.find .f-attacker dt{color:#D0453A}.find .f-result dt{color:var(--ok)}
 @media (max-width:900px){.find{gap:3px}.find div{grid-template-columns:64px minmax(0,1fr)}.find dd{font-size:13px}.find .f-checked,.find .f-read{display:none}}
 /* the live posture card: a small copy of the opening picture that follows the tour */
 .viz{flex:none;margin:12px 0 0;border-radius:14px;padding:10px 12px;color:#fff;background:radial-gradient(120% 90% at 85% 0%, #2B4FC4 0%, #17296B 55%, #0F1B48 100%)}
@@ -199,6 +201,29 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
 @media (max-width:640px){.yours{grid-template-columns:1fr}#endSvg{width:100%;max-width:170px;justify-self:center}}
 .yours b{font-size:clamp(30px,5vw,44px);letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
 .yours span{font-size:16px;font-weight:600}
+/* v2: the attacker's reach from adservice - before and after, the thread of the tour */
+.yk{font-style:normal;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#FFD08A}
+.bfa{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.bfa>div{display:flex;flex-direction:column;gap:4px}
+.bfa em{font-style:normal;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#8FA2DA}
+.bfa b{color:#FFB3AA}.bfa b.g{color:#9DF0D2}
+.bfa span{font-size:14px!important}
+.bfa .ar{font-size:28px;color:#8FA2DA}
+#tookd{font-size:13.5px!important;font-weight:500!important;color:#8FA2DA!important}
+#tookd:empty{display:none}
+.pct b.red{color:#D0453A}
+.chain{list-style:none;margin:6px 0 4px;padding:0;display:grid;gap:0}
+.chain li{position:relative;padding:0 0 12px 26px}
+.chain li::before{content:'';position:absolute;left:6px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--net)}
+.chain li:not(:last-child)::after{content:'';position:absolute;left:10px;top:18px;bottom:0;width:1.5px;background:var(--line)}
+.chain li:last-child::before{background:var(--ok)}
+.chain b{display:block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.chain span{font-size:13.5px;line-height:1.4}
+.chain code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--soft);padding:0 4px;border-radius:4px}
+.story.noviz .viz{display:none}
+@media (max-width:900px){.chain{margin:2px 0}.chain li{padding-bottom:5px}.chain b{font-size:10px}.chain span{font-size:12.5px}.story.noviz .more{display:none}}
+.viz .atk{fill:none;stroke:#FFB547;stroke-width:1.6;stroke-dasharray:3 2.5}
+.vleg .vh{grid-column:1/-1;color:#FFD08A;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
 .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .nums div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--muted)}
 .nums b{display:block;font-size:26px;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.15}
@@ -237,7 +262,7 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
       <div class="txt">
         <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="var(--net)"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#4FC3A1"/></svg>DECISION &amp; SAFETY LAYER · 5-MINUTE TOUR</div>
         <h1>Zero Trust for every Kubernetes workload, without breaking production</h1>
-        <p class="lead">Workloads get far more access than they use. The product builds an allow-list from manifests and observed behavior, then enforces it stage by stage.</p>
+        <p class="lead">Take over one pod in this shop and you can reach 11 other workloads, the Kubernetes API and the internet, and run any program. The product shrinks that to what each workload needs, then enforces it stage by stage.</p>
         <p class="why">Cilium and Tetragon can enforce. Deciding what to allow without breaking production is the hard part. That is what this product does.</p>
         <div class="go1"><button id="start">Start the tour →</button><span>5 min · you act as the platform engineer · lab data</span></div>
       </div>
@@ -260,8 +285,11 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
 <section class="cover" id="end" aria-label="Summary" hidden>
   <div class="cv">
     <div class="kick">WHAT YOU JUST DID</div>
-    <h1>Zero Trust approach</h1>
-    <div class="yours"><div class="yt"><b id="took"></b><span id="tookd"></span></div><svg id="endSvg" viewBox="0 0 330 250" aria-hidden="true"></svg></div>
+    <h1>Network enforced. Runtime allow-list ready.</h1>
+    <div class="yours"><div class="yt"><i class="yk">If adservice is compromised, the attacker reaches</i>
+      <div class="bfa"><div><em>Before</em><b>13</b><span>targets · any program</span></div><div class="ar" aria-hidden="true">→</div>
+        <div><em>After</em><b class="g">0</b><span>targets beyond DNS · 8 programs (ready)</span></div></div>
+      <span id="tookd"></span></div><svg id="endSvg" viewBox="0 0 330 250" aria-hidden="true"></svg></div>
     <div class="nums">
       <div class="key"><b>0</b>required flows denied</div>
       <div><b>Denied</b>Kubernetes API and cross-namespace access</div>
@@ -284,7 +312,7 @@ iframe{flex:1;width:100%;min-height:0;border:0;display:block;background:#F3F5F8}
 <div class="app">
   <header class="top">
     <h1>Decision &amp; Safety Layer<span>Product tour · boutique, 12 workloads</span></h1>
-    <div class="pct" aria-label="Share of the exposure closed"><b id="pct"></b><span>closed</span></div>
+    <div class="pct" aria-label="Targets an attacker in adservice can reach"><b id="pct"></b><span id="pctl">targets reachable<br>from adservice</span></div>
     <div class="steps" id="steps" aria-label="Progress"></div>
   </header>
   <main class="stage">
@@ -311,7 +339,8 @@ const ROUTE = [['Baseline','allow all','Start'],['Stage 1','Namespace isolation'
 const CH = [
  {page:'a0-home', step:0, pct:0, world:'both', where:'Baseline', title:'Default: allow all',
   find:[['Read','12 Deployment manifests, 33,411 flows from Cilium, every exec from Tetragon'],
-        ['Found','All 4 attack surfaces open to every workload']],
+        ['Found','All 4 attack surfaces open to every workload'],
+        ['Attacker','In adservice: reaches 11 workloads, the Kubernetes API, the internet, and can run any program. It needs only DNS and 8 programs']],
   hl:'.card.flush', top:'.expo-sum'},
  {page:'s1a-review', step:1, pct:0, world:'net', where:'Stage 1 · Network', title:'Namespace isolation',
   find:[['Checked','Which workloads call the Kubernetes API or other namespaces'],
@@ -340,6 +369,16 @@ const CH = [
   find:[['Checked','Every path between the 12 workloads, configured and observed'],
         ['Found','17 required flows. 116 paths open but never used'],
         ['Result','Deny the 116. Validated: 0 required flows denied']],
+  hl:'.dh'},
+ {page:'s3b-checked', step:3, pct:50, world:'net', where:'Stage 3 · Evidence', title:'How it decided: one flow',
+  chain:[['Observed · Hubble','frontend → adservice on 9555/TCP, 144 flows'],
+         ['Declared · manifest','frontend sets <code>AD_SERVICE_ADDR = adservice:9555</code>'],
+         ['Need','adservice accepts frontend on 9555. Declared and seen: confirmed'],
+         ['Rule · level3-adservice','Ingress only from <code>app: frontend</code> on 9555/TCP']],
+  text:['adservice’s 11 outbound paths had no declaration and no traffic, so they are denied. Outbound it keeps only DNS.'],
+  hl:'.dh'},
+ {page:'s3b-checked', step:3, pct:50, world:'net', where:'Stage 3 · Approval', title:'Approve east-west isolation',
+  find:[['Result','Deny the 116 unused paths. Validated: 0 required flows denied']],
   todo:'Approve stage 3, then Yes, approve.', action:'approve', hl:'#approve', top:'.dh', after:'Enforcing stage 3…'},
  {page:'s3d-map', step:3, pct:75, world:'net', where:'Stage 3 · Enforced', title:'Blast radius, before and after',
   text:['Red: allowed but unused. Green: required. Only green remains.'],
@@ -366,7 +405,9 @@ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let at=0;
 let deep=false; try{ const h=location.hash.replace('#',''); const i=CH.findIndex(c=>c.page===h); if(i>=0){ at=i; deep=true; } }catch(e){}
 function route(c){
-  $('pct').textContent=c.pct+'%';
+  const lv=c.pct>=75?3:c.pct>=50?2:c.pct>=25?1:0, n=(lv<3?11:0)+(lv<1?1:0)+(lv<2?1:0);
+  $('pct').textContent=n; $('pct').classList.toggle('red',n>0);
+  $('pctl').innerHTML=n?'targets reachable<br>from adservice':'targets beyond DNS<br>from adservice';
   $('steps').innerHTML=ROUTE.map(([n,l,k],i)=>`<div class="step${i<c.step?' done':i===c.step?' now':''}" title="${n} · ${l}"><b><span class="long">${i<c.step&&i>0?'✓ ':''}${n}</span><span class="short">${i<c.step&&i>0?'✓':k}</span></b><i>${l}</i></div>`).join('');
 }
 // The arrow: lives inside the product screen and follows the button to click. After Approve, the product asks
@@ -440,9 +481,10 @@ window.addEventListener('message',e=>{            // the viewer clicked the prod
 let open=false;
 function draw(){
   const c=CH[at];
-  const st=$('story'); st.style.setProperty('--c',C[c.world]); st.classList.toggle('open',open);
+  const st=$('story'); st.style.setProperty('--c',C[c.world]); st.classList.toggle('open',open); st.classList.toggle('noviz',!!c.chain);
   $('sHead').innerHTML=`<div class="where">${c.where}</div><h2>${c.title}</h2>
     ${c.find?`<dl class="find">${c.find.map(([k,v])=>`<div class="f-${k.toLowerCase()}"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`:''}
+    ${c.chain?`<ol class="chain">${c.chain.map(([k,v])=>`<li><b>${k}</b><span>${v}</span></li>`).join('')}</ol>`:''}
     ${c.text?`<div class="more">${c.text.map(t=>`<p>${t}</p>`).join('')}</div>`:''}`;
   $('sAct').innerHTML=`${c.todo?`<div class="todo"><b>Your turn</b>${c.todo}</div>`:''}
     <div class="foot"><div class="prog"><i style="width:${Math.round(100*(at+1)/CH.length)}%"></i></div>
@@ -498,7 +540,7 @@ const VNEED=[['loadgen','frontend'],['frontend','ad'],['frontend','recommend'],[
   const api=K.map(k=>`<line class="api" x1="${VN[k][0]}" y1="${VN[k][1]}" x2="${A[0]}" y2="${A[1]}"/>`).join('');
   const web=K.map(k=>`<line class="web" x1="${VN[k][0]}" y1="${VN[k][1]}" x2="${W[0]}" y2="${W[1]}"/>`).join('');
   const need=VNEED.map(([a,b])=>`<path class="need" d="${cv(a,b)}"/>`).join('');
-  const nodes=K.map(k=>{ const [x,y]=VN[k]; return `<circle class="node" cx="${x}" cy="${y}" r="7"/><text x="${x}" y="${y+18}">${k}</text>`; }).join('');
+  const nodes=K.map(k=>{ const [x,y]=VN[k]; return `${k==='ad'?`<circle class="atk" cx="${x}" cy="${y}" r="11.5"/>`:''}<circle class="node" cx="${x}" cy="${y}" r="7"/><text x="${x}" y="${y+18}">${k}</text>`; }).join('');
   const hub=([x,y],lab,cls)=>`<circle class="hub" cx="${x}" cy="${y}" r="11" stroke="${cls==='xa'?'#FFB547':'#FF8A7D'}"/><text x="${x}" y="${y+4}" style="font-size:9px">${cls==='xa'?'API':'www'}</text>
     <path class="x ${cls}" d="M${x-7} ${y-7}L${x+7} ${y+7}M${x+7} ${y-7}L${x-7} ${y+7}"/><text x="${x+(cls==='xa'?36:-38)}" y="${y+4}" style="font-size:9px;fill:#8FA2DA">${lab}</text>`;
   const rows=[['java','/opt/java/…/java','ok'],['sed','/bin/sed','ask'],['uname','/bin/uname','ask'],['curl','/usr/bin/curl','no'],['nc','/bin/nc','no']];
@@ -514,17 +556,18 @@ function posture(c){
   const v=$('viz'), lvl=c.pct>=75?3:c.pct>=50?2:c.pct>=25?1:0, prog=c.world==='prog';
   v.classList.remove('c1','c2','c3'); for(let i=1;i<=lvl;i++) v.classList.add('c'+i);
   v.classList.toggle('inprog',prog);
-  const answered=c.page==='p2-confirmed-2';
+  const answered=c.page==='p2-confirmed-2'||c.step===5;
   v.querySelectorAll('#vIn .row').forEach(r=>{ if(r.dataset.k==='sed'||r.dataset.k==='uname'){ r.classList.toggle('ask',!answered); r.classList.toggle('ok',answered); r.querySelector('.tag').textContent=answered?'ALLOW':'REVIEW'; } });
   $('vState').textContent=prog?(answered?'ALLOW-LIST READY':'PENDING REVIEW'):['ALLOW ALL','NAMESPACE ISOLATED','EGRESS LOCKED','LEAST PRIVILEGE'][lvl];
-  const L=[['Kubernetes API',lvl>=1],['Egress',lvl>=2],['East-west',lvl>=3],['Process exec',answered?'p':false]];
-  $('vLeg').innerHTML=L.map(([n,ok])=>`<span>${n}<b class="${ok==='p'?'p':ok?'c':'o'}">${ok==='p'?'Ready':ok?'Closed':'Open'}</b></span>`).join('');
+  // the thread of the tour: what an attacker inside adservice can still reach
+  const L=[['Workloads',lvl>=3?['c','0 · DNS only']:['o','11']],['Kubernetes API',lvl>=1?['c','No']:['o','Yes']],
+           ['Internet',lvl>=2?['c','No']:['o','Yes']],['Programs',answered?['p','8 · ready']:['o','Any']]];
+  $('vLeg').innerHTML='<span class="vh">Attacker in adservice reaches</span>'+L.map(([n,[k,t]])=>`<span>${n}<b class="${k}">${t}</b></span>`).join('');
 }
 let t0=Date.now(), acts=0;
 function finish(){
   const sec=Math.max(1,Math.round((Date.now()-t0)/1000)), m=Math.floor(sec/60), r=sec%60;
-  $('took').textContent=m?`${m} min ${r} s`:`${r} s`;
-  $('tookd').textContent=`to Zero Trust, with ${acts} decision${acts===1?'':'s'} of yours`;
+  $('tookd').textContent=acts?`You got here in ${m?`${m} min ${r} s`:`${r} s`}, with ${acts} decision${acts===1?'':'s'} of yours.`:'';
   $('end').hidden=false; $('end').scrollTop=0; $('again').focus({preventScroll:true});
 }
 $('again').onclick=()=>{ $('end').hidden=true; acts=0; go(0); cover(true); };

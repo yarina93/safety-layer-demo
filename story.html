@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0D14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Safety Layer Walkthrough</title>
+<meta name="description" content="Hands-on: take a Kubernetes namespace from default-allow to least privilege on Cilium and Tetragon. You explore, decide and verify; every value is lab evidence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Phone-first, hands-on walkthrough. Every card asks the viewer to do something: run a command, explore the map,
+   write a policy, classify paths, open evidence, run the replay, approve, review binaries.
+   The window on top is where the work happens; the text below explains why. All values are lab data (boutique). */
+:root{
+  --bg:#0A0D14; --panel:#10151F; --panel2:#151C29; --panel3:#1B2433; --ink:#E6EAF2; --text:#B9C2D3; --muted:#7D889C; --dim:#4F5A6E; --line:#222B3A;
+  --ok:#3DD68C; --bad:#FF5C5C; --warn:#F5B947; --info:#6EA8FE; --amber:#F5B947;
+  --body:'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono:ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg)}
+body{color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;overflow:hidden}
+button{font:inherit;color:inherit}
+.phone{position:relative;height:100vh;height:100dvh;max-width:440px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;
+  padding:max(10px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left))}
+@media (min-width:600px){body{background:radial-gradient(80% 60% at 50% 0%, #141B2B 0%, var(--bg) 70%)}
+  .phone{height:min(100dvh, 880px);top:50%;transform:translateY(-50%);border:1px solid var(--line);border-radius:28px;background:var(--bg);box-shadow:0 30px 80px rgba(0,0,0,.5)}}
+.bars{display:flex;gap:3px;flex:none}
+.bars i{flex:1;height:2.5px;border-radius:2px;background:#232C3C}
+.bars i.pd{background:#8893A8}.bars i.pn{background:var(--ink)}
+.head{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:9px 0 7px}
+.brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
+.brand svg{width:20px;height:20px}.brand span{font-weight:500;color:var(--muted)}
+.blast{font:600 11px var(--mono);color:var(--muted);white-space:nowrap}
+.blast b{font-size:13px;color:var(--bad);font-variant-numeric:tabular-nums}
+.blast.zero b{color:var(--ok)}
+.blast.pop b{display:inline-block;animation:pop .5s ease}
+@keyframes pop{40%{transform:scale(1.3)}}
+.pipe{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-bottom:7px;transition:opacity .3s}
+.pipe span{font:700 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;text-align:center;padding:5px 0 4px;border-radius:6px;color:var(--dim);background:var(--panel);border:1px solid var(--line)}
+.pipe span.d{color:var(--muted)}.pipe span.n{color:#0A0D14;background:var(--ink);border-color:var(--ink)}
+.pipe.off{opacity:.3}
+/* the window */
+.win{flex:none;height:clamp(250px, 44dvh, 368px);display:flex;flex-direction:column;border-radius:14px;background:var(--panel);border:1px solid var(--line);overflow:hidden}
+.wbar{flex:none;display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--panel2);font:600 11px var(--mono);color:var(--muted)}
+.wbar i{width:8px;height:8px;border-radius:50%;background:#2A3344}
+.wbar span{margin-left:4px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wbar em{margin-left:auto;font-style:normal;color:var(--dim);white-space:nowrap}
+.wbody{flex:1;min-height:0;position:relative;overflow:auto;padding:10px 12px;font:11.5px/1.6 var(--mono);color:var(--text);-webkit-overflow-scrolling:touch}
+.wbody.map{padding:4px;overflow:hidden}
+.wfoot{flex:none;display:flex;justify-content:space-between;gap:8px;padding:6px 10px;border-top:1px solid var(--line);font:600 10.5px var(--mono);color:var(--muted)}
+.wfoot b{color:var(--ink);font-variant-numeric:tabular-nums}
+.t>div{white-space:pre;min-height:1.6em}
+.p{color:var(--ink)}.p::before{content:'$ ';color:var(--ok)}
+.c{color:var(--dim)}.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}.info{color:var(--info)}
+.fade{animation:fade .25s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(3px)}}
+.cmd{display:flex;align-items:center;gap:8px;width:100%;margin:6px 0;padding:9px 10px;border-radius:9px;border:1px dashed #3A4660;background:var(--panel2);font:600 11.5px var(--mono);color:var(--ink);cursor:pointer;text-align:left}
+.cmd::before{content:'▶';font-size:9px;color:var(--ok)}
+.cmd.go{border-style:solid;border-color:var(--ink);animation:glow 1.6s ease-out infinite}
+@keyframes glow{0%{box-shadow:0 0 0 0 rgba(230,234,242,.3)}100%{box-shadow:0 0 0 8px rgba(230,234,242,0)}}
+/* map */
+.wbody svg{display:block;width:100%;height:100%}
+svg text{font-family:var(--mono)}
+.mp .ew{stroke:#FF5C5C;stroke-width:.5;opacity:.12;transition:opacity .5s}
+.mp.l3 .ew{opacity:0}
+.mp .need{stroke:#566175;stroke-width:1;fill:none;opacity:.6;transition:stroke .5s,opacity .5s}
+.mp.l3 .need{stroke:var(--ok);opacity:.55}
+.mp .rl{stroke:var(--amber);stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .5s ease forwards}
+.mp .rl.g{stroke:var(--ok);stroke-width:2.2}
+@keyframes draw{to{stroke-dashoffset:0}}
+.mp .nd{cursor:pointer}
+.mp .nd circle.v{fill:#10151F;stroke:#8893A8;stroke-width:1.6;transition:stroke .3s,fill .3s}
+.mp.l3 .nd circle.v{stroke:var(--ok)}
+.mp .nd.sel circle.v{fill:rgba(245,185,71,.25);stroke:var(--amber);stroke-width:2.4}
+.mp .nd circle.hit{fill:transparent}
+.mp .nd text{fill:#9AA5B8;font-size:8.5px;text-anchor:middle;pointer-events:none}
+.mp .nd.sel text{fill:var(--ink);font-weight:700}
+.mp .hint-ring{fill:none;stroke:var(--ink);stroke-width:1.2;opacity:.6;animation:ring 1.6s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes ring{from{transform:scale(1);opacity:.7}to{transform:scale(2.2);opacity:0}}
+.mp .hub{fill:#10151F;stroke:#566175;stroke-width:1.6}
+.mp .x{stroke:var(--bad);stroke-width:2.6;stroke-linecap:round;opacity:0;transition:opacity .4s}
+.mp.l1 .xa,.mp.l2 .xw{opacity:1}
+.mp .hl{fill:#7D889C;font-size:8.5px}
+/* lists and rows */
+.list{display:grid;gap:5px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;padding:6px 8px;border-radius:8px;background:var(--panel2);border:1px solid var(--line)}
+.row .a{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .e{grid-column:1;color:var(--muted);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .v{grid-row:1 / span 2;grid-column:2;display:flex;gap:4px;align-items:center}
+.row.tap{cursor:pointer}.row.tap .a::after{content:'  ⓘ';color:var(--dim)}
+.row.diff{border-color:rgba(245,185,71,.6)}
+.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:5px 8px;font:700 10px var(--mono);letter-spacing:.04em;color:var(--muted);cursor:pointer}
+.seg button.k.on{background:rgba(61,214,140,.18);color:var(--ok)}
+.seg button.d.on{background:rgba(255,92,92,.18);color:var(--bad)}
+.tag{display:inline-block;font:800 9.5px var(--mono);letter-spacing:.05em;padding:3px 7px;border-radius:5px;border:1px solid;font-style:normal;white-space:nowrap}
+.tag.g{color:var(--ok);border-color:rgba(61,214,140,.4);background:rgba(61,214,140,.08)}
+.tag.b{color:var(--info);border-color:rgba(110,168,254,.4);background:rgba(110,168,254,.08)}
+.tag.x{color:var(--bad);border-color:rgba(255,92,92,.4);background:rgba(255,92,92,.08)}
+.tag.y{color:var(--warn);border-color:rgba(245,185,71,.4);background:rgba(245,185,71,.08)}
+.stamp{animation:stamp .3s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stamp{from{opacity:0;transform:scale(1.5)}}
+/* the hand-written editor */
+.ed{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
+.chk{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font:600 11px var(--mono);color:var(--muted);cursor:pointer;text-align:left}
+.chk i{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--dim);flex:none;display:grid;place-items:center;font-style:normal;font-size:10px}
+.chk.on{color:var(--ink);border-color:#3A4660}.chk.on i{background:var(--info);border-color:var(--info);color:#0A0D14}
+.chk.on i::after{content:'✓'}
+/* yaml */
+.y>div{display:flex;justify-content:space-between;align-items:center;gap:6px;white-space:pre;min-height:1.6em}
+.y .k{color:var(--info)}.y .s{color:var(--ok)}
+.y .rule{cursor:pointer;border-radius:5px;margin:0 -4px;padding:0 4px}
+.y .rule:hover,.y .rule.go{background:rgba(110,168,254,.1)}
+.y .rule.go{animation:glow 1.6s ease-out infinite}
+.y .tag{font-size:8.5px;padding:1px 5px}
+.y .bad-rule{background:rgba(255,92,92,.08)}
+/* sources */
+.src{display:grid;gap:7px}
+.tile{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:9px 10px;border-radius:10px;border:1px dashed #3A4660;background:var(--panel2);cursor:pointer;text-align:left;width:100%}
+.tile .ic{grid-row:1 / span 2;width:28px;height:28px;border-radius:7px;display:grid;place-items:center;background:var(--panel3);font:800 12px var(--mono);color:var(--info)}
+.tile b{font-size:12px;color:var(--ink)}.tile span{font-size:10.5px;color:var(--muted)}
+.tile em{grid-row:1 / span 2;grid-column:3;font-style:normal;font:700 10.5px var(--mono);color:var(--dim)}
+.tile.on{border-style:solid;border-color:rgba(110,168,254,.5)}.tile.on em{color:var(--info)}
+.tile.go{border-color:var(--ink);animation:glow 1.6s ease-out infinite}
+.stream{height:4px;border-radius:2px;background:var(--panel3);overflow:hidden;grid-column:2 / span 2;margin-top:4px}
+.stream i{display:block;height:100%;width:30%;background:linear-gradient(90deg,transparent,var(--info),transparent);animation:sweep 1s linear infinite;opacity:0}
+.tile.on .stream i{opacity:1}
+@keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(340%)}}
+.profiles{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.profiles span{font:600 9.5px var(--mono);padding:2px 6px;border-radius:5px;border:1px solid var(--line);color:var(--dim)}
+.profiles span.on{color:var(--ink);border-color:rgba(61,214,140,.45)}
+/* replay */
+.bar{display:inline-block;width:110px;height:8px;border-radius:2px;background:#232C3C;margin:0 6px;overflow:hidden;vertical-align:0}
+.bar i{display:block;height:100%;width:0;background:var(--info);transition:width 1.4s cubic-bezier(.3,.6,.4,1)}
+/* process tree */
+.tree>div{display:flex;justify-content:space-between;align-items:center;gap:6px;white-space:pre;min-height:2.05em}
+.tree .g{color:var(--dim)}.tree .n{color:var(--ink)}.tree .w{color:var(--muted);font-size:10px}
+.tree .tap{cursor:pointer}
+/* text card */
+.txt{flex:1;min-height:0;overflow:auto;padding:11px 2px 4px;-webkit-overflow-scrolling:touch}
+.txt.in{animation:fade .3s ease}
+.kick{font:700 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.txt h1{font-size:21px;line-height:1.2;letter-spacing:-.015em;margin:4px 0 7px;text-wrap:balance}
+.txt p{margin:0 0 8px;color:var(--text);font-size:14px}
+.txt p b{color:var(--ink);font-weight:650}
+.txt code{font-family:var(--mono);font-size:.86em;color:var(--ink);background:var(--panel2);border:1px solid var(--line);padding:0 4px;border-radius:4px}
+.task{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:10px;border:1px solid #3A4660;background:var(--panel2);font-size:13.5px;color:var(--ink);margin:2px 0 8px}
+.task::before{content:'▶';font-size:9px;color:var(--warn);margin-top:5px}
+.task.done{border-color:rgba(61,214,140,.45)}.task.done::before{content:'✓';color:var(--ok);font-size:12px;margin-top:1px}
+.btn{font-weight:700;font-size:14.5px;padding:11px 14px;border-radius:11px;border:0;background:var(--ink);color:#0A0D14;cursor:pointer;width:100%;margin:2px 0 8px}
+.btn.sec{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.cmd:focus-visible,.tile:focus-visible,.chk:focus-visible{outline:2px solid var(--info);outline-offset:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stg{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:5px}
+.stg li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;font-size:13px;color:var(--text)}
+.stg li i{font-style:normal;font:700 11px var(--mono);width:22px;height:22px;border-radius:6px;display:grid;place-items:center;border:1px solid var(--line);color:var(--muted)}
+.stg li.ok i{background:var(--ok);border-color:var(--ok);color:#0A0D14}.stg li.now i{border-color:var(--ink);color:var(--ink)}
+.stg li b{color:var(--ink);font-weight:650}
+.facts{display:grid;gap:4px;margin:0 0 8px;font:12px/1.5 var(--mono)}
+.facts div{display:flex;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:7px;background:var(--panel2);border:1px solid var(--line)}
+.facts span{color:var(--muted)}.facts b{color:var(--ink);text-align:right}
+/* footer nav */
+.nav{flex:none;display:flex;align-items:center;gap:8px;padding-top:6px}
+.nav button{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:9px 14px;font-weight:700;font-size:13.5px;cursor:pointer}
+.nav button:disabled{opacity:.4;cursor:default}
+.nav .next{margin-left:auto;background:var(--ink);color:#0A0D14;border-color:var(--ink)}
+.nav .next:disabled{background:var(--panel2);color:var(--dim);border-color:var(--line);opacity:1}
+.nav span{font:600 10.5px var(--mono);color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* evidence sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:10;max-height:72%;display:flex;flex-direction:column;background:#121826;border-top:1px solid #34405A;border-radius:18px 18px 0 0;
+  box-shadow:0 -20px 50px rgba(0,0,0,.55);transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);padding:0 16px max(12px, env(safe-area-inset-bottom));visibility:hidden}
+.sheet.open{transform:none;visibility:visible}
+.scrim{position:absolute;inset:0;z-index:9;background:rgba(5,8,14,.55);opacity:0;pointer-events:none;transition:opacity .3s}
+.scrim.open{opacity:1;pointer-events:auto}
+.sh-h{display:flex;align-items:center;gap:10px;padding:12px 0 8px}
+.sh-h b{font-size:15px}.sh-h small{display:block;font:600 10.5px var(--mono);color:var(--muted)}
+.sh-h button{margin-left:auto;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 10px;font-weight:700;font-size:12px;cursor:pointer}
+.sh-b{overflow:auto;padding-bottom:6px}
+.ev{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:7px;background:var(--panel)}
+.ev h4{margin:0 0 4px;font:800 10px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.ev pre{margin:0;font:11px/1.55 var(--mono);color:var(--text);white-space:pre-wrap;word-break:break-word}
+.verdict{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);margin:4px 0 8px}
+@media (max-height:700px){.win{height:clamp(220px, 41dvh, 290px)}.txt h1{font-size:18px;margin:3px 0 5px}.txt p{font-size:13px;margin-bottom:6px}.wbody{font-size:10.5px;padding:8px 10px;line-height:1.45}.head{margin:7px 0 6px}.task{font-size:12.5px;padding:6px 9px}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}.mp .rl{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="bars" id="bars" aria-hidden="true"></div>
+  <div class="head">
+    <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#2B3A55"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#E6EAF2" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#3DD68C"/></svg>Safety Layer <span>· boutique</span></div>
+    <div class="blast" id="blast" aria-live="polite"><span id="bW">ad</span> reach <b id="bN">13</b></div>
+  </div>
+  <div class="pipe off" id="pipe" aria-label="Pipeline"><span>Collect</span><span>Classify</span><span>Compile</span><span>Verify</span><span>Enforce</span></div>
+  <div class="win"><div class="wbar"><i></i><i></i><i></i><span id="wt"></span><em id="wm"></em></div><div class="wbody" id="wb"></div><div class="wfoot" id="wf"></div></div>
+  <section class="txt" id="txt" aria-live="polite"></section>
+  <div class="nav"><button id="back">Back</button><span id="hint"></span><button class="next" id="next">Next</button></div>
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"><div class="sh-h"><div><b id="shT"></b><small id="shS"></small></div><button id="shX">Close</button></div><div class="sh-b" id="shB"></div></div>
+</div>
+<script>
+// ---------- lab data: boutique, 12 workloads. Needs per workload with their evidence (manifest env, Hubble flow count, platform rule).
+const W={"adservice":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"]],"in":[["frontend","9555/TCP",144,"frontend: env AD_SERVICE_ADDR = adservice:9555"],["kubelet","9555/TCP",583,"platform rule: kubelet health probe"]],"exOut":11,"exIn":10},"cartservice":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"],["redis-cart","6379/TCP",161,"env REDIS_ADDR = redis-cart:6379"]],"in":[["checkoutservice","7070/TCP",57,"checkoutservice: env CART_SERVICE_ADDR = cartservice:7070"],["frontend","7070/TCP",292,"frontend: env CART_SERVICE_ADDR = cartservice:7070"],["kubelet","7070/TCP",894,"platform rule: kubelet health probe"]],"exOut":10,"exIn":9},"checkoutservice":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"],["cartservice","7070/TCP",57,"env CART_SERVICE_ADDR = cartservice:7070"],["currencyservice","7000/TCP",57,"env CURRENCY_SERVICE_ADDR = currencyservice:7000"],["emailservice","8080/TCP",67,"env EMAIL_SERVICE_ADDR = emailservice:5000"],["paymentservice","50051/TCP",113,"env PAYMENT_SERVICE_ADDR = paymentservice:50051"],["productcatalogservice","3550/TCP",73,"env PRODUCT_CATALOG_SERVICE_ADDR = productcatalogservice:3550"],["shippingservice","50051/TCP",73,"env SHIPPING_SERVICE_ADDR = shippingservice:50051"]],"in":[["frontend","5050/TCP",145,"frontend: env CHECKOUT_SERVICE_ADDR = checkoutservice:5050"],["kubelet","5050/TCP",890,"platform rule: kubelet health probe"]],"exOut":5,"exIn":10},"currencyservice":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"]],"in":[["checkoutservice","7000/TCP",57,"checkoutservice: env CURRENCY_SERVICE_ADDR = currencyservice:7000"],["frontend","7000/TCP",291,"frontend: env CURRENCY_SERVICE_ADDR = currencyservice:7000"],["kubelet","7000/TCP",889,"platform rule: kubelet health probe"]],"exOut":11,"exIn":9},"emailservice":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"]],"in":[["checkoutservice","8080/TCP",67,"checkoutservice: env EMAIL_SERVICE_ADDR = emailservice:5000"],["kubelet","8080/TCP",1747,"platform rule: kubelet health probe"]],"exOut":11,"exIn":10},"frontend":{"out":[["adservice","9555/TCP",144,"env AD_SERVICE_ADDR = adservice:9555"],["cartservice","7070/TCP",292,"env CART_SERVICE_ADDR = cartservice:7070"],["checkoutservice","5050/TCP",145,"env CHECKOUT_SERVICE_ADDR = checkoutservice:5050"],["currencyservice","7000/TCP",291,"env CURRENCY_SERVICE_ADDR = currencyservice:7000"],["productcatalogservice","3550/TCP",292,"env PRODUCT_CATALOG_SERVICE_ADDR = productcatalogservice:3550"],["recommendationservice","8080/TCP",292,"env RECOMMENDATION_SERVICE_ADDR = recommendationservice:8080"],["shippingservice","50051/TCP",255,"env SHIPPING_SERVICE_ADDR = shippingservice:50051"],["dns","53/UDP",928,"platform rule: every pod resolves names"]],"in":[["external LB","8080/TCP",0,"Service type LoadBalancer/NodePort"],["loadgenerator","8080/TCP",1029,"loadgenerator: env FRONTEND_ADDR = frontend:80"],["kubelet","8080/TCP",788,"platform rule: kubelet health probe"]],"exOut":4,"exIn":10},"loadgenerator":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"],["frontend","8080/TCP",1029,"env FRONTEND_ADDR = frontend:80"]],"in":[],"exOut":10,"exIn":0},"paymentservice":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"]],"in":[["checkoutservice","50051/TCP",113,"checkoutservice: env PAYMENT_SERVICE_ADDR = paymentservice:50051"],["kubelet","50051/TCP",895,"platform rule: kubelet health probe"]],"exOut":11,"exIn":10},"productcatalogservice":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"]],"in":[["checkoutservice","3550/TCP",73,"checkoutservice: env PRODUCT_CATALOG_SERVICE_ADDR = productcatalogservice:3550"],["frontend","3550/TCP",292,"frontend: env PRODUCT_CATALOG_SERVICE_ADDR = productcatalogservice:3550"],["recommendationservice","3550/TCP",146,"recommendationservice: env PRODUCT_CATALOG_SERVICE_ADDR = productcatalogservice:3550"],["kubelet","3550/TCP",888,"platform rule: kubelet health probe"]],"exOut":11,"exIn":8},"recommendationservice":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"],["productcatalogservice","3550/TCP",146,"env PRODUCT_CATALOG_SERVICE_ADDR = productcatalogservice:3550"]],"in":[["frontend","8080/TCP",292,"frontend: env RECOMMENDATION_SERVICE_ADDR = recommendationservice:8080"],["kubelet","8080/TCP",1726,"platform rule: kubelet health probe"]],"exOut":10,"exIn":10},"redis-cart":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"]],"in":[["cartservice","6379/TCP",161,"cartservice: env REDIS_ADDR = redis-cart:6379"],["kubelet","6379/TCP",1436,"platform rule: kubelet health probe"]],"exOut":11,"exIn":10},"shippingservice":{"out":[["dns","53/UDP",0,"platform rule: every pod resolves names"]],"in":[["checkoutservice","50051/TCP",73,"checkoutservice: env SHIPPING_SERVICE_ADDR = shippingservice:50051"],["frontend","50051/TCP",255,"frontend: env SHIPPING_SERVICE_ADDR = shippingservice:50051"],["kubelet","50051/TCP",1330,"platform rule: kubelet health probe"]],"exOut":11,"exIn":9}};
+const FLOWS=33411;
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let timers=[]; const later=(ms,f)=>timers.push(setTimeout(f, reduce?0:ms)); const stop=()=>{ timers.forEach(clearTimeout); timers=[]; };
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const SHORT={adservice:'ad',cartservice:'cart',checkoutservice:'checkout',currencyservice:'currency',emailservice:'email',frontend:'frontend',loadgenerator:'loadgen',
+  paymentservice:'payment',productcatalogservice:'catalog',recommendationservice:'recommend','redis-cart':'redis',shippingservice:'shipping'};
+const POS={loadgenerator:[22,128],frontend:[80,128],adservice:[156,44],recommendationservice:[156,88],checkoutservice:[156,172],emailservice:[156,224],
+  productcatalogservice:[236,48],currencyservice:[236,92],cartservice:[236,136],shippingservice:[236,180],paymentservice:[236,224],'redis-cart':[304,136]};
+const API=[24,20], WORLD=[306,20];
+const needsOut=w=>W[w].out.filter(r=>r[0]!=='dns').map(r=>r[0]);
+// ---------- state the viewer changes
+const S={sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
+function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textContent+$('bW').textContent; $('bW').textContent=SHORT[w]||w; $('bN').textContent=n;
+  b.classList.toggle('zero',S.lvl>=3); if(n+(SHORT[w]||w)!==was){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }
+// ---------- the map: tap any workload
+function mapSVG(){
+  const K=Object.keys(POS);
+  const cv=(a,b)=>{ const [x1,y1]=POS[a],[x2,y2]=POS[b]; if(x1===x2) return `M${x1} ${y1}L${x2} ${y2}`; const m=(x1+x2)/2; return `M${x1} ${y1}C${m} ${y1} ${m} ${y2} ${x2} ${y2}`; };
+  let ew=''; for(let i=0;i<K.length;i++) for(let j=i+1;j<K.length;j++){ const [x1,y1]=POS[K[i]],[x2,y2]=POS[K[j]]; ew+=`<line class="ew" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`; }
+  const need=K.flatMap(a=>needsOut(a).map(b=>`<path class="need" d="${cv(a,b)}"/>`)).join('');
+  const nodes=K.map(k=>{ const [x,y]=POS[k]; return `<g class="nd" data-w="${k}" role="button" aria-label="${k}"><circle class="hit" cx="${x}" cy="${y}" r="17"/><circle class="v" cx="${x}" cy="${y}" r="7"/><text x="${x}" y="${y+17}">${SHORT[k]}</text></g>`; }).join('');
+  const hub=([x,y],lab,cls,dx)=>`<circle class="hub" cx="${x}" cy="${y}" r="9"/><path class="x ${cls}" d="M${x-6} ${y-6}L${x+6} ${y+6}M${x+6} ${y-6}L${x-6} ${y+6}"/><text class="hl" x="${x+dx}" y="${y+3}" text-anchor="middle">${lab}</text>`;
+  return `<svg class="mp" id="mp" viewBox="0 0 330 246">${ew}${need}<g id="reach"></g>${hub(API,'kube-apiserver','xa',48)}${hub(WORLD,'world','xw',-26)}${nodes}<g id="ring"></g></svg>`;
+}
+function drawReach(w){
+  const m=$('mp'); if(!m) return; m.classList.remove('l1','l2','l3'); for(let i=1;i<=S.lvl;i++) m.classList.add('l'+i);
+  m.querySelectorAll('.nd').forEach(n=>n.classList.toggle('sel',n.dataset.w===w));
+  const [ax,ay]=POS[w]; let h='';
+  if(S.lvl>=3) h=needsOut(w).map(k=>`<line class="rl g" pathLength="1" x1="${ax}" y1="${ay}" x2="${POS[k][0]}" y2="${POS[k][1]}"/>`).join('');
+  else { h=Object.keys(POS).filter(k=>k!==w).map((k,i)=>`<line class="rl" pathLength="1" style="animation-delay:${i*40}ms" x1="${ax}" y1="${ay}" x2="${POS[k][0]}" y2="${POS[k][1]}"/>`).join('');
+    if(S.lvl<1) h+=`<line class="rl" pathLength="1" style="animation-delay:480ms" x1="${ax}" y1="${ay}" x2="${API[0]}" y2="${API[1]}"/>`;
+    if(S.lvl<2) h+=`<line class="rl" pathLength="1" style="animation-delay:520ms" x1="${ax}" y1="${ay}" x2="${WORLD[0]}" y2="${WORLD[1]}"/>`; }
+  $('reach').innerHTML=h; blast(w);
+}
+function ringOn(w){ const r=$('ring'); if(!r) return; if(!w){ r.innerHTML=''; return; } const [x,y]=POS[w]; r.innerHTML=`<circle class="hint-ring" cx="${x}" cy="${y}" r="9"/>`; }
+function bindMap(onPick){ $('mp').querySelectorAll('.nd').forEach(n=>n.onclick=()=>{ S.sel=n.dataset.w; ringOn(null); drawReach(S.sel); onPick(S.sel); }); }
+// ---------- evidence sheet: the raw facts behind a path or a binary
+function sheet(title,sub,html){ $('shT').textContent=title; $('shS').textContent=sub; $('shB').innerHTML=html; $('sheet').classList.add('open'); $('scrim').classList.add('open'); $('shX').focus({preventScroll:true}); }
+function closeSheet(){ $('sheet').classList.remove('open'); $('scrim').classList.remove('open'); }
+$('shX').onclick=closeSheet; $('scrim').onclick=closeSheet;
+function pathEvidence(w,dir,r){
+  const [peer,port,seen,src]=r, platform=src.startsWith('platform rule');
+  const from=dir==='in'?peer:w, to=dir==='in'?w:(peer==='dns'?'kube-dns':peer);
+  let h=`<div class="verdict">${platform?'<i class="tag b">NEEDED</i> platform rule':'<i class="tag g">CONFIRMED</i> declared and observed'}</div>`;
+  h+=platform?`<div class="ev"><h4>Platform rule</h4><pre>${esc(src.replace('platform rule: ',''))}\nkept even with ${seen} flows in the window:\nplatform needs are never denied</pre></div>`
+    :`<div class="ev"><h4>Manifest · Deployment ${esc(dir==='in'?peer:w)}</h4><pre>spec.containers[0].env:\n  - ${esc(src.replace(/^.*env /,'').replace(' = ',': '))}</pre></div>`;
+  h+=`<div class="ev"><h4>Hubble · ${seen.toLocaleString('en-US')} flows in ${FLOWS.toLocaleString('en-US')}</h4><pre>${seen?`${esc(from)} → ${esc(to)}:${esc(port.split('/')[0])}  ${esc(port.split('/')[1])}  FORWARDED\n… ${(seen-1).toLocaleString('en-US')} more`:'no flow observed in the recording window'}</pre></div>`;
+  return h;
+}
+function excessEvidence(w,dir,n){
+  return `<div class="verdict"><i class="tag x">EXCESS ×${n}</i> no evidence</div>
+    <div class="ev"><h4>Manifests · 12 Deployments</h4><pre>no env var, port or Service reference\n${dir==='out'?`from ${w} to these ${n} workloads`:`from these ${n} workloads to ${w}`}</pre></div>
+    <div class="ev"><h4>Hubble · 0 flows in ${FLOWS.toLocaleString('en-US')}</h4><pre>never used in the recording window</pre></div>
+    <div class="ev"><h4>Today</h4><pre>allowed by default-allow, any port</pre></div>`;
+}
+// ---------- adservice paths the viewer classifies (truth = the product's verdict from evidence)
+const AD=W.adservice;
+const PATHS=[
+ {k:'in-fe', a:'IN  frontend → :9555/TCP', e:'env AD_SERVICE_ADDR · 144 flows', truth:'keep', ev:()=>pathEvidence('adservice','in',AD.in[0])},
+ {k:'in-kl', a:'IN  kubelet → :9555/TCP', e:'health probe · 583 flows', truth:'keep', ev:()=>pathEvidence('adservice','in',AD.in[1])},
+ {k:'out-dns', a:'OUT → kube-dns:53', e:'platform rule · 0 flows in window', truth:'keep', ev:()=>pathEvidence('adservice','out',AD.out[0])},
+ {k:'out-ex', a:'OUT → 11 workloads, any port', e:'not declared · 0 flows', truth:'deny', ev:()=>excessEvidence('adservice','out',11)},
+ {k:'in-ex', a:'IN  ← 10 workloads, any port', e:'not declared · 0 flows', truth:'deny', ev:()=>excessEvidence('adservice','in',10)},
+];
+const decided=()=>PATHS.every(p=>S.dec[p.k]);
+const wrong=()=>PATHS.filter(p=>S.dec[p.k]&&S.dec[p.k]!==p.truth);
+// ---------- adservice binaries started by the entrypoint script (Tetragon process_exec)
+const BINS=[['java','/opt/java/openjdk/bin/java','AdService','container start',2],['sed','/bin/sed','AdService','inside the script',1],['uname','/bin/uname','AdService','inside the script',1],
+  ['tr','/usr/bin/tr','AdService','inside the script',1],['xargs','/usr/bin/xargs','AdService','inside the script',1],['echo','/bin/echo','xargs','inside the script',1]];
+// ---------- the cards
+const CARDS=[
+ { // 1. the situation, hands on the terminal
+   pipe:-1, wt:'zsh · prod-cluster', wm:'boutique',
+   win(){ return `<div class="t" id="term"><div class="c"># Cilium, Hubble and Tetragon are installed.</div><div class="c"># Check what is enforced.</div></div>
+     ${S.ran.has('cnp')?'':'<button class="cmd go" data-c="cnp">kubectl get cnp -n boutique</button>'}${S.ran.has('hub')?'':`<button class="cmd ${S.ran.has('cnp')?'go':''}" data-c="hub">hubble observe -n boutique --last 3</button>`}`; },
+   out:{cnp:[`<div class="p">kubectl get cnp -n boutique</div>`,`<div class="warn">No resources found in boutique namespace.</div>`],
+        hub:[`<div class="p">hubble observe -n boutique --last 3</div>`,`<div>frontend → adservice:9555   <span class="ok">FORWARDED</span></div>`,`<div>checkout → payment:50051   <span class="ok">FORWARDED</span></div>`,`<div>cart → redis-cart:6379     <span class="ok">FORWARDED</span></div>`]},
+   bind(){ const c0=CARDS[0], t=$('term'); [...S.ran].forEach(k=>c0.out[k].forEach(l=>t.insertAdjacentHTML('beforeend',l)));
+     document.querySelectorAll('.cmd').forEach(b=>b.onclick=()=>{ const c=b.dataset.c; S.ran.add(c); b.remove(); const n=document.querySelector('.cmd'); if(n) n.classList.add('go');
+       c0.out[c].forEach((l,i)=>later(i*220,()=>{ t.insertAdjacentHTML('beforeend',l); t.lastElementChild.classList.add('fade'); }));
+       later(c0.out[c].length*220,()=>{ refreshFoot(); refreshTxt(); }); }); },
+   foot:()=>`<span>Cilium ✓ Hubble ✓ Tetragon ✓</span><span>policies <b>${S.ran.has('cnp')?'0':'?'}</b></span>`,
+   kick:'The starting point', title:'The engines are installed. Is anything enforced?',
+   body:()=>`<div class="task ${S.ran.size===2?'done':''}">Run both commands in the terminal.</div>
+     ${S.ran.size===2?`<p>No <code>CiliumNetworkPolicy</code>, and traffic flows freely. The namespace runs <b>default-allow</b>: any pod can reach any pod, the kube-apiserver and the internet.</p>`
+       :`<p>A typical day-2 namespace: 12 Deployments in production, Cilium as the CNI, Hubble and Tetragon collecting.</p>`}`,
+   gate:()=>S.ran.size===2 },
+ { // 2. explore the blast radius of any workload
+   pipe:-1, wt:'boutique · reachability', wm:'default-allow', map:true,
+   win(){ return mapSVG(); },
+   bind(){ const keep=S.lvl; S.lvl=0; drawReach(S.sel); S.lvl=keep; if(!S.explored.size) ringOn('adservice'); bindMap(w=>{ S.explored.add(w); refreshFoot(); refreshTxt(); }); },
+   foot:()=>`<span>tap a workload</span><span>${SHORT[S.sel]} reaches <b style="color:var(--bad)">13</b> · needs <b style="color:var(--ok)">${needsOut(S.sel).length}</b></span>`,
+   kick:'The exposure', title:'How far can one compromised pod reach?',
+   body:()=>{ const w=S.sel, d=W[w];
+     return `<div class="task ${S.explored.size?'done':''}">Tap workloads on the map. Try adservice, then frontend.</div>
+       ${S.explored.size?`<p><b>${w}</b> can reach <b>13 targets</b> today. What it actually calls (tap for evidence):</p>
+       <div class="list">${d.out.map((r,i)=>`<div class="row tap" data-ev="out:${i}"><span class="a">→ ${esc(r[0]==='dns'?'kube-dns':r[0])}:${esc(r[1])}</span><span class="e">${r[2].toLocaleString('en-US')} flows · ${r[3].startsWith('platform')?'platform rule':'manifest env'}</span><span class="v"><i class="tag ${r[3].startsWith('platform')?'b':'g'}">NEED</i></span></div>`).join('')}</div>`
+       :`<p>Under default-allow every pod has the same blast radius. Pick one and compare what it can reach with what it needs.</p>`}`; },
+   bindTxt(){ document.querySelectorAll('[data-ev]').forEach(r=>r.onclick=()=>{ const [dir,i]=r.dataset.ev.split(':'); const row=W[S.sel][dir][+i];
+     sheet(`${S.sel} → ${row[0]==='dns'?'kube-dns':row[0]}`,`${row[1]} · evidence`,pathEvidence(S.sel,dir,row)); }); },
+   gate:()=>S.explored.size>0 },
+ { // 3. write frontend's policy by hand
+   pipe:-1, wt:'frontend-cnp.yaml · by hand', wm:'egress',
+   win(){ const opts=Object.keys(POS).filter(k=>k!=='frontend').concat(['dns']);
+     if(S.handApplied) return handResult();
+     return `<div class="c"># allow-list for frontend: which destinations does it call?</div><div class="ed">${opts.map(o=>`<button class="chk ${S.hand.has(o)?'on':''}" data-o="${o}"><i></i>${o==='dns'?'kube-dns:53':SHORT[o]}</button>`).join('')}</div>`; },
+   bind(){ document.querySelectorAll('.chk').forEach(c=>c.onclick=()=>{ const o=c.dataset.o; S.hand.has(o)?S.hand.delete(o):S.hand.add(o); c.classList.toggle('on'); refreshFoot(); }); },
+   foot:()=>`<span>selected <b>${S.hand.size}</b></span><span>${S.handApplied?'applied':'not applied'}</span>`,
+   kick:'Why it stays open', title:'Write frontend’s allow-list by hand.',
+   body:()=>S.handApplied?`<div class="task done">Applied. Hubble shows what happened.</div>
+       <p>That was one workload, with the topology in front of you. Real teams do this for every service on every release, without the map. <b>One miss drops production traffic</b>, so most leave default-allow in place.</p>
+       <button class="btn sec" id="redo">Edit and apply again</button>`
+     :`<div class="task">Tick the destinations frontend calls, then apply.</div><p>This is what securing a namespace means today: list every dependency by hand, then hope the rollout drops nothing.</p>
+       <button class="btn" id="apply">kubectl apply</button>`,
+   bindTxt(){ if($('apply')) $('apply').onclick=()=>{ S.handApplied=true; refresh(true); }; if($('redo')) $('redo').onclick=()=>{ S.handApplied=false; refresh(true); }; },
+   gate:()=>S.handApplied },
+ { // 4. collect: connect the three sources
+   pipe:0, wt:'decision-layer · sources', wm:'read-only',
+   win(){ const T=[['m','M','Manifests','Deployment specs · env · ports','12 Deployments'],['h','H','Hubble','L3/L4 flow logs from Cilium',`${FLOWS.toLocaleString('en-US')} flows`],['t','T','Tetragon','process_exec events','per container']];
+     return `<div class="src">${T.map(([k,ic,n,d,c],i)=>`<button class="tile ${S.src.has(k)?'on':''} ${!S.src.has(k)&&i===S.src.size?'go':''}" data-s="${k}"><span class="ic">${ic}</span><b>${n}</b><em>${S.src.has(k)?c:'connect'}</em><span>${d}</span><div class="stream"><i></i></div></button>`).join('')}</div>
+       <div class="c" style="margin-top:8px"># evidence profiles</div><div class="profiles">${Object.keys(POS).map(w=>`<span class="${S.src.size===3?'on':''}">${SHORT[w]}</span>`).join('')}</div>`; },
+   bind(){ document.querySelectorAll('.tile').forEach(t=>t.onclick=()=>{ if(S.src.has(t.dataset.s)) return; S.src.add(t.dataset.s); refresh(true);
+       if(S.src.size===3){ const ps=[...document.querySelectorAll('.profiles span')]; ps.forEach(p=>p.classList.remove('on')); ps.forEach((p,i)=>later(150+i*90,()=>p.classList.add('on'))); } }); },
+   foot:()=>`<span>no new agents</span><span>sources <b>${S.src.size}/3</b></span>`,
+   kick:'Step 1 · Collect', title:'Read what the cluster already produces.',
+   body:()=>`<div class="task ${S.src.size===3?'done':''}">Connect the three sources.</div>
+     <p>Nothing new is installed. The product reads the manifests, Hubble flow logs and Tetragon exec events you already have, and builds <b>one evidence profile per workload</b>: what it declares and what it actually does.</p>`,
+   gate:()=>S.src.size===3 },
+ { // 5. classify: the viewer decides, the evidence is one tap away
+   pipe:1, wt:'classify · adservice', wm:'24 paths',
+   win(){ return `<div class="list">${PATHS.map(p=>{ const d=S.dec[p.k], show=decided();
+       return `<div class="row ${show&&d!==p.truth?'diff':''}"><span class="a tapev" data-k="${p.k}" style="cursor:pointer">${p.a} <span class="c">ⓘ</span></span><span class="e">${p.e}</span>
+         <span class="v">${show?`<i class="tag ${p.truth==='keep'?(p.k==='out-dns'?'b':'g'):'x'} stamp">${p.truth==='keep'?(p.k==='out-dns'?'NEED':'CONF'):'EXCESS'}</i>`:''}
+         <span class="seg"><button class="k ${d==='keep'?'on':''}" data-k="${p.k}" data-d="keep">KEEP</button><button class="d ${d==='deny'?'on':''}" data-k="${p.k}" data-d="deny">DENY</button></span></span></div>`; }).join('')}</div>`; },
+   bind(){ document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{ S.dec[b.dataset.k]=b.dataset.d; S.replay=null; refresh(true); });
+     document.querySelectorAll('.tapev').forEach(a=>a.onclick=()=>{ const p=PATHS.find(x=>x.k===a.dataset.k); sheet(`adservice · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'evidence',p.ev()); }); },
+   foot:()=>`<span>decided <b>${Object.keys(S.dec).length}/5</b></span><span>${decided()?`differs from evidence <b style="color:${wrong().length?'var(--warn)':'var(--ok)'}">${wrong().length}</b>`:'tap a path for evidence'}</span>`,
+   kick:'Step 2 · Classify · your call', title:'Keep or deny each path. The evidence is one tap away.',
+   body:()=>decided()?`<div class="task done">All 5 decided. The product's verdicts are now shown.</div>
+       ${wrong().length?`<p>${wrong().length} of your choices differ from the evidence (outlined). Keep them for now: the next steps show what they cause.</p>`:`<p>Same verdicts as the product: declared and observed paths are confirmed, platform needs are kept, paths with no evidence are excess.</p>`}`
+     :`<div class="task">Mark each of adservice's paths KEEP or DENY. Tap a path to see its evidence.</div>
+       <p>The product does this for every workload: a manifest declaration plus traffic in Hubble means <b>confirmed</b>; no declaration and no traffic means <b>excess</b>.</p>`,
+   gate:decided },
+ { // 6. compile: the policy built from those decisions, each rule opens its evidence
+   pipe:2, wt:'level3-adservice.yaml', wm:'from your decisions',
+   win(){ const d=S.dec, L=[];
+     L.push(['','<span class="k">kind:</span> CiliumNetworkPolicy']); L.push(['','<span class="k">metadata:</span> {name: level3-adservice}']); L.push(['','<span class="k">spec:</span>']); L.push(['','  <span class="k">endpointSelector:</span> {app: adservice}']);
+     L.push(['','  <span class="k">ingress:</span>']);
+     if(d['in-fe']==='keep') L.push(['in-fe','  - fromEndpoints: [{app: <span class="s">frontend</span>}]\n    toPorts: [{port: <span class="s">"9555"</span>}]','g','env·144']);
+     if(d['in-kl']==='keep') L.push(['in-kl','  - fromEntities: [<span class="s">host</span>]  <span class="c"># kubelet</span>','g','probe']);
+     if(d['in-ex']==='keep') L.push(['in-ex','  - fromEndpoints: [{}]  <span class="c"># any pod</span>','x','no evidence']);
+     L.push(['','  <span class="k">egress:</span>']);
+     if(d['out-dns']==='keep') L.push(['out-dns','  - toEndpoints: [{k8s-app: <span class="s">kube-dns</span>}]\n    toPorts: [{port: <span class="s">"53"</span>}]','b','platform']);
+     if(d['out-ex']==='keep') L.push(['out-ex','  - toEndpoints: [{}]    <span class="c"># any pod</span>','x','no evidence']);
+     const first=L.find(l=>l[0]);
+     return `<div class="y">${L.map(([k,h,c,t])=>k?`<div class="rule ${c==='x'?'bad-rule':''} ${!S.evOpened&&first&&k===first[0]?'go':''}" data-k="${k}"><span>${h}</span><i class="tag ${c}">${t}</i></div>`:`<div><span>${h}</span></div>`).join('')}
+       <div><span class="c">  # denied paths: no rule → dropped</span></div></div>`; },
+   bind(){ document.querySelectorAll('.rule').forEach(r=>r.onclick=()=>{ const p=PATHS.find(x=>x.k===r.dataset.k); S.evOpened=true; document.querySelectorAll('.rule.go').forEach(g=>g.classList.remove('go')); sheet(`rule · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'why this rule exists',p.ev()); refreshTxt(); }); },
+   foot:()=>`<span>engine-native · no product CRDs</span><span>rules <b>${PATHS.filter(p=>S.dec[p.k]==='keep').length}</b></span>`,
+   kick:'Step 3 · Compile', title:'Your decisions become plain Cilium policy.',
+   body:()=>`<div class="task ${S.evOpened?'done':''}">Tap any rule to see the evidence behind it.</div>
+     <p>Kept paths compile into a standard <code>CiliumNetworkPolicy</code>, and each rule keeps a link to its evidence. Denied paths get no rule, so they are dropped.</p>
+     <p>It is ordinary YAML: <b>remove the product and the policy keeps enforcing.</b></p>`,
+   gate:()=>S.evOpened },
+ { // 7. verify: replay; wrong choices are caught here
+   pipe:3, wt:'decision-layer verify', wm:'dry-run',
+   win(){ return `<div class="t" id="vt"><div class="p">decision-layer verify adservice --replay</div>${S.replay?replayOut():'<div class="c"># replays every recorded flow against the proposal</div>'}</div>`; },
+   foot:()=>`<span>cluster not touched</span><span>result <b style="color:${S.replay==='pass'?'var(--ok)':S.replay?'var(--bad)':'var(--ink)'}">${S.replay?S.replay.toUpperCase():'–'}</b></span>`,
+   kick:'Step 4 · Verify', title:'Replay the proposal before it touches the cluster.',
+   body:()=>S.replay==='pass'?`<div class="task done">PASS: no required flow would be dropped.</div><p>Safe to enforce. The replay also confirms what it closes: 21 unused paths for adservice.</p>`
+     :S.replay?`<div class="task">The replay caught a problem. Fix it from the evidence and run it again.</div>
+       <p>${replayIssues().map(i=>i.why).join(' ')}</p><button class="btn" id="fix">Apply the evidence verdicts and re-run</button>`
+     :`<div class="task">Run the replay.</div><p>The proposal is replayed offline against <b>all ${FLOWS.toLocaleString('en-US')} recorded flows</b> plus the platform rules. It passes only if nothing required would be dropped.</p><button class="btn" id="run">Run the replay</button>`,
+   bindTxt(){ if($('run')) $('run').onclick=runReplay; if($('fix')) $('fix').onclick=()=>{ PATHS.forEach(p=>S.dec[p.k]=p.truth); S.replay=null; refresh(true); later(250,runReplay); }; },
+   gate:()=>S.replay==='pass' },
+ { // 8. enforce: approve the stages, then check any workload's reach
+   pipe:4, wt:'boutique · enforcement', wm:'staged', map:true,
+   win(){ return mapSVG(); },
+   bind(){ drawReach(S.sel); bindMap(()=>refreshFoot()); },
+   foot:()=>`<span>kube-api <b style="color:${S.lvl>=1?'var(--ok)':'var(--bad)'}">${S.lvl>=1?'denied':'open'}</b> · world <b style="color:${S.lvl>=2?'var(--ok)':'var(--bad)'}">${S.lvl>=2?'denied':'open'}</b></span><span>${SHORT[S.sel]} reach <b>${reachOf(S.sel)}</b></span>`,
+   kick:'Step 5 · Enforce', title:'Approve each stage. Then check any workload.',
+   body:()=>`<div class="task ${S.lvl>=3?'done':''}">${S.lvl>=3?'All 3 stages enforced. Tap workloads to check their reach now.':'Approve the stages one by one and watch the map.'}</div>
+     ${S.lvl<3?`<button class="btn" id="appr">Approve stage ${S.lvl+1}</button>`:''}
+     <ol class="stg">${[['Namespace isolation','deny kube-apiserver and cross-namespace'],['Egress lock','deny egress to world'],['East-west isolation','per-workload allow-lists, 116 unused paths denied']]
+       .map(([t,d],i)=>`<li class="${S.lvl>i?'ok':S.lvl===i?'now':''}"><i>${S.lvl>i?'✓':i+1}</i><span><b>${t}</b> · ${d}</span></li>`).join('')}</ol>
+     <p>Each stage is its own policy set: applied after approval, rolled back in one step.</p>`,
+   bindTxt(){ if($('appr')) $('appr').onclick=e=>{ e.target.disabled=true; e.target.textContent='Applying…'; later(600,()=>{ S.lvl++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); }; },
+   gate:()=>S.lvl>=3 },
+ { // 9. runtime: the viewer reviews binaries; denying a startup binary is caught
+   pipe:1, wt:'tetragon · process_exec · adservice', wm:'runtime',
+   win(){ const row=(b,pre)=>{ const v=S.bin[b[0]];
+       return `<div><span class="tap" data-b="${b[0]}"><span class="g">${pre}</span><span class="n">${b[0]}</span> <span class="c">ⓘ</span></span><span class="seg"><button class="k ${v==='keep'?'on':''}" data-b="${b[0]}" data-d="keep">NEEDED</button><button class="d ${v==='deny'?'on':''}" data-b="${b[0]}" data-d="deny">NO</button></span></div>`; };
+     return `<div class="tree"><div><span class="g">containerd-shim-runc-v2</span></div>
+       <div><span><span class="g">└─ </span><span class="n">AdService</span> <span class="w">ENTRYPOINT</span></span><i class="tag g">DECLARED</i></div>
+       <div><span><span class="g">   │  </span><span class="n">/bin/sh</span> <span class="w">#! line</span></span><i class="tag g">DECLARED</i></div>
+       ${BINS.map((b,i)=>row(b, b[0]==='echo'?'      └─ ':i===4?'   └─ ':'   ├─ ')).join('')}</div>
+       ${S.binChecked&&!S.binOk?`<div class="bad" style="margin-top:6px;white-space:normal">${BINS.filter(b=>S.bin[b[0]]==='deny').map(b=>`✗ ${b[0]}: ${b[3]==='container start'?`exec'd at container start (${b[4]}×)`:'runs in the startup script'}`).join('<br>')}</div>`:''}`; },
+   bind(){ document.querySelectorAll('.tree .seg button').forEach(b=>b.onclick=()=>{ S.bin[b.dataset.b]=b.dataset.d; S.binChecked=false; S.binOk=false; refresh(true); });
+     document.querySelectorAll('.tree .tap').forEach(t=>t.onclick=()=>{ const b=BINS.find(x=>x[0]===t.dataset.b);
+       sheet(`adservice · ${b[0]}`,'process_exec evidence',`<div class="verdict"><i class="tag y">REVIEW</i> the product does not guess</div><div class="ev"><h4>Tetragon · process_exec</h4><pre>binary   ${b[1]}\nparent   ${b[2]}\nwhen     ${b[3]}\nseen     ${b[4]}×</pre></div>
+         <div class="ev"><h4>Image config</h4><pre>ENTRYPOINT  …/hipstershop/bin/AdService\n            a shell script (#!/bin/sh)\n${b[0]} is not declared in the image;\nthe script starts it, and a script\ncan't be resolved statically</pre></div>`); }); },
+   foot:()=>`<span>allow-list <b>${2+BINS.filter(b=>S.bin[b[0]]==='keep').length}</b> binaries</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
+   kick:'Runtime · same pipeline · your call', title:'Six binaries the image doesn’t declare. Are they needed?',
+   body:()=>{ const all=BINS.every(b=>S.bin[b[0]]);
+     return S.binOk?`<div class="task done">Allow-list ready: 8 binaries. Anything else will be denied once enforced.</div><p>The decision is recorded with who made it, and it feeds the Tetragon policy the same way the network decisions fed Cilium.</p>`
+       :S.binChecked?`<div class="task">The startup check failed: denied binaries are part of how adservice starts.</div><p>Blocking them would stop the container from starting. Change them to NEEDED and check again.</p><button class="btn" id="chk">Check against startup</button>`
+       :`<div class="task ${all?'done':''}">Mark each binary, then check. Tap a binary for its evidence.</div>
+         <p>Tetragon saw adservice's entrypoint <b>script</b> start these. The product can't resolve a script statically, so it escalates instead of guessing.</p>
+         <button class="btn" id="chk" ${all?'':'disabled'}>Check against startup</button>`; },
+   bindTxt(){ if($('chk')) $('chk').onclick=()=>{ S.binChecked=true; S.binOk=BINS.every(b=>S.bin[b[0]]==='keep'); refresh(true); }; },
+   gate:()=>S.binOk },
+ { // 10. result: compare any workload before and after
+   pipe:-1, wt:'boutique · least privilege', wm:'tap a workload', map:true, end:true,
+   win(){ return mapSVG(); },
+   bind(){ drawReach(S.sel); bindMap(()=>{ refreshFoot(); refreshTxt(); }); },
+   foot:()=>`<span>required flows dropped <b>0</b></span><span>unused paths closed <b>116</b></span>`,
+   kick:'Result', title:'Every workload, before and after.',
+   body:()=>{ const w=S.sel, n=needsOut(w);
+     return `<div class="facts"><div><span>workload</span><b>${w}</b></div><div><span>reach before</span><b style="color:var(--bad)">13 targets · any binary</b></div>
+       <div><span>reach now</span><b style="color:var(--ok)">${n.length?n.map(k=>SHORT[k]).join(', '):'kube-dns only'}</b></div>
+       ${w==='adservice'?'<div><span>binaries</span><b>8, reviewed · ready</b></div>':''}</div>
+       <p>Network: enforced with plain <code>CiliumNetworkPolicy</code>. Runtime: allow-list ready for Tetragon. <b>Next in the lab:</b> a real intrusion from adservice, blocked on both layers.</p>
+       <div class="two"><button class="btn" id="again">Start over</button><button class="btn sec" id="desk">Full tour</button></div>`; },
+   bindTxt(){ $('again').onclick=reset; $('desk').onclick=()=>location.href='index.html?desktop'; },
+   gate:()=>true },
+];
+function handResult(){
+  const need=needsOut('frontend').concat(['dns']), port=Object.fromEntries(W.frontend.out.map(r=>[r[0],r])), L=[];
+  L.push(`<div class="p">kubectl apply -f frontend-cnp.yaml</div><div>ciliumnetworkpolicy/frontend <span class="ok">created</span></div><div class="p">hubble observe --from-label app=frontend</div>`);
+  const miss=need.filter(n=>!S.hand.has(n)), extra=[...S.hand].filter(n=>!need.includes(n));
+  need.forEach(n=>{ const r=port[n]; const to=n==='dns'?'kube-dns:53':`${SHORT[n]}:${r[1].split('/')[0]}`;
+    L.push(`<div>frontend → ${to.padEnd(15)} ${S.hand.has(n)?'<span class="ok">FORWARDED</span>':'<span class="bad">DROPPED</span>'}</div>`); });
+  if(extra.length) L.push(`<div class="warn"># allowed, never used: ${extra.map(e=>e==='dns'?'dns':SHORT[e]).join(', ')}</div>`);
+  L.push(miss.length?`<div class="bad"># ${miss.length} required destination${miss.length>1?'s':''} dropped: pages break</div>`:`<div class="ok"># all ${need.length} required destinations allowed</div>`);
+  return `<div class="t">${L.join('')}</div>`;
+}
+function replayIssues(){ const d=S.dec, I=[];
+  if(d['in-fe']==='deny') I.push({l:`frontend → adservice:9555   <span class="bad">DROP ×144</span>`,why:'Denying frontend would drop 144 real requests: the ads on every page.'});
+  if(d['in-kl']==='deny') I.push({l:`kubelet → adservice:9555    <span class="bad">DROP ×583</span>`,why:'Denying the kubelet probe would fail health checks and restart the pod.'});
+  if(d['out-dns']==='deny') I.push({l:`guard: kube-dns:53          <span class="bad">platform rule</span>`,why:'DNS shows 0 flows in this window, but every pod resolves names. Replay alone would miss it, so a guard rule catches it.'});
+  if(d['out-ex']==='keep') I.push({l:`adservice → 11 workloads    <span class="warn">still open</span>`,why:'Keeping the 11 unused outbound paths leaves the blast radius as it was.'});
+  if(d['in-ex']==='keep') I.push({l:`10 workloads → adservice    <span class="warn">still open</span>`,why:'Keeping the 10 unused inbound paths leaves adservice reachable from every pod.'});
+  return I; }
+function replayOut(){ const I=replayIssues(), pass=!I.length;
+  return `<div>replaying flows<span class="bar"><i style="width:100%"></i></span></div><div class="c">${FLOWS.toLocaleString('en-US')} / ${FLOWS.toLocaleString('en-US')} Hubble flows</div><div>&nbsp;</div>
+    ${pass?`<div>frontend → adservice:9555   <span class="ok">kept ×144</span></div><div>kubelet → adservice:9555    <span class="ok">kept ×583</span></div><div>guard: kube-dns:53          <span class="ok">kept</span></div><div>unused paths                <span class="info">21 closed</span></div>`
+      :I.map(i=>`<div>${i.l}</div>`).join('')}<div>&nbsp;</div><div>RESULT  ${pass?'<span class="ok">PASS</span>':'<span class="bad">FAIL</span>'}</div>`; }
+function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='Replaying…'; }
+  const t=$('vt'); t.insertAdjacentHTML('beforeend',`<div>replaying flows<span class="bar"><i id="vb"></i></span></div><div class="c"><span id="vn">0</span> / ${FLOWS.toLocaleString('en-US')} Hubble flows</div>`);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
+  const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
+  later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
+function reset(){ Object.assign(S,{sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); }
+// ---------- rendering and navigation
+let at=0;
+$('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
+function refreshFoot(){ const c=CARDS[at]; $('wf').innerHTML=c.foot?c.foot():''; }
+function refreshTxt(){ const c=CARDS[at], t=$('txt'), y=t.scrollTop;
+  t.innerHTML=`<div class="kick">${c.kick}</div><h1>${c.title}</h1>${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
+function refresh(win){ const c=CARDS[at]; if(win&&!c.map){ const wb=$('wb'), y=wb.scrollTop; wb.innerHTML=c.win(); wb.scrollTop=y; c.bind&&c.bind(); } refreshFoot(); refreshTxt(); }
+function nav(){ const c=CARDS[at], ok=c.gate(), last=at===CARDS.length-1; $('next').disabled=!ok||last; $('next').textContent='Next';
+  $('back').disabled=at===0; $('hint').textContent=ok||last?`${at+1} / ${CARDS.length}`:'your turn ↑'; }
+function show(i){
+  if(i<0||i>=CARDS.length) return; stop(); closeSheet(); at=i; const c=CARDS[i];
+  [...$('bars').children].forEach((s,k)=>s.className=k<i?'pd':k===i?'pn':'');
+  const p=$('pipe'); p.classList.toggle('off',c.pipe<0); [...p.children].forEach((s,k)=>s.className=k<c.pipe?'d':k===c.pipe?'n':'');
+  $('wt').textContent=c.wt; $('wm').textContent=c.wm;
+  const wb=$('wb'); wb.className='wbody'+(c.map?' map':''); wb.innerHTML=c.win(); wb.scrollTop=0; c.bind&&c.bind();
+  if(!c.map) blast(S.sel);
+  refreshFoot(); const t=$('txt'); t.scrollTop=0; refreshTxt(); t.classList.remove('in'); void t.offsetWidth; t.classList.add('in');
+}
+$('next').onclick=()=>{ if(CARDS[at].gate()) show(at+1); };
+$('back').onclick=()=>show(at-1);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.target.closest('button')) return; if(e.key==='ArrowRight'&&CARDS[at].gate()) show(at+1); if(e.key==='ArrowLeft') show(at-1); });
+show(0);
+</script>
+</body>
+</html>
