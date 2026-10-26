@@ -171,6 +171,31 @@ svg text{font-family:var(--mono)}
 .nav button:disabled{opacity:.4;cursor:default}
 .nav .next{margin-left:auto;background:var(--ink);color:#0A0D14;border-color:var(--ink)}
 .nav .next:disabled{background:var(--panel2);color:var(--dim);border-color:var(--line);opacity:1}
+.diff div{white-space:pre;padding:2px 12px;margin:0 -12px}
+.diff .m{background:rgba(255,92,92,.09);color:#FF9C9C}.diff .pl{background:rgba(61,214,140,.09);color:#8FEBBE}.diff .h{color:var(--muted);margin-top:3px}
+:root{--des:#7FA7D9;--prog:#B392F0}
+.facts span{min-width:0}
+/* open the pod */
+.pod svg{display:block;width:100%;height:auto}
+.pod text{font-family:var(--mono)}
+.pod .ln{stroke:var(--ok);stroke-width:1.6;fill:none;opacity:.85;transition:opacity .4s}
+.pod .ln.other{stroke:var(--warn);stroke-dasharray:4 3}
+.pod .xx{stroke:var(--bad);stroke-width:2.6;stroke-linecap:round;opacity:0;transition:opacity .4s .2s}
+.pod.enf .ln.other{opacity:.1}.pod.enf .xx{opacity:1}
+.proc rect{fill:var(--panel2);stroke:var(--line)}
+/* two gates */
+.pick{display:flex;flex-wrap:wrap;gap:5px;margin:3px 0 8px}
+.pick button{border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:6px 9px;font:600 11px var(--mono);color:var(--muted);cursor:pointer}
+.pick button.on{border-color:var(--ink);color:var(--ink)}
+.flow{display:grid;grid-template-columns:auto minmax(6px,1fr) auto minmax(6px,1fr) auto;align-items:center;gap:4px;margin:10px 0 8px}
+.flow .gt{border:1px solid var(--line);border-radius:8px;padding:6px 7px;text-align:center;font:700 9.5px var(--mono);color:var(--muted);background:var(--panel2);min-width:66px}
+.flow .gt b{display:block;font-size:11px;margin-top:1px;color:var(--text)}
+.flow .gt.pass{border-color:rgba(61,214,140,.55)}.flow .gt.pass b{color:var(--ok)}
+.flow .gt.stop{border-color:rgba(255,92,92,.65)}.flow .gt.stop b{color:var(--bad)}
+.flow .gt.skip{opacity:.35}
+.flow i{height:2px;background:var(--line);display:block}.flow i.on{background:var(--ok)}
+.vline{font:700 11.5px var(--mono)}
+.vline.ok{color:var(--ok)}.vline.bad{color:var(--bad)}
 /* opening screen */
 .cover{position:absolute;inset:0;z-index:20;background:var(--bg);overflow:auto;display:flex;flex-direction:column;gap:12px;
   padding:max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left))}
@@ -255,9 +280,13 @@ const POS={loadgenerator:[22,128],frontend:[80,128],adservice:[156,44],recommend
 const API=[24,20], WORLD=[306,20];
 const needsOut=w=>W[w].out.filter(r=>r[0]!=='dns').map(r=>r[0]);
 // the hand-written example: every frontend dependency except checkoutservice
+// sources the product reads, by category: [category, where from, what was loaded, lab | design]
+const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows`,'lab'],['Configuration','Git · manifests','12 Deployments, env, ports','lab'],
+  ['Runtime','Tetragon process_exec','process tree per container','lab'],['Platform','Kubernetes API','DNS, kubelet probes, Services','lab'],
+  ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textContent+$('bW').textContent; $('bW').textContent=SHORT[w]||w; $('bN').textContent=n;
   b.classList.toggle('zero',S.lvl>=3); if(n+(SHORT[w]||w)!==was){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }
@@ -345,34 +374,34 @@ const CARDS=[
        ${S.explored.size?`<p><b>${w}</b> can reach <b>13 targets</b> today. What it actually calls (tap for evidence):</p>
        <div class="list">${d.out.map((r,i)=>`<div class="row tap" data-ev="out:${i}"><span class="a">→ ${esc(r[0]==='dns'?'kube-dns':r[0])}:${esc(r[1])}</span><span class="e">${r[2].toLocaleString('en-US')} flows · ${r[3].startsWith('platform')?'platform rule':'manifest env'}</span><span class="v"><i class="tag ${r[3].startsWith('platform')?'b':'g'}">NEED</i></span></div>`).join('')}</div>`
        :`<p>Under default-allow every pod has the same blast radius. Pick one and compare what it can reach with what it needs.</p>`}`; },
-   bindTxt(){ document.querySelectorAll('[data-ev]').forEach(r=>r.onclick=()=>{ const [dir,i]=r.dataset.ev.split(':'); const row=W[S.sel][dir][+i];
+   bindTxt(){ document.querySelectorAll('[data-ev]').forEach(r=>r.onclick=()=>{ S.mapEv=true; const [dir,i]=r.dataset.ev.split(':'); const row=W[S.sel][dir][+i];
      sheet(`${S.sel} → ${row[0]==='dns'?'kube-dns':row[0]}`,`${row[1]} · evidence`,pathEvidence(S.sel,dir,row)); }); },
    gate:()=>S.explored.size>0 },
- { // 3. write frontend's policy by hand
-   pipe:-1, wt:'frontend-cnp.yaml · by hand', wm:'egress',
+ { // 3. how it is done today: a hand-written policy, played out
+   pipe:-1, wt:'frontend-cnp.yaml · written by hand', wm:'today',
    win(){ if(S.handApplied) return handResult();
      const t=o=>o==='dns'?'k8s-app: kube-dns':`app: ${o}`;
-     return `<div class="t"><div class="c"># frontend-cnp.yaml · written by hand</div><div>egress:</div>${[...HAND].map(o=>`<div>- toEndpoints: [{${t(o)}}]</div>`).join('')}<div class="c">  # checkoutservice: forgotten</div></div>`; },
-   foot:()=>`<span>rules <b>${HAND.size}</b></span><span>${S.handApplied?'applied':'not applied'}</span>`,
-   kick:'Why it stays open', title:'A hand-written allow-list for frontend.',
-   body:()=>S.handApplied?`<div class="task done">Applied. Hubble shows what happened.</div>
-       <p>One destination was missed, so checkout traffic is dropped. Real teams write these for every service on every release. <b>One miss drops production traffic</b>, so most leave default-allow in place.</p>`
-     :`<div class="task">Apply the policy and watch Hubble.</div><p>This is how a namespace is secured today: list every dependency by hand, then hope the rollout drops nothing. This one looks complete.</p>
-       <button class="btn" id="apply">kubectl apply</button>`,
-   bindTxt(){ if($('apply')) $('apply').onclick=()=>{ S.handApplied=true; refresh(true); }; },
+     return `<div class="t"><div class="c"># an engineer lists frontend's dependencies</div><div>egress:</div>${[...HAND].map(o=>`<div>- toEndpoints: [{${t(o)}}]</div>`).join('')}<div class="c">  # 7 listed. checkoutservice was missed.</div></div>`; },
+   bind(){ if(S.handApplied){ $('wb').querySelectorAll('.t>div').forEach((d,i)=>{ d.style.opacity=0; later(i*170,()=>{ d.style.transition='opacity .2s'; d.style.opacity=1; }); }); return; }
+     $('wb').querySelectorAll('.t>div').forEach((d,i)=>{ d.style.opacity=0; later(i*160,()=>{ d.style.transition='opacity .2s'; d.style.opacity=1; }); });
+     later(2600,()=>{ S.handApplied=true; refresh(true); }); },
+   foot:()=>`<span>rules <b>${HAND.size}</b> of 8 needed</span><span>${S.handApplied?'applied':'writing…'}</span>`,
+   kick:'Why it stays open', title:'How it is done today: by hand.',
+   body:()=>S.handApplied?`<p>The policy is applied and Hubble shows the result: <b>frontend → checkout is DROPPED</b>. Customers can browse but can't check out.</p>
+       <p>One missed line, one broken page. Multiply by every service and every release, and teams decide it is safer to <b>leave default-allow on</b>. That is the gap the product closes.</p>`
+     :`<p>An engineer writes frontend's allow-list by hand. It needs 8 destinations; the list has 7. It looks complete.</p><p class="c">Applying it…</p>`,
    gate:()=>S.handApplied },
- { // 4. collect: connect the three sources
+ { // 4. collect: every source that already describes the workloads
    pipe:0, wt:'decision-layer · sources', wm:'read-only',
-   win(){ const T=[['m','M','Manifests','Deployment specs · env · ports','12 Deployments'],['h','H','Hubble','L3/L4 flow logs from Cilium',`${FLOWS.toLocaleString('en-US')} flows`],['t','T','Tetragon','process_exec events','per container']];
-     return `<div class="src">${T.map(([k,ic,n,d,c],i)=>`<button class="tile ${S.src.has(k)?'on':''} ${!S.src.has(k)&&i===S.src.size?'go':''}" data-s="${k}"><span class="ic">${ic}</span><b>${n}</b><em>${S.src.has(k)?c:'connect'}</em><span>${d}</span><div class="stream"><i></i></div></button>`).join('')}</div>
-       <div class="c" style="margin-top:8px"># evidence profiles</div><div class="profiles">${Object.keys(POS).map(w=>`<span class="${S.src.size===3?'on':''}">${SHORT[w]}</span>`).join('')}</div>`; },
-   bind(){ document.querySelectorAll('.tile').forEach(t=>t.onclick=()=>{ if(S.src.has(t.dataset.s)) return; S.src.add(t.dataset.s); refresh(true);
-       if(S.src.size===3){ const ps=[...document.querySelectorAll('.profiles span')]; ps.forEach(p=>p.classList.remove('on')); ps.forEach((p,i)=>later(150+i*90,()=>p.classList.add('on'))); } }); },
-   foot:()=>`<span>reads existing telemetry</span><span>sources <b>${S.src.size}/3</b></span>`,
-   kick:'Step 1 · Collect', title:'Read what the cluster already produces.',
-   body:()=>`<div class="task ${S.src.size===3?'done':''}">Connect the three sources.</div>
-     <p>The product reads the manifests, Hubble flow logs and Tetragon exec events you already have, and builds <b>one evidence profile per workload</b>: what it declares and what it actually does.</p>`,
-   gate:()=>S.src.size===3 },
+   win(){ return `<div class="list">${SRC.map(([cat,from,val,st],i)=>`<div class="row" data-i="${i}"><span class="a">${cat} <span class="c">· ${from}</span></span><span class="e" id="sv${i}">${S.srcN>i?val:'loading…'}</span><span class="v"><i class="tag ${st==='lab'?'g':'b'}">${st==='lab'?'LAB':'DESIGN'}</i></span></div>`).join('')}</div>
+       <div class="c" style="margin-top:8px"># evidence profiles</div><div class="profiles">${Object.keys(POS).map(w=>`<span class="${S.srcN>=SRC.length?'on':''}">${SHORT[w]}</span>`).join('')}</div>`; },
+   bind(){ if(S.srcN>=SRC.length) return; SRC.forEach((x,i)=>later(400+i*420,()=>{ S.srcN=i+1; const e=$('sv'+i); if(e){ e.textContent=x[2]; e.classList.add('fade'); } refreshFoot(); }));
+     later(400+SRC.length*420,()=>{ document.querySelectorAll('.profiles span').forEach((p,i)=>later(i*70,()=>p.classList.add('on'))); later(900,()=>{ refreshFoot(); refreshTxt(); }); }); },
+   foot:()=>`<span>reads, never writes here</span><span>sources <b>${Math.min(S.srcN,SRC.length)}/${SRC.length}</b></span>`,
+   kick:'Step 1 · Collect', title:'Read everything that already describes the workloads.',
+   body:()=>`<p>The product doesn't ask anyone what an application needs. It reads it from the sources that already describe it: <b>network flows from Hubble</b>, <b>configuration from Git and the manifests</b>, <b>process events from Tetragon</b>, the Kubernetes platform itself, and later images and metrics.</p>
+     <p>The result is <b>one evidence profile per workload</b>: what it declares, and what it actually does.</p>`,
+   gate:()=>S.srcN>=SRC.length },
  { // 5. classify: the viewer decides, the evidence is one tap away
    pipe:1, wt:'classify · adservice', wm:'24 paths',
    win(){ return `<div class="list">${PATHS.map((p,i)=>{ const on=S.cls>i;
@@ -412,13 +441,13 @@ const CARDS=[
    gate:()=>S.evOpened },
  { // 7. verify: replay; wrong choices are caught here
    pipe:3, wt:'decision-layer verify', wm:'dry-run',
-   win(){ return `<div class="t" id="vt"><div class="p">decision-layer verify adservice --replay</div>${S.replay?replayOut():'<div class="c"># replays every recorded flow against the proposal</div>'}</div>`; },
+   win(){ return `<div class="t" id="vt"><div class="p">decision-layer verify adservice --replay</div>${S.replay?replayOut():'<div class="c"># each recorded flow → proposed policy</div><div class="c">#   → allowed or dropped?</div><div class="c"># offline · the cluster is not touched</div>'}</div>`; },
    foot:()=>`<span>cluster not touched</span><span>result <b style="color:${S.replay==='pass'?'var(--ok)':S.replay?'var(--bad)':'var(--ink)'}">${S.replay?S.replay.toUpperCase():'–'}</b></span>`,
    kick:'Step 4 · Verify', title:'Replay the proposal before it touches the cluster.',
    body:()=>S.replay==='pass'?`<div class="task done">PASS: no required flow would be dropped.</div><p>Safe to enforce. The replay also confirms what it closes: 21 unused paths for adservice.</p>`
      :S.replay?`<div class="task">The replay caught a problem. Fix it from the evidence and run it again.</div>
        <p>${replayIssues().map(i=>i.why).join(' ')}</p><button class="btn" id="fix">Apply the evidence verdicts and re-run</button>`
-     :`<div class="task">Run the replay.</div><p>The proposal is replayed offline against <b>all ${FLOWS.toLocaleString('en-US')} recorded flows</b> plus the platform rules. It passes only if nothing required would be dropped.</p><button class="btn" id="run">Run the replay</button>`,
+     :`<div class="task">Run the replay.</div><button class="btn" id="run">Run the replay</button><p><b>What is a replay?</b> Hubble recorded every connection the namespace made: ${FLOWS.toLocaleString('en-US')} flows. Each one is run through the proposed policy, offline: <b>allowed or dropped?</b> If anything the app needs would be dropped, nothing is applied.</p>`,
    bindTxt(){ if($('run')) $('run').onclick=runReplay; if($('fix')) $('fix').onclick=()=>{ PATHS.forEach(p=>S.dec[p.k]=p.truth); S.replay=null; refresh(true); later(250,runReplay); }; },
    gate:()=>S.replay==='pass' },
  { // 8. enforce: approve the stages, then check any workload's reach
@@ -444,16 +473,81 @@ const CARDS=[
    bind(){ document.querySelectorAll('.tree .tap').forEach(t=>t.onclick=()=>{ const b=BINS.find(x=>x[0]===t.dataset.b);
        sheet(`adservice · ${b[0]}`,'process_exec evidence',`<div class="verdict"><i class="tag y">REVIEW</i> the product does not guess</div><div class="ev"><h4>Tetragon · process_exec</h4><pre>binary   ${b[1]}\nparent   ${b[2]}\nwhen     ${b[3]}\nseen     ${b[4]}×</pre></div>
          <div class="ev"><h4>Image config</h4><pre>ENTRYPOINT  …/hipstershop/bin/AdService\n            a shell script (#!/bin/sh)\n${b[0]} is not declared in the image;\nthe script starts it, and a script\ncan't be resolved statically</pre></div>`); }); },
-   foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b> binaries</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
+   foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b> binaries${S.binChk?' · startup <b style="color:var(--ok)">PASS</b>':''}</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
    kick:'Runtime · same pipeline', title:'Six binaries the image doesn’t declare.',
-   body:()=>S.binOk?`<div class="task done">Allow-list ready: 8 binaries. Anything else will be denied once enforced.</div><p>Checked against startup: all 8 run when adservice starts. The decision is recorded with who made it, and it feeds the Tetragon policy the same way the network verdicts fed Cilium.</p>`
+   body:()=>S.binOk&&S.binChk?`<div class="task done">Startup check passed. Allow-list ready: 8 binaries.</div><p>The recorded <code>process_exec</code> events were replayed against the allow-list: every binary adservice ran at startup is allowed, nothing it needs would be blocked. Anything else will be denied once Tetragon enforces it.</p>`
+     :S.binOk?`<div class="task">Run the startup check.</div><p>The same idea as the network replay: every exec Tetragon recorded for adservice is run through the proposed allow-list, offline. It passes only if nothing adservice needs would be blocked.</p><button class="btn" id="bchk">Run the startup check</button>`
      :`<div class="task">Review them and confirm. Tap a binary for its evidence.</div>
        <p>Tetragon saw adservice's entrypoint <b>script</b> start these six. A script can't be resolved statically, so the product <b>escalates to a person instead of guessing</b>. Here they are part of normal startup.</p>
        <button class="btn" id="chk">Confirm all 6 as needed</button>`,
-   bindTxt(){ if($('chk')) $('chk').onclick=()=>{ $('chk').disabled=true; later(500,()=>{ S.binOk=true; refresh(true); }); }; },
-   gate:()=>S.binOk },
+   bindTxt(){ if($('chk')) $('chk').onclick=()=>{ $('chk').disabled=true; later(500,()=>{ S.binOk=true; refresh(true); }); };
+     if($('bchk')) $('bchk').onclick=()=>{ $('bchk').disabled=true; $('bchk').textContent='Replaying exec events…'; later(1200,()=>{ S.binChk=true; refresh(true); }); }; },
+   gate:()=>S.binOk&&S.binChk },
+ { // 10. network per process: Cilium works per pod, Tetragon per program - open the pod
+   pipe:1, wt:'frontend pod · network per process', wm:'design',
+   win(){ const enf=S.npp;
+     const dst=[['checkout:5050',70],['catalog:3550',125],['cart:7070',180]];
+     const ln=(y0,cls)=>dst.map(([d,y])=>`<path class="ln ${cls}" d="M150 ${y0} C190 ${y0} 190 ${y} 220 ${y}"/>`).join('');
+     return `<div class="pod ${enf?'enf':''}"><svg viewBox="0 0 330 250">
+       <rect x="8" y="22" width="150" height="206" rx="12" fill="none" stroke="#3A4660" stroke-dasharray="4 4"/>
+       <text x="18" y="40" fill="#7D889C" font-size="10">frontend pod · one identity for Cilium</text>
+       <g class="proc"><rect x="20" y="70" width="128" height="44" rx="8"/><text x="32" y="90" fill="#E6EAF2" font-size="11" font-weight="700">/src/server</text><text x="32" y="105" fill="#7D889C" font-size="9.5">the application</text></g>
+       <g class="proc"><rect x="20" y="150" width="128" height="44" rx="8"/><text x="32" y="170" fill="#E6EAF2" font-size="11" font-weight="700">any other process</text><text x="32" y="185" fill="#7D889C" font-size="9.5">not in the profile</text></g>
+       ${ln(92,'')}${ln(172,'other')}
+       <path class="xx" d="M153 165 L165 177 M165 165 L153 177"/>
+       ${dst.map(([d,y])=>`<circle cx="226" cy="${y}" r="5" fill="#10151F" stroke="#3DD68C" stroke-width="1.6"/><text x="236" y="${y+3.5}" fill="#B9C2D3" font-size="9.5">${d}</text>`).join('')}
+       <text x="18" y="244" fill="${enf?'#3DD68C':'#F5B947'}" font-size="10">${enf?'only /src/server may open connections':'Cilium allows these for every process in the pod'}</text>
+     </svg></div>`; },
+   foot:()=>`<span>Cilium: pod → service</span><span>Tetragon: ${S.npp?'<b style="color:var(--ok)">program-level</b>':'<b style="color:var(--warn)">not set</b>'}</span>`,
+   kick:'Runtime · network per process', title:'Inside the pod, which program may connect?',
+   body:()=>S.npp?`<div class="task done">Proposed: only <code>/src/server</code> opens connections from frontend.</div>
+       <p>Cilium still decides <b>where</b> frontend may connect. Tetragon now decides <b>which program</b> inside the pod may do it. Any other process gets an error from the kernel when it tries to connect.</p>
+       <p class="note">Built from the same evidence profile: Tetragon saw one binary in frontend, and every flow it opens comes from it. Not yet run in the lab.</p>`
+     :`<p>Cilium enforces per pod: any process inside frontend inherits frontend's network permissions. That's the remaining gap after network isolation.</p>
+       <p>Tetragon sees which binary opens each connection. The product combines both into one decision.</p><button class="btn" id="npp">Propose network per process</button>`,
+   bindTxt(){ if($('npp')) $('npp').onclick=()=>{ $('npp').disabled=true; later(500,()=>{ S.npp=true; refresh(true); }); }; },
+   gate:()=>S.npp },
+ { // 11. two gates: try a program and a destination, see which engine decides
+   pipe:1, wt:'connect() · two gates', wm:'design',
+   win(){ const src=[['/src/server','app'],['other','other process']], dst=[['checkout','checkout:5050'],['redis','redis-cart:6379'],['world','internet']];
+     const g1=S.gSrc==='/src/server', g2=S.gDst==='checkout';
+     return `<div class="c"># program</div><div class="pick">${src.map(([k,l])=>`<button data-gs="${k}" class="${S.gSrc===k?'on':''}">${l}</button>`).join('')}</div>
+       <div class="c"># destination</div><div class="pick">${dst.map(([k,l])=>`<button data-gd="${k}" class="${S.gDst===k?'on':''}">${l}</button>`).join('')}</div>
+       <div class="flow"><div class="gt">connect()<b>frontend</b></div><i class="${g1?'on':''}"></i><div class="gt ${g1?'pass':'stop'}">Tetragon<b>${g1?'allowed':'denied'}</b></div><i class="${g1&&g2?'on':''}"></i><div class="gt ${!g1?'skip':g2?'pass':'stop'}">Cilium<b>${!g1?'—':g2?'allowed':'dropped'}</b></div></div>
+       <div class="vline ${g1&&g2?'ok':'bad'}">${g1&&g2?'✓ connection opens':!g1?'✕ stopped inside the pod: wrong program':'✕ dropped: frontend never needs this destination'}</div>`; },
+   bind(){ $('wb').querySelectorAll('[data-gs]').forEach(b=>b.onclick=()=>{ S.gSrc=b.dataset.gs; S.gTry.add(S.gSrc+S.gDst); refresh(true); });
+     $('wb').querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>{ S.gDst=b.dataset.gd; S.gTry.add(S.gSrc+S.gDst); refresh(true); }); },
+   foot:()=>`<span>Tetragon, then Cilium</span><span>tried <b>${S.gTry.size}</b></span>`,
+   kick:'Runtime · network per process', title:'Two gates. Neither engine covers it alone.',
+   body:()=>`<div class="task ${S.gTry.size>=2?'done':''}">Pick a program and a destination. Try at least two.</div>
+     <p><b>Gate 1, Tetragon:</b> is this program allowed to open connections? <b>Gate 2, Cilium:</b> is this destination one frontend needs? A connection opens only if both say yes.</p>`,
+   gate:()=>S.gTry.size>=2 },
+ { // 12. files: what each workload writes and reads, from Tetragon file events
+   pipe:1, wt:'adservice · file access', wm:'design',
+   win(){ const r=(a,b,t,c)=>`<div class="row"><span class="a">${a}</span><span class="e">${b}</span><span class="v"><i class="tag ${c}">${t}</i></span></div>`;
+     return `<div class="list">${r('writes · /tmp/*','JVM temp files · example','EXAMPLE','y')}${r('writes · anywhere else','not seen, not declared',S.fil?'DENY':'ALLOWED',S.fil?'g':'x')}
+       ${r('reads · service-account token','adservice never calls the K8s API',S.fil?'DENY':'ALLOWED',S.fil?'g':'x')}${r('reads · app files','image ENTRYPOINT and libraries','NEEDED','b')}</div>`; },
+   foot:()=>`<span>source: Tetragon file events</span><span>${S.fil?'<b style="color:var(--ok)">proposed</b>':'open'}</span>`,
+   kick:'Runtime · files', title:'Each workload writes only where it needs to.',
+   body:()=>S.fil?`<div class="task done">Proposed: writes outside the profile are refused by the kernel.</div><p>The same evidence links the layers: adservice never calls the Kubernetes API, so it has no reason to read its service-account token.</p><p class="note">Design. File events are the next lab step; the write path above is an example.</p>`
+     :`<p>Tetragon can see which files a workload writes and reads, and refuse the ones outside its profile. Today every path is open.</p><button class="btn" id="fil">Propose the file profile</button>`,
+   bindTxt(){ if($('fil')) $('fil').onclick=()=>{ $('fil').disabled=true; later(500,()=>{ S.fil=true; refresh(true); }); }; },
+   gate:()=>S.fil },
+ { // 13. privileges: capabilities granted vs used
+   pipe:1, wt:'adservice · privileges', wm:'design',
+   win(){ return `<div class="list">
+       <div class="row"><span class="a">granted today</span><span class="e">container runtime default set</span><span class="v"><i class="tag x">14 CAPS</i></span></div>
+       <div class="row"><span class="a">used</span><span class="e">kernel capability checks, recorded by Tetragon</span><span class="v"><i class="tag y">EXAMPLE 0</i></span></div>
+       <div class="row"><span class="a">proposal</span><span class="e">securityContext: drop ALL</span><span class="v"><i class="tag ${S.prv?'g':'b'}">${S.prv?'PROPOSED':'READY'}</i></span></div>
+       <div class="row"><span class="a">proposal</span><span class="e">allowPrivilegeEscalation: false</span><span class="v"><i class="tag ${S.prv?'g':'b'}">${S.prv?'PROPOSED':'READY'}</i></span></div></div>`; },
+   foot:()=>`<span>granted vs used</span><span>${S.prv?'<b style="color:var(--ok)">proposed</b>':'open'}</span>`,
+   kick:'Runtime · privileges', title:'Privileges it was granted but never uses.',
+   body:()=>S.prv?`<div class="task done">Proposed: drop every capability adservice never used.</div><p>This one is a change to the Deployment itself, reviewed like any other proposal. The product keeps watching, so a new release that needs a capability shows up as evidence, not as an outage.</p><p class="note">Design. Capability recording is a next lab step; "0 used" is an example.</p>`
+     :`<p>Linux splits root's power into capabilities. A container starts with a default set, and most applications use none of them. Tetragon records which ones the kernel is actually asked for.</p><button class="btn" id="prv">Propose the privilege profile</button>`,
+   bindTxt(){ if($('prv')) $('prv').onclick=()=>{ $('prv').disabled=true; later(500,()=>{ S.prv=true; refresh(true); }); }; },
+   gate:()=>S.prv },
  { // 10. result: compare any workload before and after
-   pipe:-1, wt:'boutique · least privilege', wm:'tap a workload', map:true, end:true,
+   pipe:-1, wt:'boutique · least privilege', wm:'tap a workload', map:true,
    win(){ return mapSVG(); },
    bind(){ drawReach(S.sel); bindMap(()=>{ refreshFoot(); refreshTxt(); }); },
    foot:()=>`<span>required flows dropped <b>0</b></span><span>unused paths closed <b>116</b></span>`,
@@ -462,9 +556,24 @@ const CARDS=[
      return `<div class="facts"><div><span>workload</span><b>${w}</b></div><div><span>reach before</span><b style="color:var(--bad)">13 targets · any binary</b></div>
        <div><span>reach now</span><b style="color:var(--ok)">${n.length?n.map(k=>SHORT[k]).join(', '):'kube-dns only'}</b></div>
        ${w==='adservice'?'<div><span>binaries</span><b>8, reviewed · ready</b></div>':''}</div>
-       <p>Network: enforced with plain <code>CiliumNetworkPolicy</code>. Runtime: allow-list ready for Tetragon. <b>Next in the lab:</b> a real intrusion from adservice, blocked on both layers.</p>
-       <div class="two"><button class="btn" id="again">Start over</button><button class="btn sec" id="desk">Full tour</button></div>`; },
-   bindTxt(){ $('again').onclick=reset; $('desk').onclick=()=>location.href='index.html?desktop'; },
+       <p>Tap any workload on the map to compare. Next: the summary.</p>`; },
+   gate:()=>true },
+ { // 15. summary, the v2 way: adservice's effective permissions as a diff, and where each layer stands
+   pipe:-1, wt:'adservice · effective permissions', wm:'diff', end:true,
+   win(){ const m=t=>`<div class="m">- ${t}</div>`, p=t=>`<div class="pl">+ ${t}</div>`, h=t=>`<div class="h">@@ ${t} @@</div>`;
+     return `<div class="diff">${h('network · enforced · lab')}${m('egress   11 workloads, any port')}${m('egress   kube-apiserver, internet')}${m('ingress  any pod in the namespace')}${p('egress   kube-dns:53')}${p('ingress  frontend → :9555/TCP')}
+       ${h('programs · allow-list ready · lab')}${m('exec     any binary in the image')}${p('exec     8 binaries, startup check passed')}
+       ${h('network per process · design')}${m('connect  any process in the pod')}${p('connect  the application binary only')}
+       ${h('files · privileges · design')}${m('write    anywhere · 14 capabilities')}${p('write    its own paths · capabilities it uses')}</div>`; },
+   bind(){ $('wb').querySelectorAll('.diff div').forEach((d,i)=>{ d.style.opacity=0; later(120+i*110,()=>{ d.style.transition='opacity .25s'; d.style.opacity=1; }); }); },
+   foot:()=>`<span>required flows dropped <b>0</b></span><span>unused paths closed <b>116</b></span>`,
+   kick:'Summary', title:'From default-allow to least privilege.',
+   body:()=>`<div class="facts"><div><span>Network</span><b style="color:var(--ok)">enforced · lab</b></div>
+       <div><span>Programs · 25 binaries</span><b style="color:var(--prog)">ready · lab</b></div>
+       <div><span>Net per process · files · privileges</span><b style="color:var(--des)">design</b></div></div>
+     <p>One evidence profile per workload drives every layer. Every rule traces back to evidence, every change is verified first, and nothing the app needs was dropped.</p>
+     <button class="btn" id="again">Start over</button>`,
+   bindTxt(){ $('again').onclick=reset; },
    gate:()=>true },
 ];
 function handResult(){
@@ -493,7 +602,7 @@ function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='R
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
   later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
@@ -504,18 +613,24 @@ function refresh(win){ const c=CARDS[at]; if(win&&!c.map){ const wb=$('wb'), y=w
 const GUIDE=[
   ()=>document.querySelector('.cmd'),
   ()=>S.explored.size?null:$('wb').querySelector('.nd[data-w="adservice"]'),
-  ()=>$('apply'),
-  ()=>document.querySelector('.tile.go')||document.querySelector('.tile:not(.on)'),
+  ()=>null,
+  ()=>null,
   ()=>$('cls'),
   ()=>S.evOpened?null:document.querySelector('.rule'),
   ()=>$('run'),
   ()=>$('appr'),
-  ()=>$('chk'),
+  ()=>$('chk')||$('bchk'),
+  ()=>$('npp'),
+  ()=>S.gTry.size?$('wb').querySelector('[data-gs]:not(.on)'):$('wb').querySelector('[data-gd]:not(.on)'),
+  ()=>$('fil'),
+  ()=>$('prv'),
   ()=>null,
+  ()=>$('again'),
 ];
 let gEl=null;
 function guide(){
   const c=CARDS[at]; let el=c.gate()?(at<CARDS.length-1?$('next'):null):(GUIDE[at]&&GUIDE[at]());
+  if(at===1&&S.explored.size&&!S.mapEv) el=document.querySelector('#txt [data-ev]')||el;   // after picking a workload: open its evidence
   if(el&&el.disabled) el=null;
   if($('sheet').classList.contains('open')||!$('cover').hidden) el=null;
   if(gEl&&gEl!==el){ gEl.classList.remove('guide'); }
