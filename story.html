@@ -196,6 +196,13 @@ svg text{font-family:var(--mono)}
 .flow i{height:2px;background:var(--line);display:block}.flow i.on{background:var(--ok)}
 .vline{font:700 11.5px var(--mono)}
 .vline.ok{color:var(--ok)}.vline.bad{color:var(--bad)}
+/* live check after a stage */
+.live{font-size:12.5px;color:var(--text);padding:7px 10px;border-radius:9px;border:1px dashed rgba(127,167,217,.55);margin:2px 0 6px}
+.live b{display:block;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info);margin-bottom:2px}
+.dtag{font-style:normal;font:800 8.5px var(--mono);letter-spacing:.05em;color:#7FA7D9;border:1px dashed rgba(127,167,217,.6);border-radius:4px;padding:0 4px;margin-left:4px}
+/* why-this-step line */
+.whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
+.whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
 /* opening screen */
 .cover{position:absolute;inset:0;z-index:20;background:var(--bg);overflow:auto;display:flex;flex-direction:column;gap:12px;
   padding:max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left))}
@@ -286,7 +293,7 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textContent+$('bW').textContent; $('bW').textContent=SHORT[w]||w; $('bN').textContent=n;
   b.classList.toggle('zero',S.lvl>=3); if(n+(SHORT[w]||w)!==was){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }
@@ -347,33 +354,33 @@ const BINS=[['java','/opt/java/openjdk/bin/java','AdService','container start',2
   ['tr','/usr/bin/tr','AdService','inside the script',1],['xargs','/usr/bin/xargs','AdService','inside the script',1],['echo','/bin/echo','xargs','inside the script',1]];
 // ---------- the cards
 const CARDS=[
- { // 1. the situation, hands on the terminal
-   pipe:-1, wt:'zsh · prod-cluster', wm:'boutique',
-   win(){ return `<div class="t" id="term"><div class="c"># Cilium, Hubble and Tetragon are installed.</div><div class="c"># Check what is enforced.</div></div>
-     ${S.ran.has('cnp')?'':'<button class="cmd go" data-c="cnp">kubectl get cnp -n boutique</button>'}${S.ran.has('hub')?'':`<button class="cmd ${S.ran.has('cnp')?'go':''}" data-c="hub">hubble observe -n boutique --last 3</button>`}`; },
-   out:{cnp:[`<div class="p">kubectl get cnp -n boutique</div>`,`<div class="warn">No resources found in boutique namespace.</div>`],
-        hub:[`<div class="p">hubble observe -n boutique --last 3</div>`,`<div>frontend → adservice:9555   <span class="ok">FORWARDED</span></div>`,`<div>checkout → payment:50051   <span class="ok">FORWARDED</span></div>`,`<div>cart → redis-cart:6379     <span class="ok">FORWARDED</span></div>`]},
-   bind(){ const c0=CARDS[0], t=$('term'); [...S.ran].forEach(k=>c0.out[k].forEach(l=>t.insertAdjacentHTML('beforeend',l)));
-     document.querySelectorAll('.cmd').forEach(b=>b.onclick=()=>{ const c=b.dataset.c; S.ran.add(c); b.remove(); const n=document.querySelector('.cmd'); if(n) n.classList.add('go');
-       c0.out[c].forEach((l,i)=>later(i*220,()=>{ t.insertAdjacentHTML('beforeend',l); t.lastElementChild.classList.add('fade'); }));
-       later(c0.out[c].length*220,()=>{ refreshFoot(); refreshTxt(); }); }); },
-   foot:()=>`<span>Cilium ✓ Hubble ✓ Tetragon ✓</span><span>policies <b>${S.ran.has('cnp')?'0':'?'}</b></span>`,
-   kick:'The starting point', title:'The engines are installed. Is anything enforced?',
-   body:()=>`<div class="task ${S.ran.size===2?'done':''}">Run both commands in the terminal.</div>
-     ${S.ran.size===2?`<p>No <code>CiliumNetworkPolicy</code>, and traffic flows freely. The namespace runs <b>default-allow</b>: any pod can reach any pod, the kube-apiserver and the internet.</p>`
-       :`<p>A typical day-2 namespace: 12 Deployments in production, Cilium as the CNI, Hubble and Tetragon collecting.</p>`}`,
-   gate:()=>S.ran.size===2 },
+ { // 1. the cluster as it is today, then zoom into one namespace
+   pipe:-1, wt:'zsh · prod-cluster', wm:'cluster view',
+   win(){ const L=[`<div class="p">kubectl get ns</div>`,`<div class="c">NAME              STATUS</div>`,`<div>boutique          Active   <span class="warn">← the shop</span></div>`,
+       `<div>default           Active</div>`,`<div>kube-system       Active   <span class="c">← engines</span></div>`,`<div>kube-public       Active</div>`,`<div>kube-node-lease   Active</div>`,
+       `<div class="p">kubectl get cnp --all-namespaces</div>`,`<div class="warn">No resources found</div>`,
+       `<div class="p">hubble observe -n boutique --last 3</div>`,`<div>frontend → adservice:9555   <span class="ok">FORWARDED</span></div>`,`<div>checkout → payment:50051   <span class="ok">FORWARDED</span></div>`,`<div>cart → redis-cart:6379     <span class="ok">FORWARDED</span></div>`];
+     return `<div class="t" id="term">${L.join('')}</div>`; },
+   bind(){ const rows=[...$('wb').querySelectorAll('.t>div')]; if(S.ran.size){ return; }
+     rows.forEach((d,i)=>{ d.style.opacity=0; later(250+i*230,()=>{ d.style.transition='opacity .2s'; d.style.opacity=1; }); });
+     later(250+rows.length*230,()=>{ S.ran.add('all'); refreshFoot(); refreshTxt(); }); },
+   foot:()=>`<span>Cilium ✓ Hubble ✓ Tetragon ✓</span><span>policies <b>${S.ran.size?'0':'…'}</b></span>`,
+   kick:'1 · The cluster today', title:'The engines are installed. Nothing is enforced.',
+   body:()=>S.ran.size?`<p>One application namespace, <b>boutique</b>, runs the shop: 12 workloads in production. Across the whole cluster there is <b>no CiliumNetworkPolicy</b>, and traffic flows freely.</p>
+       <p>That is <b>default-allow</b>: any pod can reach any pod, the kube-apiserver and the internet. Next, we zoom into boutique.</p>`
+     :`<p>A cluster on day 2: Cilium as the CNI, Hubble and Tetragon collecting. Checking what is enforced…</p>`,
+   gate:()=>S.ran.size>0 },
  { // 2. explore the blast radius of any workload
    pipe:-1, wt:'boutique · reachability', wm:'default-allow', map:true,
    win(){ return mapSVG(); },
    bind(){ const keep=S.lvl; S.lvl=0; drawReach(S.sel); S.lvl=keep; if(!S.explored.size) ringOn('adservice'); bindMap(w=>{ S.explored.add(w); refreshFoot(); refreshTxt(); }); },
    foot:()=>`<span>tap a workload</span><span>${SHORT[S.sel]} reaches <b style="color:var(--bad)">13</b> · needs <b style="color:var(--ok)">${needsOut(S.sel).length}</b></span>`,
-   kick:'The exposure', title:'How far can one compromised pod reach?',
+   kick:'2 · Zoom into boutique', title:'What can each workload reach, and what does it need?',
    body:()=>{ const w=S.sel, d=W[w];
      return `<div class="task ${S.explored.size?'done':''}">Tap workloads on the map. Try adservice, then frontend.</div>
-       ${S.explored.size?`<p><b>${w}</b> can reach <b>13 targets</b> today. What it actually calls (tap for evidence):</p>
+       ${S.explored.size?`<p>The <b style="color:var(--warn)">amber lines</b> are everywhere <b>${w}</b> can connect today: <b>13 targets</b>. Below is what it actually needs. Tap one to see the evidence.</p>
        <div class="list">${d.out.map((r,i)=>`<div class="row tap" data-ev="out:${i}"><span class="a">→ ${esc(r[0]==='dns'?'kube-dns':r[0])}:${esc(r[1])}</span><span class="e">${r[2].toLocaleString('en-US')} flows · ${r[3].startsWith('platform')?'platform rule':'manifest env'}</span><span class="v"><i class="tag ${r[3].startsWith('platform')?'b':'g'}">NEED</i></span></div>`).join('')}</div>`
-       :`<p>Under default-allow every pod has the same blast radius. Pick one and compare what it can reach with what it needs.</p>`}`; },
+       :`<p>This is boutique's map. Tap a workload: the map shows what it <b>can</b> reach today, and the list below shows what it <b>needs</b>. The difference is the attack surface.</p>`}`; },
    bindTxt(){ document.querySelectorAll('[data-ev]').forEach(r=>r.onclick=()=>{ S.mapEv=true; const [dir,i]=r.dataset.ev.split(':'); const row=W[S.sel][dir][+i];
      sheet(`${S.sel} → ${row[0]==='dns'?'kube-dns':row[0]}`,`${row[1]} · evidence`,pathEvidence(S.sel,dir,row)); }); },
    gate:()=>S.explored.size>0 },
@@ -386,7 +393,7 @@ const CARDS=[
      $('wb').querySelectorAll('.t>div').forEach((d,i)=>{ d.style.opacity=0; later(i*160,()=>{ d.style.transition='opacity .2s'; d.style.opacity=1; }); });
      later(2600,()=>{ S.handApplied=true; refresh(true); }); },
    foot:()=>`<span>rules <b>${HAND.size}</b> of 8 needed</span><span>${S.handApplied?'applied':'writing…'}</span>`,
-   kick:'Why it stays open', title:'How it is done today: by hand.',
+   kick:'3 · Why it stays open', title:'How it is done today: by hand.',
    body:()=>S.handApplied?`<p>The policy is applied and Hubble shows the result: <b>frontend → checkout is DROPPED</b>. Customers can browse but can't check out.</p>
        <p>One missed line, one broken page. Multiply by every service and every release, and teams decide it is safer to <b>leave default-allow on</b>. That is the gap the product closes.</p>`
      :`<p>An engineer writes frontend's allow-list by hand. It needs 8 destinations; the list has 7. It looks complete.</p><p class="c">Applying it…</p>`,
@@ -398,7 +405,7 @@ const CARDS=[
    bind(){ if(S.srcN>=SRC.length) return; SRC.forEach((x,i)=>later(400+i*420,()=>{ S.srcN=i+1; const e=$('sv'+i); if(e){ e.textContent=x[2]; e.classList.add('fade'); } refreshFoot(); }));
      later(400+SRC.length*420,()=>{ document.querySelectorAll('.profiles span').forEach((p,i)=>later(i*70,()=>p.classList.add('on'))); later(900,()=>{ refreshFoot(); refreshTxt(); }); }); },
    foot:()=>`<span>reads, never writes here</span><span>sources <b>${Math.min(S.srcN,SRC.length)}/${SRC.length}</b></span>`,
-   kick:'Step 1 · Collect', title:'Read everything that already describes the workloads.',
+   kick:'4 · Collect', title:'Read everything that already describes the workloads.',
    body:()=>`<p>The product doesn't ask anyone what an application needs. It reads it from the sources that already describe it: <b>network flows from Hubble</b>, <b>configuration from Git and the manifests</b>, <b>process events from Tetragon</b>, the Kubernetes platform itself, and later images and metrics.</p>
      <p>The result is <b>one evidence profile per workload</b>: what it declares, and what it actually does.</p>`,
    gate:()=>S.srcN>=SRC.length },
@@ -409,7 +416,7 @@ const CARDS=[
          <span class="v">${on?`<i class="tag ${p.truth==='keep'?(p.k==='out-dns'?'b':'g'):'x'} stamp">${p.truth==='keep'?(p.k==='out-dns'?'NEEDED':'CONFIRMED'):'EXCESS'}</i>`:'<span class="c">…</span>'}</span></div>`; }).join('')}</div>`; },
    bind(){ document.querySelectorAll('.row.tap').forEach(a=>a.onclick=()=>{ const p=PATHS.find(x=>x.k===a.dataset.k); sheet(`adservice · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'evidence',p.ev()); }); },
    foot:()=>`<span>classified <b>${Math.min(S.cls,5)}/5</b></span><span>keep <b>3</b> · excess <b style="color:var(--bad)">21</b></span>`,
-   kick:'Step 2 · Classify', title:'Every path gets a verdict from evidence.',
+   kick:'5 · Classify', title:'Every path gets a verdict from evidence.',
    body:()=>S.cls>=5?`<div class="task done">Classified. Tap any path to see the evidence behind its verdict.</div>
        <p>Declared in a manifest and seen in Hubble: <b>confirmed</b>. Platform needs such as DNS and kubelet probes: <b>needed</b>, even with no traffic in the window. No declaration and no traffic: <b>excess</b>, attack surface with no reason to exist.</p>`
      :`<div class="task">Run the classification for adservice.</div>
@@ -434,7 +441,7 @@ const CARDS=[
        <div><span class="c">  # denied paths: no rule → dropped</span></div></div>`; },
    bind(){ document.querySelectorAll('.rule').forEach(r=>r.onclick=()=>{ const p=PATHS.find(x=>x.k===r.dataset.k); S.evOpened=true; document.querySelectorAll('.rule.go').forEach(g=>g.classList.remove('go')); sheet(`rule · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'why this rule exists',p.ev()); refreshTxt(); }); },
    foot:()=>`<span>engine-native · no product CRDs</span><span>rules <b>${PATHS.filter(p=>S.dec[p.k]==='keep').length}</b></span>`,
-   kick:'Step 3 · Compile', title:'The verdicts become plain Cilium policy.',
+   kick:'6 · Compile', title:'The verdicts become plain Cilium policy.',
    body:()=>`<div class="task ${S.evOpened?'done':''}">Tap any rule to see the evidence behind it.</div>
      <p>Confirmed and needed paths compile into a standard <code>CiliumNetworkPolicy</code>, and each rule keeps a link to its evidence. Denied paths get no rule, so they are dropped.</p>
      <p>It is ordinary YAML: <b>remove the product and the policy keeps enforcing.</b></p>`,
@@ -443,7 +450,7 @@ const CARDS=[
    pipe:3, wt:'decision-layer verify', wm:'dry-run',
    win(){ return `<div class="t" id="vt"><div class="p">decision-layer verify adservice --replay</div>${S.replay?replayOut():'<div class="c"># each recorded flow → proposed policy</div><div class="c">#   → allowed or dropped?</div><div class="c"># offline · the cluster is not touched</div>'}</div>`; },
    foot:()=>`<span>cluster not touched</span><span>result <b style="color:${S.replay==='pass'?'var(--ok)':S.replay?'var(--bad)':'var(--ink)'}">${S.replay?S.replay.toUpperCase():'–'}</b></span>`,
-   kick:'Step 4 · Verify', title:'Replay the proposal before it touches the cluster.',
+   kick:'7 · Verify', title:'Replay the proposal before it touches the cluster.',
    body:()=>S.replay==='pass'?`<div class="task done">PASS: no required flow would be dropped.</div><p>Safe to enforce. The replay also confirms what it closes: 21 unused paths for adservice.</p>`
      :S.replay?`<div class="task">The replay caught a problem. Fix it from the evidence and run it again.</div>
        <p>${replayIssues().map(i=>i.why).join(' ')}</p><button class="btn" id="fix">Apply the evidence verdicts and re-run</button>`
@@ -455,14 +462,17 @@ const CARDS=[
    win(){ return mapSVG(); },
    bind(){ drawReach(S.sel); bindMap(()=>refreshFoot()); },
    foot:()=>`<span>kube-api <b style="color:${S.lvl>=1?'var(--ok)':'var(--bad)'}">${S.lvl>=1?'denied':'open'}</b> · world <b style="color:${S.lvl>=2?'var(--ok)':'var(--bad)'}">${S.lvl>=2?'denied':'open'}</b></span><span>${SHORT[S.sel]} reach <b>${reachOf(S.sel)}</b></span>`,
-   kick:'Step 5 · Enforce', title:'Approve each stage. Then check any workload.',
-   body:()=>`<div class="task ${S.lvl>=3?'done':''}">${S.lvl>=3?'All 3 stages enforced. Tap workloads to check their reach now.':'Approve the stages one by one and watch the map.'}</div>
+   kick:'8 · Enforce', title:'Approve each stage. Check it. Keep a way back.',
+   body:()=>`<div class="task ${S.lvl>=3&&S.rb?'done':''}">${S.lvl>=3?(S.rb?'All 3 stages enforced, and you saw the way back. Tap workloads to check their reach.':'All 3 enforced. Now try the way back: roll back stage 3.'):'Approve the stages one by one and watch the map.'}</div>
      ${S.lvl<3?`<button class="btn" id="appr">Approve stage ${S.lvl+1}</button>`:''}
+     ${S.lvl>0?`<div class="live"><b>Live check · stage ${S.lvl}</b> Hubble watches the required flows after apply. A drop on any of them rolls the stage back automatically. <i class="dtag">DESIGN</i></div>
+       <button class="btn sec" id="rbk">↶ Roll back stage ${S.lvl}</button>`:''}
      <ol class="stg">${[['Namespace isolation','deny kube-apiserver and cross-namespace'],['Egress lock','deny egress to world'],['East-west isolation','per-workload allow-lists, 116 unused paths denied']]
        .map(([t,d],i)=>`<li class="${S.lvl>i?'ok':S.lvl===i?'now':''}"><i>${S.lvl>i?'✓':i+1}</i><span><b>${t}</b> · ${d}</span></li>`).join('')}</ol>
      <p>Each stage is its own policy set: applied after approval, rolled back in one step.</p>`,
-   bindTxt(){ if($('appr')) $('appr').onclick=e=>{ e.target.disabled=true; e.target.textContent='Applying…'; later(600,()=>{ S.lvl++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); }; },
-   gate:()=>S.lvl>=3 },
+   bindTxt(){ if($('appr')) $('appr').onclick=e=>{ e.target.disabled=true; e.target.textContent='Applying…'; later(600,()=>{ S.lvl++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); };
+     if($('rbk')) $('rbk').onclick=e=>{ e.target.disabled=true; e.target.textContent='Rolling back…'; later(600,()=>{ S.lvl--; S.rb++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); }; },
+   gate:()=>S.lvl>=3&&S.rb>0 },
  { // 9. runtime: the viewer reviews binaries; denying a startup binary is caught
    pipe:1, wt:'tetragon · process_exec · adservice', wm:'runtime',
    win(){ const row=(b,pre)=>`<div><span class="tap" data-b="${b[0]}"><span class="g">${pre}</span><span class="n">${b[0]}</span> <span class="c">ⓘ</span></span>${S.binOk?'<i class="tag g">NEEDED</i>':'<i class="tag y">REVIEW</i>'}</div>`;
@@ -474,9 +484,9 @@ const CARDS=[
        sheet(`adservice · ${b[0]}`,'process_exec evidence',`<div class="verdict"><i class="tag y">REVIEW</i> the product does not guess</div><div class="ev"><h4>Tetragon · process_exec</h4><pre>binary   ${b[1]}\nparent   ${b[2]}\nwhen     ${b[3]}\nseen     ${b[4]}×</pre></div>
          <div class="ev"><h4>Image config</h4><pre>ENTRYPOINT  …/hipstershop/bin/AdService\n            a shell script (#!/bin/sh)\n${b[0]} is not declared in the image;\nthe script starts it, and a script\ncan't be resolved statically</pre></div>`); }); },
    foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b> binaries${S.binChk?' · startup <b style="color:var(--ok)">PASS</b>':''}</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
-   kick:'Runtime · same pipeline', title:'Six binaries the image doesn’t declare.',
-   body:()=>S.binOk&&S.binChk?`<div class="task done">Startup check passed. Allow-list ready: 8 binaries.</div><p>The recorded <code>process_exec</code> events were replayed against the allow-list: every binary adservice ran at startup is allowed, nothing it needs would be blocked. Anything else will be denied once Tetragon enforces it.</p>`
-     :S.binOk?`<div class="task">Run the startup check.</div><p>The same idea as the network replay: every exec Tetragon recorded for adservice is run through the proposed allow-list, offline. It passes only if nothing adservice needs would be blocked.</p><button class="btn" id="bchk">Run the startup check</button>`
+   kick:'9 · Runtime · programs', title:'Six binaries the image doesn’t declare.',
+   body:()=>S.binOk&&S.binChk?`<div class="task done">Startup check passed. Allow-list ready: 8 programs.</div><p>Every program adservice ran when it started is on the allow-list, so enforcing it won't stop the container from starting. Any other program will be blocked once Tetragon enforces it.</p>`
+     :S.binOk?`<div class="task">Run the startup check.</div><button class="btn" id="bchk">Run the startup check</button><p><b>What is the startup check?</b> When adservice starts, its script runs these 8 programs. If the allow-list missed one, Tetragon would block it and <b>the container would fail to start</b>. The check replays every program Tetragon recorded at startup against the allow-list, offline, and passes only if all of them are allowed.</p>`
      :`<div class="task">Review them and confirm. Tap a binary for its evidence.</div>
        <p>Tetragon saw adservice's entrypoint <b>script</b> start these six. A script can't be resolved statically, so the product <b>escalates to a person instead of guessing</b>. Here they are part of normal startup.</p>
        <button class="btn" id="chk">Confirm all 6 as needed</button>`,
@@ -499,7 +509,7 @@ const CARDS=[
        <text x="18" y="244" fill="${enf?'#3DD68C':'#F5B947'}" font-size="10">${enf?'only /src/server may open connections':'Cilium allows these for every process in the pod'}</text>
      </svg></div>`; },
    foot:()=>`<span>Cilium: pod → service</span><span>Tetragon: ${S.npp?'<b style="color:var(--ok)">program-level</b>':'<b style="color:var(--warn)">not set</b>'}</span>`,
-   kick:'Runtime · network per process', title:'Inside the pod, which program may connect?',
+   kick:'10 · Runtime · network per process', title:'Inside the pod, which program may connect?',
    body:()=>S.npp?`<div class="task done">Proposed: only <code>/src/server</code> opens connections from frontend.</div>
        <p>Cilium still decides <b>where</b> frontend may connect. Tetragon now decides <b>which program</b> inside the pod may do it. Any other process gets an error from the kernel when it tries to connect.</p>
        <p class="note">Built from the same evidence profile: Tetragon saw one binary in frontend, and every flow it opens comes from it. Not yet run in the lab.</p>`
@@ -518,7 +528,7 @@ const CARDS=[
    bind(){ $('wb').querySelectorAll('[data-gs]').forEach(b=>b.onclick=()=>{ S.gSrc=b.dataset.gs; S.gTry.add(S.gSrc+S.gDst); refresh(true); });
      $('wb').querySelectorAll('[data-gd]').forEach(b=>b.onclick=()=>{ S.gDst=b.dataset.gd; S.gTry.add(S.gSrc+S.gDst); refresh(true); }); },
    foot:()=>`<span>Tetragon, then Cilium</span><span>tried <b>${S.gTry.size}</b></span>`,
-   kick:'Runtime · network per process', title:'Two gates. Neither engine covers it alone.',
+   kick:'11 · Runtime · two gates', title:'Two gates. Neither engine covers it alone.',
    body:()=>`<div class="task ${S.gTry.size>=2?'done':''}">Pick a program and a destination. Try at least two.</div>
      <p><b>Gate 1, Tetragon:</b> is this program allowed to open connections? <b>Gate 2, Cilium:</b> is this destination one frontend needs? A connection opens only if both say yes.</p>`,
    gate:()=>S.gTry.size>=2 },
@@ -528,7 +538,7 @@ const CARDS=[
      return `<div class="list">${r('writes · /tmp/*','JVM temp files · example','EXAMPLE','y')}${r('writes · anywhere else','not seen, not declared',S.fil?'DENY':'ALLOWED',S.fil?'g':'x')}
        ${r('reads · service-account token','adservice never calls the K8s API',S.fil?'DENY':'ALLOWED',S.fil?'g':'x')}${r('reads · app files','image ENTRYPOINT and libraries','NEEDED','b')}</div>`; },
    foot:()=>`<span>source: Tetragon file events</span><span>${S.fil?'<b style="color:var(--ok)">proposed</b>':'open'}</span>`,
-   kick:'Runtime · files', title:'Each workload writes only where it needs to.',
+   kick:'12 · Runtime · files', title:'Each workload writes only where it needs to.',
    body:()=>S.fil?`<div class="task done">Proposed: writes outside the profile are refused by the kernel.</div><p>The same evidence links the layers: adservice never calls the Kubernetes API, so it has no reason to read its service-account token.</p><p class="note">Design. File events are the next lab step; the write path above is an example.</p>`
      :`<p>Tetragon can see which files a workload writes and reads, and refuse the ones outside its profile. Today every path is open.</p><button class="btn" id="fil">Propose the file profile</button>`,
    bindTxt(){ if($('fil')) $('fil').onclick=()=>{ $('fil').disabled=true; later(500,()=>{ S.fil=true; refresh(true); }); }; },
@@ -541,7 +551,7 @@ const CARDS=[
        <div class="row"><span class="a">proposal</span><span class="e">securityContext: drop ALL</span><span class="v"><i class="tag ${S.prv?'g':'b'}">${S.prv?'PROPOSED':'READY'}</i></span></div>
        <div class="row"><span class="a">proposal</span><span class="e">allowPrivilegeEscalation: false</span><span class="v"><i class="tag ${S.prv?'g':'b'}">${S.prv?'PROPOSED':'READY'}</i></span></div></div>`; },
    foot:()=>`<span>granted vs used</span><span>${S.prv?'<b style="color:var(--ok)">proposed</b>':'open'}</span>`,
-   kick:'Runtime · privileges', title:'Privileges it was granted but never uses.',
+   kick:'13 · Runtime · privileges', title:'Privileges it was granted but never uses.',
    body:()=>S.prv?`<div class="task done">Proposed: drop every capability adservice never used.</div><p>This one is a change to the Deployment itself, reviewed like any other proposal. The product keeps watching, so a new release that needs a capability shows up as evidence, not as an outage.</p><p class="note">Design. Capability recording is a next lab step; "0 used" is an example.</p>`
      :`<p>Linux splits root's power into capabilities. A container starts with a default set, and most applications use none of them. Tetragon records which ones the kernel is actually asked for.</p><button class="btn" id="prv">Propose the privilege profile</button>`,
    bindTxt(){ if($('prv')) $('prv').onclick=()=>{ $('prv').disabled=true; later(500,()=>{ S.prv=true; refresh(true); }); }; },
@@ -551,7 +561,7 @@ const CARDS=[
    win(){ return mapSVG(); },
    bind(){ drawReach(S.sel); bindMap(()=>{ refreshFoot(); refreshTxt(); }); },
    foot:()=>`<span>required flows dropped <b>0</b></span><span>unused paths closed <b>116</b></span>`,
-   kick:'Result', title:'Every workload, before and after.',
+   kick:'14 · Result', title:'Every workload, before and after.',
    body:()=>{ const w=S.sel, n=needsOut(w);
      return `<div class="facts"><div><span>workload</span><b>${w}</b></div><div><span>reach before</span><b style="color:var(--bad)">13 targets · any binary</b></div>
        <div><span>reach now</span><b style="color:var(--ok)">${n.length?n.map(k=>SHORT[k]).join(', '):'kube-dns only'}</b></div>
@@ -567,7 +577,7 @@ const CARDS=[
        ${h('files · privileges · design')}${m('write    anywhere · 14 capabilities')}${p('write    its own paths · capabilities it uses')}</div>`; },
    bind(){ $('wb').querySelectorAll('.diff div').forEach((d,i)=>{ d.style.opacity=0; later(120+i*110,()=>{ d.style.transition='opacity .25s'; d.style.opacity=1; }); }); },
    foot:()=>`<span>required flows dropped <b>0</b></span><span>unused paths closed <b>116</b></span>`,
-   kick:'Summary', title:'From default-allow to least privilege.',
+   kick:'15 · Summary', title:'From default-allow to least privilege.',
    body:()=>`<div class="facts"><div><span>Network</span><b style="color:var(--ok)">enforced · lab</b></div>
        <div><span>Programs · 25 binaries</span><b style="color:var(--prog)">ready · lab</b></div>
        <div><span>Net per process · files · privileges</span><b style="color:var(--des)">design</b></div></div>
@@ -602,23 +612,41 @@ function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='R
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
   later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
 function refreshFoot(){ const c=CARDS[at]; $('wf').innerHTML=c.foot?c.foot():''; }
 function refreshTxt(){ const c=CARDS[at], t=$('txt'), y=t.scrollTop;
-  t.innerHTML=`<div class="kick">${c.kick}</div><h1>${c.title}</h1>${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
+  t.innerHTML=`<div class="kick">${c.kick}</div><h1>${c.title}</h1>${c.why?`<div class="whyline"><b>Why this step</b>${c.why}</div>`:''}${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
 function refresh(win){ const c=CARDS[at]; if(win&&!c.map){ const wb=$('wb'), y=wb.scrollTop; wb.innerHTML=c.win(); wb.scrollTop=y; c.bind&&c.bind(); } refreshFoot(); refreshTxt(); }
+const WHY=[
+  'See the starting point: what is enforced in the cluster today.',
+  'Measure the gap for one workload: what it can reach vs what it needs.',
+  'Understand why teams don\u2019t close the gap by hand.',
+  'Build each workload\u2019s profile from what the cluster already records.',
+  'Decide which paths are needed, from evidence, not guesses.',
+  'Turn the verdicts into a policy the engine can enforce.',
+  'Prove the policy breaks nothing before it touches the cluster.',
+  'Apply in safe stages, check live traffic, keep a way back.',
+  'Apply the same method one level down: which programs may run.',
+  'Close the gap Cilium can\u2019t see: which program inside the pod connects.',
+  'See how the two engines combine on one connection.',
+  'Limit where each workload can write and what it can read.',
+  'Remove privileges the workload was given but never uses.',
+  'Check the result for any workload.',
+  'One page: where each layer stands.',
+];
+CARDS.forEach((c,i)=>{ c.why=WHY[i]; });
 const GUIDE=[
-  ()=>document.querySelector('.cmd'),
+  ()=>null,
   ()=>S.explored.size?null:$('wb').querySelector('.nd[data-w="adservice"]'),
   ()=>null,
   ()=>null,
   ()=>$('cls'),
   ()=>S.evOpened?null:document.querySelector('.rule'),
   ()=>$('run'),
-  ()=>$('appr'),
+  ()=>S.lvl>=3&&!S.rb?$('rbk'):$('appr'),
   ()=>$('chk')||$('bchk'),
   ()=>$('npp'),
   ()=>S.gTry.size?$('wb').querySelector('[data-gs]:not(.on)'):$('wb').querySelector('[data-gd]:not(.on)'),
@@ -637,14 +665,16 @@ function guide(){
   gEl=el; const tip=$('gtip');
   if(!el){ tip.hidden=true; return; }
   if(!(el instanceof SVGElement)) el.classList.add('guide');
+  { const box=el.closest&&el.closest('#txt,#wb'); if(box){ const b=box.getBoundingClientRect(), q=el.getBoundingClientRect();
+      if(q.bottom>b.bottom-4||q.top<b.top+30) box.scrollTop+=q.top-b.top-Math.max(36,(b.height-q.height)/2); } }
   const ph=$('phone').getBoundingClientRect(), r=el.getBoundingClientRect();
   if(r.width===0||r.bottom<ph.top||r.top>ph.bottom){ tip.hidden=true; return; }
-  if(r.width>ph.width*.6){ tip.hidden=true; return; }   // wide buttons: the outline is enough, a label would cover the text
   $('gtipT').textContent=el===$('next')?'Next':'Tap here';
   tip.hidden=false; const up=r.top-ph.top<70;
   tip.classList.toggle('up',up);
-  tip.style.left=(r.left-ph.left+r.width/2-tip.offsetWidth/2)+'px';
-  tip.style.top=(up?r.bottom-ph.top+4:r.top-ph.top-tip.offsetHeight-4)+'px';
+  const wide=r.width>ph.width*.6;   // wide buttons: label on the right edge, so it doesn't cover the text above
+  tip.style.left=(wide?r.right-ph.left-tip.offsetWidth-14:r.left-ph.left+r.width/2-tip.offsetWidth/2)+'px';
+  tip.style.top=(up?r.bottom-ph.top+4:wide?r.top-ph.top-tip.offsetHeight+8:r.top-ph.top-tip.offsetHeight-4)+'px';
 }
 setInterval(()=>{ try{ guide(); }catch(e){} }, 250);
 function nav(){ const c=CARDS[at], ok=c.gate(), last=at===CARDS.length-1; $('next').disabled=!ok||last; $('next').textContent='Next';
