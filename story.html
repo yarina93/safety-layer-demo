@@ -263,6 +263,27 @@ svg text{font-family:var(--mono)}
 .tile2 em.a{color:var(--ok)}
 .tile2 i{font-style:normal;color:var(--dim);font-size:12px}
 .tile2 em.b:empty + i{display:none}
+/* enforce stages */
+.stg2{display:grid;gap:6px;margin:0 0 8px}
+.sg{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel2)}
+.sg.now{border-color:var(--ink)}.sg.ok{border-color:rgba(61,214,140,.5)}.sg.wait{opacity:.6}
+.sgh{display:flex;align-items:center;gap:8px}
+.sgh i{font-style:normal;font:700 11px var(--mono);width:20px;height:20px;border-radius:6px;display:grid;place-items:center;border:1px solid var(--line);color:var(--muted)}
+.sg.ok .sgh i{background:var(--ok);border-color:var(--ok);color:#0A0D14}.sg.now .sgh i{border-color:var(--ink);color:var(--ink)}
+.sgh b{font-size:13.5px;color:var(--ink)}.sgh em{margin-left:auto;font-style:normal;font:800 9px var(--mono);letter-spacing:.06em;color:var(--muted)}
+.sg.ok .sgh em{color:var(--ok)}.sg.now .sgh em{color:var(--ink)}
+.sg p{margin:4px 0 2px!important;font-size:12.5px!important}
+.sg small{display:block;font:600 10px var(--mono);color:var(--muted)}
+.sg .btn{margin:7px 0 0}.btn.sm{padding:7px 10px;font-size:12.5px}
+.lv{font-size:11.5px;color:var(--ok);margin-top:5px}
+/* network per process comparison */
+.npt{display:grid;gap:5px}
+.npt .nh,.npt .nr{display:grid;grid-template-columns:minmax(0,1fr) 74px 74px;gap:6px;align-items:center}
+.npt .nh span{font:700 9px var(--mono);color:var(--muted);text-transform:uppercase}.npt .nh b{font:800 9.5px var(--mono);color:var(--muted);text-align:center;text-transform:uppercase}
+.npt .nr{padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);font-size:11px}
+.npt .nr span{color:var(--ink)}.npt .nr small{display:block;color:var(--muted);font-size:9.5px}
+.npt .nr.gap{border-color:var(--warn);background:rgba(245,185,71,.06)}
+.npt em{font-style:normal;text-align:center;font-size:10.5px}.okc{color:var(--ok)}.noc{color:var(--bad)}.dim{color:var(--dim)}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -530,13 +551,17 @@ const CARDS=[
    bind(){ drawReach(S.sel); bindMap(()=>refreshFoot()); },
    foot:()=>`<span>kube-api <b style="color:${S.lvl>=1?'var(--ok)':'var(--bad)'}">${S.lvl>=1?'denied':'open'}</b> · world <b style="color:${S.lvl>=2?'var(--ok)':'var(--bad)'}">${S.lvl>=2?'denied':'open'}</b></span><span>${SHORT[S.sel]} reach <b>${reachOf(S.sel)}</b></span>`,
    kick:'8 · Enforce', title:'Staged enforcement with verification and rollback.',
-   body:()=>`<div class="task ${S.lvl>=3&&S.rb?'done':''}">${S.lvl>=3?(S.rb?'All 3 stages enforced, and you saw the way back. Tap workloads to check their reach.':'All 3 enforced. Now try the way back: roll back stage 3.'):'Approve the stages one by one and watch the map.'}</div>
-     ${S.lvl<3?`<button class="btn" id="appr">Approve stage ${S.lvl+1}</button>`:''}
-     ${S.lvl>0?`<div class="live"><b>Live check · stage ${S.lvl}</b> Hubble watches the required flows after apply. A drop on any of them rolls the stage back automatically. <i class="dtag">DESIGN</i></div>
-       <button class="btn sec" id="rbk">↶ Roll back stage ${S.lvl}</button>`:''}
-     <ol class="stg">${[['Namespace isolation','deny kube-apiserver and cross-namespace'],['Egress lock','deny egress to world'],['East-west isolation','per-workload allow-lists, 116 unused paths denied']]
-       .map(([t,d],i)=>`<li class="${S.lvl>i?'ok':S.lvl===i?'now':''}"><i>${S.lvl>i?'✓':i+1}</i><span><b>${t}</b> · ${d}</span></li>`).join('')}</ol>
-     <p>Each stage is its own policy set: applied after approval, rolled back in one step.</p>`,
+   body:()=>{ const ST=[['Namespace isolation','Deny the kube-apiserver and traffic from other namespaces.','closes: K8s API for 12 workloads'],
+       ['Egress lock','Deny connections from the namespace to the internet.','closes: internet egress for 12 workloads'],
+       ['East-west isolation','Each workload may talk only to the services it needs.','closes: 116 unused paths, keeps 17 required']];
+     const done=S.lvl>=3&&S.rb>0;
+     return `<div class="task ${done?'done':''}">${done?'All 3 stages enforced, and you saw the way back.':S.lvl>=3?'All 3 enforced. Now try the way back: roll back stage 3.':`Approve stage ${S.lvl+1}. Watch the map change.`}</div>
+       <div class="stg2">${ST.map(([t,d,c],i)=>{ const st=S.lvl>i?'ok':S.lvl===i?'now':'wait';
+         return `<div class="sg ${st}"><div class="sgh"><i>${st==='ok'?'✓':i+1}</i><b>${t}</b><em>${st==='ok'?'ENFORCED':st==='now'?'NEXT':'PENDING'}</em></div>
+           ${st==='ok'?'':`<p>${d}</p><small>${c} · flow replay: 0 required flows dropped</small>`}
+           ${st==='now'?`<button class="btn" id="appr">Approve stage ${i+1}</button>`:''}
+           ${st==='ok'?`<div class="lv">${c} · live check: 0 drops</div>${i===S.lvl-1&&!done?`<button class="btn sec sm" id="rbk">↶ Roll back stage ${i+1}</button>`:''}`:''}</div>`; }).join('')}</div>
+       <p class="note">Each stage is its own policy set: applied only after approval, rolled back in one step. A drop on a required flow rolls it back automatically.</p>`; },
    bindTxt(){ if($('appr')) $('appr').onclick=e=>{ e.target.disabled=true; e.target.textContent='Applying…'; later(600,()=>{ S.lvl++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); };
      if($('rbk')) $('rbk').onclick=e=>{ e.target.disabled=true; e.target.textContent='Rolling back…'; later(600,()=>{ S.lvl--; S.rb++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); }; },
    gate:()=>S.lvl>=3&&S.rb>0 },
@@ -574,27 +599,20 @@ const CARDS=[
      if($('bchk')) $('bchk').onclick=()=>{ $('bchk').disabled=true; $('bchk').textContent='Replaying exec events…'; later(1200,()=>{ S.binChk=true; refresh(true); }); }; },
    gate:()=>S.binOk&&S.binChk },
  { // 10. network per process: Cilium works per pod, Tetragon per program - open the pod
-   pipe:1, wt:'frontend pod · network per process', wm:'design',
-   win(){ const enf=S.npp;
-     const dst=[['checkout:5050',70],['catalog:3550',125],['cart:7070',180]];
-     const ln=(y0,cls)=>dst.map(([d,y])=>`<path class="ln ${cls}" d="M150 ${y0} C190 ${y0} 190 ${y} 220 ${y}"/>`).join('');
-     return `<div class="pod ${enf?'enf':''}"><svg viewBox="0 0 330 250">
-       <rect x="8" y="22" width="150" height="206" rx="12" fill="none" stroke="#3A4660" stroke-dasharray="4 4"/>
-       <text x="18" y="40" fill="#7D889C" font-size="10">frontend pod · one identity for Cilium</text>
-       <g class="proc"><rect x="20" y="70" width="128" height="44" rx="8"/><text x="32" y="90" fill="#E6EAF2" font-size="11" font-weight="700">/src/server</text><text x="32" y="105" fill="#7D889C" font-size="9.5">the application</text></g>
-       <g class="proc"><rect x="20" y="150" width="128" height="44" rx="8"/><text x="32" y="170" fill="#E6EAF2" font-size="11" font-weight="700">any other process</text><text x="32" y="185" fill="#7D889C" font-size="9.5">not in the profile</text></g>
-       ${ln(92,'')}${ln(172,'other')}
-       <path class="xx" d="M153 165 L165 177 M165 165 L153 177"/>
-       ${dst.map(([d,y])=>`<circle cx="226" cy="${y}" r="5" fill="#10151F" stroke="#3DD68C" stroke-width="1.6"/><text x="236" y="${y+3.5}" fill="#B9C2D3" font-size="9.5">${d}</text>`).join('')}
-       <text x="18" y="244" fill="${enf?'#3DD68C':'#F5B947'}" font-size="10">${enf?'only /src/server may open connections':'Cilium allows these for every process in the pod'}</text>
-     </svg></div>`; },
-   foot:()=>`<span>Cilium: pod → service</span><span>Tetragon: ${S.npp?'<b style="color:var(--ok)">program-level</b>':'<b style="color:var(--warn)">not set</b>'}</span>`,
+   pipe:1, wt:'frontend pod · connection attempts', wm:'design',
+   win(){ const R=[['/src/server','the app','checkout:5050','ok','ok'],['/src/server','the app','redis-cart:6379','no','no'],
+       ['other process','not in the profile','checkout:5050','ok','no'],['other process','not in the profile','internet','no','no']];
+     const c=v=>v==='ok'?'<b class="okc">✓ opens</b>':'<b class="noc">✕ blocked</b>';
+     return `<div class="npt"><div class="nh"><span>who connects · to where</span><b>Cilium only</b><b>+ Tetragon</b></div>
+       ${R.map(([w,ws,d,a,b],i)=>`<div class="nr ${i===2?'gap':''}"><span><b>${w}</b> → ${d}<small>${ws}</small></span><em>${c(a)}</em><em>${S.npp?c(b):'<b class="dim">—</b>'}</em></div>`).join('')}</div>
+       <div class="c" style="margin-top:6px">${S.npp?'# row 3: same pod, same destination. Only the program differs.':'# Cilium sees the pod, not the program inside it'}</div>`; },
+   foot:()=>`<span>Cilium: which destination</span><span>Tetragon: ${S.npp?'<b style="color:var(--ok)">which program</b>':'<b style="color:var(--warn)">not set</b>'}</span>`,
    kick:'11 · Runtime · network per process', title:'Process-level network control inside the pod.',
-   body:()=>S.npp?`<div class="task done">Proposed: only <code>/src/server</code> opens connections from frontend.</div>
-       <p>Cilium still decides <b>where</b> frontend may connect. Tetragon now decides <b>which program</b> inside the pod may do it. Any other process gets an error from the kernel when it tries to connect.</p>
-       <p class="note">Built from the same evidence profile: Tetragon saw one binary in frontend, and every flow it opens comes from it. Not yet run in the lab.</p>`
-     :`<p>Cilium enforces per pod: any process inside frontend inherits frontend's network permissions. That's the remaining gap after network isolation.</p>
-       <p>Tetragon sees which binary opens each connection. The product combines both into one decision.</p><button class="btn" id="npp">Propose network per process</button>`,
+   body:()=>S.npp?`<div class="task done">Added: only <code>/src/server</code> may open connections from frontend.</div>
+       <p>Look at the outlined row. With Cilium only, <b>any process</b> inside frontend reaches checkout, because Cilium allows the <b>pod</b>. With Tetragon, the kernel also checks <b>which program</b> is connecting, so only the app gets through.</p>
+       <p class="note">The allow-list comes from the evidence profile: in the lab, every connection frontend opened came from /src/server. Not yet enforced in the lab.</p>`
+     :`<p>Each row is a connection attempt from inside the frontend pod. Today Cilium decides by <b>pod</b>: every process in the pod gets the same permissions.</p>
+       <p>The outlined row is the gap: a process that isn't the app, connecting to an allowed destination.</p><button class="btn" id="npp">Add the Tetragon rule</button>`,
    bindTxt(){ if($('npp')) $('npp').onclick=()=>{ $('npp').disabled=true; later(500,()=>{ S.npp=true; refresh(true); }); }; },
    gate:()=>S.npp },
  { // 11. two gates: try a program and a destination, see which engine decides
