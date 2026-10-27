@@ -659,7 +659,7 @@ const CARDS=[
    win(){ return mapSVG(); },
    bind(){ const show=()=>{ const keep=S.lvl; S.lvl=S.ba==='before'?0:3; drawReach(S.sel); const m=$('mp'); if(m){ m.classList.toggle('before',S.ba==='before'); if(S.ba==='before') $('reach').innerHTML=''; } S.lvl=keep; };
      show(); bindMap(()=>{ show(); refreshFoot(); refreshTxt(); });
-     if(!S.baSeen){ S.ba='before'; show(); later(1600,()=>{ S.ba='after'; S.baSeen=true; show(); refreshFoot(); refreshTxt(); }); } CARDS[at]._show=show; },
+     if(!S.baSeen){ S.ba='before'; S.baSeen=true; show(); refreshFoot(); } CARDS[at]._show=show; },
    foot:()=>`<span>${S.ba==='before'?'<b style="color:var(--bad)">before</b> · every path open':'<b style="color:var(--ok)">after</b> · only required flows'}</span><span>unused ${S.ba==='before'?'open <b style="color:var(--bad)">116</b>':'closed <b style="color:var(--ok)">116</b>'}</span>`,
    kick:'15 · Result · network', title:'Network exposure: before and after.',
    body:()=>{ const w=S.sel, n=needsOut(w);
@@ -764,7 +764,7 @@ const GUIDE=[
   ()=>S.gTry.size?$('wb').querySelector('[data-gs]:not(.on)'):$('wb').querySelector('[data-gd]:not(.on)'),
   ()=>$('fil'),
   ()=>$('prv'),
-  ()=>S.baT.has('b')?(S.baT.has('a')?null:$('vaf')):$('vb4'),
+  ()=>S.baT.has('a')?(S.baT.has('b')?null:$('vb4')):$('vaf'),
   ()=>null,
   ()=>$('again'),
 ];
