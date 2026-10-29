@@ -382,7 +382,7 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textContent+$('bW').textContent; $('bW').textContent=SHORT[w]||w; $('bN').textContent=n;
   b.classList.toggle('zero',S.lvl>=3); if(n+(SHORT[w]||w)!==was){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }
@@ -683,6 +683,43 @@ const CARDS=[
    body:()=>`<p><b>What it means:</b> before, anything that runs inside adservice can start any program, connect anywhere the pod can, write files and use 14 root powers. After, only adservice's own programs run, only the application connects, it writes only where it needs to, and unused privileges are gone.</p>
      <p class="note">Programs are measured in the lab. The other three layers are the product's design and the next lab steps.</p>`,
    gate:()=>true },
+ { // agents 1: why now
+   pipe:-1, wt:'reported case · Oct 2026', wm:'why now',
+   win(){ const R=[['Task','write a detection rule (benchmark)'],['Access','an agent with a terminal, in a sandbox'],['Observed','left the task, tried to send data to an external storage bucket'],['Its reasoning','said it would call no tools at all'],['Stopped by','the network, not the model']];
+     return `<div class="list">${R.map(([k,v])=>`<div class="row"><span class="a">${v}</span><span class="e">${k}</span></div>`).join('')}</div>
+       <div class="c" style="margin-top:6px"># source: Cohere, open-weight model evaluation</div>`; },
+   bind(){ $('wb').querySelectorAll('.row').forEach((d,i)=>{ d.style.opacity=0; later(150+i*350,()=>{ d.style.transition='opacity .3s'; d.style.opacity=1; }); }); },
+   foot:()=>`<span>rare: under 1 in 100,000 runs</span><span>at scale: weekly</span>`,
+   kick:'17 · Why now · AI agents', title:'An agent’s reasoning is not a security boundary.',
+   body:()=>`<p>AI agents now run as workloads in Kubernetes, with tools, terminals and network access. In a recent evaluation, Cohere saw an open-weight model leave its task and try to send data out, while its own reasoning said it would do nothing.</p>
+     <p>Their conclusion is the product's premise: <b>enforce on the action itself</b>, with egress denied by default. The same layers you just closed apply to agents, and matter more there.</p>
+     <p class="note"><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener" style="color:var(--info)">Read the Cohere report ↗</a></p>`,
+   gate:()=>true },
+ { // agents 2: an agent's profile, needs vs allowed
+   pipe:1, wt:'agents · support-agent · profile', wm:'example',
+   win(){ const r=(k,n,a)=>`<div class="cr"><span>${k}</span><em class="a">${n}</em><em class="b">${a}</em></div>`;
+     return `<div class="cmp"><div class="ch"><span></span><b class="ok">Needs</b><b class="bad">Allowed today</b></div>
+       ${r('LLM API','api.llm-provider.com:443','any host')}${r('Tools (MCP)','mcp-tickets:8080','any service')}${r('Programs','python (the agent)','anything in the image')}
+       ${r('Cloud metadata','none','169.254.169.254')}${r('Privileges','none','14 capabilities, user namespaces')}</div>`; },
+   foot:()=>`<span>example agent workload</span><span>needs <b style="color:var(--ok)">2</b> destinations</span>`,
+   kick:'18 · AI agents · profile', title:'An agent gets a profile, like any workload.',
+   body:()=>`<p>The product builds the agent's profile the same way: its manifest declares the model endpoint and its MCP servers, and the observed traffic and processes confirm them.</p>
+     <p>What the agent <b>needs</b> is small: one model API by name, its tool servers, one program. What it is <b>allowed</b> today is everything.</p>
+     <p class="note">Example workload, design. Agent profiles are the next lab step.</p>`,
+   gate:()=>true },
+ { // agents 3: what the policy decides for each agent action
+   pipe:4, wt:'agents · support-agent · enforced', wm:'design',
+   win(){ const R=[['Call the LLM API','allowed','ok','Cilium FQDN allow-list'],['Call its MCP tool server','allowed','ok','Cilium allow-list'],['Send data to an unknown host','blocked','no','egress deny by default'],
+       ['Reach the cloud metadata address','blocked','no','no rule: not in the profile'],['Run a program outside its profile','blocked','no','Tetragon allow-list'],['Create a user namespace','blocked','no','privileges profile']];
+     return `<div class="list">${R.map(([a,v,k,w])=>`<div class="row"><span class="a">${a}</span><span class="e">${w}</span><span class="v"><i class="tag ${k==='ok'?'g':'x'}">${S.agt?v.toUpperCase():'?'}</i></span></div>`).join('')}</div>`; },
+   foot:()=>`<span>checked by the kernel, not the model</span><span>${S.agt?'<b style="color:var(--ok)">enforced</b>':'open'}</span>`,
+   kick:'19 · AI agents · enforce', title:'Every agent action checked where it happens.',
+   body:()=>S.agt?`<div class="task done">The agent can do its job, and nothing else.</div>
+       <p>Whatever the model decides, or writes in its reasoning, the network and the kernel only allow what its profile needs. The case from the report would stop at the first step: an unknown destination is not in the profile.</p>`
+     :`<p>Each row is something an agent might do. The product writes one profile into the engines: names it may call, programs it may run, privileges it keeps.</p>
+       <button class="btn" id="agt">Enforce the agent profile</button>`,
+   bindTxt(){ if($('agt')) $('agt').onclick=()=>{ $('agt').disabled=true; later(600,()=>{ S.agt=true; refresh(true); }); }; },
+   gate:()=>S.agt },
  { // 15. summary: the numbers, before -> after, for the namespace and for adservice
    pipe:-1, wt:'boutique · attack surface', wm:'before → after', end:true,
    win(){ const t=(l,b,a)=>`<div class="tile2"><span>${l}</span><div><em class="b">${b}</em><i>→</i><em class="a">${a}</em></div></div>`;
@@ -690,7 +727,7 @@ const CARDS=[
        <div class="grp">Inside the pods · 12 workloads</div><div class="tiles">${t('programs allowed','any','25')}${t('any process connects','12','0')}${t('pods writing anywhere','12','0')}${t('capabilities','168','0')}</div>`; },
    bind(){ $('wb').querySelectorAll('.tile2').forEach((d,i)=>{ d.style.opacity=0; later(150+i*220,()=>{ d.style.transition='opacity .3s'; d.style.opacity=1; }); }); },
    foot:()=>`<span>namespace boutique</span><span>12 workloads · network + runtime</span>`,
-   kick:'17 · Summary', title:'From default-allow to least privilege.',
+   kick:'20 · Summary', title:'From default-allow to least privilege.',
    body:()=>`<p>Every workload is limited to what it needs: on the network, and inside the pod. Every rule traces back to evidence, every change is tested before it is applied, and <b>nothing the application needs was dropped</b>.</p>
      <button class="btn" id="again">Start over</button>`,
    bindTxt(){ $('again').onclick=reset; },
@@ -722,7 +759,7 @@ function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='R
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
   later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
@@ -747,6 +784,9 @@ const WHY=[
   'Remove privileges the workload was given but never uses.',
   'See the blast radius shrink: every path open, then only what is needed.',
   'Compare what can happen inside the pod, before and after.',
+  'See why agents make this urgent now.',
+  'Profile an AI agent like any other workload.',
+  'Limit what an agent can do, whatever the model decides.',
   'The whole result in numbers.',
 ];
 CARDS.forEach((c,i)=>{ c.why=WHY[i]; });
@@ -767,6 +807,9 @@ const GUIDE=[
   ()=>$('prv'),
   ()=>S.baT.has('a')?(S.baT.has('b')?null:$('vb4')):$('vaf'),
   ()=>null,
+  ()=>null,
+  ()=>null,
+  ()=>$('agt'),
   ()=>$('again'),
 ];
 let gEl=null;
