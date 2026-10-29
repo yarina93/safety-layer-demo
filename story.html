@@ -9,11 +9,11 @@
 <title>eBPF Safety Layer · Guided Tour</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="eBPF Safety Layer · Zero Trust for Kubernetes workloads">
-<meta property="og:description" content="A guided tour: from default-allow to least privilege on the eBPF engines you already run, network and runtime, without breaking production. Lab data.">
+<meta property="og:description" content="A guided tour: from default-allow to least privilege with eBPF, network and runtime, without breaking production. Lab data.">
 <meta property="og:url" content="https://yarina93.github.io/safety-layer-demo/">
 <meta name="twitter:card" content="summary">
 
-<meta name="description" content="Hands-on: take a Kubernetes namespace from default-allow to least privilege on the eBPF engines you already run. You explore, decide and verify; every value is lab evidence.">
+<meta name="description" content="Hands-on: take a Kubernetes namespace from default-allow to least privilege with eBPF. You explore, decide and verify; every value is lab evidence.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
 <style>
@@ -397,6 +397,28 @@ svg text{font-family:var(--mono)}
 .erule{font:600 10px var(--mono);color:var(--ink);padding:4px 8px;margin-top:3px;border-left:2px solid var(--ok);background:rgba(61,214,140,.06);border-radius:0 5px 5px 0}
 .eyaml{margin-top:6px;background:transparent;border:1px solid var(--line);color:var(--info);border-radius:6px;padding:5px 9px;font:700 10px var(--mono)}
 .pipe.gone{display:none}
+.cl{position:relative;padding:8px 10px;font:600 11px var(--mono)}
+.clh{display:flex;justify-content:space-between;color:var(--muted);font-size:9.5px;margin-bottom:4px}
+.clr{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;margin-bottom:3px;border-radius:6px;border:1px solid var(--line);color:var(--muted);opacity:.2;transition:all .35s}
+.clr.on{opacity:1;color:var(--ink);border-color:rgba(255,92,92,.45);background:rgba(255,92,92,.08)}
+.clr em{font-style:normal;font-weight:800;color:var(--bad)}
+.clr.ok{border-color:rgba(61,214,140,.5);background:rgba(61,214,140,.08)}.clr.ok em{color:var(--ok)}
+.csw{position:absolute;left:4px;right:4px;top:22px;height:3px;border-radius:2px;background:var(--ok);box-shadow:0 0 10px var(--ok);opacity:0}
+.csw.go{opacity:1;animation:csw 1.95s linear forwards}
+@keyframes csw{from{top:22px}to{top:calc(100% - 6px)}}
+.rp{font:600 10px var(--mono)}.rph{display:grid;grid-template-columns:1fr 70px 8px 64px;gap:4px;color:var(--muted);font-size:8.5px;margin-bottom:5px}.rph span:nth-child(2){grid-column:2/4;text-align:center}.rph span:last-child{text-align:right}
+.rpl{display:grid;grid-template-columns:1fr 70px 8px 64px;gap:4px;align-items:center;padding:7px 6px;border:1px solid var(--line);border-radius:7px;margin-bottom:5px}
+.rps b{display:block;color:var(--ink);font-size:9.5px}.rps small{color:var(--muted);font-size:8.5px}
+.rpt{position:relative;height:10px;overflow:hidden}.rpt::before{content:'';position:absolute;left:0;right:0;top:4.5px;height:1px;background:var(--line)}
+.rpt i{position:absolute;top:2px;left:-8px;width:6px;height:6px;border-radius:50%;background:var(--info);opacity:0}
+.rpt.go i{animation:rpd .7s linear infinite;animation-delay:calc(var(--d) + var(--k,0s))}.rpt i:nth-child(2){--k:.23s}.rpt i:nth-child(3){--k:.46s}
+@keyframes rpd{0%{left:-8px;opacity:1}100%{left:100%;opacity:1}}
+.rpg{width:4px;height:22px;border-radius:2px;background:var(--info)}
+.rpl em{font-style:normal;text-align:right;font-weight:800;font-size:9px;color:var(--muted)}
+.rpl.ok{border-color:rgba(61,214,140,.45)}.rpl.ok em{color:var(--ok)}.rpl.bad{border-color:rgba(255,92,92,.6);background:rgba(255,92,92,.06)}.rpl.bad em{color:var(--bad)}
+.rpl.cl em{color:var(--info)}.rpl.warn em{color:var(--warn)}
+.rpn{margin-top:6px;color:var(--muted);font-size:9.5px;text-align:center}.rpn b{color:var(--ink)}
+.cover .cmap{flex-shrink:0}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -409,7 +431,7 @@ svg text{font-family:var(--mono)}
 .cover h1{font-size:clamp(24px,7.4vw,30px);line-height:1.12;letter-spacing:-.02em;margin:0;text-wrap:balance}
 .cover .lead{margin:0;color:var(--text);font-size:15px}
 .cover .why{margin:0;padding:10px 12px;border-left:3px solid var(--ok);background:var(--panel);border-radius:0 10px 10px 0;font-size:14px;font-weight:600;color:var(--ink)}
-.cover .cmap{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:4px;height:clamp(170px,30dvh,250px)}
+.cover .cmap{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:4px;height:auto}
 .cover .cmap svg{display:block;width:100%;height:100%}
 .cover .cap{display:flex;justify-content:space-between;font:600 10.5px var(--mono);color:var(--muted);margin-top:-6px}
 .cover .cap b{color:var(--bad)}
@@ -454,9 +476,9 @@ svg text{font-family:var(--mono)}
   <section class="cover" id="cover" aria-label="Start">
     <div class="ck"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#2B3A55"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#E6EAF2" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#3DD68C"/></svg>Decision &amp; Safety Layer · guided tour</div>
     <h1>Zero Trust for every Kubernetes workload, without breaking production</h1>
-    <p class="lead">Workloads are allowed far more than they use. The product builds each one's allow-list from manifests and observed behavior, then enforces it with the network and runtime engines the cluster already runs, stage by stage.</p>
+    <p class="lead">Every workload, and every AI agent, is allowed far more than it uses: on the network and inside the pod. The product decides what each one needs, from evidence, and enforces it in the kernel with eBPF engines such as Cilium and Tetragon.</p>
     <div class="cmap" id="cmap"><div class="pin" id="pin"></div></div>
-    <div class="cap"><span id="cL">boutique · default-allow today</span><span id="cR">adservice reaches <b id="cN">0</b></span></div>
+    <div class="cap"><span id="cL">boutique · default-allow today</span><span id="cR">open <b id="cN">0</b>/7 layers</span></div>
     <p class="why">eBPF engines like Cilium and Tetragon can enforce. Deciding what to allow without breaking production is the hard part. That is what this product does.</p>
     <p style="margin:0;font-size:12.5px;color:var(--muted)">Shown here on Cilium and Tetragon. The decision layer is engine-agnostic: the same profile can be written as policy for other network and runtime engines.</p>
     <div class="go"><button class="btn" id="start">Start the tour →</button><small>about 3 min · you act as the platform engineer · lab data</small></div>
@@ -495,7 +517,7 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 const ASL=['K8s API','Internet','Pods','Programs','Proc→net','Files','Privileges'];
 function meter(){ const c=CARDS[at], i=c._i; let n=0;
@@ -696,7 +718,7 @@ const CARDS=[
    foot:()=>`<span>boutique: <b>133</b> paths open · <b>17</b> needed</span><span>step <b>${Math.min(S.prb,4)}/4</b></span>`,
    kick:'Problem · why it stays open', title:'Locking down is a decision that expires every release.',
    body:()=>{ const t=[
-     `<p>Red: <b>116 paths</b> allowed but never used. That is the attack surface, and the engines to close it are already installed.</p>`,
+     `<p>Red: <b>116 paths</b> allowed but never used. That is the attack surface.</p>`,
      `<p>The team writes the policy by hand. The gap closes: only the <b>17 needed paths</b> stay open.</p>`,
      `<p>Release v4 adds one dependency. Nobody updated the policy, so the new flow is <b>dropped</b>. Checkout is down.</p>`,
      `<p>The fix under pressure is a rollback: <b>open again</b>. That's why <b>58% of organizations</b> leave most workloads without network policy (Fairwinds 2024).</p>`,
@@ -709,8 +731,8 @@ const CARDS=[
    bind(){ $('wb').querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ S.eng=b.dataset.e; S.engSeen.add(S.eng); $('wb').innerHTML=engHTML(); CARDS[at].bind(); refreshTxt(); refreshFoot(); });
      $('eyaml').onclick=()=>sheet(`adservice · ${ENG[S.eng][1]}`,'generated from the profile',`<div class="ev"><h4>${ENG[S.eng][0]}</h4><pre>${ENG[S.eng][2]}</pre></div>`); },
    foot:()=>`<span>${['kubearmor','sc'].includes(S.eng)?'design':'lab'} · ${ENG[S.eng][0]}</span><span>viewed <b>${S.engSeen.size}/4</b></span>`,
-   kick:'Solution · one decision', title:'Decide once. Enforce with the engines you already run.',
-   body:()=>`<p>One profile, written in each engine's native format. “Only java connects” becomes a Cilium rule for <i>where</i> and a Tetragon rule for <i>which process</i>.</p>
+   kick:'Solution · one decision', title:'Decide once. Enforce on any engine.',
+   body:()=>`<p>One profile, written in each engine's native format: the engines a cluster runs today, or the ones deployed with the product. “Only java connects” becomes a Cilium rule for <i>where</i> and a Tetragon rule for <i>which process</i>.</p>
      <div class="task ${S.engSeen.size>=2?'done':''}">Tap another engine and see which profile lines it enforces.</div>`,
    gate:()=>S.engSeen.size>=2 },
  { // special 2: learning is not recording
@@ -802,14 +824,14 @@ const CARDS=[
    gate:()=>S.evOpened },
  { // 7. verify: replay; wrong choices are caught here
    pipe:3, wt:'decision-layer verify', wm:'dry-run',
-   win(){ return `<div class="t" id="vt"><div class="p">decision-layer verify adservice --replay</div>${S.replay?replayOut():'<div class="c"># a test run on real traffic, before applying</div><div>&nbsp;</div><div class="c">recorded connection           new policy says</div><div>frontend → adservice:9555     <span class="ok">still allowed ✓</span></div><div>kubelet  → adservice:9555     <span class="ok">still allowed ✓</span></div><div>… 33,411 recorded connections</div><div>&nbsp;</div><div class="c"># one needed connection blocked = not applied</div>'}</div>`; },
+   win(){ return replayHTML(); },
    foot:()=>`<span>cluster not touched</span><span>result <b style="color:${S.replay==='pass'?'var(--ok)':S.replay?'var(--bad)':'var(--ink)'}">${S.replay?S.replay.toUpperCase():'–'}</b></span>`,
-   kick:'Proof · verify', title:'Pre-deployment validation against recorded traffic.',
-   body:()=>S.replay==='pass'?`<div class="task done">PASS: no required flow would be dropped.</div><p>Safe to enforce. The replay also confirms what it closes: 21 unused paths for adservice.</p>`
+   kick:'Proof · verify', title:'Test the policy on real traffic before it touches the cluster.',
+   body:()=>S.replay==='pass'?`<div class="task done">PASS: no required flow would be dropped.</div><p>Every needed connection still passes. The 21 paths it closes carried no traffic at all.</p><button class="btn sec" id="miss">${S.rpMiss?'Back to the real policy':'What if frontend had been missed?'}</button>`
      :S.replay?`<div class="task">The replay caught a problem. Fix it from the evidence and run it again.</div>
        <p>${replayIssues().map(i=>i.why).join(' ')}</p><button class="btn" id="fix">Apply the evidence verdicts and re-run</button>`
-     :`<div class="task">Run the flow replay.</div><button class="btn" id="run">Run the flow replay</button><p>Every recorded connection is sent through the new policy first. If one the app needs would drop, nothing is applied.</p>`,
-   bindTxt(){ if($('run')) $('run').onclick=runReplay; if($('fix')) $('fix').onclick=()=>{ PATHS.forEach(p=>S.dec[p.k]=p.truth); S.replay=null; refresh(true); later(250,runReplay); }; },
+     :S.rpRun?`<div class="task">Replaying…</div>`:`<div class="task">Run the flow replay.</div><button class="btn" id="run">Run the flow replay</button><p>Hubble recorded every real connection. Each one is run through the new policy, offline. <b>If one the app needs would be dropped, the policy is not applied.</b></p>`,
+   bindTxt(){ if($('run')) $('run').onclick=runReplay; if($('miss')) $('miss').onclick=()=>{ S.rpMiss=!S.rpMiss; refresh(true); }; if($('fix')) $('fix').onclick=()=>{ PATHS.forEach(p=>S.dec[p.k]=p.truth); S.replay=null; refresh(true); later(250,runReplay); }; },
    gate:()=>S.replay==='pass' },
  { // 8. enforce: approve the stages, then check any workload's reach
    pipe:4, wt:'boutique · enforcement', wm:'staged', map:true,
@@ -996,7 +1018,7 @@ const CARDS=[
    bind(){ $('wb').querySelectorAll('.tile2').forEach((d,i)=>{ d.style.opacity=0; later(150+i*220,()=>{ d.style.transition='opacity .3s'; d.style.opacity=1; }); }); },
    foot:()=>`<span>namespace boutique</span><span>12 workloads · network + runtime</span>`,
    kick:'Vision', title:'The decision layer for runtime enforcement.',
-   body:()=>`<p>Least privilege for every workload and every agent: <b>decided from evidence, verified before it is applied, kept current on every release</b>, on the engines the cluster already runs.</p><p>In the lab, boutique went from default-allow to least privilege, and <b>nothing the application needs was dropped</b>.</p>
+   body:()=>`<p>Least privilege for every workload and every agent: <b>decided from evidence, verified before it is applied, kept current on every release</b>, enforced in the kernel.</p><p>In the lab, boutique went from default-allow to least privilege, and <b>nothing the application needs was dropped</b>.</p>
      <button class="btn" id="again">Start over</button>`,
    bindTxt(){ $('again').onclick=reset; },
    gate:()=>true },
@@ -1088,6 +1110,19 @@ function handResult(){
   L.push(miss.length?`<div class="bad"># ${miss.length} required destination${miss.length>1?'s':''} dropped: pages break</div>`:`<div class="ok"># all ${need.length} required destinations allowed</div>`);
   return `<div class="t">${L.join('')}</div>`;
 }
+
+// ---------- verify: recorded connections flow through the new policy
+function replayHTML(){ const d=S.dec, run=S.rpRun&&!S.replay, done=!!S.replay;
+  const ex=d['out-ex']==='keep'||d['in-ex']==='keep';
+  const fe=d['in-fe']==='deny'||S.rpMiss; const L=[['frontend → adservice:9555','144 recorded',fe?'bad':'ok',fe?'DROPPED':'PASSES'],
+    ['kubelet → adservice:9555','583 recorded',d['in-kl']==='deny'?'bad':'ok',d['in-kl']==='deny'?'DROPPED':'PASSES'],
+    ['adservice → kube-dns:53','platform guard',d['out-dns']==='deny'?'bad':'ok',d['out-dns']==='deny'?'DROPPED':'PASSES'],
+    ['21 unused paths','0 recorded',ex?'warn':'cl',ex?'STILL OPEN':'CLOSED']];
+  return `<div class="rp"><div class="rph"><span>recorded traffic · Hubble</span><span>new policy</span><span>result</span></div>
+    ${L.map(([n,c,k,r],i)=>`<div class="rpl ${done?k:''}"><div class="rps"><b>${n}</b><small>${c}</small></div>
+      <div class="rpt ${run&&i<3?'go':''}" style="--d:${i*.15}s"><i></i><i></i><i></i></div><div class="rpg"></div>
+      <em>${done?r:run?'…':'?'}</em></div>`).join('')}
+    <div class="rpn">${run?`replaying <b id="vn">0</b> / ${FLOWS.toLocaleString('en-US')} connections`:done?(S.rpMiss?'<b style="color:var(--bad)">144 real requests would fail · policy NOT applied</b>':`${FLOWS.toLocaleString('en-US')} connections replayed · nothing applied yet`):`${FLOWS.toLocaleString('en-US')} real connections, recorded`}</div></div>`; }
 function replayIssues(){ const d=S.dec, I=[];
   if(d['in-fe']==='deny') I.push({l:`frontend → adservice:9555   <span class="bad">DROP ×144</span>`,why:'Denying frontend would drop 144 real requests: the ads on every page.'});
   if(d['in-kl']==='deny') I.push({l:`kubelet → adservice:9555    <span class="bad">DROP ×583</span>`,why:'Denying the kubelet probe would fail health checks and restart the pod.'});
@@ -1099,12 +1134,10 @@ function replayOut(){ const I=replayIssues(), pass=!I.length;
   return `<div>replaying flows<span class="bar"><i style="width:100%"></i></span></div><div class="c">${FLOWS.toLocaleString('en-US')} / ${FLOWS.toLocaleString('en-US')} Hubble flows</div><div>&nbsp;</div>
     ${pass?`<div>frontend → adservice:9555   <span class="ok">kept ×144</span></div><div>kubelet → adservice:9555    <span class="ok">kept ×583</span></div><div>guard: kube-dns:53          <span class="ok">kept</span></div><div>unused paths                <span class="info">21 closed</span></div>`
       :I.map(i=>`<div>${i.l}</div>`).join('')}<div>&nbsp;</div><div>RESULT  ${pass?'<span class="ok">PASS</span>':'<span class="bad">FAIL</span>'}</div>`; }
-function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='Replaying…'; }
-  const t=$('vt'); t.insertAdjacentHTML('beforeend',`<div>replaying flows<span class="bar"><i id="vb"></i></span></div><div class="c"><span id="vn">0</span> / ${FLOWS.toLocaleString('en-US')} Hubble flows</div>`);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
-  const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
-  later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function runReplay(){ S.replay=null; S.rpRun=true; refresh(true);
+  const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1600); if(vn&&vn.isConnected){ vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1) requestAnimationFrame(f); } }; if(!reduce) requestAnimationFrame(f);
+  later(1900,()=>{ S.rpRun=false; S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
+function reset(){ Object.assign(S,{rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
@@ -1116,7 +1149,7 @@ for(let i=0;i<CARDS.length;i++) CARDS[i]._i=i;
 const WHY=[
   'See what kernel enforcement changes when a workload or agent is compromised.',
   'See the starting point: what is enforced in the cluster today.',
-  'See why the attack surface stays open, even with the engines installed.',
+  'See why the attack surface stays open.',
   'See what the product outputs: one profile, written for each engine.',
   'See how the product learns without trusting everything it sees.',
   'Measure the gap for one workload: what it can reach vs what it needs.',
@@ -1206,30 +1239,22 @@ $('next').onclick=()=>{ if(CARDS[at].gate()) show(at+1); };
 $('back').onclick=()=>show(at-1);
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.target.closest('button')) return; if(e.key==='ArrowRight'&&CARDS[at].gate()) show(at+1); if(e.key==='ArrowLeft') show(at-1); });
 function cover(on){ $('cover').hidden=!on; if(!on) return;
-  const box=$('cmap'); box.querySelectorAll('svg').forEach(x=>x.remove()); box.insertAdjacentHTML('afterbegin',mapSVG());
-  const m=box.querySelector('svg'); m.removeAttribute('id'); m.classList.add('cz');
-  const [ax,ay]=POS.adservice, tg=Object.keys(POS).filter(k=>k!=='adservice').map(k=>POS[k]).concat([API,WORLD]);
-  const g=m.querySelector('#reach'); g.removeAttribute('id'); m.querySelectorAll('.nd').forEach(n=>n.classList.toggle('sel',n.dataset.w==='adservice'));
-  m.style.transformOrigin=`${ax/330*100}% ${ay/246*100}%`;
-  // inside adservice: what the runtime allow-list does (programs from the lab; the rest is the product's design)
-  const ROWS=[['exec','AdService · java','ALLOW','ok'],['exec','any other binary','DENY','no'],['connect','a process other than the app','DENY','no'],['write','outside its own paths','DENY','no'],['privileges','unused capabilities','DROP','no']];
-  $('pin').innerHTML=`<div class="pt"><b>adservice</b><span>inside the pod · runtime</span></div>`+ROWS.map(([v,a,t,k])=>`<div class="pr ${k}"><i>${v}</i><span>${a}</span><em>${t}</em></div>`).join('');
-  const T=f=>timers.push(setTimeout(()=>{ if(!$('cover').hidden) f(); }, reduce?0:0)) ;
+  // the opener: adservice's attack surface on every layer, before and after (same 7 layers as the meter)
+  const L=[['K8s API','reachable','denied'],['Internet','reachable','denied'],['Other pods','any pod','DNS only'],['Programs','any binary','8 allowed'],['Process → network','any process','java only'],['File writes','anywhere','/tmp only'],['Privileges','14 capabilities','0']];
+  const box=$('cmap'); box.innerHTML=`<div class="cl"><div class="clh"><span>adservice · layer</span><span>allowed</span></div>${L.map(([n,b4,af],i)=>`<div class="clr" id="cl${i}"><span>${n}</span><em data-b="${b4}" data-a="${af}">${b4}</em></div>`).join('')}<i class="csw" id="csw"></i></div>`;
   let cancel=false; const at2=(ms,f)=>setTimeout(()=>{ if(!$('cover').hidden&&!cancel) f(); }, ms);
   const cap=(l,r)=>{ $('cL').textContent=l; $('cR').innerHTML=r; };
   const loop=()=>{ if($('cover').hidden) return;
-    // 1. default-allow: draw adservice's reach
-    m.classList.remove('l1','l2','l3','zoom'); box.classList.remove('inside'); g.innerHTML=''; cap('boutique · default-allow today','adservice reaches <b id="cN">0</b>');
-    tg.forEach(([x,y],i)=>at2(300+i*70,()=>{ g.insertAdjacentHTML('beforeend',`<line class="rl" pathLength="1" x1="${ax}" y1="${ay}" x2="${x}" y2="${y}"/>`); $('cN').textContent=i+1; }));
-    // 2. least privilege on the network
-    at2(300+tg.length*70+1200,()=>{ g.innerHTML=''; m.classList.add('l1','l2','l3'); cap('network · least privilege','adservice reaches <b class="okb">DNS only</b>'); });
-    // 3. into the pod: runtime limits
-    at2(300+tg.length*70+2800,()=>{ m.classList.add('zoom'); cap('inside adservice · runtime','allow-list <b class="okb">8 programs</b>'); });
-    at2(300+tg.length*70+3300,()=>{ box.classList.add('inside'); [...$('pin').querySelectorAll('.pr')].forEach((r,i)=>{ r.classList.remove('on'); at2(250+i*300,()=>r.classList.add('on')); }); });
-    at2(300+tg.length*70+7200,loop); };
-  // the tour can start only after the intro has played once
+    box.querySelector('.cl').classList.remove('done'); $('csw').classList.remove('go');
+    L.forEach((_,i)=>{ const r=$('cl'+i); r.className='clr'; const e=r.querySelector('em'); e.textContent=e.dataset.b; });
+    cap('adservice · default-allow today','open <b id="cN" style="color:var(--bad)">0</b>/7 layers');
+    L.forEach((_,i)=>at2(250+i*220,()=>{ $('cl'+i).classList.add('on'); $('cN').textContent=i+1; }));
+    const t1=250+L.length*220+900;
+    at2(t1,()=>{ $('csw').classList.add('go'); cap('least privilege · enforced in the kernel','open <b id="cN" style="color:var(--bad)">7</b>/7 layers'); });
+    L.forEach((_,i)=>at2(t1+150+i*260,()=>{ const r=$('cl'+i); r.classList.add('ok'); const e=r.querySelector('em'); e.textContent=e.dataset.a; const n=6-i; $('cN').textContent=n; if(!n) $('cN').style.color='var(--ok)'; }));
+    at2(t1+150+L.length*260+2600,loop); };
   const st=$('start'); if(!reduce){ st.disabled=true; st.textContent='Watch the intro…'; }
-  at2(reduce?0:300+tg.length*70+3300+5*300+500,()=>{ st.disabled=false; st.textContent='Start the tour →'; st.focus({preventScroll:true}); });
+  at2(reduce?0:250+L.length*220+900+150+L.length*260+400,()=>{ st.disabled=false; st.textContent='Start the tour →'; st.focus({preventScroll:true}); });
   loop(); }
 $('start').onclick=()=>{ cover(false); show(0); };
 show(0); cover(!/skip/.test(location.search));
