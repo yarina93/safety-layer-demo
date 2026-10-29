@@ -59,7 +59,7 @@ button{font:inherit;color:inherit}
 .pipe span.d{color:var(--muted)}.pipe span.n{color:#0A0D14;background:var(--ink);border-color:var(--ink)}
 .pipe.off{opacity:.3}
 /* the window */
-.win{flex:none;height:clamp(250px, 44dvh, 368px);display:flex;flex-direction:column;border-radius:14px;background:var(--panel);border:1px solid var(--line);overflow:hidden}
+.win{flex:none;height:clamp(270px, 53dvh, 450px);display:flex;flex-direction:column;border-radius:14px;background:var(--panel);border:1px solid var(--line);overflow:hidden}
 .wbar{flex:none;display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--panel2);font:600 11px var(--mono);color:var(--muted)}
 .wbar i{width:8px;height:8px;border-radius:50%;background:#2A3344}
 .wbar span{margin-left:4px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -483,6 +483,42 @@ svg text{font-family:var(--mono)}
 .scr i{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font:800 11px var(--mono);font-style:normal;background:var(--panel);border:2px solid var(--dim);color:var(--ink)}
 .scr.on i{border-color:var(--bad);color:var(--bad)}.scr.last i{background:var(--bad);color:#fff;box-shadow:0 0 12px rgba(255,92,92,.6)}
 .scr b{display:block;font:700 12.5px var(--body);color:var(--ink)}.scr small{font:500 10px var(--mono);color:var(--muted)}
+.msv{width:100%;display:block}
+.msv .mpod{fill:rgba(110,168,254,.04);stroke:var(--dim);stroke-dasharray:4 3}.msv .mpod.on{stroke:var(--ok);stroke-dasharray:none;stroke-width:2;filter:drop-shadow(0 0 5px rgba(61,214,140,.45))}
+.msv .mpl{font:700 8.5px var(--mono);fill:var(--muted)}
+.msv .mnode circle{fill:var(--panel);stroke:var(--dim);stroke-width:1.5}.msv .mnode.core circle{stroke:var(--warn);stroke-width:2}
+.msv .ml{font:700 10px var(--mono);fill:var(--ink)}.msv .ms{font:500 8px var(--mono);fill:var(--muted)}
+.msv .ma{stroke-width:2.4;fill:none}.msv .ma.bad{stroke:var(--bad)}.msv .ma.blk{stroke:var(--bad);opacity:.6}.msv .ma.mod{stroke:var(--warn);stroke-dasharray:4 3}.msv .ma.run{stroke:var(--info)}
+.msv .mh.bad{fill:var(--bad)}.msv .mh.mod{fill:var(--warn)}.msv .mh.run{fill:var(--info)}.msv .mh.blk{fill:var(--bad)}
+.msv .mx circle{fill:var(--bg);stroke:var(--ok);stroke-width:2}.msv .mx path{stroke:var(--ok);stroke-width:2.2}
+.msv .mn{font:800 9px var(--mono);fill:var(--ink)}
+.mchips{display:flex;gap:5px;justify-content:center;margin:2px 0 6px}.mchips button{width:30px;height:26px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);font:800 11px var(--mono)}
+.mchips button.block{border-color:var(--ok);color:var(--ok)}.mchips button.open{border-color:var(--bad);color:var(--bad)}.mchips button.model{border-color:var(--warn);color:var(--warn)}.mchips button.run{border-color:var(--info);color:var(--info)}.mchips button.never{opacity:.4}.mchips button.sel{background:rgba(255,255,255,.1)}
+.mcap{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid var(--line);min-height:56px}
+.mcap div{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.mcap b{font:700 12.5px var(--body);color:var(--ink)}.mcap em{font:800 10px var(--mono);font-style:normal;white-space:nowrap}
+.mcap em.bad,.mcap .bad{color:var(--bad)}.mcap em.ok,.mcap .okc{color:var(--ok)}.mcap em.mod{color:var(--warn)}.mcap em.run{color:var(--info)}.mcap em.off{color:var(--muted)}
+.mcap small{display:block;font:500 12px/1.4 var(--body);color:var(--text);margin-top:2px}.mcap code{display:block;margin-top:5px;font:600 10.5px var(--mono);color:var(--ok)}.mcap code i{font-style:normal;color:var(--bg);background:var(--ok);padding:1px 5px;border-radius:4px;margin-right:4px}
+.bars .ch span{font-size:9.5px !important}
+.pr3{display:flex;flex-direction:column;gap:4px}.prh{display:flex;gap:8px;align-items:baseline}.prh .rv{font:800 11px var(--mono);color:var(--bg);background:var(--ink);padding:2px 6px;border-radius:4px}.prh b{font:700 12.5px/1.3 var(--body);color:var(--ink)}
+.psv2{width:100%;display:block}.psv2 .rl2{stroke-width:1.6}.psv2 .rl2.open{stroke:var(--bad);opacity:.55}.psv2 .rl2.need{stroke:var(--info);stroke-width:2.2}.psv2 .rl2.fit{stroke:var(--ok);stroke-width:2.6}.psv2 .rl2.new{stroke-dasharray:5 3}.psv2 .rl2.drop{stroke:var(--bad);stroke-width:2.6}
+.psv2 .n2 circle{fill:var(--panel);stroke:var(--text);stroke-width:1.5}.psv2 .n2 text{font:700 10px var(--mono);fill:var(--ink)}.psv2 .n2.nw circle{stroke:var(--info);stroke-width:2.2}.psv2 .n2.down circle{fill:rgba(255,92,92,.25);stroke:var(--bad);stroke-width:2.4}
+.psv2 .mx2 circle{fill:var(--bg);stroke:var(--bad);stroke-width:2}.psv2 .mx2 path{stroke:var(--bad);stroke-width:2.2}
+.prs{font:700 12px var(--mono);text-align:center;padding:6px;border-radius:7px}.prs.bad{color:var(--bad);background:rgba(255,92,92,.1)}.prs.ok{color:var(--ok);background:rgba(61,214,140,.1)}
+.prl{display:flex;gap:6px;align-items:center;justify-content:center;font:600 9.5px var(--mono);color:var(--muted)}.prl i{display:inline-block;width:14px;height:3px;border-radius:2px}.prl .lo{background:var(--bad)}.prl .lf{background:var(--ok);margin-left:8px}
+.msv .ml{font-size:12px}.msv .ms{font-size:9.5px}.msv .mn{font-size:11px}.msv .mpl{font-size:10px}
+.psv2 .n2 text{font-size:12px}.prh b{font-size:13.5px}.prs{font-size:12.5px}.prl{font-size:10.5px}
+.scr small{font:500 11.5px var(--body)}.scr b{font-size:14px}.sch span{font-size:12px}
+.chr b{font-size:12px}.chr small{font-size:10px}
+.kn{display:flex;flex-direction:column;gap:6px}.knr{display:grid;grid-template-columns:84px 1fr;gap:8px;align-items:center;padding:8px 9px;border:1px solid var(--line);border-radius:8px;opacity:.25;transition:opacity .35s}.knr.on{opacity:1}
+.knr b{font:800 13px var(--body);color:var(--ink)}.knr span{display:block;font:500 12px/1.35 var(--body)}.knr .y{color:var(--ok)}.knr .x{color:var(--bad);margin-top:2px}
+.knb{padding:9px 10px;border-radius:8px;font:700 13px/1.35 var(--body);color:var(--muted);border:1px dashed var(--line)}.knb.on{color:var(--warn);border:1px solid rgba(245,185,71,.5);background:rgba(245,185,71,.08)}.knb small{display:block;font:500 11.5px/1.35 var(--body);color:var(--text);margin-top:3px}
+#hint.nx{color:var(--info);font-weight:800}
+.wbody.fin{animation:fin .45s ease}@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.chb{animation:fin .5s ease}
+.br{display:flex;flex-direction:column;gap:7px}.brr{display:grid;grid-template-columns:110px 16px 1fr;gap:6px;align-items:center;padding:8px 9px;border:1px solid var(--line);border-radius:8px;min-height:66px}
+.brp b{display:block;font:800 13px var(--body);color:var(--bad)}.brp small{font:500 11px/1.3 var(--body);color:var(--text)}.brr i{font-style:normal;color:var(--dim);font-weight:800}
+.bra{font:600 12px/1.4 var(--body);color:var(--ok)}.brr.on{border-color:rgba(61,214,140,.45)}.brr.on i{color:var(--ok)}
+.bars .ch span{visibility:hidden}.bars .ch.on span{visibility:visible;overflow:visible;font-size:11px !important;color:var(--ink)}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -531,7 +567,7 @@ svg text{font-family:var(--mono)}
 .ev h4{margin:0 0 4px;font:800 10px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
 .ev pre{margin:0;font:11px/1.55 var(--mono);color:var(--text);white-space:pre-wrap;word-break:break-word}
 .verdict{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);margin:4px 0 8px}
-@media (max-height:700px){.win{height:clamp(220px, 41dvh, 290px)}.txt h1{font-size:18px;margin:3px 0 5px}.txt p{font-size:13px;margin-bottom:6px}.wbody{font-size:10.5px;padding:8px 10px;line-height:1.45}.head{margin:7px 0 6px}.task{font-size:12.5px;padding:6px 9px}}
+@media (max-height:700px){.win{height:clamp(230px, 47dvh, 330px)}.txt h1{font-size:18px;margin:3px 0 5px}.txt p{font-size:13px;margin-bottom:6px}.wbody{font-size:10.5px;padding:8px 10px;line-height:1.45}.head{margin:7px 0 6px}.task{font-size:12.5px;padding:6px 9px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}.mp .rl{stroke-dashoffset:0}}
 </style>
 </head>
@@ -581,10 +617,10 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, apN:0, scN:0, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, apN:0, scN:0, knN:0, brN:0, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSel:null, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 const ASL=['K8s API','Internet','Pods','Programs','Proc→net','Files','Privileges'];
-function meter(){ const c=CARDS[at], i=(c.cmp||c.intro||c.scale)?-1:c._i; let n=0;
+function meter(){ const c=CARDS[at], i=(c.cmp||c.intro||c.scale||c.know||c.bridge)?-1:c._i; let n=0;
   if(i===11) n=S.lvl>=3?3:0; else if(i>11&&i<13) n=3; else if(i===13) n=S.binOk?5:3; else if(i>13&&i<23) n=5; else if(i>=23) n=7;
   const m=$('asm'); const h=`<small>attack surface</small><div>${ASL.map((l,k)=>`<i class="${k<n?'c':''}" title="${l}"></i>`).join('')}</div><b class="${n===7?'ok':''}">${7-n}/7 open</b>`;
   if(m.dataset.n!==String(n)){ m.innerHTML=h; m.dataset.n=n; } }
@@ -676,65 +712,73 @@ const CMPC=[['Detect','Runtime detection tools: watch events and alert. Nothing 
 const CMPR=[['Prevents, not only alerts',['n','y','y','y']],['Network and inside the pod',['p','y','n','y']],['Checks what it learns',['n','n','n','y']],['Tested before enforcing',['n','n','p','y']],['Staged, with rollback',['n','p','n','y']],['Any engine',['n','n','n','y']],['AI agents',['p','n','n','y']]];
 
 // ---------- why: the attack chain, open vs enforced in the kernel
-const CHAIN=()=>S.wTab===1?[
-  ['Agent gets a ticket','normal work','start'],
-  ['Model goes off-task','or a poisoned model loads','model'],
-  ['Connect to unknown host','fetch code, send data','net'],
-  ['Run a shell via a tool','sh, curl','pod'],
-  ['Read cloud credentials','instance metadata','net'],
-  ['Reach other pods','move sideways','net']]:[
-  ['Exploit request arrives','frontend → adservice, an allowed path','start'],
-  ['Download attack code','from the internet','net'],
-  ['Run a shell','sh, curl','pod'],
-  ['Use the service token','call the K8s API','net'],
-  ['Reach other pods','move sideways','net'],
-  ['Escalate to root','new privileges','pod']];
-function chainHTML(){ const C=CHAIN(), ph=S.wPh, n=S.wN, ag=S.wTab===1;
-  const fb=C.findIndex(r=>r[2]==='net'||r[2]==='pod');
-  const st=i=>{ if(ph===0||i>=n) return ['','']; if(C[i][2]==='start') return ['go','RUNS']; if(C[i][2]==='model') return ['warn','HAPPENS'];
-    if(ph===1) return ['bad','SUCCEEDS']; if(ph===2) return i===fb?['ok','BLOCKED']:['off','NEVER RUNS']; return ['ok','BLOCKED']; };
-  const intro=`<div class="cin">${ag?'<b>support-agent</b>: an AI agent with a model API and a ticket tool. Its model goes off-task.':'<b>adservice</b>: one of boutique’s services, with a bug in a library it uses.'}</div>`;
-  const end=ph===1&&n>=C.length?`<div class="cend bad">${ag?'Breach: the agent ran code, leaked credentials and reached other pods.':'Breach: shell, cluster access, every pod in reach.'}</div>`
-    :ph===2&&n>=C.length?`<div class="cend ok">${ag?'The model still went off-task. Nothing it tried left the pod.':'The attack fails at step 2. The bug is still there; it just can’t be used.'}</div>`
-    :ph===3&&n>=C.length?`<div class="cend ok">Even inside, every next step is blocked.</div>`:`<div class="cend"></div>`;
-  const btn=S.wRun?'':ph===0?'Run the attack ▸':ph===1?'Enforce in the kernel, run it again ▸':ph===2?'What if it got in anyway? ▸':'';
+// nodes: [x, y, label, sub]; steps: [from, to, title, what happens, layer, rule, engine]
+const ATK={
+ app:{intro:'adservice is a Java service. Its logging library has a remote-code bug (Log4Shell-style).',
+  nodes:{fe:[42,150,'frontend','caller'],att:[42,40,'attacker','internet'],java:[150,108,'java','adservice'],curl:[214,150,'curl',''],root:[214,78,'root',''],api:[292,40,'K8s API',''],pods:[292,170,'redis-cart','other pods']},
+  steps:[['fe','java','Request carries a JNDI lookup string','frontend → adservice:9555, a path it really needs','start','needed path: stays open',''],
+   ['java','att','Log4j calls out to ldap://attacker:1389','to fetch the attacker’s Java class','net','egress: only kube-dns:53 → DROP','Cilium'],
+   ['java','curl','The loaded class starts curl','to pull more tools','pod','exec allow-list: curl not on it → DENY','Tetragon'],
+   ['java','api','It calls the K8s API with the pod’s token','to read secrets, start pods','net','egress to kube-apiserver → DROP','Cilium'],
+   ['java','pods','It connects to redis-cart:6379','to read every customer’s cart','net','redis-cart not in adservice egress → DROP','Cilium'],
+   ['java','root','It tries to become root','setuid, new capabilities','pod','drop ALL caps · no privilege escalation','securityContext']]},
+ agent:{intro:'support-agent reads tickets and has a shell tool. A ticket hides instructions for it (prompt injection).',
+  nodes:{tk:[42,150,'ticket','MCP tool'],att:[42,40,'paste site','internet'],py:[150,108,'python','support-agent'],curl:[214,150,'curl',''],llm:[292,108,'LLM API','allowed'],md:[292,40,'metadata','169.254.169.254'],pods:[292,176,'redis-cart','other pods']},
+  steps:[['tk','py','A ticket hides instructions','reading tickets is its job','start','needed path: stays open',''],
+   ['py','llm','The model decides to follow them','the model API is allowed','model','the kernel can’t judge content: the gateway’s job',''],
+   ['py','curl','Its shell tool runs curl … | sh','to download and run a script','pod','exec allow-list: python only → DENY','Tetragon'],
+   ['py','att','It posts customer data to a paste site','paste.example.net:443','net','egress: only LLM API + mcp-tickets → DROP','Cilium'],
+   ['py','md','It reads cloud credentials','from the metadata service','net','169.254.169.254 not allowed → DROP','Cilium'],
+   ['py','pods','It connects to redis-cart:6379','to read customer data','net','not in its egress → DROP','Cilium']]}};
+function atkState(i){ const A=ATK[S.wTab?'agent':'app'], st=A.steps[i], ph=S.wPh, kind=st[4];
+  const fb=A.steps.findIndex(x=>x[4]==='net'||x[4]==='pod');
+  if(ph===0||i>=S.wN) return 'idle'; if(kind==='start') return 'run'; if(kind==='model') return 'model';
+  if(ph===1) return 'open'; if(ph===2) return i===fb?'block':'never'; return 'block'; }
+function chainHTML(){ const A=ATK[S.wTab?'agent':'app'], N=A.nodes, ph=S.wPh, ag=S.wTab===1;
+  const arr=(i)=>{ const [f,t]=A.steps[i], st=atkState(i); if(st==='idle'||st==='never') return '';
+    const [x1,y1]=N[f],[x2,y2]=N[t], dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L, sx=x1+ux*16, sy=y1+uy*16, ex=x2-ux*18, ey=y2-uy*18;
+    const cls=st==='open'?'bad':st==='block'?'blk':st==='model'?'mod':'run';
+    if(st==='block'){ const mx=sx+(ex-sx)*.55, my=sy+(ey-sy)*.55; return `<line x1="${sx}" y1="${sy}" x2="${mx}" y2="${my}" class="ma ${cls}"/><g class="mx"><circle cx="${mx}" cy="${my}" r="8"/><path d="M${mx-4} ${my-4}L${mx+4} ${my+4}M${mx+4} ${my-4}L${mx-4} ${my+4}"/></g><text x="${mx}" y="${my-11}" class="mn" text-anchor="middle">${i+1}</text>`; }
+    const mx=(sx+ex)/2, my=(sy+ey)/2;
+    return `<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" class="ma ${cls}" marker-end="url(#ah-${cls})"/><text x="${mx}" y="${my-6}" class="mn" text-anchor="middle">${i+1}</text>`; };
+  const nodes=Object.entries(N).map(([k,[x,y,l,sub]])=>`<g class="mnode ${k==='java'||k==='py'?'core':''}"><circle cx="${x}" cy="${y}" r="13"/><text x="${x}" y="${y+25}" text-anchor="middle" class="ml">${l}</text>${sub?`<text x="${x}" y="${y+35}" text-anchor="middle" class="ms">${sub}</text>`:''}</g>`).join('');
+  const mk=['bad','blk','mod','run'].map(c=>`<marker id="ah-${c}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" class="mh ${c}"/></marker>`).join('');
+  const wall=ph>=2?`<rect x="104" y="58" width="134" height="140" rx="12" class="mpod on"/>`:`<rect x="104" y="58" width="134" height="140" rx="12" class="mpod"/>`;
+  // caption: the step being played or inspected, otherwise the summary
+  const sel=S.wRun?S.wN-1:S.wSel; let cap='';
+  if(sel!=null&&sel>=0){ const st=A.steps[sel], k=atkState(sel), lab={run:['RUNS','run'],model:['HAPPENS','mod'],open:['SUCCEEDS','bad'],block:['BLOCKED','ok'],never:['NEVER RUNS','off'],idle:['','off']}[k];
+    cap=`<div class="mcap"><div><b>${sel+1} · ${st[2]}</b><em class="${lab[1]}">${lab[0]}</em></div><small>${st[3]}</small>${(k==='block'||k==='model'||k==='run')?`<code>${st[6]?`<i>${st[6]}</i> `:''}${st[5]}</code>`:''}</div>`; }
+  else cap=`<div class="mcap"><small>${ph===0?A.intro:ph===1?(ag?'<b class="bad">Breach:</b> the agent ran code, leaked data and reached other pods.':'<b class="bad">Breach:</b> remote code, cluster access, customer data.'):ph===2?(ag?'<b class="okc">Stopped at step 3.</b> The model still followed the ticket; nothing it tried left the pod.':'<b class="okc">Stopped at step 2.</b> The bug is still in the code; the call out never connects.'):'<b class="okc">Even if it got in another way,</b> every next step is blocked. Tap a number for the rule.'}</small></div>`;
+  const chips=ph>0&&!S.wRun?`<div class="mchips">${A.steps.map((_,i)=>{ const k=atkState(i); return `<button data-ws="${i}" class="${k} ${S.wSel===i?'sel':''}">${i+1}</button>`; }).join('')}</div>`:'';
+  const btn=S.wRun?'':ph===0?'Run the attack ▸':ph===1?'Enforce in the kernel, run again ▸':ph===2?'What if it got in anyway? ▸':'';
   return `<div class="wtabs2"><button data-wt="0" class="${!ag?'on':''}">Exploited app</button><button data-wt="1" class="${ag?'on':''}">AI agent</button></div>
-    ${intro}<div class="chn ${ph>=2?'k':''}">${C.map(([t,d,l],i)=>{ const [k,x]=st(i); return `<div class="chr ${k}"><i>${i+1}</i><div><b>${t}</b><small>${l==='net'?'<u>network</u> · ':l==='pod'?'<u>in the pod</u> · ':l==='model'?'<u>in the model</u> · ':''}${d}</small></div><em>${x}</em></div>`; }).join('')}</div>
-    ${end}${btn?`<button class="pbtn" id="wgo">${btn}</button>`:''}`; }
+    <svg viewBox="0 0 330 212" class="msv"><defs>${mk}</defs>${wall}<text x="112" y="72" class="mpl">${ag?'support-agent pod':'adservice pod'}</text>${A.steps.map((_,i)=>arr(i)).join('')}${nodes}</svg>
+    ${chips}${cap}${btn?`<button class="pbtn" id="wgo">${btn}</button>`:''}`; }
 // ---------- problem chart: allowed vs needed paths across releases
 function probSVG(){
-  const p=S.prb, top=58, H=150, base=top+H, X=i=>14+i*52, W=40, h=v=>v/133*H;
-  const need=[17,17,17,18,18,18];
-  // per release: state shown for the releases revealed so far
-  const ST=p>=4?need.map(()=>'fit'):[['open','open'],['open','open','lock'],['open','open','lock','down'],['open','open','lock','down','open','open']][p];
-  const col=(k,i)=>{ const x=X(i), n=need[i]; let g='';
-    if(k==='open'){ g=`<rect x="${x}" y="${base-h(133)}" width="${W}" height="${h(133)-h(n)}" rx="4" class="bo"/><text x="${x+W/2}" y="${base-h(133)+16}" class="bn" text-anchor="middle">${133-n}</text><text x="${x+W/2}" y="${base-h(133)+27}" class="bs" text-anchor="middle">unused</text>`; }
-    if(k==='down') g=`<rect x="${x}" y="${base-h(n)-9}" width="${W}" height="9" rx="2" class="bx"/><text x="${x+W/2}" y="${base-h(n)-16}" class="bxx" text-anchor="middle">✕</text>`;
-    if(k==='fit') g=`<rect x="${x}" y="${base-h(133)}" width="${W}" height="${h(133)-h(n)}" rx="4" class="bg"/>`;
-    g+=`<rect x="${x}" y="${base-h(n)}" width="${W}" height="${h(n)}" rx="3" class="bd ${k==='lock'||k==='fit'?'fit':''}"/>`;
-    const lab={open:['OPEN','bad'],lock:['LOCKED','ok'],down:['OUTAGE','bad'],fit:['FIT','ok']}[k];
-    return `<g class="nw2">${g}<text x="${x+W/2}" y="${base+16}" class="bv" text-anchor="middle">v${i+1}</text><text x="${x+W/2}" y="${base+29}" class="bl ${lab[1]}" text-anchor="middle">${lab[0]}</text></g>`; };
-  if(p>=4){ // before vs after, side by side by release
-    const row=(y0,lab,sub,states,ly)=>{ const bh=v=>v/133*62; let g=`<text x="10" y="${ly}" class="rlab">${lab}<tspan class="rsub" dx="8">${sub}</tspan></text>`;
-      states.forEach((k,i)=>{ const x=18+i*52, n=need[i], w=40;
-        if(k==='open') g+=`<rect x="${x}" y="${y0-bh(133)}" width="${w}" height="${bh(133)-bh(n)}" rx="3" class="bo"/>`;
-        if(k==='down') g+=`<rect x="${x}" y="${y0-bh(n)-6}" width="${w}" height="6" rx="2" class="bx"/>`;
-        g+=`<rect x="${x}" y="${y0-bh(n)}" width="${w}" height="${bh(n)}" rx="2" class="bd ${k==='lock'||k==='fit'?'fit':''}"/>`;
-        const L={open:['OPEN','bad'],lock:['LOCK','ok'],down:['DOWN','bad'],fit:['FIT','ok']}[k];
-        g+=`<text x="${x+w/2}" y="${y0+11}" class="bl ${L[1]}" text-anchor="middle">${L[0]}</text>`; });
-      return g; };
-    const vs=need.map((_,i)=>`<text x="${18+i*52+20}" y="22" class="bv" text-anchor="middle">v${i+1}</text>`).join('');
-    return `<svg viewBox="0 0 330 250" class="psv">${vs}
-      ${row(122,'By hand','4 of 6 releases open · 1 outage',['open','open','lock','down','open','open'],48)}
-      <line x1="10" x2="322" y1="146" y2="146" class="pl"/>
-      ${row(200,'Decision layer','every release fits · 0 outages',need.map(()=>'fit'),168)}
-      <text x="${18+3*52+20}" y="226" class="bs" text-anchor="middle">+1 dependency added</text></svg>`; }
-  const ghost=need.map((_,i)=>i<ST.length?'':`<text x="${X(i)+W/2}" y="${base+16}" class="bv off" text-anchor="middle">v${i+1}</text>`).join('');
-  const HL=[['116','unused paths open','bad'],['0','unused · locked by hand','ok'],['✕','v4 adds one dependency: checkout down','bad'],['116','rolled back: open again','bad'],['0','every release: re-decided, verified','ok']][p];
-  return `<svg viewBox="0 0 330 250" class="psv"><text x="14" y="30" class="bh ${HL[2]}">${HL[0]}</text><text x="${HL[0].length>1?62:36}" y="30" class="bht">${HL[1]}</text>
-    <text x="14" y="46" class="bs">each column: one release · <tspan class="lgd">■ needed</tspan> <tspan class="lgu">■ allowed, never used</tspan></text>
-    <line x1="10" x2="322" y1="${base}" y2="${base}" class="pl"/>${ST.map(col).join('')}${ghost}</svg>
-    ${p<4?`<button class="pbtn" id="prb">${['Write the policy by hand','Ship release v4','Roll back','Add a decision layer'][p]} ▸</button>`:''}`;
+  const p=S.prb;
+  const P={fe:[60,60,'frontend'],ad:[60,170,'ad'],ck:[165,60,'checkout'],ct:[165,170,'cart'],py:[270,60,'payment'],rd:[270,170,'redis'],fr:[270,115,'fraud-check']};
+  const NEED=[['fe','ck'],['fe','ct'],['fe','ad'],['ck','py'],['ck','ct'],['ct','rd']];
+  const base=['fe','ad','ck','ct','py','rd'], hasFr=p>=2, K=hasFr?[...base,'fr']:base;
+  const line=(a,b,c,ex='')=>{ const [x1,y1]=P[a],[x2,y2]=P[b]; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="rl2 ${c}" ${ex}/>`; };
+  let L='';
+  const allPairs=[]; for(let i=0;i<K.length;i++) for(let j=i+1;j<K.length;j++) allPairs.push([K[i],K[j]]);
+  const isNeed=(a,b)=>NEED.some(([x,y])=>(x===a&&y===b)||(x===b&&y===a))||(p>=2&&((a==='ck'&&b==='fr')||(a==='fr'&&b==='ck')));
+  if(p===0||p===3) L=allPairs.map(([a,b])=>line(a,b,isNeed(a,b)?'need':'open')).join('');
+  else { L=NEED.map(([a,b])=>line(a,b,'fit')).join('');
+    if(p===2){ const [x1,y1]=P.ck,[x2,y2]=P.fr, mx=(x1+x2)/2, my=(y1+y2)/2; L+=`<line x1="${x1}" y1="${y1}" x2="${mx}" y2="${my}" class="rl2 drop"/><g class="mx2"><circle cx="${mx}" cy="${my}" r="9"/><path d="M${mx-4} ${my-4}L${mx+4} ${my+4}M${mx+4} ${my-4}L${mx-4} ${my+4}"/></g>`; }
+    if(p===4) L+=line('ck','fr','fit new'); }
+  const nodes=K.map(k=>{ const [x,y,l]=P[k]; const bad=p===2&&k==='ck'; return `<g class="n2 ${k==='fr'?'nw':''} ${bad?'down':''}"><circle cx="${x}" cy="${y}" r="12"/><text x="${x}" y="${y+26}" text-anchor="middle">${l}</text></g>`; }).join('');
+  const H=[['v1','Default: every service can reach every other','133 paths open · only 17 needed','bad'],
+    ['v3','Policy written by hand','only the 17 needed paths','ok'],
+    ['v4','Release adds fraud-check. Nobody updated the policy','checkout → fraud-check DROPPED · checkout down','bad'],
+    ['v5','Rolled back under pressure','133 paths open again','bad'],
+    ['v6','Decision layer: re-decided on every release','only what’s needed · new path added and verified','ok']][p];
+  return `<div class="pr3"><div class="prh"><span class="rv">${H[0]}</span><b>${H[1]}</b></div>
+    <svg viewBox="0 0 330 210" class="psv2">${L}${nodes}</svg>
+    <div class="prs ${H[3]}">${H[2]}</div>
+    <div class="prl"><i class="lo"></i>allowed, never used <i class="lf"></i>needed, allowed</div>
+    ${p<4?`<button class="pbtn" id="prb">${['Write the policy by hand','Ship release v4','Roll back','Add a decision layer'][p]} ▸</button>`:''}</div>`;
 }
 // ---------- the map: tap any workload
 function mapSVG(){
@@ -797,12 +841,13 @@ const CARDS=[
    pipe:-1, wt:'attack chain', wm:'one bug · one agent',
    win(){ return chainHTML(); },
    bind(){ const re=()=>{ $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); refreshFoot(); };
-     $('wb').querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{ if(S.wRun) return; S.wTab=+b.dataset.wt; S.wSeen.add(S.wTab); re(); });
-     const b=$('wgo'); if(b) b.onclick=()=>{ if(S.wRun) return; S.wPh++; S.wN=0; S.wRun=true; re();
-       const n=CHAIN().length; for(let i=1;i<=n;i++) later(i*380,()=>{ S.wN=i; if(i===n) S.wRun=false; re(); }); }; },
+     $('wb').querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{ if(S.wRun) return; S.wTab=+b.dataset.wt; S.wSeen.add(S.wTab); S.wSel=null; re(); });
+     $('wb').querySelectorAll('[data-ws]').forEach(b=>b.onclick=()=>{ S.wSel=+b.dataset.ws; re(); });
+     const b=$('wgo'); if(b) b.onclick=()=>{ if(S.wRun) return; S.wPh++; S.wN=0; S.wSel=null; S.wRun=true; re();
+       const n=6; for(let i=1;i<=n;i++) later(i*1100,()=>{ S.wN=i; re(); }); later(n*1100+900,()=>{ S.wRun=false; re(); }); }; },
    foot:()=>`<span>${['ready','the attack succeeds','the attack is stopped','inside: nothing to gain'][S.wPh]}</span><span>${S.wTab?'AI agent':'app'}</span>`,
-   kick:'Problem · the attack surface', title:'One bug shouldn’t become a breach.',
-   body:()=>`<p>An attack is a chain of steps. <b>Block one in the kernel and the attack fails</b>, even with the bug still in the code. If it gets in anyway, there's nothing to gain.</p>
+   kick:'Why it matters · the attack surface', title:'One bug shouldn’t become a breach.',
+   body:()=>`<p>An attack is a chain of steps. <b>Block one in the kernel and it fails</b>, with the bug still in the code. Each block is a specific rule; tap a step number to see it.</p>
      <p><b>An agent can ignore its instructions. It can't ignore the kernel.</b></p>
      <div class="task ${S.wPh>=3?'done':''}">${S.wPh>=3?'Attack stopped, and nothing to gain inside.':'Tap the button under the chain.'}</div>
      <div class="task ${S.wSeen.has(1)?'done':''}">Switch to <b>AI agent</b>: same chain, same result.</div>`,
@@ -824,13 +869,13 @@ const CARDS=[
      :`<p>A cluster on day 2: Cilium as the CNI, Hubble and Tetragon collecting. Checking what is enforced…</p>`,
    gate:()=>S.ran.size>0 },
  { // problem: a lockdown decision expires every release
-   pipe:-1, wt:'boutique · over time', wm:'illustration · lab data',
+   pipe:-1, wt:'boutique · over time', wm:'simplified map',
    win(){ return `<div class="pw">${probSVG()}</div>`; },
    bind(){ const b=$('prb'); if(b) b.onclick=()=>{ stop(); S.prb++; $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); refreshFoot(); }; },
    foot:()=>`<span>boutique: <b>133</b> paths open · <b>17</b> needed</span><span>step <b>${Math.min(S.prb,4)}/4</b></span>`,
-   kick:'Problem · why it stays open', title:'Locking down is a decision that expires every release.',
+   kick:'Problem · change', title:'Locking down is a decision that expires every release.',
    body:()=>{ const t=[
-     `<p>Red: <b>116 paths</b> allowed but never used. That is the attack surface.</p>`,
+     `<p>Today every service can reach every other. In boutique that is <b>133 paths, and only 17 are needed</b>. The other 116 are the attack surface.</p>`,
      `<p>The team writes the policy by hand. The gap closes: only the <b>17 needed paths</b> stay open.</p>`,
      `<p>Release v4 adds one dependency. Nobody updated the policy, so the new flow is <b>dropped</b>. Checkout is down.</p>`,
      `<p>The fix under pressure is a rollback: <b>open again</b>. That's why <b>58% of organizations</b> leave most workloads without network policy (Fairwinds 2024).</p>`,
@@ -843,7 +888,7 @@ const CARDS=[
    bind(){ $('wb').querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ S.eng=b.dataset.e; S.engSeen.add(S.eng); $('wb').innerHTML=engHTML(); CARDS[at].bind(); refreshTxt(); refreshFoot(); });
      $('eyaml').onclick=()=>sheet(`adservice · ${ENG[S.eng][1]}`,'generated from the profile',`<div class="ev"><h4>${ENG[S.eng][0]}</h4><pre>${ENG[S.eng][2]}</pre></div>`); },
    foot:()=>`<span>${['kubearmor','sc'].includes(S.eng)?'design':'lab'} · ${ENG[S.eng][0]}</span><span>viewed <b>${S.engSeen.size}/4</b></span>`,
-   kick:'Solution · one decision', title:'Decide once. Enforce on any engine.',
+   kick:'Solution · one decision', title:'The product decides. Your engines enforce.',
    body:()=>`<p>One profile, written in each engine's native format: the engines a cluster runs today, or the ones deployed with the product. “Only java connects” becomes a Cilium rule for <i>where</i> and a Tetragon rule for <i>which process</i>.</p>
      <div class="task ${S.engSeen.size>=2?'done':''}">Tap another engine and see which profile lines it enforces.</div>`,
    gate:()=>S.engSeen.size>=2 },
@@ -1157,9 +1202,9 @@ tools: [create_ticket, search_kb]</pre></div>
    gate:()=>S.cmpSeen.size>0 },
  { // intro: how the tour works
    pipe:-1, intro:true, wt:'boutique · the tour', wm:'about 4 min',
-   win(){ const C=[['1','Problem','What one bug, or one AI agent, can do today. And why it stays open.'],['2','Solution','How the product decides what each workload may do.'],['3','Proof','The same, step by step, on a real namespace in the lab.'],['4','Why now','AI agents, and why the kernel is where to stop them.'],['5','Vision','The result in numbers.']];
+   win(){ const C=[['1','Why it matters','What one bug, or one AI agent, can do, and how the kernel stops it.'],['2','Problem','Why almost nobody enforces it: knowledge, scale, change.'],['3','Solution','How the product decides what each workload may do.'],['4','Proof','The same, step by step, on a real namespace in the lab.'],['5','Why now','AI agents, and why the kernel is where to stop them.'],['6','Vision','The result in numbers.']];
      return `<div class="tin"><div class="tinh"><b>boutique</b><span>an online shop on Kubernetes · 12 services · lab cluster</span></div>${C.map(([n,t,d])=>`<div class="tir"><i>${n}</i><div><b>${t}</b><small>${d}</small></div></div>`).join('')}</div>`; },
-   foot:()=>`<span>you tap, the product works</span><span>5 chapters</span>`,
+   foot:()=>`<span>you tap, the product works</span><span>6 chapters</span>`,
    kick:'Start · how this works', title:'You are the platform engineer for boutique.',
    body:()=>`<p>Every step shows one idea. <b>The yellow “Tap” marks what to press next</b>; when the step is done, Next lights up.</p>`,
    gate:()=>true },
@@ -1176,7 +1221,34 @@ tools: [create_ticket, search_kb]</pre></div>
    kick:'Problem · the scale', title:'One namespace is hard. A company is impossible by hand.',
    body:()=>`<p>Every workload needs a decision on every layer, and every release can change it. ${S.scN>=5?'<b>Tens of thousands of decisions, re-checked on every release.</b> That is why teams leave it open, and why it has to be decided by a product, not by people.':''}</p>
      <div class="task ${S.scN>=5?'done':''}">Tap until the arrow is complete.</div>`,
-   gate:()=>S.scN>=5 }
+   gate:()=>S.scN>=5 },
+ { // knowledge: nobody holds all of it
+   pipe:-1, know:true, wt:'adservice · who can write the rule?', wm:'',
+   win(){ const R=[['Developer','knows what the app calls','not eBPF, not the cluster, not what the base image runs'],['Platform','knows the cluster and the engines','not what each of 300 apps needs'],['Security','knows the risk','not the app, not the policy languages']];
+     const n=S.knN;
+     return `<div class="kn">${R.map(([r,k,x],i)=>`<div class="knr ${i<n?'on':''}"><b>${r}</b><div><span class="y">✓ ${k}</span><span class="x">✕ ${x}</span></div></div>`).join('')}
+       <div class="knb ${n>=3?'on':''}">The right rule needs all three, for every workload, on every release.<small>The evidence exists, scattered: manifests, Hubble flows, Tetragon events, image config.</small></div>
+       ${n<3?`<button class="pbtn" id="knb">${['Ask the developer','Ask the platform team','Ask security'][n]} ▸</button>`:''}</div>`; },
+   bind(){ const b=$('knb'); if(b) b.onclick=()=>{ S.knN++; $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); }; },
+   guide:()=>S.knN<3?$('knb'):null,
+   foot:()=>`<span>knowledge is split</span><span>${S.knN}/3</span>`,
+   kick:'Problem · knowledge', title:'No one person knows what a workload needs.',
+   body:()=>`<p>To write one correct rule you need to know the app, the cluster and the risk. In most companies those are three different teams.</p>
+     <div class="task ${S.knN>=3?'done':''}">Ask all three.</div>`,
+   gate:()=>S.knN>=3 },
+ { // bridge: the three problems, answered
+   pipe:-1, bridge:true, wt:'problem → answer', wm:'',
+   win(){ const R=[['Knowledge','no one knows what a workload needs','Read the evidence that already exists: manifests, image, traffic, runtime events, agent config.'],['Scale','42,000 decisions','Decide every workload and every layer automatically. People only see the exceptions.'],['Change','every release breaks the rules','Re-decide on every release, test on recorded traffic first, enforce in stages, roll back in one step.']];
+     const n=S.brN;
+     return `<div class="br">${R.map(([p,q,a],i)=>`<div class="brr ${i<n?'on':''}"><div class="brp"><b>${p}</b><small>${q}</small></div><i>→</i><div class="bra">${i<n?a:''}</div></div>`).join('')}
+       ${n<3?`<button class="pbtn" id="brb">Answer: ${['knowledge','scale','change'][n]} ▸</button>`:''}</div>`; },
+   bind(){ const b=$('brb'); if(b) b.onclick=()=>{ S.brN++; $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); }; },
+   guide:()=>S.brN<3?$('brb'):null,
+   foot:()=>`<span>three problems · one product</span><span>${S.brN}/3</span>`,
+   kick:'Solution · the answer', title:'A decision layer: evidence in, tested rules out.',
+   body:()=>`<p>The engines already enforce. The product sits above them and makes the decisions: for every workload, every layer, every release.</p>
+     <div class="task ${S.brN>=3?'done':''}">Answer each problem.</div>`,
+   gate:()=>S.brN>=3 }
 ];
 // ---------- agent scene: actions travel from the agent pod; before enforcement they all arrive, after only the profile's do
 const AGT=[ // [label, target x,y, allowed?, stopped by]
@@ -1292,7 +1364,7 @@ function replayOut(){ const I=replayIssues(), pass=!I.length;
 function runReplay(){ S.replay=null; S.rpRun=true; refresh(true);
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1600); if(vn&&vn.isConnected){ vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1) requestAnimationFrame(f); } }; if(!reduce) requestAnimationFrame(f);
   later(1900,()=>{ S.rpRun=false; S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, apN:0, scN:0, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, apN:0, scN:0, knN:0, brN:0, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSel:null, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 let CH=null, CHN=null;
@@ -1302,7 +1374,7 @@ function bars(i){ if(!CH){ CH=CARDS.map(c=>{ const k=c.kick.split(' · ')[0]; re
   const done=idx.filter(j=>j<=i).length; el.querySelector('b').style.width=(done/idx.length*100)+'%'; el.classList.toggle('on',idx.includes(i)); el.classList.toggle('past',idx[idx.length-1]<i); }); }
 function refreshFoot(){ try{ meter(); }catch(e){}  const c=CARDS[at]; $('wf').innerHTML=c.foot?c.foot():''; }
 function refreshTxt(){ const c=CARDS[at], t=$('txt'), y=t.scrollTop;
-  const CHD={Problem:'What one bug, or one agent, can do today, and why it stays open.',Solution:'What the product does differently.',Proof:'Now the same thing on a real namespace in the lab, step by step.','Why now':'AI agents make this urgent.',Vision:'Where this goes.'};
+  const CHD={'Why it matters':'What one bug, or one AI agent, can do today, and how the kernel stops it.',Problem:'The kernel can stop it. So why is almost nothing enforced? Three reasons: knowledge, scale and change.',Solution:'Knowledge, scale, change. Here is how the product answers each one.',Proof:'That is the idea. Now the same thing on a real namespace in the lab, step by step.','Why now':'Everything so far applies to AI agents too, and agents make it urgent.',Vision:'Putting it together.'};
   const chn=c.kick.split(' · ')[0], prv=at>0?CARDS[at-1].kick.split(' · ')[0]:'';
   t.innerHTML=(chn!==prv&&CHD[chn]?`<div class="chb"><b>${chn}</b>${CHD[chn]}</div>`:'')+`<div class="kick">${(at+1)+' · '+c.kick.replace(/^\d+ · /,'')}</div><h1>${c.title}</h1>${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
 function refresh(win){ const c=CARDS[at]; if(win&&!c.map){ const wb=$('wb'), y=wb.scrollTop; wb.innerHTML=c.win(); wb.scrollTop=y; c.bind&&c.bind(); } refreshFoot(); refreshTxt(); }
@@ -1335,6 +1407,8 @@ const WHY=[
   'See where the product sits next to the tools teams use today.',
   'See what the tour covers.',
   'See how the decisions multiply.',
+  'See why nobody can write the rule alone.',
+  'See how the product answers each problem.',
 ];
 CARDS.forEach((c,i)=>{ c.why=WHY[i]; });
 const GUIDE=[
@@ -1365,12 +1439,18 @@ const GUIDE=[
   ()=>S.cmpSeen.size?null:$('wb').querySelector('[data-cm="3"]'),
   ()=>null,
   ()=>null,
+  ()=>null,
+  ()=>null,
 ];
 // the tour keeps the cards that carry the story; the rest stay in the source
 { const SK=new Set([1, 6, 7, 9, 12, 14, 15, 16, 17, 18, 19]); const keep=(_,i)=>!SK.has(i); const C=CARDS.filter(keep), Wh=WHY.filter(keep), G=GUIDE.filter(keep); CARDS.length=0; CARDS.push(...C); WHY.length=0; WHY.push(...Wh); GUIDE.length=0; GUIDE.push(...G); }
 { const from=CARDS.findIndex(c=>c.cmp); if(from>=0) [CARDS,WHY,GUIDE].forEach(A=>A.splice(from,1)); }
 { const from=CARDS.findIndex(c=>c.intro); [CARDS,WHY,GUIDE].forEach(A=>{ const [x]=A.splice(from,1); A.unshift(x); }); }
 { const from=CARDS.findIndex(c=>c.scale); [CARDS,WHY,GUIDE].forEach(A=>{ const [x]=A.splice(from,1); const to=CARDS.findIndex(c=>c.wt==='boutique · over time')+1; A.splice(A===CARDS?to:to,0,x); }); }   // comparison step: not shown
+{ const e=CARDS.findIndex(c=>c.wt==='adservice · one profile'); if(e>=0) [CARDS,WHY,GUIDE].forEach(A=>A.splice(e,1)); }
+{ const want=[c=>c.intro,c=>c.wt==='attack chain',c=>c.know,c=>c.scale,c=>c.wt==='boutique · over time',c=>c.bridge];
+  const idx=want.map(f=>CARDS.findIndex(f)); const rest=CARDS.map((_,i)=>i).filter(i=>!idx.includes(i)); const order=[...idx,...rest];
+  [CARDS,WHY,GUIDE].forEach(A=>{ const c=order.map(i=>A[i]); A.length=0; A.push(...c); }); }
 let gEl=null;
 function guide(){
   const c=CARDS[at]; let el=c.gate()?(at<CARDS.length-1?$('next'):null):(c.guide?c.guide():GUIDE[at]&&GUIDE[at]());
@@ -1394,14 +1474,15 @@ function guide(){
 }
 setInterval(()=>{ try{ guide(); }catch(e){} }, 250);
 function nav(){ const c=CARDS[at], ok=c.gate(), last=at===CARDS.length-1; $('next').disabled=!ok||last; $('next').textContent='Next';
-  $('back').disabled=at===0; $('hint').textContent=ok||last?`${at+1} / ${CARDS.length}`:'your turn ↑'; }
+  $('back').disabled=at===0; const ch=k=>CARDS[k]&&CARDS[k].kick.split(' · ')[0]; const nx=!last&&ch(at+1)!==ch(at)?ch(at+1):'';
+  $('hint').textContent=ok||last?(nx?`next: ${nx} →`:`${at+1} / ${CARDS.length}`):'your turn ↑'; $('hint').classList.toggle('nx',!!(ok&&nx)); }
 function show(i){
   if(i<0||i>=CARDS.length) return; stop(); closeSheet(); at=i; const c=CARDS[i];
   if(c._i>=6&&c._i<18) S.sel='adservice';   // the story follows adservice after the overview
   bars(i);
   const p=$('pipe'); p.classList.toggle('off',c.pipe<0); p.classList.toggle('gone',true); [...p.children].forEach((s,k)=>s.className=k<c.pipe?'d':k===c.pipe?'n':'');
   $('wt').textContent=c.wt; $('wm').textContent=c.wm;
-  const wb=$('wb'); wb.className='wbody'+(c.map?' map':''); wb.innerHTML=c.win(); wb.scrollTop=0; c.bind&&c.bind();
+  const wb=$('wb'); wb.className='wbody'+(c.map?' map':''); wb.classList.remove('fin'); void wb.offsetWidth; wb.classList.add('fin'); wb.innerHTML=c.win(); wb.scrollTop=0; c.bind&&c.bind();
   if(!c.map) blast(S.sel);
   refreshFoot(); const t=$('txt'); t.scrollTop=0; refreshTxt(); t.classList.remove('in'); void t.offsetWidth; t.classList.add('in');
 }
