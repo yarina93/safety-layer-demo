@@ -1236,7 +1236,7 @@ const GUIDE=[
 ];
 // the tour keeps the cards that carry the story; the rest stay in the source
 { const SK=new Set([1, 6, 7, 9, 12, 14, 15, 16, 17, 19]); const keep=(_,i)=>!SK.has(i); const C=CARDS.filter(keep), Wh=WHY.filter(keep), G=GUIDE.filter(keep); CARDS.length=0; CARDS.push(...C); WHY.length=0; WHY.push(...Wh); GUIDE.length=0; GUIDE.push(...G); }
-{ const from=CARDS.findIndex(c=>c.cmp), to=CARDS.findIndex(c=>c.wt==='adservice · learning window')+1; [CARDS,WHY,GUIDE].forEach(A=>{ const [x]=A.splice(from,1); A.splice(to,0,x); }); }
+{ const from=CARDS.findIndex(c=>c.cmp); if(from>=0) [CARDS,WHY,GUIDE].forEach(A=>A.splice(from,1)); }   // comparison step: not shown
 let gEl=null;
 function guide(){
   const c=CARDS[at]; let el=c.gate()?(at<CARDS.length-1?$('next'):null):(GUIDE[at]&&GUIDE[at]());
