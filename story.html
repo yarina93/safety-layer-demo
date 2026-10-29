@@ -462,6 +462,12 @@ svg text{font-family:var(--mono)}
 .apr2 em{font-style:normal;font-weight:800;font-size:8.5px}.apr2.on{opacity:1}
 .apr2.on.ok em{color:var(--ok)}.apr2.on.warn{border-color:rgba(245,185,71,.5)}.apr2.on.warn em{color:var(--warn)}.apr2.on.bad{border-color:rgba(255,92,92,.6);background:rgba(255,92,92,.06)}.apr2.on.bad em{color:var(--bad)}
 .list .more{font:600 10px var(--mono);color:var(--muted);padding:6px 2px}
+.pz{border:1px solid var(--line);border-radius:8px;padding:7px 8px;margin-bottom:6px}.pz.ask{border-color:rgba(245,185,71,.5)}.pz.rest{border-style:dashed}.pz.rest.blk{border-color:rgba(255,92,92,.55);border-style:solid;background:rgba(255,92,92,.05)}
+.pzh{display:flex;justify-content:space-between;gap:6px;font:700 8.5px var(--mono);color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}.pzh em{font-style:normal;color:var(--dim)}.pzh em.ok{color:var(--ok)}.pzh em.warn{color:var(--warn)}.pzh em.bad{color:var(--bad)}
+.pzc{display:flex;flex-wrap:wrap;gap:5px}.chip{font:700 10.5px var(--mono);padding:5px 8px;border-radius:6px;border:1px solid var(--line);color:var(--ink);background:rgba(255,255,255,.03)}.chip small{font-weight:500;color:var(--muted);font-size:8.5px}
+.chip.ok{border-color:rgba(61,214,140,.55);background:rgba(61,214,140,.08)}.chip.warn{border-color:rgba(245,185,71,.6);background:rgba(245,185,71,.08)}.chip.ghost{color:var(--muted);border-style:dashed}.pz.rest.blk .chip.ghost{color:var(--bad);text-decoration:line-through}
+.chip.tap{cursor:pointer}
+.mp.solo .ew,.mp.solo .need{display:none}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -823,7 +829,7 @@ const CARDS=[
  { // 2. explore the blast radius of any workload
    pipe:-1, wt:'boutique · reachability', wm:'default-allow', map:true,
    win(){ return mapSVG(); },
-   bind(){ const keep=S.lvl; S.lvl=0; drawReach(S.sel); S.lvl=keep; if(!S.explored.size){ S.sel='frontend'; ringOn('frontend'); } bindMap(w=>{ S.explored.add(w); refreshFoot(); refreshTxt(); }); },
+   bind(){ $('mp').classList.add('solo'); if(!S.explored.size) S.sel='frontend'; const keep=S.lvl; S.lvl=0; drawReach(S.sel); S.lvl=keep; if(!S.explored.size) ringOn('frontend'); bindMap(w=>{ S.explored.add(w); refreshFoot(); refreshTxt(); }); },
    foot:()=>`<span>${SHORT[S.sel]}</span><span>can reach <b style="color:var(--bad)">13</b> · needs <b style="color:var(--ok)">${needsOut(S.sel).length}</b> + DNS</span>`,
    kick:'Proof · the gap', title:'Every workload can reach far more than it needs.',
    body:()=>{ const w=S.sel, d=W[w];
@@ -941,16 +947,18 @@ const CARDS=[
      <p>Same method as the network: <b>evidence → verdict → policy → test run → enforce</b>, one layer at a time.</p>`,
    gate:()=>true },
  { // 9. runtime: the viewer reviews binaries; denying a startup binary is caught
-   pipe:1, wt:'tetragon · process_exec · adservice', wm:'runtime',
-   win(){ const row=(b,pre)=>`<div><span class="tap" data-b="${b[0]}"><span class="g">${pre}</span><span class="n">${b[0]}</span> <span class="c">ⓘ</span></span>${S.binOk?'<i class="tag g">NEEDED</i>':'<i class="tag y">REVIEW</i>'}</div>`;
-     return `<div class="tree"><div><span class="g">containerd-shim-runc-v2</span></div>
-       <div><span><span class="g">└─ </span><span class="n">AdService</span> <span class="w">ENTRYPOINT</span></span><i class="tag g">DECLARED</i></div>
-       <div><span><span class="g">   │  </span><span class="n">/bin/sh</span> <span class="w">#! line</span></span><i class="tag g">DECLARED</i></div>
-       ${BINS.map((b,i)=>row(b, b[0]==='echo'?'      └─ ':i===4?'   └─ ':'   ├─ ')).join('')}</div>`; },
-   bind(){ document.querySelectorAll('.tree .tap').forEach(t=>t.onclick=()=>{ const b=BINS.find(x=>x[0]===t.dataset.b);
+   pipe:1, wt:'adservice · programs', wm:'Tetragon · lab',
+   win(){ const ok=S.binOk, done=S.binChk;
+     return `<div class="pz"><div class="pzh"><span>declared in the image</span><em class="ok">ALLOW</em></div>
+       <div class="pzc"><span class="chip ok">AdService <small>entrypoint</small></span><span class="chip ok">/bin/sh <small>its #! line</small></span></div></div>
+       <div class="pz ${ok?'':'ask'}"><div class="pzh"><span>seen at startup · Tetragon · not declared</span><em class="${ok?'ok':'warn'}">${ok?'ALLOW · confirmed':'A PERSON DECIDES'}</em></div>
+       <div class="pzc">${BINS.map(b=>`<span class="chip tap ${ok?'ok':'warn'}" data-b="${b[0]}">${b[0]} <small>ⓘ</small></span>`).join('')}</div></div>
+       <div class="pz rest ${done?'blk':''}"><div class="pzh"><span>every other program in the image</span><em class="${done?'bad':''}">${done?'BLOCKED':'still allowed'}</em></div>
+       <div class="pzc"><span class="chip ghost">bash</span><span class="chip ghost">curl</span><span class="chip ghost">nc</span><span class="chip ghost">apt</span><span class="chip ghost">…</span></div></div>`; },
+   bind(){ document.querySelectorAll('#wb .tap').forEach(t=>t.onclick=()=>{ const b=BINS.find(x=>x[0]===t.dataset.b);
        sheet(`adservice · ${b[0]}`,'process_exec evidence',`<div class="verdict"><i class="tag y">REVIEW</i> the product does not guess</div><div class="ev"><h4>Tetragon · process_exec</h4><pre>binary   ${b[1]}\nparent   ${b[2]}\nwhen     ${b[3]}\nseen     ${b[4]}×</pre></div>
          <div class="ev"><h4>Image config</h4><pre>ENTRYPOINT  …/hipstershop/bin/AdService\n            a shell script (#!/bin/sh)\n${b[0]} is not declared in the image;\nthe script starts it, and a script\ncan't be resolved statically</pre></div>`); }); },
-   foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b> binaries${S.binChk?' · exec replay <b style="color:var(--ok)">PASS</b>':''}</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
+   foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b>${S.binChk?' · replay <b style="color:var(--ok)">PASS</b>':''}</span><span>other → <b style="color:var(--bad)">deny</b></span>`,
    kick:'Proof · inside the pod', title:'Inside the pod: only the programs it really runs.',
    body:()=>S.binOk&&S.binChk?`<div class="task done">Exec replay passed. Allow-list ready: 8 programs.</div><p>Any other program is blocked by Tetragon.</p>`
      :S.binOk?`<div class="task">Run the exec replay.</div><button class="btn" id="bchk">Run the exec replay</button><p>Checks that every program adservice runs at startup is on the list, so the container still starts.</p>`
