@@ -42,6 +42,11 @@ button{font:inherit;color:inherit}
 .brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
 .brand svg{width:20px;height:20px}.brand span{font-weight:500;color:var(--muted)}
 .blast{font:600 11px var(--mono);color:var(--muted);white-space:nowrap}
+.asm{display:flex;align-items:center;gap:6px;font:600 9px var(--mono);color:var(--muted)}.asm div{display:flex;gap:2px}
+.asm i{width:9px;height:12px;border-radius:2px;background:var(--bad);transition:background .6s}.asm i.c{background:var(--ok)}
+.asm b{color:var(--bad);font-size:10.5px}.asm b.ok{color:var(--ok)}
+@media (max-width:420px){.head .brand>span{display:none}}
+@media (max-width:360px){.asm small{display:none}}
 .blast b{font-size:13px;color:var(--bad);font-variant-numeric:tabular-nums}
 .blast.zero b{color:var(--ok)}
 .blast.pop b{display:inline-block;animation:pop .5s ease}
@@ -347,6 +352,51 @@ svg text{font-family:var(--mono)}
 .lanes .xx2{fill:#FF5C5C;font-size:16px;font-weight:900}
 .lanes .bub2 rect{fill:#1B2433;stroke:#FF5C5C}.lanes .bub2 text{fill:#FFB3B3;font-weight:700}
 .lanes .src0{font-size:8.5px;fill:#7D889C}
+/* decisions grid */
+.dg{display:grid;grid-template-columns:62px repeat(7,minmax(0,1fr));gap:2px;align-items:center;font:600 8.5px var(--mono)}
+.dg b{color:var(--muted);text-align:center;font-weight:800;font-size:7.5px;white-space:nowrap;overflow:hidden}.dg span{color:var(--text);white-space:nowrap;overflow:hidden}
+.dg i{height:11px;border-radius:3px;background:rgba(255,92,92,.55)}
+.dg i.ch{animation:ch 1.1s ease}
+@keyframes ch{0%{background:#F5B947;transform:scale(1.25)}100%{background:rgba(255,92,92,.55)}}
+.dgl{display:flex;justify-content:space-between;margin-top:7px;font:600 9.5px var(--mono);color:var(--muted)}.dgl b{color:var(--ink)}.dgl b.bad{color:var(--bad)}
+.dgk{margin-top:6px;font:500 8.5px/1.45 var(--mono);color:var(--muted)}
+.dgo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.dgo>div{border:1px solid rgba(255,92,92,.35);border-radius:8px;padding:8px;background:rgba(255,92,92,.06)}
+.dgo b{display:block;font-size:12px;color:var(--ink)}.dgo small{display:block;font:500 9.5px var(--mono);color:var(--muted);margin:2px 0 5px}.dgo em{font:700 10.5px var(--mono);font-style:normal;color:var(--bad)}
+.pw{display:flex;flex-direction:column;height:100%}.psv{width:100%;flex:1;min-height:0}
+.psv .pl{stroke:var(--line);stroke-width:.6}.psv .pa{font:600 8.5px var(--mono);fill:var(--muted)}.psv .pa.off{opacity:.3}
+.psv .pg{fill:rgba(255,92,92,.22)}.psv .fade{opacity:.22;transition:opacity .8s}.psv .pbox{fill:rgba(61,214,140,.1);stroke:var(--ok)}.psv .nw{animation:pf .7s ease}.psv .nw2{animation:pf .7s ease}
+@keyframes pf{from{opacity:0}to{opacity:1}}
+.psv .pn{fill:none;stroke:var(--info);stroke-width:2}.psv .pal{fill:none;stroke:var(--bad);stroke-width:2.4}
+.psv .pdl{fill:none;stroke:var(--ok);stroke-width:2.4;stroke-dasharray:5 3;animation:pf .9s ease}
+.psv .pt{font:700 9px var(--mono);fill:var(--ink)}.psv .pt.bad{fill:var(--bad)}.psv .pt.ok{fill:var(--warn)}.psv .pt.dl{fill:var(--ok)}
+.psv .px{fill:rgba(255,92,92,.25);stroke:var(--bad)}.psv .pxt{font:800 10px var(--mono);fill:var(--bad)}
+.psv .lg.al{fill:var(--bad)}.psv .lg.nd{fill:var(--info)}
+.pbtn{margin:6px auto 0;display:block;background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;font:700 13px var(--body)}
+.wtabs2{display:flex;gap:6px;margin-bottom:4px}.wtabs2 button{flex:1;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:6px;font:700 11.5px var(--body)}.wtabs2 button.on{border-color:var(--info);color:var(--ink);background:rgba(110,168,254,.1)}
+.psv .wsrc{fill:rgba(255,92,92,.12);stroke:var(--bad);stroke-width:1.4}.psv .wsrc.ag{fill:rgba(179,146,240,.12);stroke:var(--prog)}
+.psv .wt1{font:800 9.5px var(--mono);fill:var(--ink)}.psv .wt2{font:500 7.5px var(--mono);fill:var(--muted)}.psv .wt1.s{font-size:8.5px}.psv .wt2.s{font-size:7px}
+.psv .wr{fill:none;stroke-width:1.6;stroke-dasharray:300;stroke-dashoffset:300;animation:wd .7s ease forwards;animation-delay:var(--d)}
+@keyframes wd{to{stroke-dashoffset:0}}
+.psv .wr.bad{stroke:var(--bad)}.psv .wr.ok{stroke:var(--ok)}.psv .wr.blk{stroke:var(--bad);opacity:.55}
+.psv .wdot{fill:var(--bad)}.psv .wwall{fill:var(--ok);filter:drop-shadow(0 0 4px rgba(61,214,140,.7))}
+.psv .wtg{fill:var(--panel);stroke:var(--line)}.psv .wtg.bad{stroke:rgba(255,92,92,.6)}.psv .wtg.ok{stroke:var(--ok)}.psv .wtg.blk{stroke:var(--line);opacity:.8}
+.psv .wst{font:800 7px var(--mono)}.psv .wst.bad{fill:var(--bad)}.psv .wst.ok{fill:var(--ok)}.psv .wst.blk{fill:var(--ok)}
+.pfh{font:700 9px var(--mono);color:var(--muted);margin-bottom:4px}
+.pf>div{display:grid;grid-template-columns:1fr 1fr 64px;gap:4px;align-items:center;padding:3px 7px;border:1px solid var(--line);border-radius:6px;margin-bottom:3px;font:600 10px var(--mono);color:var(--muted);transition:all .3s}
+.pf>div b{color:var(--text);font-weight:700}.pf>div i{font-style:normal;text-align:right;color:var(--ok);font-size:9px}
+.pf>div.on{border-color:var(--ok);background:rgba(61,214,140,.08)}.pf>div.on span{color:var(--ink)}
+.etab{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:7px 0 5px}.etab button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:6px 2px;font:700 10.5px var(--body)}
+.etab button.seen{color:var(--text)}.etab button.on{border-color:var(--info);color:var(--ink);background:rgba(110,168,254,.12)}
+.ecode small{font:600 8.5px var(--mono);color:var(--ok)}.ecode pre{margin:3px 0 0;font:500 8.5px/1.35 var(--mono);color:var(--text);background:rgba(0,0,0,.25);border-radius:6px;padding:7px;overflow-x:auto;white-space:pre}
+.lw{display:flex;flex-direction:column;gap:5px}
+.lwr{display:grid;grid-template-columns:52px 1fr auto;gap:6px;align-items:center;padding:7px 8px;border:1px solid var(--line);border-radius:7px;font:600 10px var(--mono);opacity:.15;transition:opacity .4s}
+.lwr.on{opacity:1}.lwr i{font-style:normal;color:var(--muted)}.lwr span{color:var(--ink)}.lwr small{display:block;color:var(--muted);font-size:8.5px;font-weight:500}
+.lwr em{font-style:normal;font-size:8.5px;font-weight:800;padding:2px 5px;border-radius:4px}
+.lwr.base em{color:var(--ok);background:rgba(61,214,140,.12)}.lwr.esc em{color:var(--warn);background:rgba(245,185,71,.12)}.lwr.out em{color:var(--bad);background:rgba(255,92,92,.14)}
+.lwr.on.out{border-color:rgba(255,92,92,.6);cursor:pointer}.lwr.on.esc{border-color:rgba(245,185,71,.4)}
+.erule{font:600 10px var(--mono);color:var(--ink);padding:4px 8px;margin-top:3px;border-left:2px solid var(--ok);background:rgba(61,214,140,.06);border-radius:0 5px 5px 0}
+.eyaml{margin-top:6px;background:transparent;border:1px solid var(--line);color:var(--info);border-radius:6px;padding:5px 9px;font:700 10px var(--mono)}
+.pipe.gone{display:none}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -415,7 +465,7 @@ svg text{font-family:var(--mono)}
   <div class="bars" id="bars" aria-hidden="true"></div>
   <div class="head">
     <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#2B3A55"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#E6EAF2" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#3DD68C"/></svg>Safety Layer <span>· boutique</span></div>
-    <div class="blast" id="blast" aria-live="polite"><span id="bW">ad</span> reach <b id="bN">13</b></div>
+    <div class="blast" id="blast" hidden><span id="bW">ad</span><b id="bN">13</b></div><div class="asm" id="asm" aria-live="polite"></div>
   </div>
   <div class="pipe off" id="pipe" aria-label="Pipeline"><span>Collect</span><span>Classify</span><span>Compile</span><span>Verify</span><span>Enforce</span></div>
   <div class="win"><div class="wbar"><i></i><i></i><i></i><span id="wt"></span><em id="wm"></em></div><div class="wbody" id="wb"></div><div class="wfoot" id="wf"></div></div>
@@ -445,10 +495,115 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
+const ASL=['K8s API','Internet','Pods','Programs','Proc→net','Files','Privileges'];
+function meter(){ const c=CARDS[at], i=c._i; let n=0;
+  if(i===11) n=S.lvl>=3?3:0; else if(i>11&&i<13) n=3; else if(i===13) n=S.binOk?5:3; else if(i>13&&i<23) n=5; else if(i>=23) n=7;
+  const m=$('asm'); const h=`<small>attack surface</small><div>${ASL.map((l,k)=>`<i class="${k<n?'c':''}" title="${l}"></i>`).join('')}</div><b class="${n===7?'ok':''}">${7-n}/7 open</b>`;
+  if(m.dataset.n!==String(n)){ m.innerHTML=h; m.dataset.n=n; } }
 function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textContent+$('bW').textContent; $('bW').textContent=SHORT[w]||w; $('bN').textContent=n;
   b.classList.toggle('zero',S.lvl>=3); if(n+(SHORT[w]||w)!==was){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }
+
+
+// ---------- why: what one compromised workload can reach, before / after kernel enforcement
+const WT=[['K8s API','take over the cluster'],['Internet','send data out'],['Other pods','move sideways'],['Programs','run a shell, tools'],['Files','change code, persist'],['Privileges','escalate to root'],['checkout:5050','the one it needs']];
+function whySVG(){
+  const e=S.wEnf, ag=S.wTab===1, y=i=>30+i*31, wx=168;
+  const src=ag?`<rect x="8" y="96" width="100" height="58" rx="9" class="wsrc ag"/><text x="58" y="117" class="wt1" text-anchor="middle">AI agent</text><text x="58" y="131" class="wt2" text-anchor="middle">goes off-task, or</text><text x="58" y="144" class="wt2" text-anchor="middle">a poisoned model</text>`
+    :`<rect x="8" y="96" width="100" height="58" rx="9" class="wsrc"/><text x="58" y="117" class="wt1" text-anchor="middle">adservice</text><text x="58" y="131" class="wt2" text-anchor="middle">one exploited</text><text x="58" y="144" class="wt2" text-anchor="middle">dependency</text>`;
+  const rows=WT.map(([n,d],i)=>{ if(i===6&&ag){ n='LLM API:443'; d='the model it calls'; } const need=i===6, blk=e&&!need, st=need?'ALLOWED':(e?'BLOCKED':'REACHED');
+    return `<path d="M108 125 C 140 125, 140 ${y(i)}, ${blk?wx:214} ${y(i)}" class="wr ${need?'ok':blk?'blk':'bad'}" style="--d:${i*.12}s"/>
+      ${blk?`<circle cx="${wx}" cy="${y(i)}" r="4" class="wdot"/>`:''}
+      <rect x="216" y="${y(i)-12}" width="108" height="24" rx="5" class="wtg ${need?'ok':blk?'blk':'bad'}"/>
+      <text x="222" y="${y(i)-1}" class="wt1 s">${n}</text><text x="222" y="${y(i)+8}" class="wt2 s">${d}</text>
+      <text x="320" y="${y(i)-1}" class="wst ${need?'ok':blk?'blk':'bad'}" text-anchor="end">${st}</text>`; }).join('');
+  const wall=e?`<g class="nw2"><rect x="${wx-3}" y="12" width="6" height="226" rx="3" class="wwall"/><text x="${wx}" y="250" class="wt2" text-anchor="middle" style="fill:var(--ok)">kernel (eBPF)</text></g>`:'';
+  return `<div class="wtabs2"><button data-wt="0" class="${!ag?'on':''}">Exploited app</button><button data-wt="1" class="${ag?'on':''}">AI agent</button></div>
+    <svg viewBox="0 0 330 256" class="psv">${rows}${wall}${src}</svg>
+    ${e?'':'<button class="pbtn" id="wenf">Enforce in the kernel ▸</button>'}`;
+}
+
+// ---------- what's special: one profile, compiled per engine
+const PROF=[['Network in','frontend → :9555',['cilium']],['Network out','DNS only',['cilium']],['Network per process','only java connects',['cilium','tetragon']],['Programs','8 allowed',['tetragon','kubearmor']],['Files','writes /tmp only',['kubearmor','sc']],['Privileges','drop all 14',['sc']]];
+const ENG={cilium:['Cilium','CiliumNetworkPolicy',`kind: CiliumNetworkPolicy
+spec:
+  endpointSelector: {matchLabels: {app: adservice}}
+  ingress:
+  - fromEndpoints: [{matchLabels: {app: frontend}}]
+    toPorts: [{ports: [{port: "9555"}]}]
+  egress:
+  - toEndpoints: [{matchLabels: {k8s-app: kube-dns}}]
+    toPorts: [{ports: [{port: "53", protocol: UDP}]}]`],
+ tetragon:['Tetragon','TracingPolicy',`kind: TracingPolicy
+spec:
+  podSelector: {matchLabels: {app: adservice}}
+  kprobes:
+  - call: security_bprm_check      # programs
+    selectors:
+    - matchArgs: [{index: 0, operator: NotPostfix,
+        values: [java, sed, uname, tr, …]}]
+      matchActions: [{action: Override, argError: -1}]
+  - call: security_socket_connect  # network per process
+    selectors:
+    - matchBinaries: [{operator: NotIn,
+        values: [/usr/bin/java]}]
+      matchActions: [{action: Override, argError: -1}]`],
+ kubearmor:['KubeArmor','KubeArmorPolicy',`kind: KubeArmorPolicy
+spec:
+  selector: {matchLabels: {app: adservice}}
+  process:
+    matchPaths: [{path: /usr/bin/java}, …]
+  file:
+    matchDirectories:
+    - {dir: /tmp/, recursive: true}
+  action: Allow`],
+ sc:['securityContext','Pod spec',`securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: [ALL]
+  seccompProfile: {type: RuntimeDefault}`]};
+const ENGR={cilium:['allow frontend → :9555','allow → kube-dns :53/UDP','drop everything else'],
+ tetragon:['exec: not one of the 8 → denied','connect: not java → blocked','same pod selector as Cilium'],
+ kubearmor:['process: allow-list of 8','file: write /tmp only','default: block'],
+ sc:['no privilege escalation','read-only root filesystem','drop ALL capabilities']};
+function engHTML(){ const e=S.eng;
+  return `<div class="pfh">adservice · one profile</div><div class="pf">${PROF.map(([n,v,es])=>`<div class="${es.includes(e)?'on':''}"><span>${n}</span><b>${v}</b><i>${es.includes(e)?'→ '+(e==='sc'?'secCtx':ENG[e][0]):''}</i></div>`).join('')}</div>
+    <div class="etab">${Object.keys(ENG).map(k=>`<button data-e="${k}" class="${k===e?'on':''} ${S.engSeen.has(k)?'seen':''}">${ENG[k][0]}</button>`).join('')}</div>
+    <div class="ecode"><small>${ENG[e][1]} · generated</small>${ENGR[e].map(r=>`<div class="erule">${r}</div>`).join('')}<button class="eyaml" id="eyaml">View the YAML</button></div>`; }
+// ---------- what's special: the learning window doesn't just record
+const LW=[['exec','java','AdService entrypoint','base','in the image, seen every run'],
+ ['connect','java → kube-dns:53','DNS','base','in the manifest and in traffic'],
+ ['exec','sed, uname, tr…','startup script','esc','not declared in the image: a person approves once'],
+ ['connect','sh → 203.0.113.7:443','unknown host','out','unexpected process, unknown destination, no manifest reference'],
+ ['exec','java (after restart)','same binary','base','matches the baseline']];
+function lwHTML(){ const n=S.lwN;
+  return `<div class="lw">${LW.map(([v,a,d,k],i)=>`<div class="lwr ${i<n?'on':''} ${k}" ${k==='out'?'data-lwx':''}><i>${v}</i><span>${a}<small>${d}</small></span><em>${k==='base'?'BASELINE':k==='esc'?'ASK A PERSON':'KEPT OUT'}</em></div>`).join('')}</div>
+    ${n<LW.length?'<button class="pbtn" id="lwrun">Run the learning window ▸</button>':''}`; }
+// ---------- problem chart: allowed vs needed paths across releases
+function probSVG(){
+  const p=S.prb, X=i=>44+i*46, Y=v=>226-v*1.45, end=X(6);
+  const need=[17,17,17,18,18,18];
+  const allow=[[133,133],[133,133,17],[133,133,17,17],[133,133,17,17,133,133],[133,133,17,17,133,133]][p];
+  const step=(v)=>v.map((y,i)=>`${i?'V':'M'+X(0)} ${Y(y)} H ${X(i+1)}`).join(' ').replace(/^M(\S+) (\S+)/,'M$1 $2');
+  const sp=v=>{ let d=`M${X(0)} ${Y(v[0])}`; v.forEach((y,i)=>{ if(i) d+=` V${Y(y)}`; d+=` H${X(i+1)}`; }); return d; };
+  const n=allow.length, needS=need.slice(0,n);
+  let gap=''; allow.forEach((y,i)=>{ const h=Y(needS[i])-Y(y); if(h>0) gap+=`<rect x="${X(i)}" y="${Y(y)}" width="46" height="${h}" class="pg ${i===n-1?'nw':''}"/>`; });
+  const grid=[0,50,100,133].map(v=>`<line x1="${X(0)}" x2="${end}" y1="${Y(v)}" y2="${Y(v)}" class="pl"/><text x="${X(0)-5}" y="${Y(v)+3}" class="pa" text-anchor="end">${v}</text>`).join('');
+  const rel=need.map((_,i)=>`<text x="${X(i)+23}" y="244" class="pa ${i<n?'':'off'}" text-anchor="middle">v${i+1}</text>`).join('');
+  let mk='';
+  if(p>=1) mk+=`<g class="nw2"><text x="${X(2)+4}" y="${Y(17)-26}" class="pt ok">policy</text><text x="${X(2)+4}" y="${Y(17)-15}" class="pt ok">by hand</text></g>`;
+  if(p>=2) mk+=`<g class="nw2"><circle cx="${X(3)+23}" cy="${Y(18)-3}" r="9" class="px"/><text x="${X(3)+23}" y="${Y(18)}" class="pxt" text-anchor="middle">✕</text><text x="${X(3)+23}" y="${Y(18)-18}" class="pt bad" text-anchor="middle">checkout</text><text x="${X(3)+23}" y="${Y(18)-29}" class="pt bad" text-anchor="middle">DROPPED</text></g>`;
+  if(p>=3) mk+=`<g class="nw2"><text x="${X(4)+46}" y="${Y(133)-6}" class="pt bad" text-anchor="middle">rollback: open again</text></g>`;
+  const dl=p>=4?`<path d="${sp(need)}" class="pdl"/><g class="nw2"><rect x="${X(0)+20}" y="${Y(92)}" width="236" height="40" rx="7" class="pbox"/><text x="${X(3)}" y="${Y(92)+16}" class="pt dl" text-anchor="middle">with a decision layer: allowed = needed</text><text x="${X(3)}" y="${Y(92)+30}" class="pa" text-anchor="middle">re-decided and verified on every release</text></g>`:'';
+  const lbl=p===0?`<text x="${X(1)+46}" y="${Y(75)}" class="pt bad" text-anchor="middle">116 unused paths</text><text x="${X(1)+46}" y="${Y(75)+11}" class="pa" text-anchor="middle">attack surface</text>`:'';
+  return `<svg viewBox="0 0 330 252" class="psv"><g class="${p>=4?'fade':''}">${grid}${gap}${lbl}
+    <path d="${sp(needS)}" class="pn"/><path d="${sp(allow)}" class="pal"/>${mk}</g>${dl}${rel}
+    <text x="${X(0)}" y="12" class="pa"><tspan class="lg al">━ allowed</tspan>  <tspan class="lg nd">━ needed</tspan></text>
+    <text x="${X(0)-30}" y="12" class="pa">paths</text></svg>
+    ${p<4?`<button class="pbtn" id="prb">${['Write the policy by hand','Ship release v4','Roll back','Add a decision layer'][p]} ▸</button>`:''}`;
+}
 // ---------- the map: tap any workload
 function mapSVG(){
   const K=Object.keys(POS);
@@ -506,6 +661,18 @@ const BINS=[['java','/opt/java/openjdk/bin/java','AdService','container start',2
   ['tr','/usr/bin/tr','AdService','inside the script',1],['xargs','/usr/bin/xargs','AdService','inside the script',1],['echo','/bin/echo','xargs','inside the script',1]];
 // ---------- the cards
 const CARDS=[
+ { // why: kernel enforcement limits what a compromised workload or agent can do
+   pipe:-1, wt:'adservice · if compromised', wm:'blast radius',
+   win(){ return `<div class="pw">${whySVG()}</div>`; },
+   bind(){ const re=()=>{ $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); refreshFoot(); };
+     $('wb').querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{ S.wTab=+b.dataset.wt; S.wSeen.add(S.wTab); re(); });
+     const b=$('wenf'); if(b) b.onclick=()=>{ S.wEnf=true; re(); }; },
+   foot:()=>`<span>${S.wEnf?'<b>6</b> of 7 blocked · needed path works':'<b>7</b> of 7 paths reachable'}</span><span>${S.wTab?'agent':'app'}</span>`,
+   kick:'Problem · the attack surface', title:'Assume one workload is compromised. What can it reach?',
+   body:()=>`<p>eBPF enforces in the kernel, at the moment of the action. <b>An agent can ignore its instructions. It can't ignore the kernel.</b></p>
+     <div class="task ${S.wEnf?'done':''}">Tap <b>Enforce in the kernel</b>.</div>
+     <div class="task ${S.wSeen.has(1)?'done':''}">Switch to <b>AI agent</b>: same rules, same result.</div>`,
+   gate:()=>S.wEnf&&S.wSeen.has(1) },
  { // 1. the cluster as it is today, then zoom into one namespace
    pipe:-1, wt:'zsh · prod-cluster', wm:'cluster view',
    win(){ const L=[`<div class="p">kubectl get ns</div>`,`<div class="c">NAME              STATUS</div>`,`<div>boutique          Active   <span class="warn">← the shop</span></div>`,
@@ -522,17 +689,52 @@ const CARDS=[
        <p>That is <b>default-allow</b>: any pod can reach any pod, the kube-apiserver and the internet. Next, we zoom into boutique.</p>`
      :`<p>A cluster on day 2: Cilium as the CNI, Hubble and Tetragon collecting. Checking what is enforced…</p>`,
    gate:()=>S.ran.size>0 },
+ { // problem: a lockdown decision expires every release
+   pipe:-1, wt:'boutique · over time', wm:'illustration · lab data',
+   win(){ return `<div class="pw">${probSVG()}</div>`; },
+   bind(){ const b=$('prb'); if(b) b.onclick=()=>{ stop(); S.prb++; $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); refreshFoot(); }; },
+   foot:()=>`<span>boutique: <b>133</b> paths open · <b>17</b> needed</span><span>step <b>${Math.min(S.prb,4)}/4</b></span>`,
+   kick:'Problem · why it stays open', title:'Locking down is a decision that expires every release.',
+   body:()=>{ const t=[
+     `<p>Red: <b>116 paths</b> allowed but never used. That is the attack surface, and the engines to close it are already installed.</p>`,
+     `<p>The team writes the policy by hand. The gap closes: only the <b>17 needed paths</b> stay open.</p>`,
+     `<p>Release v4 adds one dependency. Nobody updated the policy, so the new flow is <b>dropped</b>. Checkout is down.</p>`,
+     `<p>The fix under pressure is a rollback: <b>open again</b>. That's why <b>58% of organizations</b> leave most workloads without network policy (Fairwinds 2024).</p>`,
+     `<p><b>The missing piece is the decision, not the engine</b>: re-decided and verified on every release, for every layer.</p>`];
+     return t[Math.min(S.prb,4)]+(S.prb<4?`<div class="task">Tap <b>${['Write the policy by hand','Ship release v4','Roll back','Add a decision layer'][S.prb]}</b>.</div>`:'<div class="task done">Done.</div>'); },
+   gate:()=>S.prb>=4 },
+ { // special 1: one profile, every engine
+   pipe:-1, wt:'adservice · profile → policies', wm:'engine-agnostic',
+   win(){ return engHTML(); },
+   bind(){ $('wb').querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ S.eng=b.dataset.e; S.engSeen.add(S.eng); $('wb').innerHTML=engHTML(); CARDS[at].bind(); refreshTxt(); refreshFoot(); });
+     $('eyaml').onclick=()=>sheet(`adservice · ${ENG[S.eng][1]}`,'generated from the profile',`<div class="ev"><h4>${ENG[S.eng][0]}</h4><pre>${ENG[S.eng][2]}</pre></div>`); },
+   foot:()=>`<span>${['kubearmor','sc'].includes(S.eng)?'design':'lab'} · ${ENG[S.eng][0]}</span><span>viewed <b>${S.engSeen.size}/4</b></span>`,
+   kick:'Solution · one decision', title:'Decide once. Enforce with the engines you already run.',
+   body:()=>`<p>One profile, written in each engine's native format. “Only java connects” becomes a Cilium rule for <i>where</i> and a Tetragon rule for <i>which process</i>.</p>
+     <div class="task ${S.engSeen.size>=2?'done':''}">Tap another engine and see which profile lines it enforces.</div>`,
+   gate:()=>S.engSeen.size>=2 },
+ { // special 2: learning is not recording
+   pipe:-1, wt:'adservice · learning window', wm:'design',
+   win(){ return lwHTML(); },
+   bind(){ const b=$('lwrun'); if(b) b.onclick=()=>{ b.disabled=true; LW.forEach((_,i)=>later(150+i*650,()=>{ S.lwN=i+1; $('wb').innerHTML=lwHTML(); CARDS[at].bind(); refreshTxt(); refreshFoot(); })); };
+     const x=$('wb').querySelector('[data-lwx]'); if(x&&S.lwN>=4) x.onclick=()=>{ S.lwX=true; refreshTxt(); sheet('sh → 203.0.113.7:443','kept out of the baseline',`<div class="verdict"><i class="tag x">KEPT OUT</i> observed, but not trusted</div><div class="ev"><h4>Tetragon · process_exec + connect</h4><pre>binary   /bin/sh\nparent   java\ndest     203.0.113.7:443\nseen     1×</pre></div><div class="ev"><h4>Why it is not learned</h4><pre>process   not the app's binary\ndest      no manifest, config or DNS name\nrole      adservice only serves frontend\n→ flagged for review, never allowed</pre></div>`); }; },
+   foot:()=>`<span>events <b>${S.lwN}/${LW.length}</b></span><span>baseline <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='base').length}</b> · ask <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='esc').length}</b> · out <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='out').length}</b></span>`,
+   kick:'Solution · learning', title:'Learning is not recording. What was seen still has to make sense.',
+   body:()=>`<p>Each observation is checked against the manifest, the image and the workload's role: <b>baseline</b>, <b>ask a person</b>, or <b>kept out</b>. Bad behavior never becomes policy.</p>
+     <div class="task ${S.lwN>=LW.length?'done':''}">Tap <b>Run the learning window</b>.</div>
+     <div class="task ${S.lwX?'done':''}">Tap the event that was <b>kept out</b>.</div>`,
+   gate:()=>S.lwN>=LW.length&&S.lwX },
  { // 2. explore the blast radius of any workload
    pipe:-1, wt:'boutique · reachability', wm:'default-allow', map:true,
    win(){ return mapSVG(); },
    bind(){ const keep=S.lvl; S.lvl=0; drawReach(S.sel); S.lvl=keep; if(!S.explored.size){ S.sel='frontend'; ringOn('frontend'); } bindMap(w=>{ S.explored.add(w); refreshFoot(); refreshTxt(); }); },
    foot:()=>`<span>${SHORT[S.sel]}</span><span>can reach <b style="color:var(--bad)">13</b> · needs <b style="color:var(--ok)">${needsOut(S.sel).length}</b> + DNS</span>`,
-   kick:'2 · Zoom into boutique', title:'Reachability vs actual need, per workload.',
+   kick:'Proof · the gap', title:'Reachability vs actual need, per workload.',
    body:()=>{ const w=S.sel, d=W[w];
      return `<div class="task ${S.explored.size?'done':''}">Tap a workload on the map. Start with frontend.</div>
-       ${S.explored.size?`<p><b>${w}</b> can connect to <b>13 places</b> today. <b style="color:var(--ok)">Green</b>: the ${needsOut(w).length} it needs, plus DNS (listed below). <b style="color:var(--bad)">Red</b>: <b>the other ${13-needsOut(w).length}, the attack surface</b>: open, unused, and available to anyone who takes over this pod. Tap a row to see the evidence.</p>
+       ${S.explored.size?`<p><b>${w}</b> can reach <b>13 places</b> and needs ${needsOut(w).length} plus DNS. <b style="color:var(--bad)">The rest is attack surface.</b> Tap a row for its evidence.</p>
        <div class="list">${d.out.map((r,i)=>`<div class="row tap" data-ev="out:${i}"><span class="a">→ ${esc(r[0]==='dns'?'kube-dns':r[0])}:${esc(r[1])}</span><span class="e">${r[2].toLocaleString('en-US')} flows · ${r[3].startsWith('platform')?'platform rule':'manifest env'}</span><span class="v"><i class="tag ${r[3].startsWith('platform')?'b':'g'}">NEED</i></span></div>`).join('')}</div>`
-       :`<p>This is boutique's map. Tap a workload: the map shows what it <b>can</b> reach today, and the list below shows what it <b>needs</b>. The difference is the attack surface.</p>`}`; },
+       :`<p>Red is what a workload <b>can</b> reach. Green is what it <b>needs</b>.</p>`}`; },
    bindTxt(){ document.querySelectorAll('[data-ev]').forEach(r=>r.onclick=()=>{ S.mapEv=true; const [dir,i]=r.dataset.ev.split(':'); const row=W[S.sel][dir][+i];
      sheet(`${S.sel} → ${row[0]==='dns'?'kube-dns':row[0]}`,`${row[1]} · evidence`,pathEvidence(S.sel,dir,row)); }); },
    gate:()=>S.explored.size>0 },
@@ -568,11 +770,11 @@ const CARDS=[
          <span class="v">${on?`<i class="tag ${p.truth==='keep'?(p.k==='out-dns'?'b':'g'):'x'} stamp">${p.truth==='keep'?(p.k==='out-dns'?'NEEDED':'CONFIRMED'):'EXCESS'}</i>`:'<span class="c">…</span>'}</span></div>`; }).join('')}</div>`; },
    bind(){ document.querySelectorAll('.row.tap').forEach(a=>a.onclick=()=>{ S.clsEv=true; refreshTxt(); const p=PATHS.find(x=>x.k===a.dataset.k); sheet(`adservice · ${p.a.replace(/^(IN|OUT)\s+/,'')}`,'evidence',p.ev()); }); },
    foot:()=>`<span>classified <b>${Math.min(S.cls,5)}/5</b></span><span>keep <b>3</b> · excess <b style="color:var(--bad)">21</b></span>`,
-   kick:'5 · Classify', title:'Evidence-based classification of every path.',
+   kick:'Proof · classify', title:'Evidence-based classification of every path.',
    body:()=>S.cls>=5?`<div class="task ${S.clsEv?'done':''}">Classified. Now tap a path to see the evidence behind its verdict.</div>
-       <p>Declared in a manifest and seen in Hubble: <b>confirmed</b>. Platform needs such as DNS and kubelet probes: <b>needed</b>, even with no traffic in the window. No declaration and no traffic: <b>excess</b>, attack surface with no reason to exist.</p>`
+       <p>Declared and seen: <b>confirmed</b>. Platform needs: <b>needed</b>. Neither: <b>excess</b>.</p>`
      :`<div class="task">Run the classification for adservice.</div>
-       <p>adservice is allowed 24 paths today. The product checks each one against its evidence: the manifests and the Hubble flows.</p>
+       <p>adservice is allowed 24 paths. Each is checked against manifests and Hubble flows.</p>
        <button class="btn" id="cls" ${S.cls>0?'disabled':''}>Classify adservice</button>`,
    bindTxt(){ if($('cls')) $('cls').onclick=()=>{ $('cls').disabled=true; PATHS.forEach(p=>S.dec[p.k]=p.truth);
        for(let i=1;i<=5;i++) later(i*520,()=>{ S.cls=i; refresh(true); }); }; },
@@ -602,11 +804,11 @@ const CARDS=[
    pipe:3, wt:'decision-layer verify', wm:'dry-run',
    win(){ return `<div class="t" id="vt"><div class="p">decision-layer verify adservice --replay</div>${S.replay?replayOut():'<div class="c"># a test run on real traffic, before applying</div><div>&nbsp;</div><div class="c">recorded connection           new policy says</div><div>frontend → adservice:9555     <span class="ok">still allowed ✓</span></div><div>kubelet  → adservice:9555     <span class="ok">still allowed ✓</span></div><div>… 33,411 recorded connections</div><div>&nbsp;</div><div class="c"># one needed connection blocked = not applied</div>'}</div>`; },
    foot:()=>`<span>cluster not touched</span><span>result <b style="color:${S.replay==='pass'?'var(--ok)':S.replay?'var(--bad)':'var(--ink)'}">${S.replay?S.replay.toUpperCase():'–'}</b></span>`,
-   kick:'7 · Verify', title:'Pre-deployment validation against recorded traffic.',
+   kick:'Proof · verify', title:'Pre-deployment validation against recorded traffic.',
    body:()=>S.replay==='pass'?`<div class="task done">PASS: no required flow would be dropped.</div><p>Safe to enforce. The replay also confirms what it closes: 21 unused paths for adservice.</p>`
      :S.replay?`<div class="task">The replay caught a problem. Fix it from the evidence and run it again.</div>
        <p>${replayIssues().map(i=>i.why).join(' ')}</p><button class="btn" id="fix">Apply the evidence verdicts and re-run</button>`
-     :`<div class="task">Run the flow replay.</div><button class="btn" id="run">Run the flow replay</button><p><b>What is a flow replay?</b> A test run before anything changes. Hubble already recorded every real connection in boutique: ${FLOWS.toLocaleString('en-US')} of them. We send each one through the new policy and ask: <b>would it still get through?</b> If even one connection the app needs would be blocked, the policy is <b>not applied</b>.</p>`,
+     :`<div class="task">Run the flow replay.</div><button class="btn" id="run">Run the flow replay</button><p>Every recorded connection is sent through the new policy first. If one the app needs would drop, nothing is applied.</p>`,
    bindTxt(){ if($('run')) $('run').onclick=runReplay; if($('fix')) $('fix').onclick=()=>{ PATHS.forEach(p=>S.dec[p.k]=p.truth); S.replay=null; refresh(true); later(250,runReplay); }; },
    gate:()=>S.replay==='pass' },
  { // 8. enforce: approve the stages, then check any workload's reach
@@ -614,7 +816,7 @@ const CARDS=[
    win(){ return mapSVG(); },
    bind(){ drawReach(S.sel); bindMap(()=>refreshFoot()); },
    foot:()=>`<span>kube-api <b style="color:${S.lvl>=1?'var(--ok)':'var(--bad)'}">${S.lvl>=1?'denied':'open'}</b> · world <b style="color:${S.lvl>=2?'var(--ok)':'var(--bad)'}">${S.lvl>=2?'denied':'open'}</b></span><span>${SHORT[S.sel]} reach <b>${reachOf(S.sel)}</b></span>`,
-   kick:'8 · Enforce', title:'Staged enforcement with verification and rollback.',
+   kick:'Proof · enforce', title:'Staged enforcement with verification and rollback.',
    body:()=>{ const ST=[['Namespace isolation','Deny the kube-apiserver and traffic from other namespaces.','closes: K8s API for 12 workloads'],
        ['Egress lock','Deny connections from the namespace to the internet.','closes: internet egress for 12 workloads'],
        ['East-west isolation','Each workload may talk only to the services it needs.','closes: 116 unused paths, keeps 17 required']];
@@ -625,7 +827,7 @@ const CARDS=[
            ${st==='ok'?'':`<p>${d}</p><small>${c} · flow replay: 0 required flows dropped</small>`}
            ${st==='now'?`<button class="btn" id="appr">Approve stage ${i+1}</button>`:''}
            ${st==='ok'?`<div class="lv">${c} · live check: 0 drops</div>${i===S.lvl-1&&!done?`<button class="btn sec sm" id="rbk">↶ Roll back stage ${i+1}</button>`:''}`:''}</div>`; }).join('')}</div>
-       <p class="note">Each stage is its own policy set: applied only after approval, rolled back in one step. A drop on a required flow rolls it back automatically.</p>`; },
+       <p class="note">Applied on approval, rolled back in one step.</p>`; },
    bindTxt(){ if($('appr')) $('appr').onclick=e=>{ e.target.disabled=true; e.target.textContent='Applying…'; later(600,()=>{ S.lvl++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); };
      if($('rbk')) $('rbk').onclick=e=>{ e.target.disabled=true; e.target.textContent='Rolling back…'; later(600,()=>{ S.lvl--; S.rb++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); }; },
    gate:()=>S.lvl>=3&&S.rb>0 },
@@ -653,11 +855,11 @@ const CARDS=[
        sheet(`adservice · ${b[0]}`,'process_exec evidence',`<div class="verdict"><i class="tag y">REVIEW</i> the product does not guess</div><div class="ev"><h4>Tetragon · process_exec</h4><pre>binary   ${b[1]}\nparent   ${b[2]}\nwhen     ${b[3]}\nseen     ${b[4]}×</pre></div>
          <div class="ev"><h4>Image config</h4><pre>ENTRYPOINT  …/hipstershop/bin/AdService\n            a shell script (#!/bin/sh)\n${b[0]} is not declared in the image;\nthe script starts it, and a script\ncan't be resolved statically</pre></div>`); }); },
    foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b> binaries${S.binChk?' · exec replay <b style="color:var(--ok)">PASS</b>':''}</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
-   kick:'10 · Runtime · programs', title:'Process allow-list: escalating undeclared binaries.',
-   body:()=>S.binOk&&S.binChk?`<div class="task done">Exec replay passed. Allow-list ready: 8 programs.</div><p>Every program adservice ran when it started is on the allow-list, so enforcing it won't stop the container from starting. Any other program will be blocked once Tetragon enforces it.</p>`
-     :S.binOk?`<div class="task">Run the exec replay.</div><button class="btn" id="bchk">Run the exec replay</button><p><b>What is an exec replay?</b> When adservice starts, its script runs these 8 programs. If the allow-list missed one, Tetragon would block it and <b>the container would fail to start</b>. The check replays every program Tetragon recorded at startup against the allow-list, offline, and passes only if all of them are allowed.</p>`
+   kick:'Proof · inside the pod', title:'Process allow-list: escalating undeclared binaries.',
+   body:()=>S.binOk&&S.binChk?`<div class="task done">Exec replay passed. Allow-list ready: 8 programs.</div><p>Any other program is blocked by Tetragon.</p>`
+     :S.binOk?`<div class="task">Run the exec replay.</div><button class="btn" id="bchk">Run the exec replay</button><p>Checks that every program adservice runs at startup is on the list, so the container still starts.</p>`
      :`<div class="task">Review them and confirm. Tap a binary for its evidence.</div>
-       <p>Tetragon saw adservice's entrypoint <b>script</b> start these six. A script can't be resolved statically, so the product <b>escalates to a person instead of guessing</b>. Here they are part of normal startup.</p>
+       <p>Started by the entrypoint script, not declared in the image. The product <b>asks a person instead of guessing</b>.</p>
        <button class="btn" id="chk">Confirm all 6 as needed</button>`,
    bindTxt(){ if($('chk')) $('chk').onclick=()=>{ $('chk').disabled=true; later(500,()=>{ S.binOk=true; refresh(true); }); };
      if($('bchk')) $('bchk').onclick=()=>{ $('bchk').disabled=true; $('bchk').textContent='Replaying exec events…'; later(1200,()=>{ S.binChk=true; refresh(true); }); }; },
@@ -725,13 +927,13 @@ const CARDS=[
      show(); bindMap(()=>{ show(); refreshFoot(); refreshTxt(); });
      if(!S.baSeen){ S.ba='before'; S.baSeen=true; show(); refreshFoot(); } CARDS[at]._show=show; },
    foot:()=>`<span>${S.ba==='before'?'<b style="color:var(--bad)">before</b> · every path open':'<b style="color:var(--ok)">after</b> · only required flows'}</span><span>unused ${S.ba==='before'?'open <b style="color:var(--bad)">116</b>':'closed <b style="color:var(--ok)">116</b>'}</span>`,
-   kick:'15 · Result · network', title:'Network exposure: before and after.',
+   kick:'Result', title:'Network exposure: before and after.',
    body:()=>{ const w=S.sel, n=needsOut(w);
      return `<div class="facts"><div><span>workload</span><b>${w}</b></div><div><span>reach before</span><b style="color:var(--bad)">13 targets · any binary</b></div>
        <div><span>reach now</span><b style="color:var(--ok)">${n.length?n.map(k=>SHORT[k]).join(', '):'kube-dns only'}</b></div>
        ${w==='adservice'?'<div><span>binaries</span><b>8, reviewed · ready</b></div>':''}</div>
        <div class="two"><button class="btn ${S.ba==='before'?'':'sec'}" id="vb4">Before</button><button class="btn ${S.ba==='after'?'':'sec'}" id="vaf">After</button></div>
-       <p><b style="color:var(--bad)">Red</b>: 116 paths allowed but never used. <b style="color:var(--ok)">Green</b>: the 16 flows the app needs. After enforcement only green remains.</p>`; },
+       <p>After enforcement only the green remains.</p>`; },
    bindTxt(){ const set=v=>{ S.ba=v; CARDS[at]._show&&CARDS[at]._show(); refreshFoot(); refreshTxt(); }; $('vb4').onclick=()=>{ S.baT.add('b'); set('before'); }; $('vaf').onclick=()=>{ S.baT.add('a'); set('after'); }; },
    gate:()=>S.baT.size===2,
    },
@@ -752,11 +954,10 @@ const CARDS=[
    bind(){ $('wb').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ stop(); S.agc=+b.dataset.c; S.agcSeen.add(S.agc); $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshFoot(); refreshTxt(); });
      S.agcSeen.add(S.agc); later(400,lanePlay); },
    foot:()=>`<span>${LCASE[S.agc].src}</span><span>cases <b>${S.agcSeen.size}/3</b></span>`,
-   kick:'17 · Why now · AI agents', title:'Agent controls watch the conversation. The kernel watches the action.',
+   kick:'Why now · AI agents', title:'Agent controls watch the conversation. The kernel watches the action.',
    body:()=>`<div class="task ${S.agcSeen.size>=3?'done':''}">Watch all three cases.</div>
-     <p>Guardrails, tool allow-lists and gateways watch the <b>conversation</b>. In the first two cases the conversation looked fine or didn't exist. The harmful <b>action</b>, a connection out, went straight from a process to the network, and <b>only the kernel saw it</b>.</p>
-     <p>The third case is the honest limit: misuse through an <b>allowed</b> path is a content question, and the agent-level controls catch it. The two layers work together.</p>
-     <p><b>Enforcing in the kernel is the easy part. The hard part is the right profile for every agent</b>: from its config, without breaking it, kept current. That is what we build.</p>
+     <p>Agent controls watch the <b>conversation</b>; the harmful <b>action</b> only the kernel saw. Case 3 is the honest limit: misuse of an <b>allowed</b> path needs agent-level controls too.</p>
+     <p><b>The hard part is the right profile for every agent. That is what we build.</b></p>
      <p class="note"><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener" style="color:var(--info)">Cohere report ↗</a> · <a href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/" target="_blank" rel="noopener" style="color:var(--info)">JFrog report ↗</a></p>`,
    gate:()=>S.agcSeen.size>=3 },
  { // agents 2: the profile is built from what the agent declares (its config) and confirmed by what it does
@@ -771,9 +972,8 @@ const CARDS=[
      rows.forEach((r,i)=>later(300+i*450,()=>{ r.classList.add('on'); srcs.forEach(s=>s.classList.toggle('lit',s.dataset.k===r.classList[1])); }));
      later(300+rows.length*450+300,()=>{ srcs.forEach(s=>s.classList.remove('lit')); $('chk2')&&$('chk2').classList.add('on'); }); },
    foot:()=>`<span>intent from config · proof from behavior</span><span>example</span>`,
-   kick:'18 · AI agents · profile', title:'An agent declares its intent. The product holds it to it.',
-   body:()=>`<p>Agents come with their own configuration: the model they call, the MCP servers they use, the tools they may invoke. That is the agent's <b>declared intent</b>, and it is the first source of the profile.</p>
-     <p>The manifest adds the runtime, and observed behavior confirms both. <b>Declared but never used</b>: tightened. <b>Used but never declared</b>: escalated to a person, never added on its own.</p>
+   kick:'Why now · agent profile', title:'An agent declares its intent. The product holds it to it.',
+   body:()=>`<p>The agent's config declares its intent: model, MCP servers, tools. Behavior confirms it. <b>Declared but unused</b>: tightened. <b>Used but undeclared</b>: sent to a person.</p>
      <p class="note">Example workload, design. Agent profiles are the next lab step.</p>`,
    gate:()=>true },
  { // agents 3: watch each agent action, before and after the profile is enforced
@@ -781,10 +981,10 @@ const CARDS=[
    win(){ return agentSVG(); },
    bind(){ agentPlay(); },
    foot:()=>`<span>checked by the kernel, not the model</span><span>${S.agt?'<b style="color:var(--ok)">enforced</b>':'open'}</span>`,
-   kick:'19 · AI agents · enforce', title:'Every agent action checked where it happens.',
+   kick:'Why now · agent enforcement', title:'Every agent action checked where it happens.',
    body:()=>S.agt?`<div class="task done">The agent can do its job, and nothing else.</div>
-       <p>Whatever the model decides, or writes in its reasoning, the network and the kernel only allow what its profile needs. The case from the report would stop at the first step: an unknown destination is not in the profile.</p>`
-     :`<p>Watch the agent work. Every action leaves the pod, and today <b>every one arrives</b>, including the one its reasoning says it isn't doing.</p>
+       <p>Whatever the model decides, only what its profile needs leaves the pod.</p>`
+     :`<p>Today <b>every action arrives</b>, including the one its reasoning says it isn't doing.</p>
        <button class="btn" id="agt">Enforce the agent profile</button>`,
    bindTxt(){ if($('agt')) $('agt').onclick=()=>{ $('agt').disabled=true; stop(); S.agt=true; $('wb').innerHTML=agentSVG(); agentPlay(); refreshFoot(); refreshTxt(); }; },
    gate:()=>S.agt },
@@ -795,8 +995,8 @@ const CARDS=[
        <div class="grp">Inside the pods · 12 workloads</div><div class="tiles">${t('programs allowed','any','25')}${t('any process connects','12','0')}${t('pods writing anywhere','12','0')}${t('capabilities','168','0')}</div>`; },
    bind(){ $('wb').querySelectorAll('.tile2').forEach((d,i)=>{ d.style.opacity=0; later(150+i*220,()=>{ d.style.transition='opacity .3s'; d.style.opacity=1; }); }); },
    foot:()=>`<span>namespace boutique</span><span>12 workloads · network + runtime</span>`,
-   kick:'20 · Summary', title:'From default-allow to least privilege.',
-   body:()=>`<p>Every workload is limited to what it needs: on the network, and inside the pod. Every rule traces back to evidence, every change is tested before it is applied, and <b>nothing the application needs was dropped</b>.</p>
+   kick:'Vision', title:'The decision layer for runtime enforcement.',
+   body:()=>`<p>Least privilege for every workload and every agent: <b>decided from evidence, verified before it is applied, kept current on every release</b>, on the engines the cluster already runs.</p><p>In the lab, boutique went from default-allow to least privilege, and <b>nothing the application needs was dropped</b>.</p>
      <button class="btn" id="again">Start over</button>`,
    bindTxt(){ $('again').onclick=reset; },
    gate:()=>true },
@@ -904,16 +1104,21 @@ function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='R
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
   later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
-function refreshFoot(){ const c=CARDS[at]; $('wf').innerHTML=c.foot?c.foot():''; }
+function refreshFoot(){ try{ meter(); }catch(e){}  const c=CARDS[at]; $('wf').innerHTML=c.foot?c.foot():''; }
 function refreshTxt(){ const c=CARDS[at], t=$('txt'), y=t.scrollTop;
-  t.innerHTML=`<div class="kick">${c.kick}</div><h1>${c.title}</h1>${c.why?`<div class="whyline"><b>Goal</b>${c.why}</div>`:''}${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
+  t.innerHTML=`<div class="kick">${(at+1)+' · '+c.kick.replace(/^\d+ · /,'')}</div><h1>${c.title}</h1>${c.why?`<div class="whyline"><b>Goal</b>${c.why}</div>`:''}${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
 function refresh(win){ const c=CARDS[at]; if(win&&!c.map){ const wb=$('wb'), y=wb.scrollTop; wb.innerHTML=c.win(); wb.scrollTop=y; c.bind&&c.bind(); } refreshFoot(); refreshTxt(); }
+for(let i=0;i<CARDS.length;i++) CARDS[i]._i=i;
 const WHY=[
+  'See what kernel enforcement changes when a workload or agent is compromised.',
   'See the starting point: what is enforced in the cluster today.',
+  'See why the attack surface stays open, even with the engines installed.',
+  'See what the product outputs: one profile, written for each engine.',
+  'See how the product learns without trusting everything it sees.',
   'Measure the gap for one workload: what it can reach vs what it needs.',
   'Understand why teams don\u2019t close the gap by hand.',
   'Build each workload\u2019s profile from what the cluster already records.',
@@ -936,7 +1141,11 @@ const WHY=[
 ];
 CARDS.forEach((c,i)=>{ c.why=WHY[i]; });
 const GUIDE=[
+  ()=>!S.wEnf?$('wenf'):(!S.wSeen.has(1)?$('wb').querySelector('[data-wt="1"]'):null),
   ()=>null,
+  ()=>S.prb<4?$('prb'):null,
+  ()=>{ const k=['tetragon','kubearmor','sc'].find(k=>!S.engSeen.has(k)); return S.engSeen.size>=2?null:$('wb').querySelector(`[data-e="${k}"]`); },
+  ()=>S.lwN<LW.length?$('lwrun'):(!S.lwX?$('wb').querySelector('[data-lwx]'):null),
   ()=>S.explored.size?null:$('wb').querySelector('.nd[data-w="frontend"]'),
   ()=>null,
   ()=>null,
@@ -957,10 +1166,12 @@ const GUIDE=[
   ()=>$('agt'),
   ()=>$('again'),
 ];
+// the tour keeps the cards that carry the story; the rest stay in the source
+{ const SK=new Set([1, 6, 7, 9, 12, 14, 15, 16, 17, 19]); const keep=(_,i)=>!SK.has(i); const C=CARDS.filter(keep), Wh=WHY.filter(keep), G=GUIDE.filter(keep); CARDS.length=0; CARDS.push(...C); WHY.length=0; WHY.push(...Wh); GUIDE.length=0; GUIDE.push(...G); }
 let gEl=null;
 function guide(){
   const c=CARDS[at]; let el=c.gate()?(at<CARDS.length-1?$('next'):null):(GUIDE[at]&&GUIDE[at]());
-  if(at===1&&S.explored.size&&!S.mapEv) el=document.querySelector('#txt [data-ev]')||el;   // after picking a workload: open its evidence
+  if(CARDS[at].wm==='default-allow'&&S.explored.size&&!S.mapEv) el=document.querySelector('#txt [data-ev]')||el;   // after picking a workload: open its evidence
   if(el&&el.disabled) el=null;
   if($('sheet').classList.contains('open')||!$('cover').hidden) el=null;
   if(gEl&&gEl!==el){ gEl.classList.remove('guide','gin'); }
@@ -983,9 +1194,9 @@ function nav(){ const c=CARDS[at], ok=c.gate(), last=at===CARDS.length-1; $('nex
   $('back').disabled=at===0; $('hint').textContent=ok||last?`${at+1} / ${CARDS.length}`:'your turn ↑'; }
 function show(i){
   if(i<0||i>=CARDS.length) return; stop(); closeSheet(); at=i; const c=CARDS[i];
-  if(i>=2&&i<14) S.sel='adservice';   // the story follows adservice after the overview
+  if(c._i>=6&&c._i<18) S.sel='adservice';   // the story follows adservice after the overview
   [...$('bars').children].forEach((s,k)=>s.className=k<i?'pd':k===i?'pn':'');
-  const p=$('pipe'); p.classList.toggle('off',c.pipe<0); [...p.children].forEach((s,k)=>s.className=k<c.pipe?'d':k===c.pipe?'n':'');
+  const p=$('pipe'); p.classList.toggle('off',c.pipe<0); p.classList.toggle('gone',!c.kick.startsWith('Proof')); [...p.children].forEach((s,k)=>s.className=k<c.pipe?'d':k===c.pipe?'n':'');
   $('wt').textContent=c.wt; $('wm').textContent=c.wm;
   const wb=$('wb'); wb.className='wbody'+(c.map?' map':''); wb.innerHTML=c.win(); wb.scrollTop=0; c.bind&&c.bind();
   if(!c.map) blast(S.sel);
@@ -1009,16 +1220,16 @@ function cover(on){ $('cover').hidden=!on; if(!on) return;
   const loop=()=>{ if($('cover').hidden) return;
     // 1. default-allow: draw adservice's reach
     m.classList.remove('l1','l2','l3','zoom'); box.classList.remove('inside'); g.innerHTML=''; cap('boutique · default-allow today','adservice reaches <b id="cN">0</b>');
-    tg.forEach(([x,y],i)=>at2(300+i*150,()=>{ g.insertAdjacentHTML('beforeend',`<line class="rl" pathLength="1" x1="${ax}" y1="${ay}" x2="${x}" y2="${y}"/>`); $('cN').textContent=i+1; }));
+    tg.forEach(([x,y],i)=>at2(300+i*70,()=>{ g.insertAdjacentHTML('beforeend',`<line class="rl" pathLength="1" x1="${ax}" y1="${ay}" x2="${x}" y2="${y}"/>`); $('cN').textContent=i+1; }));
     // 2. least privilege on the network
-    at2(300+tg.length*150+1600,()=>{ g.innerHTML=''; m.classList.add('l1','l2','l3'); cap('network · least privilege','adservice reaches <b class="okb">DNS only</b>'); });
+    at2(300+tg.length*70+1200,()=>{ g.innerHTML=''; m.classList.add('l1','l2','l3'); cap('network · least privilege','adservice reaches <b class="okb">DNS only</b>'); });
     // 3. into the pod: runtime limits
-    at2(300+tg.length*150+4000,()=>{ m.classList.add('zoom'); cap('inside adservice · runtime','allow-list <b class="okb">8 programs</b>'); });
-    at2(300+tg.length*150+4600,()=>{ box.classList.add('inside'); [...$('pin').querySelectorAll('.pr')].forEach((r,i)=>{ r.classList.remove('on'); at2(250+i*420,()=>r.classList.add('on')); }); });
-    at2(300+tg.length*150+9200,loop); };
+    at2(300+tg.length*70+2800,()=>{ m.classList.add('zoom'); cap('inside adservice · runtime','allow-list <b class="okb">8 programs</b>'); });
+    at2(300+tg.length*70+3300,()=>{ box.classList.add('inside'); [...$('pin').querySelectorAll('.pr')].forEach((r,i)=>{ r.classList.remove('on'); at2(250+i*300,()=>r.classList.add('on')); }); });
+    at2(300+tg.length*70+7200,loop); };
   // the tour can start only after the intro has played once
   const st=$('start'); if(!reduce){ st.disabled=true; st.textContent='Watch the intro…'; }
-  at2(reduce?0:300+tg.length*150+4600+5*420+700,()=>{ st.disabled=false; st.textContent='Start the tour →'; st.focus({preventScroll:true}); });
+  at2(reduce?0:300+tg.length*70+3300+5*300+500,()=>{ st.disabled=false; st.textContent='Start the tour →'; st.focus({preventScroll:true}); });
   loop(); }
 $('start').onclick=()=>{ cover(false); show(0); };
 show(0); cover(!/skip/.test(location.search));
