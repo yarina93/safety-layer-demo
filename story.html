@@ -378,7 +378,8 @@ svg text{font-family:var(--mono)}
 .psv .wr{fill:none;stroke-width:1.6;stroke-dasharray:300;stroke-dashoffset:300;animation:wd .7s ease forwards;animation-delay:var(--d)}
 @keyframes wd{to{stroke-dashoffset:0}}
 .psv .wr.bad{stroke:var(--bad)}.psv .wr.ok{stroke:var(--ok)}.psv .wr.blk{stroke:var(--bad);opacity:.55}
-.psv .wdot{fill:var(--bad)}.psv .wwall{fill:var(--ok);filter:drop-shadow(0 0 4px rgba(61,214,140,.7))}
+.psv .wdot{fill:var(--bad)}.psv .wpod{fill:rgba(110,168,254,.04);stroke:var(--line);stroke-dasharray:4 3}.psv .wbound{stroke:var(--ok);stroke-width:3;filter:drop-shadow(0 0 4px rgba(61,214,140,.7))}
+.psv .wwall{fill:var(--ok);filter:drop-shadow(0 0 4px rgba(61,214,140,.7))}
 .psv .wtg{fill:var(--panel);stroke:var(--line)}.psv .wtg.bad{stroke:rgba(255,92,92,.6)}.psv .wtg.ok{stroke:var(--ok)}.psv .wtg.blk{stroke:var(--line);opacity:.8}
 .psv .wst{font:800 7px var(--mono)}.psv .wst.bad{fill:var(--bad)}.psv .wst.ok{fill:var(--ok)}.psv .wst.blk{fill:var(--ok)}
 .pfh{font:700 9px var(--mono);color:var(--muted);margin-bottom:4px}
@@ -529,23 +530,23 @@ function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textConte
 
 
 // ---------- why: what one compromised workload can reach, before / after kernel enforcement
-const WT=[['K8s API','take over the cluster'],['Internet','send data out'],['Other pods','move sideways'],['Programs','run a shell, tools'],['Files','change code, persist'],['Privileges','escalate to root'],['checkout:5050','the one it needs']];
+// ---------- why: a compromised workload acts inside the pod (runtime) and outside it (network)
 function whySVG(){
-  const e=S.wEnf, ag=S.wTab===1, y=i=>30+i*31, wx=168;
-  const src=ag?`<rect x="8" y="96" width="100" height="58" rx="9" class="wsrc ag"/><text x="58" y="117" class="wt1" text-anchor="middle">AI agent</text><text x="58" y="131" class="wt2" text-anchor="middle">goes off-task, or</text><text x="58" y="144" class="wt2" text-anchor="middle">a poisoned model</text>`
-    :`<rect x="8" y="96" width="100" height="58" rx="9" class="wsrc"/><text x="58" y="117" class="wt1" text-anchor="middle">adservice</text><text x="58" y="131" class="wt2" text-anchor="middle">one exploited</text><text x="58" y="144" class="wt2" text-anchor="middle">dependency</text>`;
-  const rows=WT.map(([n,d],i)=>{ if(i===6&&ag){ n='LLM API:443'; d='the model it calls'; } const need=i===6, blk=e&&!need, st=need?'ALLOWED':(e?'BLOCKED':'REACHED');
-    return `<path d="M108 125 C 140 125, 140 ${y(i)}, ${blk?wx:214} ${y(i)}" class="wr ${need?'ok':blk?'blk':'bad'}" style="--d:${i*.12}s"/>
-      ${blk?`<circle cx="${wx}" cy="${y(i)}" r="4" class="wdot"/>`:''}
-      <rect x="216" y="${y(i)-12}" width="108" height="24" rx="5" class="wtg ${need?'ok':blk?'blk':'bad'}"/>
-      <text x="222" y="${y(i)-1}" class="wt1 s">${n}</text><text x="222" y="${y(i)+8}" class="wt2 s">${d}</text>
-      <text x="320" y="${y(i)-1}" class="wst ${need?'ok':blk?'blk':'bad'}" text-anchor="end">${st}</text>`; }).join('');
-  const wall=e?`<g class="nw2"><rect x="${wx-3}" y="12" width="6" height="226" rx="3" class="wwall"/><text x="${wx}" y="250" class="wt2" text-anchor="middle" style="fill:var(--ok)">kernel (eBPF)</text></g>`:'';
+  const e=S.wEnf, ag=S.wTab===1, px=64, py=110;
+  const IN=[['Programs','run sh, curl'],['Files','overwrite app code'],['Privileges','escalate to root']];
+  const OUT=[['K8s API','take the cluster'],['Internet','send data out'],['Other pods','move sideways'],ag?['LLM API','its model']:['checkout','the one it needs']];
+  const chip=(x,y,w,n,d,k,st)=>`<rect x="${x}" y="${y}" width="${w}" height="30" rx="6" class="wtg ${k}"/><text x="${x+6}" y="${y+13}" class="wt1 s">${n}</text><text x="${x+6}" y="${y+24}" class="wt2 s">${d}</text><text x="${x+w-5}" y="${y+13}" class="wst ${k}" text-anchor="end">${st}</text>`;
+  const ins=IN.map(([n,d],i)=>{ const cy=48+i*38, k=e?'blk':'bad';
+    return `<path d="M110 ${py-22} C 150 ${py-22}, 150 ${cy}, ${e?184:200} ${cy}" class="wr ${k}" style="--d:${i*.12}s"/>${e?`<circle cx="186" cy="${cy}" r="3.5" class="wdot"/>`:''}${chip(200,cy-15,114,n,d,k,e?'BLOCKED':'ALLOWED')}`; }).join('');
+  const outs=OUT.map(([n,d],i)=>{ const cx=46+i*82, need=i===3, k=need?'ok':e?'blk':'bad';
+    return `<path d="M${px} ${py+22} C ${px} 170, ${cx} 160, ${cx} ${e&&!need?150:194}" class="wr ${k}" style="--d:${(i+3)*.12}s"/>${e&&!need?`<circle cx="${cx}" cy="150" r="3.5" class="wdot"/>`:''}<rect x="${cx-38}" y="194" width="76" height="36" rx="6" class="wtg ${k}"/><text x="${cx-32}" y="206" class="wt1 s">${n}</text><text x="${cx-32}" y="216" class="wt2 s">${d}</text><text x="${cx-32}" y="226" class="wst ${k}">${need?'ALLOWED':e?'BLOCKED':'OPEN'}</text>`; }).join('');
+  const src=`<rect x="18" y="${py-22}" width="92" height="44" rx="9" class="wsrc ${ag?'ag':''}"/><text x="64" y="${py-5}" class="wt1" text-anchor="middle">${ag?'AI agent':'adservice'}</text><text x="64" y="${py+9}" class="wt2" text-anchor="middle">${ag?'off-task / poisoned':'one exploited dep'}</text>`;
+  const kern=e?`<g class="nw2"><rect x="183" y="30" width="5" height="106" rx="2.5" class="wwall"/><line x1="10" x2="320" y1="150" y2="150" class="wbound"/><text x="318" y="164" class="wt2" text-anchor="end" style="fill:var(--ok)">kernel (eBPF) checks every action</text></g>`:'';
   return `<div class="wtabs2"><button data-wt="0" class="${!ag?'on':''}">Exploited app</button><button data-wt="1" class="${ag?'on':''}">AI agent</button></div>
-    <svg viewBox="0 0 330 256" class="psv">${rows}${wall}${src}</svg>
+    <svg viewBox="0 0 330 234" class="psv"><rect x="8" y="20" width="314" height="130" rx="10" class="wpod"/><text x="16" y="15" class="wt2">inside the pod · runtime</text><text x="16" y="186" class="wt2">outside the pod · network</text>
+    ${ins}${outs}${kern}${src}</svg>
     ${e?'':'<button class="pbtn" id="wenf">Enforce in the kernel ▸</button>'}`;
 }
-
 // ---------- what's special: one profile, compiled per engine
 const PROF=[['Network in','frontend → :9555',['cilium']],['Network out','DNS only',['cilium']],['Network per process','only java connects',['cilium','tetragon']],['Programs','8 allowed',['tetragon','kubearmor']],['Files','writes /tmp only',['kubearmor','sc']],['Privileges','drop all 14',['sc']]];
 const ENG={cilium:['Cilium','CiliumNetworkPolicy',`kind: CiliumNetworkPolicy
@@ -689,8 +690,8 @@ const CARDS=[
    bind(){ const re=()=>{ $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); refreshFoot(); };
      $('wb').querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{ S.wTab=+b.dataset.wt; S.wSeen.add(S.wTab); re(); });
      const b=$('wenf'); if(b) b.onclick=()=>{ S.wEnf=true; re(); }; },
-   foot:()=>`<span>${S.wEnf?'<b>6</b> of 7 blocked · needed path works':'<b>7</b> of 7 paths reachable'}</span><span>${S.wTab?'agent':'app'}</span>`,
-   kick:'Problem · the attack surface', title:'Assume one workload is compromised. What can it reach?',
+   foot:()=>`<span>${S.wEnf?'<b>6</b> of 7 blocked · its real job still works':'<b>6</b> harmful actions possible'}</span><span>${S.wTab?'agent':'app'}</span>`,
+   kick:'Problem · the attack surface', title:'Assume one workload is compromised. What can it do?',
    body:()=>`<p>eBPF enforces in the kernel, at the moment of the action. <b>An agent can ignore its instructions. It can't ignore the kernel.</b></p>
      <div class="task ${S.wEnf?'done':''}">Tap <b>Enforce in the kernel</b>.</div>
      <div class="task ${S.wSeen.has(1)?'done':''}">Switch to <b>AI agent</b>: same rules, same result.</div>`,
