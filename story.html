@@ -431,7 +431,7 @@ svg text{font-family:var(--mono)}
 .cmd{margin-top:8px;padding:8px;border-radius:7px;background:rgba(110,168,254,.06);border:1px solid var(--line);color:var(--text);font:500 10.5px/1.45 var(--body);min-height:44px}
 .chn{position:relative;display:flex;flex-direction:column;gap:4px;margin-top:2px}
 .chn::before{content:'';position:absolute;left:11px;top:12px;bottom:12px;width:2px;background:var(--line)}
-.chr{position:relative;display:grid;grid-template-columns:24px 1fr auto 70px;gap:6px;align-items:center;padding:5px 8px 5px 0;border-radius:7px;font:600 10px var(--mono);transition:all .3s}
+.chr{position:relative;display:grid;grid-template-columns:24px 1fr 74px;gap:6px;align-items:center;padding:5px 8px 5px 0;border-radius:7px;font:600 10px var(--mono);transition:all .3s}
 .chr i{position:relative;z-index:1;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10px;background:var(--panel);border:1.5px solid var(--dim);color:var(--muted)}
 .chr b{display:block;color:var(--ink);font-size:10.5px}.chr small{color:var(--muted);font-size:8.5px;font-weight:500}
 .chr .ly{font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
@@ -447,7 +447,7 @@ svg text{font-family:var(--mono)}
 .psv .bv{font:700 9px var(--mono);fill:var(--text)}.psv .bv.off{fill:var(--dim)}.psv .bl{font:800 8.5px var(--mono)}.psv .bl.bad{fill:var(--bad)}.psv .bl.ok{fill:var(--ok)}
 .psv .bh{font:800 24px var(--body)}.psv .bh.bad{fill:var(--bad)}.psv .bh.ok{fill:var(--ok)}.psv .bht{font:700 11px var(--body);fill:var(--ink)}
 .psv .lgd{fill:var(--info)}.psv .lgu{fill:var(--bad)}
-.chr{padding:3px 8px 3px 0}
+.chr{padding:2px 8px 2px 0}.chn{gap:2px}.wtabs2 button{padding:5px}
 .ag3{font:600 10px var(--mono)}.ag3h{display:grid;grid-template-columns:1fr 78px 78px;gap:5px;color:var(--muted);font-size:8.5px;margin-bottom:5px}.ag3h span{text-align:center}.ag3h span:first-child{text-align:left}.ag3h small{display:block;font-size:7.5px;color:var(--dim)}
 .ag3r{width:100%;display:grid;grid-template-columns:1fr 78px 78px;gap:5px;align-items:center;text-align:left;padding:6px 7px;margin-bottom:5px;border-radius:8px;border:1px dashed var(--dim);background:transparent;color:inherit;font:inherit;cursor:pointer}
 .ag3r.v{border:1px solid var(--line);background:rgba(255,255,255,.02)}.ag3r.sel{border-color:var(--info)}
@@ -468,6 +468,14 @@ svg text{font-family:var(--mono)}
 .chip.ok{border-color:rgba(61,214,140,.55);background:rgba(61,214,140,.08)}.chip.warn{border-color:rgba(245,185,71,.6);background:rgba(245,185,71,.08)}.chip.ghost{color:var(--muted);border-style:dashed}.pz.rest.blk .chip.ghost{color:var(--bad);text-decoration:line-through}
 .chip.tap{cursor:pointer}
 .mp.solo .ew,.mp.solo .need{display:none}
+.tin{font:600 10px var(--mono)}.tinh{padding:8px 10px;border-radius:8px;background:rgba(110,168,254,.08);border:1px solid var(--line);margin-bottom:8px}.tinh b{display:block;color:var(--ink);font-size:13px}.tinh span{color:var(--muted);font-size:9px}
+.tir{display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line)}.tir:last-child{border:0}
+.tir i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;background:var(--ink);color:var(--bg);font-weight:800}
+.tir b{display:block;color:var(--ink);font:700 12px var(--body)}.tir small{color:var(--text);font:500 10.5px/1.35 var(--body)}
+.chb{margin:0 0 8px;padding:7px 10px;border-radius:8px;background:rgba(110,168,254,.1);border-left:3px solid var(--info);font:500 12.5px/1.4 var(--body);color:var(--text)}.chb b{display:block;font:800 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info);margin-bottom:1px}
+.cin{font:500 10.5px/1.35 var(--body);color:var(--text);margin:0 0 5px}.cin b{color:var(--ink);font-family:var(--mono)}
+.chr.warn i{border-color:var(--warn);color:var(--warn)}.chr.warn em{color:var(--warn)}
+.chr small u{text-decoration:none;color:var(--info)}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -569,7 +577,7 @@ const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(
 const S={cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, apN:0, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 const ASL=['K8s API','Internet','Pods','Programs','Proc→net','Files','Privileges'];
-function meter(){ const c=CARDS[at], i=c.cmp?-1:c._i; let n=0;
+function meter(){ const c=CARDS[at], i=(c.cmp||c.intro)?-1:c._i; let n=0;
   if(i===11) n=S.lvl>=3?3:0; else if(i>11&&i<13) n=3; else if(i===13) n=S.binOk?5:3; else if(i>13&&i<23) n=5; else if(i>=23) n=7;
   const m=$('asm'); const h=`<small>attack surface</small><div>${ASL.map((l,k)=>`<i class="${k<n?'c':''}" title="${l}"></i>`).join('')}</div><b class="${n===7?'ok':''}">${7-n}/7 open</b>`;
   if(m.dataset.n!==String(n)){ m.innerHTML=h; m.dataset.n=n; } }
@@ -662,12 +670,12 @@ const CMPR=[['Prevents, not only alerts',['n','y','y','y']],['Network and inside
 
 // ---------- why: the attack chain, open vs enforced in the kernel
 const CHAIN=()=>S.wTab===1?[
-  ['Poisoned model loads','or the model goes off-task','start'],
-  ['Connect to an unknown host','to fetch code or send data','net'],
-  ['Run a shell','through a tool','pod'],
-  ['Read cloud credentials','instance metadata service','net'],
-  ['Reach other pods','move sideways','net'],
-  ['Escalate to root','new privileges','pod']]:[
+  ['Agent gets a ticket','normal work','start'],
+  ['Model goes off-task','or a poisoned model loads','model'],
+  ['Connect to unknown host','fetch code, send data','net'],
+  ['Run a shell via a tool','sh, curl','pod'],
+  ['Read cloud credentials','instance metadata','net'],
+  ['Reach other pods','move sideways','net']]:[
   ['Exploit request arrives','frontend → adservice, an allowed path','start'],
   ['Download attack code','from the internet','net'],
   ['Run a shell','sh, curl','pod'],
@@ -675,14 +683,16 @@ const CHAIN=()=>S.wTab===1?[
   ['Reach other pods','move sideways','net'],
   ['Escalate to root','new privileges','pod']];
 function chainHTML(){ const C=CHAIN(), ph=S.wPh, n=S.wN, ag=S.wTab===1;
-  const st=i=>{ if(ph===0||i>=n) return ['','']; if(i===0) return ['go','RUNS'];
-    if(ph===1) return ['bad','SUCCEEDS']; if(ph===2) return i===1?['ok','BLOCKED']:['off','NEVER RUNS']; return ['ok','BLOCKED']; };
-  const end=ph===1&&n>=C.length?`<div class="cend bad">Breach: shell, cluster access, every pod in reach.</div>`
-    :ph===2&&n>=C.length?`<div class="cend ok">The attack fails at step 2. The bug is still there; it just can't be used.</div>`
+  const fb=C.findIndex(r=>r[2]==='net'||r[2]==='pod');
+  const st=i=>{ if(ph===0||i>=n) return ['','']; if(C[i][2]==='start') return ['go','RUNS']; if(C[i][2]==='model') return ['warn','HAPPENS'];
+    if(ph===1) return ['bad','SUCCEEDS']; if(ph===2) return i===fb?['ok','BLOCKED']:['off','NEVER RUNS']; return ['ok','BLOCKED']; };
+  const intro=`<div class="cin">${ag?'<b>support-agent</b>: an AI agent with a model API and a ticket tool. Its model goes off-task.':'<b>adservice</b>: one of boutique’s services, with a bug in a library it uses.'}</div>`;
+  const end=ph===1&&n>=C.length?`<div class="cend bad">${ag?'Breach: the agent ran code, leaked credentials and reached other pods.':'Breach: shell, cluster access, every pod in reach.'}</div>`
+    :ph===2&&n>=C.length?`<div class="cend ok">${ag?'The model still went off-task. Nothing it tried left the pod.':'The attack fails at step 2. The bug is still there; it just can’t be used.'}</div>`
     :ph===3&&n>=C.length?`<div class="cend ok">Even inside, every next step is blocked.</div>`:`<div class="cend"></div>`;
   const btn=S.wRun?'':ph===0?'Run the attack ▸':ph===1?'Enforce in the kernel, run it again ▸':ph===2?'What if it got in anyway? ▸':'';
   return `<div class="wtabs2"><button data-wt="0" class="${!ag?'on':''}">Exploited app</button><button data-wt="1" class="${ag?'on':''}">AI agent</button></div>
-    <div class="chn ${ph>=2?'k':''}">${C.map(([t,d,l],i)=>{ const [k,x]=st(i); return `<div class="chr ${k}"><i>${i+1}</i><div><b>${t}</b><small>${d}</small></div><span class="ly">${l==='net'?'network':l==='pod'?'in the pod':''}</span><em>${x}</em></div>`; }).join('')}</div>
+    ${intro}<div class="chn ${ph>=2?'k':''}">${C.map(([t,d,l],i)=>{ const [k,x]=st(i); return `<div class="chr ${k}"><i>${i+1}</i><div><b>${t}</b><small>${l==='net'?'<u>network</u> · ':l==='pod'?'<u>in the pod</u> · ':l==='model'?'<u>in the model</u> · ':''}${d}</small></div><em>${x}</em></div>`; }).join('')}</div>
     ${end}${btn?`<button class="pbtn" id="wgo">${btn}</button>`:''}`; }
 // ---------- problem chart: allowed vs needed paths across releases
 function probSVG(){
@@ -762,13 +772,13 @@ const BINS=[['java','/opt/java/openjdk/bin/java','AdService','container start',2
 // ---------- the cards
 const CARDS=[
  { // why: an attack is a chain of steps; the kernel breaks the chain
-   pipe:-1, wt:'adservice · one exploited bug', wm:'attack chain',
+   pipe:-1, wt:'attack chain', wm:'one bug · one agent',
    win(){ return chainHTML(); },
    bind(){ const re=()=>{ $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); refreshFoot(); };
      $('wb').querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{ if(S.wRun) return; S.wTab=+b.dataset.wt; S.wSeen.add(S.wTab); re(); });
      const b=$('wgo'); if(b) b.onclick=()=>{ if(S.wRun) return; S.wPh++; S.wN=0; S.wRun=true; re();
        const n=CHAIN().length; for(let i=1;i<=n;i++) later(i*380,()=>{ S.wN=i; if(i===n) S.wRun=false; re(); }); }; },
-   foot:()=>`<span>${['the bug is in the code','the attack succeeds','the attack fails at step 2','inside: nothing to gain'][S.wPh]}</span><span>${S.wTab?'AI agent':'app'}</span>`,
+   foot:()=>`<span>${['ready','the attack succeeds','the attack is stopped','inside: nothing to gain'][S.wPh]}</span><span>${S.wTab?'AI agent':'app'}</span>`,
    kick:'Problem · the attack surface', title:'One bug shouldn’t become a breach.',
    body:()=>`<p>An attack is a chain of steps. <b>Block one in the kernel and the attack fails</b>, even with the bug still in the code. If it gets in anyway, there's nothing to gain.</p>
      <p><b>An agent can ignore its instructions. It can't ignore the kernel.</b></p>
@@ -1122,7 +1132,15 @@ tools: [create_ticket, search_kb]</pre></div>
    kick:'Solution · why not existing tools', title:'Others detect, or lock down what they saw. This decides.',
    body:()=>`<p>Detection tools alert after the fact. Learning tools lock in whatever happened. Policy generators cover the network only. <b>None of them decides from evidence, tests on real traffic, and enforces every layer, on any engine.</b></p>
      <div class="task ${S.cmpSeen.size?'done':''}">Tap a column to see the approach.</div>`,
-   gate:()=>S.cmpSeen.size>0 }
+   gate:()=>S.cmpSeen.size>0 },
+ { // intro: how the tour works
+   pipe:-1, intro:true, wt:'boutique · the tour', wm:'about 4 min',
+   win(){ const C=[['1','Problem','What one bug, or one AI agent, can do today. And why it stays open.'],['2','Solution','How the product decides what each workload may do.'],['3','Proof','The same, step by step, on a real namespace in the lab.'],['4','Why now','AI agents, and why the kernel is where to stop them.'],['5','Vision','The result in numbers.']];
+     return `<div class="tin"><div class="tinh"><b>boutique</b><span>an online shop on Kubernetes · 12 services · lab cluster</span></div>${C.map(([n,t,d])=>`<div class="tir"><i>${n}</i><div><b>${t}</b><small>${d}</small></div></div>`).join('')}</div>`; },
+   foot:()=>`<span>you tap, the product works</span><span>5 chapters</span>`,
+   kick:'Start · how this works', title:'You are the platform engineer for boutique.',
+   body:()=>`<p>Every step shows one idea. <b>The yellow “Tap” marks what to press next</b>; when the step is done, Next lights up.</p>`,
+   gate:()=>true }
 ];
 // ---------- agent scene: actions travel from the agent pod; before enforcement they all arrive, after only the profile's do
 const AGT=[ // [label, target x,y, allowed?, stopped by]
@@ -1248,7 +1266,9 @@ function bars(i){ if(!CH){ CH=CARDS.map(c=>{ const k=c.kick.split(' · ')[0]; re
   const done=idx.filter(j=>j<=i).length; el.querySelector('b').style.width=(done/idx.length*100)+'%'; el.classList.toggle('on',idx.includes(i)); el.classList.toggle('past',idx[idx.length-1]<i); }); }
 function refreshFoot(){ try{ meter(); }catch(e){}  const c=CARDS[at]; $('wf').innerHTML=c.foot?c.foot():''; }
 function refreshTxt(){ const c=CARDS[at], t=$('txt'), y=t.scrollTop;
-  t.innerHTML=`<div class="kick">${(at+1)+' · '+c.kick.replace(/^\d+ · /,'')}</div><h1>${c.title}</h1>${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
+  const CHD={Problem:'What one bug, or one agent, can do today, and why it stays open.',Solution:'What the product does differently.',Proof:'Now the same thing on a real namespace in the lab, step by step.','Why now':'AI agents make this urgent.',Vision:'Where this goes.'};
+  const chn=c.kick.split(' · ')[0], prv=at>0?CARDS[at-1].kick.split(' · ')[0]:'';
+  t.innerHTML=(chn!==prv&&CHD[chn]?`<div class="chb"><b>${chn}</b>${CHD[chn]}</div>`:'')+`<div class="kick">${(at+1)+' · '+c.kick.replace(/^\d+ · /,'')}</div><h1>${c.title}</h1>${c.body()}`; t.scrollTop=y; c.bindTxt&&c.bindTxt(); nav(); }
 function refresh(win){ const c=CARDS[at]; if(win&&!c.map){ const wb=$('wb'), y=wb.scrollTop; wb.innerHTML=c.win(); wb.scrollTop=y; c.bind&&c.bind(); } refreshFoot(); refreshTxt(); }
 for(let i=0;i<CARDS.length;i++) CARDS[i]._i=i;
 const WHY=[
@@ -1277,6 +1297,7 @@ const WHY=[
   'Limit what an agent can do, whatever the model decides.',
   'The whole result in numbers.',
   'See where the product sits next to the tools teams use today.',
+  'See what the tour covers.',
 ];
 CARDS.forEach((c,i)=>{ c.why=WHY[i]; });
 const GUIDE=[
@@ -1305,10 +1326,12 @@ const GUIDE=[
   ()=>$('agt'),
   ()=>$('again'),
   ()=>S.cmpSeen.size?null:$('wb').querySelector('[data-cm="3"]'),
+  ()=>null,
 ];
 // the tour keeps the cards that carry the story; the rest stay in the source
 { const SK=new Set([1, 6, 7, 9, 12, 14, 15, 16, 17, 18, 19]); const keep=(_,i)=>!SK.has(i); const C=CARDS.filter(keep), Wh=WHY.filter(keep), G=GUIDE.filter(keep); CARDS.length=0; CARDS.push(...C); WHY.length=0; WHY.push(...Wh); GUIDE.length=0; GUIDE.push(...G); }
-{ const from=CARDS.findIndex(c=>c.cmp); if(from>=0) [CARDS,WHY,GUIDE].forEach(A=>A.splice(from,1)); }   // comparison step: not shown
+{ const from=CARDS.findIndex(c=>c.cmp); if(from>=0) [CARDS,WHY,GUIDE].forEach(A=>A.splice(from,1)); }
+{ const from=CARDS.findIndex(c=>c.intro); [CARDS,WHY,GUIDE].forEach(A=>{ const [x]=A.splice(from,1); A.unshift(x); }); }   // comparison step: not shown
 let gEl=null;
 function guide(){
   const c=CARDS[at]; let el=c.gate()?(at<CARDS.length-1?$('next'):null):(c.guide?c.guide():GUIDE[at]&&GUIDE[at]());
@@ -1316,10 +1339,10 @@ function guide(){
   if(el&&el.disabled) el=null;
   if($('sheet').classList.contains('open')||!$('cover').hidden) el=null;
   if(gEl&&gEl!==el){ gEl.classList.remove('guide','gin'); }
-  gEl=el; const tip=$('gtip');
+  const prev=gEl; gEl=el; const tip=$('gtip');
   if(!el){ tip.hidden=true; return; }
   const svg=el instanceof SVGElement; if(!svg){ el.classList.add('guide'); const wd=el.getBoundingClientRect().width>200; el.dataset.tap=el===$('next')?'Next':wd?'Tap here':'TAP'; el.classList.toggle('gin', wd); }
-  { const box=el.closest&&el.closest('#txt,#wb'); if(box){ const b=box.getBoundingClientRect(), q=el.getBoundingClientRect();
+  if(el!==prev) { const box=el.closest&&el.closest('#txt,#wb'); if(box){ const b=box.getBoundingClientRect(), q=el.getBoundingClientRect();
       if(q.bottom>b.bottom-4||q.top<b.top+30) box.scrollTop+=q.top-b.top-Math.max(36,(b.height-q.height)/2); } }
   const ph=$('phone').getBoundingClientRect(), r=el.getBoundingClientRect();
   if(!svg||r.width===0||r.bottom<ph.top||r.top>ph.bottom){ tip.hidden=true; return; }   // buttons carry their own badge; the floating tip is only for map nodes
