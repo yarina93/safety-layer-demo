@@ -547,6 +547,63 @@ function whySVG(){
     ${ins}${outs}${kern}${src}</svg>
     ${e?'':'<button class="pbtn" id="wenf">Enforce in the kernel ▸</button>'}`;
 }
+// ---------- what's special: one profile, compiled per engine
+const PROF=[['Network in','frontend → :9555',['cilium']],['Network out','DNS only',['cilium']],['Network per process','only java connects',['cilium','tetragon']],['Programs','8 allowed',['tetragon','kubearmor']],['Files','writes /tmp only',['kubearmor','sc']],['Privileges','drop all 14',['sc']]];
+const ENG={cilium:['Cilium','CiliumNetworkPolicy',`kind: CiliumNetworkPolicy
+spec:
+  endpointSelector: {matchLabels: {app: adservice}}
+  ingress:
+  - fromEndpoints: [{matchLabels: {app: frontend}}]
+    toPorts: [{ports: [{port: "9555"}]}]
+  egress:
+  - toEndpoints: [{matchLabels: {k8s-app: kube-dns}}]
+    toPorts: [{ports: [{port: "53", protocol: UDP}]}]`],
+ tetragon:['Tetragon','TracingPolicy',`kind: TracingPolicy
+spec:
+  podSelector: {matchLabels: {app: adservice}}
+  kprobes:
+  - call: security_bprm_check      # programs
+    selectors:
+    - matchArgs: [{index: 0, operator: NotPostfix,
+        values: [java, sed, uname, tr, …]}]
+      matchActions: [{action: Override, argError: -1}]
+  - call: security_socket_connect  # network per process
+    selectors:
+    - matchBinaries: [{operator: NotIn,
+        values: [/usr/bin/java]}]
+      matchActions: [{action: Override, argError: -1}]`],
+ kubearmor:['KubeArmor','KubeArmorPolicy',`kind: KubeArmorPolicy
+spec:
+  selector: {matchLabels: {app: adservice}}
+  process:
+    matchPaths: [{path: /usr/bin/java}, …]
+  file:
+    matchDirectories:
+    - {dir: /tmp/, recursive: true}
+  action: Allow`],
+ sc:['securityContext','Pod spec',`securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: [ALL]
+  seccompProfile: {type: RuntimeDefault}`]};
+const ENGR={cilium:['allow frontend → :9555','allow → kube-dns :53/UDP','drop everything else'],
+ tetragon:['exec: not one of the 8 → denied','connect: not java → blocked','same pod selector as Cilium'],
+ kubearmor:['process: allow-list of 8','file: write /tmp only','default: block'],
+ sc:['no privilege escalation','read-only root filesystem','drop ALL capabilities']};
+function engHTML(){ const e=S.eng;
+  return `<div class="pfh">adservice · one profile</div><div class="pf">${PROF.map(([n,v,es])=>`<div class="${es.includes(e)?'on':''}"><span>${n}</span><b>${v}</b><i>${es.includes(e)?'→ '+(e==='sc'?'secCtx':ENG[e][0]):''}</i></div>`).join('')}</div>
+    <div class="etab">${Object.keys(ENG).map(k=>`<button data-e="${k}" class="${k===e?'on':''} ${S.engSeen.has(k)?'seen':''}">${ENG[k][0]}</button>`).join('')}</div>
+    <div class="ecode"><small>${ENG[e][1]} · generated</small>${ENGR[e].map(r=>`<div class="erule">${r}</div>`).join('')}<button class="eyaml" id="eyaml">View the YAML</button></div>`; }
+// ---------- what's special: the learning window doesn't just record
+const LW=[['exec','java','AdService entrypoint','base','in the image, seen every run'],
+ ['connect','java → kube-dns:53','DNS','base','in the manifest and in traffic'],
+ ['exec','sed, uname, tr…','startup script','esc','not declared in the image: a person approves once'],
+ ['connect','sh → 203.0.113.7:443','unknown host','out','unexpected process, unknown destination, no manifest reference'],
+ ['exec','java (after restart)','same binary','base','matches the baseline']];
+function lwHTML(){ const n=S.lwN;
+  return `<div class="lw">${LW.map(([v,a,d,k],i)=>`<div class="lwr ${i<n?'on':''} ${k}" ${k==='out'?'data-lwx':''}><i>${v}</i><span>${a}<small>${d}</small></span><em>${k==='base'?'BASELINE':k==='esc'?'ASK A PERSON':'KEPT OUT'}</em></div>`).join('')}</div>
+    ${n<LW.length?'<button class="pbtn" id="lwrun">Run the learning window ▸</button>':''}`; }
 // ---------- problem chart: allowed vs needed paths across releases
 function probSVG(){
   const p=S.prb, X=i=>44+i*46, Y=v=>226-v*1.45, end=X(6);
