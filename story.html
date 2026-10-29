@@ -396,6 +396,7 @@ svg text{font-family:var(--mono)}
 .lwr.on.out{border-color:rgba(255,92,92,.6);cursor:pointer}.lwr.on.esc{border-color:rgba(245,185,71,.4)}
 .erule{font:600 10px var(--mono);color:var(--ink);padding:4px 8px;margin-top:3px;border-left:2px solid var(--ok);background:rgba(61,214,140,.06);border-radius:0 5px 5px 0}
 .eyaml{margin-top:6px;background:transparent;border:1px solid var(--line);color:var(--info);border-radius:6px;padding:5px 9px;font:700 10px var(--mono)}
+.pipe.gone{display:none}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -668,9 +669,7 @@ const CARDS=[
      const b=$('wenf'); if(b) b.onclick=()=>{ S.wEnf=true; re(); }; },
    foot:()=>`<span>${S.wEnf?'<b>6</b> of 7 blocked · needed path works':'<b>7</b> of 7 paths reachable'}</span><span>${S.wTab?'agent':'app'}</span>`,
    kick:'Problem · the attack surface', title:'Assume one workload is compromised. What can it reach?',
-   body:()=>`<p>One bad dependency or one off-task agent, and what matters is <b>what that process is allowed to do</b>.</p>
-     <p>eBPF enforces in the kernel at the moment of the action: connect, exec, file write, privilege change. No patch, prompt or app logic needed. <b>An agent can ignore its instructions. It can't ignore the kernel.</b></p>
-     <p>The engines to do this already exist. <b>Deciding the rules is the hard part.</b></p>
+   body:()=>`<p>eBPF enforces in the kernel, at the moment of the action. <b>An agent can ignore its instructions. It can't ignore the kernel.</b></p>
      <div class="task ${S.wEnf?'done':''}">Tap <b>Enforce in the kernel</b>.</div>
      <div class="task ${S.wSeen.has(1)?'done':''}">Switch to <b>AI agent</b>: same rules, same result.</div>`,
    gate:()=>S.wEnf&&S.wSeen.has(1) },
@@ -697,11 +696,11 @@ const CARDS=[
    foot:()=>`<span>boutique: <b>133</b> paths open · <b>17</b> needed</span><span>step <b>${Math.min(S.prb,4)}/4</b></span>`,
    kick:'Problem · why it stays open', title:'Locking down is a decision that expires every release.',
    body:()=>{ const t=[
-     `<p>The red area is the attack surface: <b>116 paths</b> the workloads are allowed but never use. The engines to close it are already installed.</p>`,
+     `<p>Red: <b>116 paths</b> allowed but never used. That is the attack surface, and the engines to close it are already installed.</p>`,
      `<p>The team writes the policy by hand. The gap closes: only the <b>17 needed paths</b> stay open.</p>`,
      `<p>Release v4 adds one dependency. Nobody updated the policy, so the new flow is <b>dropped</b>. Checkout is down.</p>`,
-     `<p>The fix under pressure is the rollback, so everything is <b>open again</b>. This is why most teams stop trying: in one benchmark, <b>58% of organizations</b> left most workloads with no network policy (Fairwinds 2024).</p>`,
-     `<p><b>The missing piece is the decision, not the engine.</b> A decision layer re-derives what each workload needs on every release, verifies it on real traffic, and only then enforces. And this is one layer: programs, files and privileges have the same problem.</p>`];
+     `<p>The fix under pressure is a rollback: <b>open again</b>. That's why <b>58% of organizations</b> leave most workloads without network policy (Fairwinds 2024).</p>`,
+     `<p><b>The missing piece is the decision, not the engine</b>: re-decided and verified on every release, for every layer.</p>`];
      return t[Math.min(S.prb,4)]+(S.prb<4?`<div class="task">Tap <b>${['Write the policy by hand','Ship release v4','Roll back','Add a decision layer'][S.prb]}</b>.</div>`:'<div class="task done">Done.</div>'); },
    gate:()=>S.prb>=4 },
  { // special 1: one profile, every engine
@@ -711,8 +710,7 @@ const CARDS=[
      $('eyaml').onclick=()=>sheet(`adservice · ${ENG[S.eng][1]}`,'generated from the profile',`<div class="ev"><h4>${ENG[S.eng][0]}</h4><pre>${ENG[S.eng][2]}</pre></div>`); },
    foot:()=>`<span>${['kubearmor','sc'].includes(S.eng)?'design':'lab'} · ${ENG[S.eng][0]}</span><span>viewed <b>${S.engSeen.size}/4</b></span>`,
    kick:'Solution · one decision', title:'Decide once. Enforce with the engines you already run.',
-   body:()=>`<p>The product's output is a <b>profile</b>: what this workload needs, layer by layer. Each engine gets it in its own native format. Nothing new to install in the data path.</p>
-     <p>One decision can feed two engines. “Only java connects” becomes a Cilium rule for <i>where</i> and a Tetragon rule for <i>which process</i>. Today those are two teams writing two policies that drift apart.</p>
+   body:()=>`<p>One profile, written in each engine's native format. “Only java connects” becomes a Cilium rule for <i>where</i> and a Tetragon rule for <i>which process</i>.</p>
      <div class="task ${S.engSeen.size>=2?'done':''}">Tap another engine and see which profile lines it enforces.</div>`,
    gate:()=>S.engSeen.size>=2 },
  { // special 2: learning is not recording
@@ -722,8 +720,7 @@ const CARDS=[
      const x=$('wb').querySelector('[data-lwx]'); if(x&&S.lwN>=4) x.onclick=()=>{ S.lwX=true; refreshTxt(); sheet('sh → 203.0.113.7:443','kept out of the baseline',`<div class="verdict"><i class="tag x">KEPT OUT</i> observed, but not trusted</div><div class="ev"><h4>Tetragon · process_exec + connect</h4><pre>binary   /bin/sh\nparent   java\ndest     203.0.113.7:443\nseen     1×</pre></div><div class="ev"><h4>Why it is not learned</h4><pre>process   not the app's binary\ndest      no manifest, config or DNS name\nrole      adservice only serves frontend\n→ flagged for review, never allowed</pre></div>`); }; },
    foot:()=>`<span>events <b>${S.lwN}/${LW.length}</b></span><span>baseline <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='base').length}</b> · ask <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='esc').length}</b> · out <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='out').length}</b></span>`,
    kick:'Solution · learning', title:'Learning is not recording. What was seen still has to make sense.',
-   body:()=>`<p>Tools that “learn” a baseline copy whatever happened. If the workload was already misbehaving, the bad behavior becomes the policy.</p>
-     <p>Here every observation is checked against the manifest, the image and the workload's role. It becomes <b>baseline</b>, goes to <b>a person</b>, or is <b>kept out</b>.</p>
+   body:()=>`<p>Each observation is checked against the manifest, the image and the workload's role: <b>baseline</b>, <b>ask a person</b>, or <b>kept out</b>. Bad behavior never becomes policy.</p>
      <div class="task ${S.lwN>=LW.length?'done':''}">Tap <b>Run the learning window</b>.</div>
      <div class="task ${S.lwX?'done':''}">Tap the event that was <b>kept out</b>.</div>`,
    gate:()=>S.lwN>=LW.length&&S.lwX },
@@ -735,9 +732,9 @@ const CARDS=[
    kick:'Proof · the gap', title:'Reachability vs actual need, per workload.',
    body:()=>{ const w=S.sel, d=W[w];
      return `<div class="task ${S.explored.size?'done':''}">Tap a workload on the map. Start with frontend.</div>
-       ${S.explored.size?`<p><b>${w}</b> can connect to <b>13 places</b> today. <b style="color:var(--ok)">Green</b>: the ${needsOut(w).length} it needs, plus DNS (listed below). <b style="color:var(--bad)">Red</b>: <b>the other ${13-needsOut(w).length}, the attack surface</b>: open, unused, and available to anyone who takes over this pod. Tap a row to see the evidence.</p>
+       ${S.explored.size?`<p><b>${w}</b> can reach <b>13 places</b> and needs ${needsOut(w).length} plus DNS. <b style="color:var(--bad)">The rest is attack surface.</b> Tap a row for its evidence.</p>
        <div class="list">${d.out.map((r,i)=>`<div class="row tap" data-ev="out:${i}"><span class="a">→ ${esc(r[0]==='dns'?'kube-dns':r[0])}:${esc(r[1])}</span><span class="e">${r[2].toLocaleString('en-US')} flows · ${r[3].startsWith('platform')?'platform rule':'manifest env'}</span><span class="v"><i class="tag ${r[3].startsWith('platform')?'b':'g'}">NEED</i></span></div>`).join('')}</div>`
-       :`<p>This is boutique's map. Tap a workload: the map shows what it <b>can</b> reach today, and the list below shows what it <b>needs</b>. The difference is the attack surface.</p>`}`; },
+       :`<p>Red is what a workload <b>can</b> reach. Green is what it <b>needs</b>.</p>`}`; },
    bindTxt(){ document.querySelectorAll('[data-ev]').forEach(r=>r.onclick=()=>{ S.mapEv=true; const [dir,i]=r.dataset.ev.split(':'); const row=W[S.sel][dir][+i];
      sheet(`${S.sel} → ${row[0]==='dns'?'kube-dns':row[0]}`,`${row[1]} · evidence`,pathEvidence(S.sel,dir,row)); }); },
    gate:()=>S.explored.size>0 },
@@ -775,9 +772,9 @@ const CARDS=[
    foot:()=>`<span>classified <b>${Math.min(S.cls,5)}/5</b></span><span>keep <b>3</b> · excess <b style="color:var(--bad)">21</b></span>`,
    kick:'Proof · classify', title:'Evidence-based classification of every path.',
    body:()=>S.cls>=5?`<div class="task ${S.clsEv?'done':''}">Classified. Now tap a path to see the evidence behind its verdict.</div>
-       <p>Declared in a manifest and seen in Hubble: <b>confirmed</b>. Platform needs such as DNS and kubelet probes: <b>needed</b>, even with no traffic in the window. No declaration and no traffic: <b>excess</b>, attack surface with no reason to exist.</p>`
+       <p>Declared and seen: <b>confirmed</b>. Platform needs: <b>needed</b>. Neither: <b>excess</b>.</p>`
      :`<div class="task">Run the classification for adservice.</div>
-       <p>adservice is allowed 24 paths today. The product checks each one against its evidence: the manifests and the Hubble flows.</p>
+       <p>adservice is allowed 24 paths. Each is checked against manifests and Hubble flows.</p>
        <button class="btn" id="cls" ${S.cls>0?'disabled':''}>Classify adservice</button>`,
    bindTxt(){ if($('cls')) $('cls').onclick=()=>{ $('cls').disabled=true; PATHS.forEach(p=>S.dec[p.k]=p.truth);
        for(let i=1;i<=5;i++) later(i*520,()=>{ S.cls=i; refresh(true); }); }; },
@@ -811,7 +808,7 @@ const CARDS=[
    body:()=>S.replay==='pass'?`<div class="task done">PASS: no required flow would be dropped.</div><p>Safe to enforce. The replay also confirms what it closes: 21 unused paths for adservice.</p>`
      :S.replay?`<div class="task">The replay caught a problem. Fix it from the evidence and run it again.</div>
        <p>${replayIssues().map(i=>i.why).join(' ')}</p><button class="btn" id="fix">Apply the evidence verdicts and re-run</button>`
-     :`<div class="task">Run the flow replay.</div><button class="btn" id="run">Run the flow replay</button><p><b>What is a flow replay?</b> A test run before anything changes. Hubble already recorded every real connection in boutique: ${FLOWS.toLocaleString('en-US')} of them. We send each one through the new policy and ask: <b>would it still get through?</b> If even one connection the app needs would be blocked, the policy is <b>not applied</b>.</p>`,
+     :`<div class="task">Run the flow replay.</div><button class="btn" id="run">Run the flow replay</button><p>Every recorded connection is sent through the new policy first. If one the app needs would drop, nothing is applied.</p>`,
    bindTxt(){ if($('run')) $('run').onclick=runReplay; if($('fix')) $('fix').onclick=()=>{ PATHS.forEach(p=>S.dec[p.k]=p.truth); S.replay=null; refresh(true); later(250,runReplay); }; },
    gate:()=>S.replay==='pass' },
  { // 8. enforce: approve the stages, then check any workload's reach
@@ -830,7 +827,7 @@ const CARDS=[
            ${st==='ok'?'':`<p>${d}</p><small>${c} · flow replay: 0 required flows dropped</small>`}
            ${st==='now'?`<button class="btn" id="appr">Approve stage ${i+1}</button>`:''}
            ${st==='ok'?`<div class="lv">${c} · live check: 0 drops</div>${i===S.lvl-1&&!done?`<button class="btn sec sm" id="rbk">↶ Roll back stage ${i+1}</button>`:''}`:''}</div>`; }).join('')}</div>
-       <p class="note">Each stage is its own policy set: applied only after approval, rolled back in one step. A drop on a required flow rolls it back automatically.</p>`; },
+       <p class="note">Applied on approval, rolled back in one step.</p>`; },
    bindTxt(){ if($('appr')) $('appr').onclick=e=>{ e.target.disabled=true; e.target.textContent='Applying…'; later(600,()=>{ S.lvl++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); };
      if($('rbk')) $('rbk').onclick=e=>{ e.target.disabled=true; e.target.textContent='Rolling back…'; later(600,()=>{ S.lvl--; S.rb++; drawReach(S.sel); refreshFoot(); refreshTxt(); }); }; },
    gate:()=>S.lvl>=3&&S.rb>0 },
@@ -859,10 +856,10 @@ const CARDS=[
          <div class="ev"><h4>Image config</h4><pre>ENTRYPOINT  …/hipstershop/bin/AdService\n            a shell script (#!/bin/sh)\n${b[0]} is not declared in the image;\nthe script starts it, and a script\ncan't be resolved statically</pre></div>`); }); },
    foot:()=>`<span>allow-list <b>${S.binOk?8:2}</b> binaries${S.binChk?' · exec replay <b style="color:var(--ok)">PASS</b>':''}</span><span>any other exec → <b style="color:var(--bad)">deny</b></span>`,
    kick:'Proof · inside the pod', title:'Process allow-list: escalating undeclared binaries.',
-   body:()=>S.binOk&&S.binChk?`<div class="task done">Exec replay passed. Allow-list ready: 8 programs.</div><p>Every program adservice ran when it started is on the allow-list, so enforcing it won't stop the container from starting. Any other program will be blocked once Tetragon enforces it.</p>`
-     :S.binOk?`<div class="task">Run the exec replay.</div><button class="btn" id="bchk">Run the exec replay</button><p><b>What is an exec replay?</b> When adservice starts, its script runs these 8 programs. If the allow-list missed one, Tetragon would block it and <b>the container would fail to start</b>. The check replays every program Tetragon recorded at startup against the allow-list, offline, and passes only if all of them are allowed.</p>`
+   body:()=>S.binOk&&S.binChk?`<div class="task done">Exec replay passed. Allow-list ready: 8 programs.</div><p>Any other program is blocked by Tetragon.</p>`
+     :S.binOk?`<div class="task">Run the exec replay.</div><button class="btn" id="bchk">Run the exec replay</button><p>Checks that every program adservice runs at startup is on the list, so the container still starts.</p>`
      :`<div class="task">Review them and confirm. Tap a binary for its evidence.</div>
-       <p>Tetragon saw adservice's entrypoint <b>script</b> start these six. A script can't be resolved statically, so the product <b>escalates to a person instead of guessing</b>. Here they are part of normal startup.</p>
+       <p>Started by the entrypoint script, not declared in the image. The product <b>asks a person instead of guessing</b>.</p>
        <button class="btn" id="chk">Confirm all 6 as needed</button>`,
    bindTxt(){ if($('chk')) $('chk').onclick=()=>{ $('chk').disabled=true; later(500,()=>{ S.binOk=true; refresh(true); }); };
      if($('bchk')) $('bchk').onclick=()=>{ $('bchk').disabled=true; $('bchk').textContent='Replaying exec events…'; later(1200,()=>{ S.binChk=true; refresh(true); }); }; },
@@ -936,7 +933,7 @@ const CARDS=[
        <div><span>reach now</span><b style="color:var(--ok)">${n.length?n.map(k=>SHORT[k]).join(', '):'kube-dns only'}</b></div>
        ${w==='adservice'?'<div><span>binaries</span><b>8, reviewed · ready</b></div>':''}</div>
        <div class="two"><button class="btn ${S.ba==='before'?'':'sec'}" id="vb4">Before</button><button class="btn ${S.ba==='after'?'':'sec'}" id="vaf">After</button></div>
-       <p><b style="color:var(--bad)">Red</b>: 116 paths allowed but never used. <b style="color:var(--ok)">Green</b>: the 16 flows the app needs. After enforcement only green remains.</p>`; },
+       <p>After enforcement only the green remains.</p>`; },
    bindTxt(){ const set=v=>{ S.ba=v; CARDS[at]._show&&CARDS[at]._show(); refreshFoot(); refreshTxt(); }; $('vb4').onclick=()=>{ S.baT.add('b'); set('before'); }; $('vaf').onclick=()=>{ S.baT.add('a'); set('after'); }; },
    gate:()=>S.baT.size===2,
    },
@@ -959,9 +956,8 @@ const CARDS=[
    foot:()=>`<span>${LCASE[S.agc].src}</span><span>cases <b>${S.agcSeen.size}/3</b></span>`,
    kick:'Why now · AI agents', title:'Agent controls watch the conversation. The kernel watches the action.',
    body:()=>`<div class="task ${S.agcSeen.size>=3?'done':''}">Watch all three cases.</div>
-     <p>Guardrails, tool allow-lists and gateways watch the <b>conversation</b>. In the first two cases the conversation looked fine or didn't exist. The harmful <b>action</b>, a connection out, went straight from a process to the network, and <b>only the kernel saw it</b>.</p>
-     <p>The third case is the honest limit: misuse through an <b>allowed</b> path is a content question, and the agent-level controls catch it. The two layers work together.</p>
-     <p><b>Enforcing in the kernel is the easy part. The hard part is the right profile for every agent</b>: from its config, without breaking it, kept current. That is what we build.</p>
+     <p>Agent controls watch the <b>conversation</b>; the harmful <b>action</b> only the kernel saw. Case 3 is the honest limit: misuse of an <b>allowed</b> path needs agent-level controls too.</p>
+     <p><b>The hard part is the right profile for every agent. That is what we build.</b></p>
      <p class="note"><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener" style="color:var(--info)">Cohere report ↗</a> · <a href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/" target="_blank" rel="noopener" style="color:var(--info)">JFrog report ↗</a></p>`,
    gate:()=>S.agcSeen.size>=3 },
  { // agents 2: the profile is built from what the agent declares (its config) and confirmed by what it does
@@ -977,8 +973,7 @@ const CARDS=[
      later(300+rows.length*450+300,()=>{ srcs.forEach(s=>s.classList.remove('lit')); $('chk2')&&$('chk2').classList.add('on'); }); },
    foot:()=>`<span>intent from config · proof from behavior</span><span>example</span>`,
    kick:'Why now · agent profile', title:'An agent declares its intent. The product holds it to it.',
-   body:()=>`<p>Agents come with their own configuration: the model they call, the MCP servers they use, the tools they may invoke. That is the agent's <b>declared intent</b>, and it is the first source of the profile.</p>
-     <p>The manifest adds the runtime, and observed behavior confirms both. <b>Declared but never used</b>: tightened. <b>Used but never declared</b>: escalated to a person, never added on its own.</p>
+   body:()=>`<p>The agent's config declares its intent: model, MCP servers, tools. Behavior confirms it. <b>Declared but unused</b>: tightened. <b>Used but undeclared</b>: sent to a person.</p>
      <p class="note">Example workload, design. Agent profiles are the next lab step.</p>`,
    gate:()=>true },
  { // agents 3: watch each agent action, before and after the profile is enforced
@@ -988,8 +983,8 @@ const CARDS=[
    foot:()=>`<span>checked by the kernel, not the model</span><span>${S.agt?'<b style="color:var(--ok)">enforced</b>':'open'}</span>`,
    kick:'Why now · agent enforcement', title:'Every agent action checked where it happens.',
    body:()=>S.agt?`<div class="task done">The agent can do its job, and nothing else.</div>
-       <p>Whatever the model decides, or writes in its reasoning, the network and the kernel only allow what its profile needs. The case from the report would stop at the first step: an unknown destination is not in the profile.</p>`
-     :`<p>Watch the agent work. Every action leaves the pod, and today <b>every one arrives</b>, including the one its reasoning says it isn't doing.</p>
+       <p>Whatever the model decides, only what its profile needs leaves the pod.</p>`
+     :`<p>Today <b>every action arrives</b>, including the one its reasoning says it isn't doing.</p>
        <button class="btn" id="agt">Enforce the agent profile</button>`,
    bindTxt(){ if($('agt')) $('agt').onclick=()=>{ $('agt').disabled=true; stop(); S.agt=true; $('wb').innerHTML=agentSVG(); agentPlay(); refreshFoot(); refreshTxt(); }; },
    gate:()=>S.agt },
@@ -1201,7 +1196,7 @@ function show(i){
   if(i<0||i>=CARDS.length) return; stop(); closeSheet(); at=i; const c=CARDS[i];
   if(c._i>=6&&c._i<18) S.sel='adservice';   // the story follows adservice after the overview
   [...$('bars').children].forEach((s,k)=>s.className=k<i?'pd':k===i?'pn':'');
-  const p=$('pipe'); p.classList.toggle('off',c.pipe<0); [...p.children].forEach((s,k)=>s.className=k<c.pipe?'d':k===c.pipe?'n':'');
+  const p=$('pipe'); p.classList.toggle('off',c.pipe<0); p.classList.toggle('gone',!c.kick.startsWith('Proof')); [...p.children].forEach((s,k)=>s.className=k<c.pipe?'d':k===c.pipe?'n':'');
   $('wt').textContent=c.wt; $('wm').textContent=c.wm;
   const wb=$('wb'); wb.className='wbody'+(c.map?' map':''); wb.innerHTML=c.win(); wb.scrollTop=0; c.bind&&c.bind();
   if(!c.map) blast(S.sel);
