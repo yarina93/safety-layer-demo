@@ -586,7 +586,7 @@ svg text{font-family:var(--mono)}
   <div id="gtip" hidden aria-hidden="true"><b id="gtipT">Tap here</b><i></i></div>
   <div class="bars" id="bars" aria-hidden="true"></div>
   <div class="head">
-    <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#2B3A55"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#E6EAF2" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#3DD68C"/></svg>Safety Layer <span>· boutique</span></div>
+    <div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#2B3A55"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#E6EAF2" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#3DD68C"/></svg>Safety Layer <span id="hctx"></span></div>
     <div class="blast" id="blast" hidden><span id="bW">ad</span><b id="bN">13</b></div><div class="asm" id="asm" aria-live="polite"></div>
   </div>
   <div class="pipe off" id="pipe" aria-label="Pipeline"><span>Collect</span><span>Classify</span><span>Compile</span><span>Verify</span><span>Enforce</span></div>
@@ -1201,11 +1201,11 @@ tools: [create_ticket, search_kb]</pre></div>
      <div class="task ${S.cmpSeen.size?'done':''}">Tap a column to see the approach.</div>`,
    gate:()=>S.cmpSeen.size>0 },
  { // intro: how the tour works
-   pipe:-1, intro:true, wt:'boutique · the tour', wm:'about 4 min',
-   win(){ const C=[['1','Why it matters','What one bug, or one AI agent, can do, and how the kernel stops it.'],['2','Problem','Why almost nobody enforces it: knowledge, scale, change.'],['3','Solution','How the product decides what each workload may do.'],['4','Proof','The same, step by step, on a real namespace in the lab.'],['5','Why now','AI agents, and why the kernel is where to stop them.'],['6','Vision','The result in numbers.']];
-     return `<div class="tin"><div class="tinh"><b>boutique</b><span>an online shop on Kubernetes · 12 services · lab cluster</span></div>${C.map(([n,t,d])=>`<div class="tir"><i>${n}</i><div><b>${t}</b><small>${d}</small></div></div>`).join('')}</div>`; },
+   pipe:-1, intro:true, wt:'the tour', wm:'about 4 min',
+   win(){ const C=[['1','Why it matters','What one bug, or one AI agent, can do, and how the kernel stops it.'],['2','Problem','Why almost nobody enforces it: knowledge, scale, change.'],['3','Solution','How the product decides what each workload may do.'],['4','Proof','The same, step by step, on boutique: a 12-service shop in our lab.'],['5','Why now','AI agents, and why the kernel is where to stop them.'],['6','Vision','The result in numbers.']];
+     return `<div class="tin"><div class="tinh"><b>Safety Layer</b><span>the decision layer for runtime enforcement · Kubernetes and AI agents</span></div>${C.map(([n,t,d])=>`<div class="tir"><i>${n}</i><div><b>${t}</b><small>${d}</small></div></div>`).join('')}</div>`; },
    foot:()=>`<span>you tap, the product works</span><span>6 chapters</span>`,
-   kick:'Start · how this works', title:'You are the platform engineer for boutique.',
+   kick:'Start · how this works', title:'A short guided tour of the product.',
    body:()=>`<p>Every step shows one idea. <b>The yellow “Tap” marks what to press next</b>; when the step is done, Next lights up.</p>`,
    gate:()=>true },
  { // scale: decisions multiply
@@ -1484,7 +1484,7 @@ function show(i){
   $('wt').textContent=c.wt; $('wm').textContent=c.wm;
   const wb=$('wb'); wb.className='wbody'+(c.map?' map':''); wb.classList.remove('fin'); void wb.offsetWidth; wb.classList.add('fin'); wb.innerHTML=c.win(); wb.scrollTop=0; c.bind&&c.bind();
   if(!c.map) blast(S.sel);
-  refreshFoot(); const t=$('txt'); t.scrollTop=0; refreshTxt(); t.classList.remove('in'); void t.offsetWidth; t.classList.add('in');
+  $('hctx').textContent=c.kick.startsWith('Proof')?'· lab: boutique':'';   refreshFoot(); const t=$('txt'); t.scrollTop=0; refreshTxt(); t.classList.remove('in'); void t.offsetWidth; t.classList.add('in');
 }
 $('next').onclick=()=>{ if(CARDS[at].gate()) show(at+1); };
 $('back').onclick=()=>show(at-1);
