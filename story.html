@@ -455,6 +455,13 @@ svg text{font-family:var(--mono)}
 .ag3r em{font-style:normal;text-align:center;font-weight:800;font-size:9px;padding:6px 2px;border-radius:6px;color:var(--dim);background:rgba(255,255,255,.03)}
 .ag3r em.ok{color:var(--ok);background:rgba(61,214,140,.12)}.ag3r em.miss{color:var(--bad);background:rgba(255,92,92,.1)}
 .ag3s{margin-top:4px;padding:8px;border-radius:7px;font:700 10.5px var(--body);color:var(--muted);text-align:center}.ag3s.on{color:var(--ok);background:rgba(61,214,140,.1)}
+.acfg small{font:600 8.5px var(--mono);color:var(--prog)}.acfg pre{margin:3px 0 5px;padding:5px 8px;border-radius:6px;background:rgba(179,146,240,.08);border-left:2px solid var(--prog);font:500 9.5px/1.45 var(--mono);color:var(--ink);white-space:pre}
+.apr2{display:grid;grid-template-columns:1fr 46px 34px 82px;gap:4px;align-items:center;padding:3px 6px;margin-bottom:2px;border-radius:6px;font:600 9.5px var(--mono);border:1px solid var(--line);opacity:.45;transition:all .3s}
+.apr2.h{border:0;opacity:1;color:var(--muted);font-size:8px;padding:0 6px}.apr2.h span{text-align:center}.apr2.h span:first-child,.apr2.h span:last-child{text-align:left}
+.apr2 b{display:block;color:var(--ink);font-size:9.5px}.apr2 small{color:var(--muted);font-size:8.5px}.apr2 i{font-style:normal;text-align:center;color:var(--text)}
+.apr2 em{font-style:normal;font-weight:800;font-size:8.5px}.apr2.on{opacity:1}
+.apr2.on.ok em{color:var(--ok)}.apr2.on.warn{border-color:rgba(245,185,71,.5)}.apr2.on.warn em{color:var(--warn)}.apr2.on.bad{border-color:rgba(255,92,92,.6);background:rgba(255,92,92,.06)}.apr2.on.bad em{color:var(--bad)}
+.list .more{font:600 10px var(--mono);color:var(--muted);padding:6px 2px}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -553,7 +560,7 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, apN:0, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 const ASL=['K8s API','Internet','Pods','Programs','Proc→net','Files','Privileges'];
 function meter(){ const c=CARDS[at], i=c.cmp?-1:c._i; let n=0;
@@ -793,7 +800,7 @@ const CARDS=[
      return t[Math.min(S.prb,4)]+(S.prb<4?`<div class="task">Tap <b>${['Write the policy by hand','Ship release v4','Roll back','Add a decision layer'][S.prb]}</b>.</div>`:'<div class="task done">Done.</div>'); },
    gate:()=>S.prb>=4 },
  { // special 1: one profile, every engine
-   pipe:-1, wt:'adservice · profile → policies', wm:'engine-agnostic',
+   pipe:-1, wt:'adservice · one profile', wm:'engine-agnostic',
    win(){ return engHTML(); },
    bind(){ $('wb').querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ S.eng=b.dataset.e; S.engSeen.add(S.eng); $('wb').innerHTML=engHTML(); CARDS[at].bind(); refreshTxt(); refreshFoot(); });
      $('eyaml').onclick=()=>sheet(`adservice · ${ENG[S.eng][1]}`,'generated from the profile',`<div class="ev"><h4>${ENG[S.eng][0]}</h4><pre>${ENG[S.eng][2]}</pre></div>`); },
@@ -822,7 +829,7 @@ const CARDS=[
    body:()=>{ const w=S.sel, d=W[w];
      return `<div class="task ${S.explored.size?'done':''}">Tap a workload on the map. Start with frontend.</div>
        ${S.explored.size?`<p><b>${w}</b> can reach <b>13 places</b> and needs ${needsOut(w).length} plus DNS. <b style="color:var(--bad)">The rest is attack surface.</b> Tap a row for its evidence.</p>
-       <div class="list">${d.out.map((r,i)=>`<div class="row tap" data-ev="out:${i}"><span class="a">→ ${esc(r[0]==='dns'?'kube-dns':r[0])}:${esc(r[1])}</span><span class="e">${r[2].toLocaleString('en-US')} flows · ${r[3].startsWith('platform')?'platform rule':'manifest env'}</span><span class="v"><i class="tag ${r[3].startsWith('platform')?'b':'g'}">NEED</i></span></div>`).join('')}</div>`
+       <div class="list">${d.out.slice(0,3).map((r,i)=>`<div class="row tap" data-ev="out:${i}"><span class="a">→ ${esc(r[0]==='dns'?'kube-dns':r[0])}:${esc(r[1])}</span><span class="e">${r[2].toLocaleString('en-US')} flows · ${r[3].startsWith('platform')?'platform rule':'manifest env'}</span><span class="v"><i class="tag ${r[3].startsWith('platform')?'b':'g'}">NEED</i></span></div>`).join('')}${d.out.length>3?`<div class="more">+ ${d.out.length-3} more needed paths, each with its evidence</div>`:''}</div>`
        :`<p>Red is what a workload <b>can</b> reach. Green is what it <b>needs</b>.</p>`}`; },
    bindTxt(){ document.querySelectorAll('[data-ev]').forEach(r=>r.onclick=()=>{ S.mapEv=true; const [dir,i]=r.dataset.ev.split(':'); const row=W[S.sel][dir][+i];
      sheet(`${S.sel} → ${row[0]==='dns'?'kube-dns':row[0]}`,`${row[1]} · evidence`,pathEvidence(S.sel,dir,row)); }); },
@@ -1055,21 +1062,23 @@ const CARDS=[
      <p class="note"><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener" style="color:var(--info)">Cohere report ↗</a> · <a href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/" target="_blank" rel="noopener" style="color:var(--info)">JFrog report ↗</a></p>`,
    gate:()=>S.agcSeen.size>=3 },
  { // agents 2: the profile is built from what the agent declares (its config) and confirmed by what it does
-   pipe:1, wt:'agents · support-agent · profile', wm:'example',
-   win(){ const SRC=[['cfg','Agent config','model · MCP servers · tools'],['k8s','K8s manifest','image · env · securityContext'],['obs','Observed','Hubble flows · Tetragon exec']];
-     const ROW=[['model API','api.llm-provider.com:443','cfg'],['tool server','mcp-tickets:8080','cfg'],['tools','create_ticket, search_kb','cfg'],['program','python (agent)','k8s'],['egress','only the 2 above','obs'],['privileges','none used','obs']];
-     return `<div class="apr"><div class="srcs">${SRC.map(([k,n,d])=>`<div class="sc ${k}" data-k="${k}"><b>${n}</b><span>${d}</span></div>`).join('')}</div>
-       <div class="arrow">→</div>
-       <div class="prof"><div class="ph">support-agent · profile</div>${ROW.map(([n,v,k],i)=>`<div class="pr2 ${k}" style="--i:${i}"><span>${n}</span><b>${v}</b></div>`).join('')}
-       <div class="chk2" id="chk2"><i>✓</i> declared = observed</div></div></div>`; },
-   bind(){ const rows=[...$('wb').querySelectorAll('.pr2')], srcs=[...$('wb').querySelectorAll('.sc')];
-     rows.forEach((r,i)=>later(300+i*450,()=>{ r.classList.add('on'); srcs.forEach(s=>s.classList.toggle('lit',s.dataset.k===r.classList[1])); }));
-     later(300+rows.length*450+300,()=>{ srcs.forEach(s=>s.classList.remove('lit')); $('chk2')&&$('chk2').classList.add('on'); }); },
+   pipe:1, wt:'support-agent · profile', wm:'example',
+   win(){ const R=[['model API','api.llm-provider.com:443',1,1,'ok','ALLOW'],['MCP server','mcp-tickets:8080',1,1,'ok','ALLOW'],['tool','search_kb',1,0,'warn','TIGHTEN'],['connect','paste.example.net:443',0,1,'bad','ASK A PERSON'],['programs','python only',1,1,'ok','ALLOW'],['privileges','none used',1,1,'ok','DROP ALL']];
+     const n=S.apN;
+     return `<div class="acfg"><small>agent config · support-agent.yaml</small><pre>model: api.llm-provider.com
+mcp_servers: [mcp-tickets:8080]
+tools: [create_ticket, search_kb]</pre></div>
+       <div class="apt"><div class="apr2 h"><span>item</span><span>declared</span><span>seen</span><span>decision</span></div>
+       ${R.map(([k,v,dc,sn,c,d],i)=>`<div class="apr2 ${i<n?'on '+c:''}"><span><b>${k}</b><small>${v}</small></span><i>${dc?'✓':'–'}</i><i>${sn?'✓':'–'}</i><em>${i<n?d:''}</em></div>`).join('')}</div>
+       ${n?'':'<button class="pbtn" id="apb">Build the profile ▸</button>'}`; },
+   bind(){ const b=$('apb'); if(b) b.onclick=()=>{ b.remove(); for(let i=1;i<=6;i++) later(i*330,()=>{ S.apN=i; $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); if(i===6){ refreshTxt(); refreshFoot(); } }); }; },
+   guide:()=>S.apN?null:$('apb'),
    foot:()=>`<span>intent from config · proof from behavior</span><span>example</span>`,
    kick:'Why now · agent profile', title:'An agent declares its intent. The product holds it to it.',
-   body:()=>`<p>The agent's config declares its intent: model, MCP servers, tools. Behavior confirms it. <b>Declared but unused</b>: tightened. <b>Used but undeclared</b>: sent to a person.</p>
+   body:()=>`<p>The agent's config is its declared intent. What it actually does confirms it. <b>Declared but never used</b>: tightened. <b>Used but never declared</b>: a person decides.</p>
+     <div class="task ${S.apN>=6?'done':''}">Tap <b>Build the profile</b>.</div>
      <p class="note">Example workload, design. Agent profiles are the next lab step.</p>`,
-   gate:()=>true },
+   gate:()=>S.apN>=6 },
  { // agents 3: watch each agent action, before and after the profile is enforced
    pipe:4, wt:'agents · support-agent · live', wm:'design',
    win(){ return agentSVG(); },
@@ -1221,7 +1230,7 @@ function replayOut(){ const I=replayIssues(), pass=!I.length;
 function runReplay(){ S.replay=null; S.rpRun=true; refresh(true);
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1600); if(vn&&vn.isConnected){ vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1) requestAnimationFrame(f); } }; if(!reduce) requestAnimationFrame(f);
   later(1900,()=>{ S.rpRun=false; S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, apN:0, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 let CH=null, CHN=null;
@@ -1290,11 +1299,11 @@ const GUIDE=[
   ()=>S.cmpSeen.size?null:$('wb').querySelector('[data-cm="3"]'),
 ];
 // the tour keeps the cards that carry the story; the rest stay in the source
-{ const SK=new Set([1, 6, 7, 9, 12, 14, 15, 16, 17, 19]); const keep=(_,i)=>!SK.has(i); const C=CARDS.filter(keep), Wh=WHY.filter(keep), G=GUIDE.filter(keep); CARDS.length=0; CARDS.push(...C); WHY.length=0; WHY.push(...Wh); GUIDE.length=0; GUIDE.push(...G); }
+{ const SK=new Set([1, 6, 7, 9, 12, 14, 15, 16, 17, 18, 19]); const keep=(_,i)=>!SK.has(i); const C=CARDS.filter(keep), Wh=WHY.filter(keep), G=GUIDE.filter(keep); CARDS.length=0; CARDS.push(...C); WHY.length=0; WHY.push(...Wh); GUIDE.length=0; GUIDE.push(...G); }
 { const from=CARDS.findIndex(c=>c.cmp); if(from>=0) [CARDS,WHY,GUIDE].forEach(A=>A.splice(from,1)); }   // comparison step: not shown
 let gEl=null;
 function guide(){
-  const c=CARDS[at]; let el=c.gate()?(at<CARDS.length-1?$('next'):null):(GUIDE[at]&&GUIDE[at]());
+  const c=CARDS[at]; let el=c.gate()?(at<CARDS.length-1?$('next'):null):(c.guide?c.guide():GUIDE[at]&&GUIDE[at]());
   if(CARDS[at].wm==='default-allow'&&S.explored.size&&!S.mapEv) el=document.querySelector('#txt [data-ev]')||el;   // after picking a workload: open its evidence
   if(el&&el.disabled) el=null;
   if($('sheet').classList.contains('open')||!$('cover').hidden) el=null;
