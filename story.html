@@ -429,6 +429,32 @@ svg text{font-family:var(--mono)}
 .cmr i{font-style:normal;text-align:center;padding:5px 0;border-radius:5px;font-weight:800;background:rgba(255,255,255,.02)}
 .cmr i.y{color:var(--ok)}.cmr i.pa{color:var(--warn)}.cmr i.n{color:var(--dim)}.cmr i.us{background:rgba(61,214,140,.1)}
 .cmd{margin-top:8px;padding:8px;border-radius:7px;background:rgba(110,168,254,.06);border:1px solid var(--line);color:var(--text);font:500 10.5px/1.45 var(--body);min-height:44px}
+.chn{position:relative;display:flex;flex-direction:column;gap:4px;margin-top:2px}
+.chn::before{content:'';position:absolute;left:11px;top:12px;bottom:12px;width:2px;background:var(--line)}
+.chr{position:relative;display:grid;grid-template-columns:24px 1fr auto 70px;gap:6px;align-items:center;padding:5px 8px 5px 0;border-radius:7px;font:600 10px var(--mono);transition:all .3s}
+.chr i{position:relative;z-index:1;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10px;background:var(--panel);border:1.5px solid var(--dim);color:var(--muted)}
+.chr b{display:block;color:var(--ink);font-size:10.5px}.chr small{color:var(--muted);font-size:8.5px;font-weight:500}
+.chr .ly{font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
+.chr em{font-style:normal;text-align:right;font-weight:800;font-size:9px;color:var(--dim)}
+.chr.go i{border-color:var(--info);color:var(--info)}.chr.go em{color:var(--info)}
+.chr.bad{background:rgba(255,92,92,.08)}.chr.bad i{border-color:var(--bad);background:var(--bad);color:#fff}.chr.bad em{color:var(--bad)}
+.chr.ok{background:rgba(61,214,140,.08)}.chr.ok i{border-color:var(--ok);background:var(--ok);color:#0A0D14}.chr.ok em{color:var(--ok)}
+.chr.off{opacity:.35}.chr.off em{color:var(--muted)}
+.cend{min-height:30px;margin-top:6px;padding:7px 9px;border-radius:7px;font:700 10.5px var(--body)}.cend.bad{color:var(--bad);background:rgba(255,92,92,.1)}.cend.ok{color:var(--ok);background:rgba(61,214,140,.1)}
+.psv .bo{fill:rgba(255,92,92,.28);stroke:var(--bad);stroke-width:1}.psv .bd{fill:var(--info)}.psv .bd.fit{stroke:var(--ok);stroke-width:2}
+.psv .bx{fill:var(--bad)}.psv .bg{fill:none;stroke:var(--dim);stroke-dasharray:3 3}.psv .bxx{font:800 13px var(--mono);fill:var(--bad)}
+.psv .bn{font:800 13px var(--mono);fill:#fff}.psv .bs{font:500 8px var(--mono);fill:var(--muted)}.psv .bn+.bs{fill:#FFD6D6}
+.psv .bv{font:700 9px var(--mono);fill:var(--text)}.psv .bv.off{fill:var(--dim)}.psv .bl{font:800 8.5px var(--mono)}.psv .bl.bad{fill:var(--bad)}.psv .bl.ok{fill:var(--ok)}
+.psv .bh{font:800 24px var(--body)}.psv .bh.bad{fill:var(--bad)}.psv .bh.ok{fill:var(--ok)}.psv .bht{font:700 11px var(--body);fill:var(--ink)}
+.psv .lgd{fill:var(--info)}.psv .lgu{fill:var(--bad)}
+.chr{padding:3px 8px 3px 0}
+.ag3{font:600 10px var(--mono)}.ag3h{display:grid;grid-template-columns:1fr 78px 78px;gap:5px;color:var(--muted);font-size:8.5px;margin-bottom:5px}.ag3h span{text-align:center}.ag3h span:first-child{text-align:left}.ag3h small{display:block;font-size:7.5px;color:var(--dim)}
+.ag3r{width:100%;display:grid;grid-template-columns:1fr 78px 78px;gap:5px;align-items:center;text-align:left;padding:6px 7px;margin-bottom:5px;border-radius:8px;border:1px dashed var(--dim);background:transparent;color:inherit;font:inherit;cursor:pointer}
+.ag3r.v{border:1px solid var(--line);background:rgba(255,255,255,.02)}.ag3r.sel{border-color:var(--info)}
+.ag3r b{display:block;color:var(--ink);font-size:10.5px}.ag3r small{display:block;color:var(--text);font:500 10px/1.35 var(--body);margin-top:2px}.ag3r i{display:block;font-style:normal;color:var(--dim);font-size:8px;margin-top:3px}
+.ag3r em{font-style:normal;text-align:center;font-weight:800;font-size:9px;padding:6px 2px;border-radius:6px;color:var(--dim);background:rgba(255,255,255,.03)}
+.ag3r em.ok{color:var(--ok);background:rgba(61,214,140,.12)}.ag3r em.miss{color:var(--bad);background:rgba(255,92,92,.1)}
+.ag3s{margin-top:4px;padding:8px;border-radius:7px;font:700 10.5px var(--body);color:var(--muted);text-align:center}.ag3s.on{color:var(--ok);background:rgba(61,214,140,.1)}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -527,7 +553,7 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 const ASL=['K8s API','Internet','Pods','Programs','Proc→net','Files','Privileges'];
 function meter(){ const c=CARDS[at], i=c.cmp?-1:c._i; let n=0;
@@ -612,7 +638,7 @@ const LW=[['exec','java','AdService entrypoint','base','in the image, seen every
  ['exec','java (after restart)','same binary','base','matches the baseline']];
 function lwHTML(){ const n=S.lwN;
   return `<div class="lw">${LW.map(([v,a,d,k],i)=>`<div class="lwr ${i<n?'on':''} ${k}" ${k==='out'?'data-lwx':''}><i>${v}</i><span>${a}<small>${d}</small></span><em>${k==='base'?'BASELINE':k==='esc'?'ASK A PERSON':'KEPT OUT'}</em></div>`).join('')}</div>
-    ${n<LW.length?'<button class="pbtn" id="lwrun">Run the learning window ▸</button>':''}`; }
+    ${n<LW.length&&!S.lwRun?'<button class="pbtn" id="lwrun">Run the learning window ▸</button>':''}`; }
 
 // ---------- compare: categories, not products
 const CMPC=[['Detect','Runtime detection tools: watch events and alert. Nothing is prevented, and someone still has to write the response.'],
@@ -620,27 +646,49 @@ const CMPC=[['Detect','Runtime detection tools: watch events and alert. Nothing 
  ['Traffic → policy','Policy generators: turn observed network flows into network policy. Network only, and only as good as the traffic they saw.'],
  ['This','Decides each layer from evidence (manifests, image, traffic, agent config), tests it on recorded traffic, enforces in stages with rollback, on any engine.']];
 const CMPR=[['Prevents, not only alerts',['n','y','y','y']],['Network and inside the pod',['p','y','n','y']],['Checks what it learns',['n','n','n','y']],['Tested before enforcing',['n','n','p','y']],['Staged, with rollback',['n','p','n','y']],['Any engine',['n','n','n','y']],['AI agents',['p','n','n','y']]];
+
+// ---------- why: the attack chain, open vs enforced in the kernel
+const CHAIN=()=>S.wTab===1?[
+  ['Poisoned model loads','or the model goes off-task','start'],
+  ['Connect to an unknown host','to fetch code or send data','net'],
+  ['Run a shell','through a tool','pod'],
+  ['Read cloud credentials','instance metadata service','net'],
+  ['Reach other pods','move sideways','net'],
+  ['Escalate to root','new privileges','pod']]:[
+  ['Exploit request arrives','frontend → adservice, an allowed path','start'],
+  ['Download attack code','from the internet','net'],
+  ['Run a shell','sh, curl','pod'],
+  ['Use the service token','call the K8s API','net'],
+  ['Reach other pods','move sideways','net'],
+  ['Escalate to root','new privileges','pod']];
+function chainHTML(){ const C=CHAIN(), ph=S.wPh, n=S.wN, ag=S.wTab===1;
+  const st=i=>{ if(ph===0||i>=n) return ['','']; if(i===0) return ['go','RUNS'];
+    if(ph===1) return ['bad','SUCCEEDS']; if(ph===2) return i===1?['ok','BLOCKED']:['off','NEVER RUNS']; return ['ok','BLOCKED']; };
+  const end=ph===1&&n>=C.length?`<div class="cend bad">Breach: shell, cluster access, every pod in reach.</div>`
+    :ph===2&&n>=C.length?`<div class="cend ok">The attack fails at step 2. The bug is still there; it just can't be used.</div>`
+    :ph===3&&n>=C.length?`<div class="cend ok">Even inside, every next step is blocked.</div>`:`<div class="cend"></div>`;
+  const btn=S.wRun?'':ph===0?'Run the attack ▸':ph===1?'Enforce in the kernel, run it again ▸':ph===2?'What if it got in anyway? ▸':'';
+  return `<div class="wtabs2"><button data-wt="0" class="${!ag?'on':''}">Exploited app</button><button data-wt="1" class="${ag?'on':''}">AI agent</button></div>
+    <div class="chn ${ph>=2?'k':''}">${C.map(([t,d,l],i)=>{ const [k,x]=st(i); return `<div class="chr ${k}"><i>${i+1}</i><div><b>${t}</b><small>${d}</small></div><span class="ly">${l==='net'?'network':l==='pod'?'in the pod':''}</span><em>${x}</em></div>`; }).join('')}</div>
+    ${end}${btn?`<button class="pbtn" id="wgo">${btn}</button>`:''}`; }
 // ---------- problem chart: allowed vs needed paths across releases
 function probSVG(){
-  const p=S.prb, X=i=>44+i*46, Y=v=>226-v*1.45, end=X(6);
+  const p=S.prb, top=58, H=150, base=top+H, X=i=>14+i*52, W=40, h=v=>v/133*H;
   const need=[17,17,17,18,18,18];
-  const allow=[[133,133],[133,133,17],[133,133,17,17],[133,133,17,17,133,133],[133,133,17,17,133,133]][p];
-  const step=(v)=>v.map((y,i)=>`${i?'V':'M'+X(0)} ${Y(y)} H ${X(i+1)}`).join(' ').replace(/^M(\S+) (\S+)/,'M$1 $2');
-  const sp=v=>{ let d=`M${X(0)} ${Y(v[0])}`; v.forEach((y,i)=>{ if(i) d+=` V${Y(y)}`; d+=` H${X(i+1)}`; }); return d; };
-  const n=allow.length, needS=need.slice(0,n);
-  let gap=''; allow.forEach((y,i)=>{ const h=Y(needS[i])-Y(y); if(h>0) gap+=`<rect x="${X(i)}" y="${Y(y)}" width="46" height="${h}" class="pg ${i===n-1?'nw':''}"/>`; });
-  const grid=[0,50,100,133].map(v=>`<line x1="${X(0)}" x2="${end}" y1="${Y(v)}" y2="${Y(v)}" class="pl"/><text x="${X(0)-5}" y="${Y(v)+3}" class="pa" text-anchor="end">${v}</text>`).join('');
-  const rel=need.map((_,i)=>`<text x="${X(i)+23}" y="244" class="pa ${i<n?'':'off'}" text-anchor="middle">v${i+1}</text>`).join('');
-  let mk='';
-  if(p>=1) mk+=`<g class="nw2"><text x="${X(2)+4}" y="${Y(17)-26}" class="pt ok">policy</text><text x="${X(2)+4}" y="${Y(17)-15}" class="pt ok">by hand</text></g>`;
-  if(p>=2) mk+=`<g class="nw2"><circle cx="${X(3)+23}" cy="${Y(18)-3}" r="9" class="px"/><text x="${X(3)+23}" y="${Y(18)}" class="pxt" text-anchor="middle">✕</text><text x="${X(3)+23}" y="${Y(18)-18}" class="pt bad" text-anchor="middle">checkout</text><text x="${X(3)+23}" y="${Y(18)-29}" class="pt bad" text-anchor="middle">DROPPED</text></g>`;
-  if(p>=3) mk+=`<g class="nw2"><text x="${X(4)+46}" y="${Y(133)-6}" class="pt bad" text-anchor="middle">rollback: open again</text></g>`;
-  const dl=p>=4?`<path d="${sp(need)}" class="pdl"/><g class="nw2"><rect x="${X(0)+20}" y="${Y(92)}" width="236" height="40" rx="7" class="pbox"/><text x="${X(3)}" y="${Y(92)+16}" class="pt dl" text-anchor="middle">with a decision layer: allowed = needed</text><text x="${X(3)}" y="${Y(92)+30}" class="pa" text-anchor="middle">re-decided and verified on every release</text></g>`:'';
-  const lbl=p===0?`<text x="${X(1)+46}" y="${Y(75)}" class="pt bad" text-anchor="middle">116 unused paths</text><text x="${X(1)+46}" y="${Y(75)+11}" class="pa" text-anchor="middle">attack surface</text>`:'';
-  return `<svg viewBox="0 0 330 252" class="psv"><g class="${p>=4?'fade':''}">${grid}${gap}${lbl}
-    <path d="${sp(needS)}" class="pn"/><path d="${sp(allow)}" class="pal"/>${mk}</g>${dl}${rel}
-    <text x="${X(0)}" y="12" class="pa"><tspan class="lg al">━ allowed</tspan>  <tspan class="lg nd">━ needed</tspan></text>
-    <text x="${X(0)-30}" y="12" class="pa">paths</text></svg>
+  // per release: state shown for the releases revealed so far
+  const ST=p>=4?need.map(()=>'fit'):[['open','open'],['open','open','lock'],['open','open','lock','down'],['open','open','lock','down','open','open']][p];
+  const col=(k,i)=>{ const x=X(i), n=need[i]; let g='';
+    if(k==='open'){ g=`<rect x="${x}" y="${base-h(133)}" width="${W}" height="${h(133)-h(n)}" rx="4" class="bo"/><text x="${x+W/2}" y="${base-h(133)+16}" class="bn" text-anchor="middle">${133-n}</text><text x="${x+W/2}" y="${base-h(133)+27}" class="bs" text-anchor="middle">unused</text>`; }
+    if(k==='down') g=`<rect x="${x}" y="${base-h(n)-9}" width="${W}" height="9" rx="2" class="bx"/><text x="${x+W/2}" y="${base-h(n)-16}" class="bxx" text-anchor="middle">✕</text>`;
+    if(k==='fit') g=`<rect x="${x}" y="${base-h(133)}" width="${W}" height="${h(133)-h(n)}" rx="4" class="bg"/>`;
+    g+=`<rect x="${x}" y="${base-h(n)}" width="${W}" height="${h(n)}" rx="3" class="bd ${k==='lock'||k==='fit'?'fit':''}"/>`;
+    const lab={open:['OPEN','bad'],lock:['LOCKED','ok'],down:['OUTAGE','bad'],fit:['FIT','ok']}[k];
+    return `<g class="nw2">${g}<text x="${x+W/2}" y="${base+16}" class="bv" text-anchor="middle">v${i+1}</text><text x="${x+W/2}" y="${base+29}" class="bl ${lab[1]}" text-anchor="middle">${lab[0]}</text></g>`; };
+  const ghost=need.map((_,i)=>i<ST.length?'':`<text x="${X(i)+W/2}" y="${base+16}" class="bv off" text-anchor="middle">v${i+1}</text>`).join('');
+  const HL=[['116','unused paths open','bad'],['0','unused · locked by hand','ok'],['✕','v4 adds one dependency: checkout down','bad'],['116','rolled back: open again','bad'],['0','every release: re-decided, verified','ok']][p];
+  return `<svg viewBox="0 0 330 250" class="psv"><text x="14" y="30" class="bh ${HL[2]}">${HL[0]}</text><text x="${HL[0].length>1?62:36}" y="30" class="bht">${HL[1]}</text>
+    <text x="14" y="46" class="bs">each column: one release · <tspan class="lgd">■ needed</tspan> <tspan class="lgu">■ allowed, never used</tspan></text>
+    <line x1="10" x2="322" y1="${base}" y2="${base}" class="pl"/>${ST.map(col).join('')}${ghost}</svg>
     ${p<4?`<button class="pbtn" id="prb">${['Write the policy by hand','Ship release v4','Roll back','Add a decision layer'][p]} ▸</button>`:''}`;
 }
 // ---------- the map: tap any workload
@@ -700,18 +748,20 @@ const BINS=[['java','/opt/java/openjdk/bin/java','AdService','container start',2
   ['tr','/usr/bin/tr','AdService','inside the script',1],['xargs','/usr/bin/xargs','AdService','inside the script',1],['echo','/bin/echo','xargs','inside the script',1]];
 // ---------- the cards
 const CARDS=[
- { // why: kernel enforcement limits what a compromised workload or agent can do
-   pipe:-1, wt:'adservice · if compromised', wm:'blast radius',
-   win(){ return `<div class="pw">${whySVG()}</div>`; },
+ { // why: an attack is a chain of steps; the kernel breaks the chain
+   pipe:-1, wt:'adservice · one exploited bug', wm:'attack chain',
+   win(){ return chainHTML(); },
    bind(){ const re=()=>{ $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); refreshFoot(); };
-     $('wb').querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{ S.wTab=+b.dataset.wt; S.wSeen.add(S.wTab); re(); });
-     const b=$('wenf'); if(b) b.onclick=()=>{ S.wEnf=true; re(); }; },
-   foot:()=>`<span>${S.wEnf?'<b>6</b> of 7 blocked · its real job still works':'<b>6</b> harmful actions possible'}</span><span>${S.wTab?'agent':'app'}</span>`,
-   kick:'Problem · the attack surface', title:'Assume one workload is compromised. What can it do?',
-   body:()=>`<p>eBPF enforces in the kernel, at the moment of the action. <b>An agent can ignore its instructions. It can't ignore the kernel.</b></p>
-     <div class="task ${S.wEnf?'done':''}">Tap <b>Enforce in the kernel</b>.</div>
-     <div class="task ${S.wSeen.has(1)?'done':''}">Switch to <b>AI agent</b>: same rules, same result.</div>`,
-   gate:()=>S.wEnf&&S.wSeen.has(1) },
+     $('wb').querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{ if(S.wRun) return; S.wTab=+b.dataset.wt; S.wSeen.add(S.wTab); re(); });
+     const b=$('wgo'); if(b) b.onclick=()=>{ if(S.wRun) return; S.wPh++; S.wN=0; S.wRun=true; re();
+       const n=CHAIN().length; for(let i=1;i<=n;i++) later(i*380,()=>{ S.wN=i; if(i===n) S.wRun=false; re(); }); }; },
+   foot:()=>`<span>${['the bug is in the code','the attack succeeds','the attack fails at step 2','inside: nothing to gain'][S.wPh]}</span><span>${S.wTab?'AI agent':'app'}</span>`,
+   kick:'Problem · the attack surface', title:'One bug shouldn’t become a breach.',
+   body:()=>`<p>An attack is a chain of steps. <b>Block one in the kernel and the attack fails</b>, even with the bug still in the code. If it gets in anyway, there's nothing to gain.</p>
+     <p><b>An agent can ignore its instructions. It can't ignore the kernel.</b></p>
+     <div class="task ${S.wPh>=3?'done':''}">${S.wPh>=3?'Attack stopped, and nothing to gain inside.':'Tap the button under the chain.'}</div>
+     <div class="task ${S.wSeen.has(1)?'done':''}">Switch to <b>AI agent</b>: same chain, same result.</div>`,
+   gate:()=>S.wPh>=3&&!S.wRun&&S.wSeen.has(1) },
  { // 1. the cluster as it is today, then zoom into one namespace
    pipe:-1, wt:'zsh · prod-cluster', wm:'cluster view',
    win(){ const L=[`<div class="p">kubectl get ns</div>`,`<div class="c">NAME              STATUS</div>`,`<div>boutique          Active   <span class="warn">← the shop</span></div>`,
@@ -755,7 +805,7 @@ const CARDS=[
  { // special 2: learning is not recording
    pipe:-1, wt:'adservice · learning window', wm:'design',
    win(){ return lwHTML(); },
-   bind(){ const b=$('lwrun'); if(b) b.onclick=()=>{ b.disabled=true; LW.forEach((_,i)=>later(150+i*650,()=>{ S.lwN=i+1; $('wb').innerHTML=lwHTML(); CARDS[at].bind(); refreshTxt(); refreshFoot(); })); };
+   bind(){ const b=$('lwrun'); if(b) b.onclick=()=>{ S.lwRun=true; $('wb').innerHTML=lwHTML(); CARDS[at].bind(); LW.forEach((_,i)=>later(150+i*650,()=>{ S.lwN=i+1; if(i===LW.length-1) S.lwRun=false; $('wb').innerHTML=lwHTML(); CARDS[at].bind(); refreshTxt(); refreshFoot(); })); };
      const x=$('wb').querySelector('[data-lwx]'); if(x&&S.lwN>=4) x.onclick=()=>{ S.lwX=true; refreshTxt(); sheet('sh → 203.0.113.7:443','kept out of the baseline',`<div class="verdict"><i class="tag x">KEPT OUT</i> observed, but not trusted</div><div class="ev"><h4>Tetragon · process_exec + connect</h4><pre>binary   /bin/sh\nparent   java\ndest     203.0.113.7:443\nseen     1×</pre></div><div class="ev"><h4>Why it is not learned</h4><pre>process   not the app's binary\ndest      no manifest, config or DNS name\nrole      adservice only serves frontend\n→ flagged for review, never allowed</pre></div>`); }; },
    foot:()=>`<span>events <b>${S.lwN}/${LW.length}</b></span><span>baseline <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='base').length}</b> · ask <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='esc').length}</b> · out <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='out').length}</b></span>`,
    kick:'Solution · learning', title:'Learning is not recording. What was seen still has to make sense.',
@@ -989,13 +1039,18 @@ const CARDS=[
    gate:()=>true },
  { // agents 1: two lanes - the conversation the agent controls see, and the actions the kernel sees
    pipe:-1, wt:'agents · conversation vs action', wm:'why the kernel',
-   win(){ return `<div class="lwrap"><div class="cases">${LCASE.map((c,i)=>`<button data-c="${i}" class="${S.agc===i?'on':''}">${c.n}</button>`).join('')}</div><div class="ev1">${LCASE[S.agc].e}</div>${laneSVG(S.agc)}</div>`; },
-   bind(){ $('wb').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ stop(); S.agc=+b.dataset.c; S.agcSeen.add(S.agc); $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshFoot(); refreshTxt(); });
-     S.agcSeen.add(S.agc); later(400,lanePlay); },
-   foot:()=>`<span>${LCASE[S.agc].src}</span><span>cases <b>${S.agcSeen.size}/3</b></span>`,
+   win(){ const R=[['Model goes off-task','Its reasoning looked harmless; the terminal tool was allowed. Then the tool connected out.','Cohere, Oct 2026',['miss','missed it'],['ok','blocks it']],
+       ['Poisoned model file','The file ran code the moment it was loaded: no prompt, no tool call.','JFrog, Feb 2024',['miss','never saw it'],['ok','blocks it']],
+       ['Data sent through its own model API','The destination is allowed, so only the content is wrong.','the honest limit',['ok','flags it'],['miss','lets it through']]];
+     return `<div class="ag3"><div class="ag3h"><span>case</span><span>agent controls<small>prompt · tools · gateway</small></span><span>kernel<small>eBPF</small></span></div>
+       ${R.map(([n,d,src,A,K],i)=>{ const v=S.agcSeen.has(i); return `<button class="ag3r ${v?'v':''} ${S.agc===i&&v?'sel':''}" data-c="${i}"><span><b>${n}</b><small>${!v?'Tap to see':S.agc===i?d:''}</small>${S.agc===i&&v?`<i>${src}</i>`:''}</span>
+         <em class="${v?A[0]:''}">${v?(A[0]==='ok'?'✓ ':'✕ ')+A[1]:'?'}</em><em class="${v?K[0]:''}">${v?(K[0]==='ok'?'✓ ':'✕ ')+K[1]:'?'}</em></button>`; }).join('')}
+       <div class="ag3s ${S.agcSeen.size>=3?'on':''}">${S.agcSeen.size>=3?'Each layer catches what the other can’t. Together they cover all three.':'Tap each case.'}</div></div>`; },
+   bind(){ $('wb').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ S.agc=+b.dataset.c; S.agcSeen.add(S.agc); $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshFoot(); refreshTxt(); }); },
+   foot:()=>`<span>real cases, simplified</span><span>cases <b>${S.agcSeen.size}/3</b></span>`,
    kick:'Why now · AI agents', title:'Agent controls watch the conversation. The kernel watches the action.',
-   body:()=>`<div class="task ${S.agcSeen.size>=3?'done':''}">Watch all three cases.</div>
-     <p>Agent controls watch the <b>conversation</b>; the harmful <b>action</b> only the kernel saw. Case 3 is the honest limit: misuse of an <b>allowed</b> path needs agent-level controls too.</p>
+   body:()=>`<div class="task ${S.agcSeen.size>=3?'done':''}">Tap all three cases.</div>
+     <p>Agent controls read what the agent <b>says</b>. The kernel sees what it <b>does</b>. In the first two cases the harm was an action, so only the kernel stopped it. The third is content, so the gateway catches it.</p>
      <p><b>The hard part is the right profile for every agent. That is what we build.</b></p>
      <p class="note"><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener" style="color:var(--info)">Cohere report ↗</a> · <a href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/" target="_blank" rel="noopener" style="color:var(--info)">JFrog report ↗</a></p>`,
    gate:()=>S.agcSeen.size>=3 },
@@ -1166,7 +1221,7 @@ function replayOut(){ const I=replayIssues(), pass=!I.length;
 function runReplay(){ S.replay=null; S.rpRun=true; refresh(true);
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1600); if(vn&&vn.isConnected){ vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1) requestAnimationFrame(f); } }; if(!reduce) requestAnimationFrame(f);
   later(1900,()=>{ S.rpRun=false; S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, lwRun:false, wTab:0, wEnf:false, wPh:0, wN:0, wRun:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 let CH=null, CHN=null;
@@ -1208,11 +1263,11 @@ const WHY=[
 ];
 CARDS.forEach((c,i)=>{ c.why=WHY[i]; });
 const GUIDE=[
-  ()=>!S.wEnf?$('wenf'):(!S.wSeen.has(1)?$('wb').querySelector('[data-wt="1"]'):null),
+  ()=>S.wRun?null:S.wPh<3?$('wgo'):(!S.wSeen.has(1)?$('wb').querySelector('[data-wt="1"]'):null),
   ()=>null,
   ()=>S.prb<4?$('prb'):null,
   ()=>{ const k=['tetragon','kubearmor','sc'].find(k=>!S.engSeen.has(k)); return S.engSeen.size>=2?null:$('wb').querySelector(`[data-e="${k}"]`); },
-  ()=>S.lwN<LW.length?$('lwrun'):(!S.lwX?$('wb').querySelector('[data-lwx]'):null),
+  ()=>S.lwRun?null:S.lwN<LW.length?$('lwrun'):(!S.lwX?$('wb').querySelector('[data-lwx]'):null),
   ()=>S.explored.size?null:$('wb').querySelector('.nd[data-w="frontend"]'),
   ()=>null,
   ()=>null,
