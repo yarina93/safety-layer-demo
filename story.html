@@ -376,6 +376,21 @@ svg text{font-family:var(--mono)}
 .psv .wdot{fill:var(--bad)}.psv .wwall{fill:var(--ok);filter:drop-shadow(0 0 4px rgba(61,214,140,.7))}
 .psv .wtg{fill:var(--panel);stroke:var(--line)}.psv .wtg.bad{stroke:rgba(255,92,92,.6)}.psv .wtg.ok{stroke:var(--ok)}.psv .wtg.blk{stroke:var(--line);opacity:.8}
 .psv .wst{font:800 7px var(--mono)}.psv .wst.bad{fill:var(--bad)}.psv .wst.ok{fill:var(--ok)}.psv .wst.blk{fill:var(--ok)}
+.pfh{font:700 9px var(--mono);color:var(--muted);margin-bottom:4px}
+.pf>div{display:grid;grid-template-columns:1fr 1fr 64px;gap:4px;align-items:center;padding:3px 7px;border:1px solid var(--line);border-radius:6px;margin-bottom:3px;font:600 10px var(--mono);color:var(--muted);transition:all .3s}
+.pf>div b{color:var(--text);font-weight:700}.pf>div i{font-style:normal;text-align:right;color:var(--ok);font-size:9px}
+.pf>div.on{border-color:var(--ok);background:rgba(61,214,140,.08)}.pf>div.on span{color:var(--ink)}
+.etab{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:7px 0 5px}.etab button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:6px 2px;font:700 10.5px var(--body)}
+.etab button.seen{color:var(--text)}.etab button.on{border-color:var(--info);color:var(--ink);background:rgba(110,168,254,.12)}
+.ecode small{font:600 8.5px var(--mono);color:var(--ok)}.ecode pre{margin:3px 0 0;font:500 8.5px/1.35 var(--mono);color:var(--text);background:rgba(0,0,0,.25);border-radius:6px;padding:7px;overflow-x:auto;white-space:pre}
+.lw{display:flex;flex-direction:column;gap:5px}
+.lwr{display:grid;grid-template-columns:52px 1fr auto;gap:6px;align-items:center;padding:7px 8px;border:1px solid var(--line);border-radius:7px;font:600 10px var(--mono);opacity:.15;transition:opacity .4s}
+.lwr.on{opacity:1}.lwr i{font-style:normal;color:var(--muted)}.lwr span{color:var(--ink)}.lwr small{display:block;color:var(--muted);font-size:8.5px;font-weight:500}
+.lwr em{font-style:normal;font-size:8.5px;font-weight:800;padding:2px 5px;border-radius:4px}
+.lwr.base em{color:var(--ok);background:rgba(61,214,140,.12)}.lwr.esc em{color:var(--warn);background:rgba(245,185,71,.12)}.lwr.out em{color:var(--bad);background:rgba(255,92,92,.14)}
+.lwr.on.out{border-color:rgba(255,92,92,.6);cursor:pointer}.lwr.on.esc{border-color:rgba(245,185,71,.4)}
+.erule{font:600 10px var(--mono);color:var(--ink);padding:4px 8px;margin-top:3px;border-left:2px solid var(--ok);background:rgba(61,214,140,.06);border-radius:0 5px 5px 0}
+.eyaml{margin-top:6px;background:transparent;border:1px solid var(--line);color:var(--info);border-radius:6px;padding:5px 9px;font:700 10px var(--mono)}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -474,7 +489,7 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 function blast(w=S.sel){ const n=reachOf(w), b=$('blast'), was=$('bN').textContent+$('bW').textContent; $('bW').textContent=SHORT[w]||w; $('bN').textContent=n;
   b.classList.toggle('zero',S.lvl>=3); if(n+(SHORT[w]||w)!==was){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }
@@ -497,6 +512,64 @@ function whySVG(){
     <svg viewBox="0 0 330 256" class="psv">${rows}${wall}${src}</svg>
     ${e?'':'<button class="pbtn" id="wenf">Enforce in the kernel ▸</button>'}`;
 }
+
+// ---------- what's special: one profile, compiled per engine
+const PROF=[['Network in','frontend → :9555',['cilium']],['Network out','DNS only',['cilium']],['Network per process','only java connects',['cilium','tetragon']],['Programs','8 allowed',['tetragon','kubearmor']],['Files','writes /tmp only',['kubearmor','sc']],['Privileges','drop all 14',['sc']]];
+const ENG={cilium:['Cilium','CiliumNetworkPolicy',`kind: CiliumNetworkPolicy
+spec:
+  endpointSelector: {matchLabels: {app: adservice}}
+  ingress:
+  - fromEndpoints: [{matchLabels: {app: frontend}}]
+    toPorts: [{ports: [{port: "9555"}]}]
+  egress:
+  - toEndpoints: [{matchLabels: {k8s-app: kube-dns}}]
+    toPorts: [{ports: [{port: "53", protocol: UDP}]}]`],
+ tetragon:['Tetragon','TracingPolicy',`kind: TracingPolicy
+spec:
+  podSelector: {matchLabels: {app: adservice}}
+  kprobes:
+  - call: security_bprm_check      # programs
+    selectors:
+    - matchArgs: [{index: 0, operator: NotPostfix,
+        values: [java, sed, uname, tr, …]}]
+      matchActions: [{action: Override, argError: -1}]
+  - call: security_socket_connect  # network per process
+    selectors:
+    - matchBinaries: [{operator: NotIn,
+        values: [/usr/bin/java]}]
+      matchActions: [{action: Sigkill}]`],
+ kubearmor:['KubeArmor','KubeArmorPolicy',`kind: KubeArmorPolicy
+spec:
+  selector: {matchLabels: {app: adservice}}
+  process:
+    matchPaths: [{path: /usr/bin/java}, …]
+  file:
+    matchDirectories:
+    - {dir: /tmp/, recursive: true}
+  action: Allow`],
+ sc:['securityContext','Pod spec',`securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: [ALL]
+  seccompProfile: {type: RuntimeDefault}`]};
+const ENGR={cilium:['allow frontend → :9555','allow → kube-dns :53/UDP','drop everything else'],
+ tetragon:['exec: not one of the 8 → denied','connect: not java → killed','same pod selector as Cilium'],
+ kubearmor:['process: allow-list of 8','file: write /tmp only','default: block'],
+ sc:['no privilege escalation','read-only root filesystem','drop ALL capabilities']};
+function engHTML(){ const e=S.eng;
+  return `<div class="pfh">adservice · one profile</div><div class="pf">${PROF.map(([n,v,es])=>`<div class="${es.includes(e)?'on':''}"><span>${n}</span><b>${v}</b><i>${es.includes(e)?'→ '+(e==='sc'?'secCtx':ENG[e][0]):''}</i></div>`).join('')}</div>
+    <div class="etab">${Object.keys(ENG).map(k=>`<button data-e="${k}" class="${k===e?'on':''} ${S.engSeen.has(k)?'seen':''}">${ENG[k][0]}</button>`).join('')}</div>
+    <div class="ecode"><small>${ENG[e][1]} · generated</small>${ENGR[e].map(r=>`<div class="erule">${r}</div>`).join('')}<button class="eyaml" id="eyaml">View the YAML</button></div>`; }
+// ---------- what's special: the learning window doesn't just record
+const LW=[['exec','java','AdService entrypoint','base','in the image, seen every run'],
+ ['connect','java → kube-dns:53','DNS','base','in the manifest and in traffic'],
+ ['exec','sed, uname, tr…','startup script','esc','not declared in the image: a person approves once'],
+ ['connect','sh → 203.0.113.7:443','unknown host','out','unexpected process, unknown destination, no manifest reference'],
+ ['exec','java (after restart)','same binary','base','matches the baseline']];
+function lwHTML(){ const n=S.lwN;
+  return `<div class="lw">${LW.map(([v,a,d,k],i)=>`<div class="lwr ${i<n?'on':''} ${k}" ${k==='out'?'data-lwx':''}><i>${v}</i><span>${a}<small>${d}</small></span><em>${k==='base'?'BASELINE':k==='esc'?'ASK A PERSON':'KEPT OUT'}</em></div>`).join('')}</div>
+    ${n<LW.length?'<button class="pbtn" id="lwrun">Run the learning window ▸</button>':''}`; }
 // ---------- problem chart: allowed vs needed paths across releases
 function probSVG(){
   const p=S.prb, X=i=>44+i*46, Y=v=>226-v*1.45, end=X(6);
@@ -621,6 +694,29 @@ const CARDS=[
      `<p><b>The missing piece is the decision, not the engine.</b> A decision layer re-derives what each workload needs on every release, verifies it on real traffic, and only then enforces. And this is one layer: programs, files and privileges have the same problem.</p>`];
      return t[Math.min(S.prb,4)]+(S.prb<4?`<div class="task">Tap <b>${['Write the policy by hand','Ship release v4','Roll back','Add a decision layer'][S.prb]}</b>.</div>`:'<div class="task done">Done.</div>'); },
    gate:()=>S.prb>=4 },
+ { // special 1: one profile, every engine
+   pipe:-1, wt:'adservice · profile → policies', wm:'engine-agnostic',
+   win(){ return engHTML(); },
+   bind(){ $('wb').querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ S.eng=b.dataset.e; S.engSeen.add(S.eng); $('wb').innerHTML=engHTML(); CARDS[at].bind(); refreshTxt(); refreshFoot(); });
+     $('eyaml').onclick=()=>sheet(`adservice · ${ENG[S.eng][1]}`,'generated from the profile',`<div class="ev"><h4>${ENG[S.eng][0]}</h4><pre>${ENG[S.eng][2]}</pre></div>`); },
+   foot:()=>`<span>${['kubearmor','sc'].includes(S.eng)?'design':'lab'} · ${ENG[S.eng][0]}</span><span>viewed <b>${S.engSeen.size}/4</b></span>`,
+   kick:'What’s special', title:'Decide once. Enforce with the engines you already run.',
+   body:()=>`<p>The product's output is a <b>profile</b>: what this workload needs, layer by layer. Each engine gets it in its own native format. Nothing new to install in the data path.</p>
+     <p>One decision can feed two engines. “Only java connects” becomes a Cilium rule for <i>where</i> and a Tetragon rule for <i>which process</i>. Today those are two teams writing two policies that drift apart.</p>
+     <div class="task ${S.engSeen.size>=3?'done':''}">Tap at least three engines and see which profile lines each one enforces.</div>`,
+   gate:()=>S.engSeen.size>=3 },
+ { // special 2: learning is not recording
+   pipe:-1, wt:'adservice · learning window', wm:'design',
+   win(){ return lwHTML(); },
+   bind(){ const b=$('lwrun'); if(b) b.onclick=()=>{ b.disabled=true; LW.forEach((_,i)=>later(150+i*650,()=>{ S.lwN=i+1; $('wb').innerHTML=lwHTML(); CARDS[at].bind(); refreshTxt(); refreshFoot(); })); };
+     const x=$('wb').querySelector('[data-lwx]'); if(x&&S.lwN>=4) x.onclick=()=>{ S.lwX=true; refreshTxt(); sheet('sh → 203.0.113.7:443','kept out of the baseline',`<div class="verdict"><i class="tag x">KEPT OUT</i> observed, but not trusted</div><div class="ev"><h4>Tetragon · process_exec + connect</h4><pre>binary   /bin/sh\nparent   java\ndest     203.0.113.7:443\nseen     1×</pre></div><div class="ev"><h4>Why it is not learned</h4><pre>process   not the app's binary\ndest      no manifest, config or DNS name\nrole      adservice only serves frontend\n→ flagged for review, never allowed</pre></div>`); }; },
+   foot:()=>`<span>events <b>${S.lwN}/${LW.length}</b></span><span>baseline <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='base').length}</b> · ask <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='esc').length}</b> · out <b>${LW.slice(0,S.lwN).filter(r=>r[3]==='out').length}</b></span>`,
+   kick:'What’s special', title:'Learning is not recording. What was seen still has to make sense.',
+   body:()=>`<p>Tools that “learn” a baseline copy whatever happened. If the workload was already misbehaving, the bad behavior becomes the policy.</p>
+     <p>Here every observation is checked against the manifest, the image and the workload's role. It becomes <b>baseline</b>, goes to <b>a person</b>, or is <b>kept out</b>.</p>
+     <div class="task ${S.lwN>=LW.length?'done':''}">Tap <b>Run the learning window</b>.</div>
+     <div class="task ${S.lwX?'done':''}">Tap the event that was <b>kept out</b>.</div>`,
+   gate:()=>S.lwN>=LW.length&&S.lwX },
  { // 2. explore the blast radius of any workload
    pipe:-1, wt:'boutique · reachability', wm:'default-allow', map:true,
    win(){ return mapSVG(); },
@@ -1003,7 +1099,7 @@ function runReplay(){ const b=$('run'); if(b){ b.disabled=true; b.textContent='R
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const vb=$('vb'); if(vb) vb.style.width='100%'; }));
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1400); if(vn.isConnected) vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1&&vn.isConnected) requestAnimationFrame(f); }; if(!reduce) requestAnimationFrame(f);
   later(1600,()=>{ S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
@@ -1015,6 +1111,8 @@ const WHY=[
   'See what kernel enforcement changes when a workload or agent is compromised.',
   'See the starting point: what is enforced in the cluster today.',
   'See why the attack surface stays open, even with the engines installed.',
+  'See what the product outputs: one profile, written for each engine.',
+  'See how the product learns without trusting everything it sees.',
   'Measure the gap for one workload: what it can reach vs what it needs.',
   'Understand why teams don\u2019t close the gap by hand.',
   'Build each workload\u2019s profile from what the cluster already records.',
@@ -1040,6 +1138,8 @@ const GUIDE=[
   ()=>!S.wEnf?$('wenf'):(!S.wSeen.has(1)?$('wb').querySelector('[data-wt="1"]'):null),
   ()=>null,
   ()=>S.prb<4?$('prb'):null,
+  ()=>{ const k=['tetragon','kubearmor','sc'].find(k=>!S.engSeen.has(k)); return S.engSeen.size>=3?null:$('wb').querySelector(`[data-e="${k}"]`); },
+  ()=>S.lwN<LW.length?$('lwrun'):(!S.lwX?$('wb').querySelector('[data-lwx]'):null),
   ()=>S.explored.size?null:$('wb').querySelector('.nd[data-w="frontend"]'),
   ()=>null,
   ()=>null,
@@ -1086,7 +1186,7 @@ function nav(){ const c=CARDS[at], ok=c.gate(), last=at===CARDS.length-1; $('nex
   $('back').disabled=at===0; $('hint').textContent=ok||last?`${at+1} / ${CARDS.length}`:'your turn ↑'; }
 function show(i){
   if(i<0||i>=CARDS.length) return; stop(); closeSheet(); at=i; const c=CARDS[i];
-  if(i>=4&&i<16) S.sel='adservice';   // the story follows adservice after the overview
+  if(i>=6&&i<18) S.sel='adservice';   // the story follows adservice after the overview
   [...$('bars').children].forEach((s,k)=>s.className=k<i?'pd':k===i?'pn':'');
   const p=$('pipe'); p.classList.toggle('off',c.pipe<0); [...p.children].forEach((s,k)=>s.className=k<c.pipe?'d':k===c.pipe?'n':'');
   $('wt').textContent=c.wt; $('wm').textContent=c.wm;
