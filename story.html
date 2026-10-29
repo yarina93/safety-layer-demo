@@ -519,6 +519,11 @@ svg text{font-family:var(--mono)}
 .brp b{display:block;font:800 13px var(--body);color:var(--bad)}.brp small{font:500 11px/1.3 var(--body);color:var(--text)}.brr i{font-style:normal;color:var(--dim);font-weight:800}
 .bra{font:600 12px/1.4 var(--body);color:var(--ok)}.brr.on{border-color:rgba(61,214,140,.45)}.brr.on i{color:var(--ok)}
 .bars .ch span{visibility:hidden}.bars .ch.on span{visibility:visible;overflow:visible;font-size:11px !important;color:var(--ink)}
+.msv .mnode circle{fill:var(--panel);stroke:var(--dim);stroke-width:1.5}.msv .mnode.att circle{fill:rgba(255,92,92,.3);stroke:var(--bad)}.msv .mnode.fe circle{fill:rgba(110,168,254,.25);stroke:var(--info)}
+.msv .mnode.core circle{fill:rgba(245,185,71,.3);stroke:var(--warn);stroke-width:2}.msv .mnode.pod circle{stroke:var(--text)}.msv .mnode.tg circle{stroke:var(--text)}.msv .mnode.ok circle{fill:rgba(61,214,140,.2);stroke:var(--ok)}
+.msv .ml{font:700 10.5px var(--mono) !important;fill:var(--ink)}.msv .mpl{font-size:9px !important}.msv .mn{font-size:10px !important}
+.msv .mx circle{r:7}
+.wtabs2{margin-bottom:2px}.mcap{min-height:0;padding:6px 9px}.mcap b{font-size:12px}.mcap small{font-size:11.5px}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -715,7 +720,7 @@ const CMPR=[['Prevents, not only alerts',['n','y','y','y']],['Network and inside
 // nodes: [x, y, label, sub]; steps: [from, to, title, what happens, layer, rule, engine]
 const ATK={
  app:{intro:'adservice is a Java service. Its logging library has a remote-code bug (Log4Shell-style).',
-  nodes:{fe:[42,150,'frontend','caller'],att:[42,40,'attacker','internet'],java:[150,108,'java','adservice'],curl:[214,150,'curl',''],root:[214,78,'root',''],api:[292,40,'K8s API',''],pods:[292,170,'redis-cart','other pods']},
+  nodes:{fe:[36,128,'frontend','fe'],att:[36,30,'attacker','att'],java:[140,80,'java','core'],curl:[210,128,'curl','pod'],root:[210,40,'root','pod'],api:[296,30,'K8s API','tg'],pods:[296,128,'redis-cart','tg']},
   steps:[['fe','java','Request carries a JNDI lookup string','frontend → adservice:9555, a path it really needs','start','needed path: stays open',''],
    ['java','att','Log4j calls out to ldap://attacker:1389','to fetch the attacker’s Java class','net','egress: only kube-dns:53 → DROP','Cilium'],
    ['java','curl','The loaded class starts curl','to pull more tools','pod','exec allow-list: curl not on it → DENY','Tetragon'],
@@ -723,7 +728,7 @@ const ATK={
    ['java','pods','It connects to redis-cart:6379','to read every customer’s cart','net','redis-cart not in adservice egress → DROP','Cilium'],
    ['java','root','It tries to become root','setuid, new capabilities','pod','drop ALL caps · no privilege escalation','securityContext']]},
  agent:{intro:'support-agent reads tickets and has a shell tool. A ticket hides instructions for it (prompt injection).',
-  nodes:{tk:[42,150,'ticket','MCP tool'],att:[42,40,'paste site','internet'],py:[150,108,'python','support-agent'],curl:[214,150,'curl',''],llm:[292,108,'LLM API','allowed'],md:[292,40,'metadata','169.254.169.254'],pods:[292,176,'redis-cart','other pods']},
+  nodes:{tk:[36,128,'ticket','fe'],att:[36,30,'paste site','att'],py:[140,80,'python','core'],curl:[210,128,'curl','pod'],llm:[296,80,'LLM API','ok'],md:[296,30,'metadata','tg'],pods:[296,128,'redis-cart','tg']},
   steps:[['tk','py','A ticket hides instructions','reading tickets is its job','start','needed path: stays open',''],
    ['py','llm','The model decides to follow them','the model API is allowed','model','the kernel can’t judge content: the gateway’s job',''],
    ['py','curl','Its shell tool runs curl … | sh','to download and run a script','pod','exec allow-list: python only → DENY','Tetragon'],
@@ -736,14 +741,14 @@ function atkState(i){ const A=ATK[S.wTab?'agent':'app'], st=A.steps[i], ph=S.wPh
   if(ph===1) return 'open'; if(ph===2) return i===fb?'block':'never'; return 'block'; }
 function chainHTML(){ const A=ATK[S.wTab?'agent':'app'], N=A.nodes, ph=S.wPh, ag=S.wTab===1;
   const arr=(i)=>{ const [f,t]=A.steps[i], st=atkState(i); if(st==='idle'||st==='never') return '';
-    const [x1,y1]=N[f],[x2,y2]=N[t], dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L, sx=x1+ux*16, sy=y1+uy*16, ex=x2-ux*18, ey=y2-uy*18;
+    const [x1,y1]=N[f],[x2,y2]=N[t], dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L, sx=x1+ux*12, sy=y1+uy*12, ex=x2-ux*14, ey=y2-uy*14;
     const cls=st==='open'?'bad':st==='block'?'blk':st==='model'?'mod':'run';
     if(st==='block'){ const mx=sx+(ex-sx)*.55, my=sy+(ey-sy)*.55; return `<line x1="${sx}" y1="${sy}" x2="${mx}" y2="${my}" class="ma ${cls}"/><g class="mx"><circle cx="${mx}" cy="${my}" r="8"/><path d="M${mx-4} ${my-4}L${mx+4} ${my+4}M${mx+4} ${my-4}L${mx-4} ${my+4}"/></g><text x="${mx}" y="${my-11}" class="mn" text-anchor="middle">${i+1}</text>`; }
     const mx=(sx+ex)/2, my=(sy+ey)/2;
     return `<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" class="ma ${cls}" marker-end="url(#ah-${cls})"/><text x="${mx}" y="${my-6}" class="mn" text-anchor="middle">${i+1}</text>`; };
-  const nodes=Object.entries(N).map(([k,[x,y,l,sub]])=>`<g class="mnode ${k==='java'||k==='py'?'core':''}"><circle cx="${x}" cy="${y}" r="13"/><text x="${x}" y="${y+25}" text-anchor="middle" class="ml">${l}</text>${sub?`<text x="${x}" y="${y+35}" text-anchor="middle" class="ms">${sub}</text>`:''}</g>`).join('');
+  const nodes=Object.entries(N).map(([k,[x,y,l,t]])=>`<g class="mnode ${t}"><circle cx="${x}" cy="${y}" r="9"/><text x="${x}" y="${y+21}" text-anchor="middle" class="ml">${l}</text></g>`).join('');
   const mk=['bad','blk','mod','run'].map(c=>`<marker id="ah-${c}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" class="mh ${c}"/></marker>`).join('');
-  const wall=ph>=2?`<rect x="104" y="58" width="134" height="140" rx="12" class="mpod on"/>`:`<rect x="104" y="58" width="134" height="140" rx="12" class="mpod"/>`;
+  const wall=`<rect x="104" y="14" width="140" height="140" rx="12" class="mpod ${ph>=2?'on':''}"/>`;
   // caption: the step being played or inspected, otherwise the summary
   const sel=S.wRun?S.wN-1:S.wSel; let cap='';
   if(sel!=null&&sel>=0){ const st=A.steps[sel], k=atkState(sel), lab={run:['RUNS','run'],model:['HAPPENS','mod'],open:['SUCCEEDS','bad'],block:['BLOCKED','ok'],never:['NEVER RUNS','off'],idle:['','off']}[k];
@@ -752,7 +757,7 @@ function chainHTML(){ const A=ATK[S.wTab?'agent':'app'], N=A.nodes, ph=S.wPh, ag
   const chips=ph>0&&!S.wRun?`<div class="mchips">${A.steps.map((_,i)=>{ const k=atkState(i); return `<button data-ws="${i}" class="${k} ${S.wSel===i?'sel':''}">${i+1}</button>`; }).join('')}</div>`:'';
   const btn=S.wRun?'':ph===0?'Run the attack ▸':ph===1?'Enforce in the kernel, run again ▸':ph===2?'What if it got in anyway? ▸':'';
   return `<div class="wtabs2"><button data-wt="0" class="${!ag?'on':''}">Exploited app</button><button data-wt="1" class="${ag?'on':''}">AI agent</button></div>
-    <svg viewBox="0 0 330 212" class="msv"><defs>${mk}</defs>${wall}<text x="112" y="72" class="mpl">${ag?'support-agent pod':'adservice pod'}</text>${A.steps.map((_,i)=>arr(i)).join('')}${nodes}</svg>
+    <svg viewBox="0 0 330 162" class="msv"><defs>${mk}</defs>${wall}<text x="112" y="28" class="mpl">${ag?'support-agent pod':'adservice pod'}</text>${A.steps.map((_,i)=>arr(i)).join('')}${nodes}</svg>
     ${chips}${cap}${btn?`<button class="pbtn" id="wgo">${btn}</button>`:''}`; }
 // ---------- problem chart: allowed vs needed paths across releases
 function probSVG(){
@@ -840,11 +845,11 @@ const CARDS=[
  { // why: an attack is a chain of steps; the kernel breaks the chain
    pipe:-1, wt:'attack chain', wm:'one bug · one agent',
    win(){ return chainHTML(); },
-   bind(){ const re=()=>{ $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); refreshFoot(); };
+   bind(){ const re=()=>{ const y=$('wb').scrollTop; $('wb').innerHTML=CARDS[at].win(); $('wb').scrollTop=y; CARDS[at].bind(); refreshTxt(); refreshFoot(); };
      $('wb').querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{ if(S.wRun) return; S.wTab=+b.dataset.wt; S.wSeen.add(S.wTab); S.wSel=null; re(); });
      $('wb').querySelectorAll('[data-ws]').forEach(b=>b.onclick=()=>{ S.wSel=+b.dataset.ws; re(); });
      const b=$('wgo'); if(b) b.onclick=()=>{ if(S.wRun) return; S.wPh++; S.wN=0; S.wSel=null; S.wRun=true; re();
-       const n=6; for(let i=1;i<=n;i++) later(i*1100,()=>{ S.wN=i; re(); }); later(n*1100+900,()=>{ S.wRun=false; re(); }); }; },
+       const A=ATK[S.wTab?'agent':'app'], fb=A.steps.findIndex(x=>x[4]==='net'||x[4]==='pod'); const n=S.wPh===2?fb+1:6; for(let i=1;i<=n;i++) later(i*1000,()=>{ S.wN=i; re(); }); later(n*1000+700,()=>{ S.wN=6; S.wRun=false; re(); }); }; },
    foot:()=>`<span>${['ready','the attack succeeds','the attack is stopped','inside: nothing to gain'][S.wPh]}</span><span>${S.wTab?'AI agent':'app'}</span>`,
    kick:'Why it matters · the attack surface', title:'One bug shouldn’t become a breach.',
    body:()=>`<p>An attack is a chain of steps. <b>Block one in the kernel and it fails</b>, with the bug still in the code. Each block is a specific rule; tap a step number to see it.</p>
