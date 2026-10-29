@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>eBPF Safety Layer · Guided Tour</title>
 <meta property="og:type" content="website">
-<meta property="og:title" content="eBPF Safety Layer · Zero Trust for Kubernetes workloads">
+<meta property="og:title" content="eBPF Safety Layer · The decision layer for runtime enforcement">
 <meta property="og:description" content="A guided tour: from default-allow to least privilege with eBPF, network and runtime, without breaking production. Lab data.">
 <meta property="og:url" content="https://yarina93.github.io/safety-layer-demo/">
 <meta name="twitter:card" content="summary">
@@ -420,6 +420,12 @@ svg text{font-family:var(--mono)}
 .rpl.cl em{color:var(--info)}.rpl.warn em{color:var(--warn)}
 .rpn{margin-top:6px;color:var(--muted);font-size:9.5px;text-align:center}.rpn b{color:var(--ink)}
 .cover .cmap{flex-shrink:0}
+.cm{font:600 9.5px var(--mono)}.cmr{display:grid;grid-template-columns:1.5fr repeat(4,1fr);gap:3px;align-items:center;margin-bottom:3px}
+.cmr>span{color:var(--text);font-size:9px;line-height:1.2}.cmh b{font-size:8.5px;color:var(--muted);text-align:center;padding:6px 2px;border:1px solid var(--line);border-radius:6px;cursor:pointer;line-height:1.15}
+.cmh b.us{color:var(--ok);border-color:var(--ok)}.cmh b.sel{background:rgba(110,168,254,.15);color:var(--ink);border-color:var(--info)}
+.cmr i{font-style:normal;text-align:center;padding:5px 0;border-radius:5px;font-weight:800;background:rgba(255,255,255,.02)}
+.cmr i.y{color:var(--ok)}.cmr i.pa{color:var(--warn)}.cmr i.n{color:var(--dim)}.cmr i.us{background:rgba(61,214,140,.1)}
+.cmd{margin-top:8px;padding:8px;border-radius:7px;background:rgba(110,168,254,.06);border:1px solid var(--line);color:var(--text);font:500 10.5px/1.45 var(--body);min-height:44px}
 /* why-this-step line */
 .whyline{display:flex;gap:8px;align-items:baseline;margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
 .whyline b{flex:none;font:800 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--info)}
@@ -476,8 +482,8 @@ svg text{font-family:var(--mono)}
 <div class="phone" id="phone">
   <section class="cover" id="cover" aria-label="Start">
     <div class="ck"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 9v10c0 9.5-6.4 15.8-15 18-8.6-2.2-15-8.5-15-18V9z" fill="#2B3A55"/><path d="M12 15h16M12 20.5h16M12 26h10" stroke="#E6EAF2" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="26" r="3.2" fill="#3DD68C"/></svg>Decision &amp; Safety Layer · guided tour</div>
-    <h1>Zero Trust for every Kubernetes workload, without breaking production</h1>
-    <p class="lead">Every workload, and every AI agent, is allowed far more than it uses: on the network and inside the pod. The product decides what each one needs, from evidence, and enforces it in the kernel with eBPF engines such as Cilium and Tetragon.</p>
+    <h1>The decision layer for runtime enforcement</h1>
+    <p class="lead">Least privilege for every Kubernetes workload and AI agent, without breaking production. Today each one is allowed far more than it uses: on the network and inside the pod. The product decides what each one needs, from evidence, and enforces it in the kernel with eBPF engines such as Cilium and Tetragon.</p>
     <div class="cmap" id="cmap"><div class="pin" id="pin"></div></div>
     <div class="cap"><span id="cL">boutique · default-allow today</span><span id="cR">open <b id="cN">0</b>/7 layers</span></div>
     <p class="why">eBPF engines like Cilium and Tetragon can enforce. Deciding what to allow without breaking production is the hard part. That is what this product does.</p>
@@ -518,10 +524,10 @@ const SRC=[['Network','Hubble flow logs',`${FLOWS.toLocaleString('en-US')} flows
   ['Images','registry · scanners','packages, entrypoints','design'],['Metrics','Prometheus','load per workload','design']];
 const HAND=new Set(needsOut('frontend').filter(n=>n!=='checkoutservice').concat(['dns']));
 // ---------- state the viewer changes
-const S={rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
+const S={cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false};
 function reachOf(w,lvl=S.lvl){ if(lvl>=3) return needsOut(w).length; return 11+(lvl<1?1:0)+(lvl<2?1:0); }
 const ASL=['K8s API','Internet','Pods','Programs','Proc→net','Files','Privileges'];
-function meter(){ const c=CARDS[at], i=c._i; let n=0;
+function meter(){ const c=CARDS[at], i=c.cmp?-1:c._i; let n=0;
   if(i===11) n=S.lvl>=3?3:0; else if(i>11&&i<13) n=3; else if(i===13) n=S.binOk?5:3; else if(i>13&&i<23) n=5; else if(i>=23) n=7;
   const m=$('asm'); const h=`<small>attack surface</small><div>${ASL.map((l,k)=>`<i class="${k<n?'c':''}" title="${l}"></i>`).join('')}</div><b class="${n===7?'ok':''}">${7-n}/7 open</b>`;
   if(m.dataset.n!==String(n)){ m.innerHTML=h; m.dataset.n=n; } }
@@ -604,6 +610,13 @@ const LW=[['exec','java','AdService entrypoint','base','in the image, seen every
 function lwHTML(){ const n=S.lwN;
   return `<div class="lw">${LW.map(([v,a,d,k],i)=>`<div class="lwr ${i<n?'on':''} ${k}" ${k==='out'?'data-lwx':''}><i>${v}</i><span>${a}<small>${d}</small></span><em>${k==='base'?'BASELINE':k==='esc'?'ASK A PERSON':'KEPT OUT'}</em></div>`).join('')}</div>
     ${n<LW.length?'<button class="pbtn" id="lwrun">Run the learning window ▸</button>':''}`; }
+
+// ---------- compare: categories, not products
+const CMPC=[['Detect','Runtime detection tools: watch events and alert. Nothing is prevented, and someone still has to write the response.'],
+ ['Learn & lock','Learning modes: record a baseline, then block anything new. Whatever happened during learning, good or bad, becomes the policy.'],
+ ['Traffic → policy','Policy generators: turn observed network flows into network policy. Network only, and only as good as the traffic they saw.'],
+ ['This','Decides each layer from evidence (manifests, image, traffic, agent config), tests it on recorded traffic, enforces in stages with rollback, on any engine.']];
+const CMPR=[['Prevents, not only alerts',['n','y','y','y']],['Network and inside the pod',['p','y','n','y']],['Checks what it learns',['n','n','n','y']],['Tested before enforcing',['n','n','p','y']],['Staged, with rollback',['n','p','n','y']],['Any engine',['n','n','n','y']],['AI agents',['p','n','n','y']]];
 // ---------- problem chart: allowed vs needed paths across releases
 function probSVG(){
   const p=S.prb, X=i=>44+i*46, Y=v=>226-v*1.45, end=X(6);
@@ -1023,6 +1036,18 @@ const CARDS=[
      <button class="btn" id="again">Start over</button>`,
    bindTxt(){ $('again').onclick=reset; },
    gate:()=>true },
+ { // compare: typical approaches vs this product
+   pipe:-1, cmp:true, wt:'typical approaches', wm:'category view',
+   win(){ const C=CMPC, R=CMPR;
+     return `<div class="cm"><div class="cmr cmh"><span></span>${C.map((c,j)=>`<b class="${j===3?'us':''} ${S.cmpSel===j?'sel':''}" data-cm="${j}">${c[0]}</b>`).join('')}</div>
+       ${R.map(([n,v])=>`<div class="cmr"><span>${n}</span>${v.map((x,j)=>`<i class="${x==='y'?'y':x==='p'?'pa':'n'} ${j===3?'us':''}">${x==='y'?'✓':x==='p'?'~':'–'}</i>`).join('')}</div>`).join('')}
+       <div class="cmd">${S.cmpSel==null?'Tap a column.':C[S.cmpSel][1]}</div></div>`; },
+   bind(){ $('wb').querySelectorAll('[data-cm]').forEach(b=>b.onclick=()=>{ S.cmpSel=+b.dataset.cm; S.cmpSeen.add(S.cmpSel); $('wb').innerHTML=CARDS[at].win(); CARDS[at].bind(); refreshTxt(); }); },
+   foot:()=>`<span>✓ yes · ~ partly · – no</span><span>categories, not products</span>`,
+   kick:'Solution · why not existing tools', title:'Others detect, or lock down what they saw. This decides.',
+   body:()=>`<p>Detection tools alert after the fact. Learning tools lock in whatever happened. Policy generators cover the network only. <b>None of them decides from evidence, tests on real traffic, and enforces every layer, on any engine.</b></p>
+     <div class="task ${S.cmpSeen.size?'done':''}">Tap a column to see the approach.</div>`,
+   gate:()=>S.cmpSeen.size>0 }
 ];
 // ---------- agent scene: actions travel from the agent pod; before enforcement they all arrive, after only the profile's do
 const AGT=[ // [label, target x,y, allowed?, stopped by]
@@ -1138,7 +1163,7 @@ function replayOut(){ const I=replayIssues(), pass=!I.length;
 function runReplay(){ S.replay=null; S.rpRun=true; refresh(true);
   const vn=$('vn'), t0=performance.now(); const f=n=>{ const k=Math.min(1,(n-t0)/1600); if(vn&&vn.isConnected){ vn.textContent=Math.round(FLOWS*(1-Math.pow(1-k,3))).toLocaleString('en-US'); if(k<1) requestAnimationFrame(f); } }; if(!reduce) requestAnimationFrame(f);
   later(1900,()=>{ S.rpRun=false; S.replay=replayIssues().length?'fail':'pass'; refresh(true); }); }
-function reset(){ Object.assign(S,{rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
+function reset(){ Object.assign(S,{cmpSel:null, cmpSeen:new Set(), rpMiss:false, rpRun:false, eng:'cilium', engSeen:new Set(['cilium']), lwN:0, lwX:false, wTab:0, wEnf:false, wSeen:new Set([0]), prb:0, agc:0, agcSeen:new Set(), agt:false, clsEv:false, baT:new Set(), rba:'before', rbaT:new Set(), ba:'after', baSeen:false, rb:0, fil:false, prv:false, npp:false, gSrc:'/src/server', gDst:'checkout', gTry:new Set(), binChk:false, srcN:0, mapEv:false, cls:0, sel:'adservice', ran:new Set(), explored:new Set(), hand:new Set(), handApplied:false, src:new Set(), dec:{}, evOpened:false, replay:null, lvl:0, bin:{}, binChecked:false, binOk:false}); show(0); cover(true); }
 // ---------- rendering and navigation
 let at=0;
 $('bars').innerHTML=CARDS.map(()=>'<i></i>').join('');
@@ -1172,6 +1197,7 @@ const WHY=[
   'Build the agent’s profile from its config, then confirm it with behavior.',
   'Limit what an agent can do, whatever the model decides.',
   'The whole result in numbers.',
+  'See where the product sits next to the tools teams use today.',
 ];
 CARDS.forEach((c,i)=>{ c.why=WHY[i]; });
 const GUIDE=[
@@ -1199,9 +1225,11 @@ const GUIDE=[
   ()=>null,
   ()=>$('agt'),
   ()=>$('again'),
+  ()=>S.cmpSeen.size?null:$('wb').querySelector('[data-cm="3"]'),
 ];
 // the tour keeps the cards that carry the story; the rest stay in the source
 { const SK=new Set([1, 6, 7, 9, 12, 14, 15, 16, 17, 19]); const keep=(_,i)=>!SK.has(i); const C=CARDS.filter(keep), Wh=WHY.filter(keep), G=GUIDE.filter(keep); CARDS.length=0; CARDS.push(...C); WHY.length=0; WHY.push(...Wh); GUIDE.length=0; GUIDE.push(...G); }
+{ const from=CARDS.findIndex(c=>c.cmp), to=CARDS.findIndex(c=>c.wt==='adservice · learning window')+1; [CARDS,WHY,GUIDE].forEach(A=>{ const [x]=A.splice(from,1); A.splice(to,0,x); }); }
 let gEl=null;
 function guide(){
   const c=CARDS[at]; let el=c.gate()?(at<CARDS.length-1?$('next'):null):(GUIDE[at]&&GUIDE[at]());
