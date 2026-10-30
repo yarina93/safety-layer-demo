@@ -98,7 +98,7 @@ button{font:inherit;cursor:pointer}
 .cover .foot{font:600 11px var(--mono);color:var(--muted);text-align:center;margin-top:10px}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tiles div{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 9px}.tiles span{display:block;font:600 11px var(--mono);color:var(--muted)}.tiles b{font-size:20px}.tiles s{color:var(--bad);font-size:15px;margin-right:5px}.tiles .g{color:var(--ok)}
 .live:has(.tiles){background:none;border:0;padding:0}
-@media (max-height:700px){.stage{height:41dvh}.cap h1{font-size:19px}.cap p{font-size:13.5px}.live{font-size:13px}.cover h1{font-size:25px}.cover .msg{font-size:14.5px}}
+@media (max-height:700px){.stage{height:38dvh}.chap{margin:6px 0 4px}.cap{padding-top:8px}.cap h1{font-size:18px;margin-bottom:4px}.cap p{font-size:13px;margin-bottom:5px}.live{font-size:12.5px;padding:7px 10px;margin-bottom:5px}.why3 span{font-size:12.5px}.bar .act,.bar .next,.bar .back{padding:10px 12px}.modep{display:none}.tiles b{font-size:17px}.cover h1{font-size:25px}.cover .msg{font-size:14.5px}}
 </style>
 </head>
 <body>
@@ -229,7 +229,7 @@ const STEPS=[
    end:s=>s.n>=6?'<b>The bug is not the problem. The problem is that everything is allowed.</b>':'',
    det:()=>`<h4>The chain</h4><table>${ATK.map((a,i)=>`<tr><td>${i+1}</td><td>${a[4].replace(/<[^>]+>/g,'')}</td></tr>`).join('')}</table><h4>Why this attack</h4><p>Log4Shell (CVE-2021-44228) hit almost every Java shop. The exploit needs one outbound connection to the attacker: the kind of path least privilege removes.</p>` },
  { ch:'Problem', t:'The engines are there. The rules aren’t.',
-   p:()=>`Cilium and Tetragon are installed in the cluster. <b>Zero policies.</b> Why does almost nobody enforce?`,
+   p:()=>`Cilium and Tetragon are installed. <b>Zero policies.</b> Why?`,
    init:()=>({r:0}),
    svg:s=>sceneB({exc:true,extra:'',over:`<g class="badge"><rect x="96" y="12" width="168" height="44" rx="8"/><text x="108" y="30">Cilium   <tspan class="k">installed</tspan> · <tspan class="z">0 rules</tspan></text><text x="108" y="47">Tetragon <tspan class="k">installed</tspan> · <tspan class="z">0 rules</tspan></text></g>`}),
    live:s=>s.r?`<div class="why3"><div><b>Knowledge</b><span>App, cluster and risk sit in three different teams.</span></div><div><b>Scale</b><span>84 decisions per namespace. Tens of thousands per company.</span></div><div><b>Change</b><span>A rule written by hand breaks the next release.</span></div></div>`:'',
@@ -251,7 +251,7 @@ const STEPS=[
    p:()=>`Each path and program is checked against all the evidence. Seen once is not enough: it has to make sense.`,
    init:()=>({d:0}),
    svg:s=>{ const chips=s.d>=2?chipRow([['java ✓','ok'],['+6 ?','ask'],['sh','a']]):chipRow([['java','ok']]);
-     const kept=s.d>=2?(()=>{ const [x1,y1]=[224,170],[x2,y2]=[54,52]; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e kept"/><g class="flag"><rect x="52" y="98" width="72" height="18" rx="5"/><text x="88" y="111" text-anchor="middle">KEPT OUT</text></g>`; })():'';
+     const kept=s.d>=2?`<line x1="212" y1="158" x2="222" y2="86" class="e kept"/>${xmark(222,84,false,true)}<g class="flag"><rect x="150" y="38" width="110" height="32" rx="6"/><text x="205" y="51" text-anchor="middle">KEPT OUT</text><text x="205" y="64" text-anchor="middle" style="font-size:9px">sh → 203.0.113.7</text></g>`:'';
      return sceneB({tint:false,need:true,exc:s.d>=1,chips,extra:kept}); },
    live:s=>['','<span class="k a">116 EXCESS</span>Paths that are allowed today but <b>never declared and never used</b>. They will be closed.','<span class="k al">17 NEEDED</span>stay open. <span class="k" style="background:var(--warn);color:var(--bg)">6 ASK</span>programs from the startup script go to a person. <span class="k a">KEPT OUT</span><b>sh → 203.0.113.7</b> was seen once while learning: not the app’s binary, no manifest, no DNS name. Never learned.'][s.d],
    actl:s=>s.d<2?['Find the excess','Check what was seen'][s.d]:'Decided', done:s=>s.d>=2, run:s=>{ s.d++; },
@@ -292,7 +292,7 @@ const STEPS=[
    end:s=>'',
    det:()=>`<h4>The rules that stop it</h4><table>${ATK.slice(1).map((a,i)=>`<tr><td>${i+2}. ${a[6]}</td><td>${a[7]}</td></tr>`).join('')}</table>` },
  { ch:'Why now', t:'An agent can ignore its instructions. Not the kernel.',
-   p:()=>`support-agent has a model API, a ticket tool and a shell tool. Its profile comes from its own config.`,
+   p:()=>`An AI agent with a model API, a ticket tool and a shell tool. Its profile comes from its config.`,
    init:()=>({n:0,sel:null,enf:true}), seq:AGA,
    svg:s=>sceneA('agent',{steps:AGA.map((x,i)=>[x[0],x[1],x[2],x[3]==='a'?'b':x[3]]),n:s.n,fresh:s.n-1,enforced:true,label:'support-agent pod'}),
    live:s=>s.n?seqLive(AGA,s):'A ticket arrives through its MCP tool. It contains hidden instructions.',
@@ -312,11 +312,11 @@ const STEPS=[
    actl:s=>s.k<2?['× 40','× 1,000'][s.k]:'Multiplied', done:s=>s.k>=2, run:s=>{ s.k++; },
    end:s=>'', det:null },
  { ch:'Vision', t:'The decision layer for runtime enforcement.', close:true,
-   p:()=>`Every cluster has the engines. <b>We make the decisions</b>: from evidence, proven first, kept current, for workloads and agents.`,
+   p:()=>`<b>We make the decisions</b>: from evidence, proven first, kept current, for workloads and agents.`,
    init:()=>({}),
    svg:s=>sceneB({tint:'ok',need:true,podOn:true,chips:chipRow([['java ✓','ok'],['sh','b'],['curl','b']]),dim:['att','api']}),
    live:s=>`<div class="tiles"><div><span>network paths</span><b><s>133</s><span class="g" style="font:inherit;display:inline">17</span></b></div><div><span>needed flows dropped</span><b class="g">0</b></div><div><span>programs (adservice)</span><b><s>any</s><span class="g" style="font:inherit;display:inline">8</span></b></div><div><span>flows replayed first</span><b>33,411</b></div></div>`,
-   actl:null, done:()=>true, run:null, end:()=>'<span style="font:600 12px var(--mono);color:var(--muted)">Lab today: network and programs on Cilium and Tetragon. Next: files, agent profiles.</span>',
+   actl:null, done:()=>true, run:null, end:()=>'<span style="font:600 11.5px var(--mono);color:var(--muted)">Lab: network + programs today · files, agents next</span>',
    det:()=>`<h4>What is real today</h4><p>Lab namespace boutique (12 workloads): evidence from manifests, Hubble and Tetragon; classification; CiliumNetworkPolicy generation; flow replay; staged enforcement with rollback; program allow-lists with exec replay.</p><h4>Design, next</h4><p>File profiles, agent profiles from agent config, more engines.</p>` }
 ];
 
