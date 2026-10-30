@@ -112,6 +112,33 @@ button{font:inherit;cursor:pointer}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tiles div{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 9px}.tiles span{display:block;font:600 11px var(--mono);color:var(--muted)}.tiles b{font-size:20px}.tiles s{color:var(--bad);font-size:15px;margin-right:5px}.tiles .g{color:var(--ok)}
 .live:has(.tiles){background:none;border:0;padding:0}
 @media (max-height:700px){.stage{height:38dvh}.chap{margin:6px 0 4px}.cap{padding-top:8px}.cap h1{font-size:18px;margin-bottom:4px}.cap p{font-size:13px;margin-bottom:5px}.live{font-size:12.5px;padding:7px 10px;margin-bottom:5px}.why3 span{font-size:12.5px}.bar .act,.bar .next,.bar .back{padding:10px 12px}.modep{display:none}.tiles b{font-size:17px}.cover h1{font-size:25px}.cover .msg{font-size:14.5px}}
+
+.inter{position:absolute;inset:0;z-index:4;background:var(--bg);display:flex;flex-direction:column;padding:26px 20px calc(18px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .35s}
+.inter.on{opacity:1;pointer-events:auto}
+.inter .ik{font:800 11px var(--mono);letter-spacing:.1em;color:var(--info);text-transform:uppercase}
+.inter h2{font-size:25px;line-height:1.2;margin:8px 0 22px;letter-spacing:-.01em;color:var(--ink)}
+.inter h2 b{color:var(--ok)}
+.inter .ik{margin-top:auto}.inter .auto{margin-top:auto}.inter .auto[style*=none]+.go2{margin-top:auto}
+.road{list-style:none;margin:0;padding:0;flex:none;display:flex;flex-direction:column;gap:0}
+.road li{position:relative;padding:0 0 18px 34px;color:var(--dim)}
+.road li::before{content:'';position:absolute;left:10px;top:22px;bottom:-2px;width:2px;background:var(--line)}
+.road li:last-child::before{display:none}
+.road li.d::before{background:var(--ok)}
+.road .dot{position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;border:2px solid var(--dim);background:var(--bg);display:grid;place-items:center;font:800 11px var(--mono)}
+.road li.d .dot{border-color:var(--ok);background:var(--ok);color:var(--bg)}
+.road li.n .dot{border-color:var(--warn);box-shadow:0 0 0 5px rgba(245,185,71,.18);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 9px rgba(245,185,71,.06)}}
+.road b{display:block;font-size:17px;line-height:22px}
+.road li.d b{color:var(--text)}.road li.n b{color:var(--ink);font-size:20px}
+.road .ss{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.road .ss span{font:700 11.5px var(--mono);border:1px solid var(--line);border-radius:7px;padding:3px 7px}
+.road li.d .ss span{color:var(--ok);border-color:rgba(61,214,140,.35)}
+.road li.n .ss span{color:var(--ink);border-color:var(--warn);background:rgba(245,185,71,.1)}
+.road li.n .ss i{font-style:normal;color:var(--warn);align-self:center}
+.inter .go2{border:0;border-radius:14px;padding:15px;font-weight:800;font-size:16px;background:var(--ink);color:var(--bg)}
+.inter .auto{height:3px;border-radius:2px;background:var(--line);margin-bottom:10px;overflow:hidden}.inter .auto i{display:block;height:100%;width:0;background:var(--warn)}
+.inter .auto.run i{animation:fill 3.2s linear forwards}@keyframes fill{to{width:100%}}
+@media (max-height:700px){.inter h2{font-size:21px;margin-bottom:14px}.road li{padding-bottom:12px}.road b{font-size:15px}.road li.n b{font-size:17px}}
 </style>
 </head>
 <body>
@@ -126,6 +153,7 @@ button{font:inherit;cursor:pointer}
   <div class="cap" id="cap"></div>
   <div class="bar"><button class="back" id="back">Back</button><button class="act" id="act"></button><button class="next" id="next">Next</button></div>
   <div class="modep" id="modep"></div>
+  <section class="inter" id="inter"><div class="ik" id="interK"></div><h2 id="interH"></h2><ol class="road" id="road"></ol><div class="auto" id="interA"><i></i></div><button class="go2" id="interGo">Continue ›</button></section>
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="sh"><b id="shT"></b><button id="shX">Close</button></div><div class="sb" id="shB"></div></div>
   <section class="cover" id="cover">
@@ -285,13 +313,14 @@ const STEPS=[
    det:()=>`<h4>Benchmark</h4><p>Fairwinds 2024: 58% of organizations had no network policy on most of their workloads.</p><h4>Scale, one company</h4><table><tr><td>12 workloads × 7 layers</td><td>84</td></tr><tr><td>× 50 namespaces</td><td>4,200</td></tr><tr><td>× 10 clusters</td><td>42,000</td></tr><tr><td>every release</td><td>re-check</td></tr></table><h4>Change</h4><p>v3: policy written by hand. v4 adds fraud-check; nobody updated the policy: checkout down. Under pressure: roll back, everything open again.</p>` },
  { ch:'Solution', t:'Evidence in.',
    p:()=>`The knowledge exists, scattered across four places that already describe every workload.`,
-   init:()=>({n:0}),
+   init:()=>({n:0,sel:null}),
    svg:s=>{ const SR=['Git','Hubble','Tetragon','K8s API'];
      const src=SR.map((t,i)=>`<g class="src ${i<s.n?'on':''}"><rect x="${10+i*86}" y="8" width="80" height="22" rx="7"/><text x="${50+i*86}" y="23" text-anchor="middle">${i<s.n?'✓ ':''}${t}</text></g>`).join('');
      const chips=s.n>=3?chipRow([['java','ok']]):'';
      return sceneB({tint:s.n>=2?false:'open',exc:s.n<2?EXC.filter(k=>k!=='att'&&k!=='api'):false,need:s.n>=2,needFresh:s.n===2,chips,over:src,hide:['att','api']}); },
-   live:s=>['','<span class="k r">Git</span>frontend’s manifest declares <b>AD_SERVICE_ADDR = adservice:9555</b>.','<span class="k r">Hubble</span><b>33,411</b> real connections recorded. frontend → adservice seen 144 times.','<span class="k r">Tetragon</span>which programs adservice really starts: <b>java</b>, plus 6 from its startup script.','<span class="k r">K8s API</span>platform needs: every pod resolves <b>DNS</b>; kubelet probes it.'][s.n],
-   actl:s=>s.n<4?['Read Git','Read Hubble','Read Tetragon','Read the K8s API'][s.n]:'Evidence collected', done:s=>s.n>=4, run:s=>{ s.n++; },
+   live:s=>{ if(!s.n) return ''; const EV=[['Git','what the app declares','frontend’s manifest declares <b>AD_SERVICE_ADDR = adservice:9555</b>.'],['Hubble','what really connects','<b>33,411</b> real connections recorded. frontend → adservice seen 144 times.'],['Tetragon','what really runs','The programs adservice really starts: <b>java</b>, plus 6 from its startup script.'],['K8s API','what the platform needs','Every pod resolves <b>DNS</b>; the kubelet probes it.']]; const cur=s.sel!=null?s.sel:s.n-1;
+     return `<div class="slist">${EV.slice(0,s.n).map(([src,what,txt],i)=>`<div class="sr ${i===cur?'cur':''}" data-k="${i}"><span class="k r" style="min-width:66px">${src}</span><div class="tt"><b>${what}</b>${i===cur?`<small>${txt}</small>`:''}</div></div>`).join('')}</div>`; },
+   actl:s=>s.n<4?['Read Git','Read Hubble','Read Tetragon','Read the K8s API'][s.n]:'Evidence collected', done:s=>s.n>=4, run:s=>{ s.n++; s.sel=null; },
    end:s=>s.n>=4?'Green: what each workload <b>needs</b>, with proof behind every line.':'',
    det:()=>`<h4>Git · Deployment frontend</h4><pre>env:\n  - name: AD_SERVICE_ADDR\n    value: adservice:9555</pre><h4>Hubble · flows</h4><pre>frontend → adservice:9555  TCP  FORWARDED\n… 143 more in 33,411 recorded flows</pre><h4>Tetragon · process_exec</h4><pre>binary  /opt/java/openjdk/bin/java\nparent  AdService (entrypoint script)</pre><h4>K8s API · platform</h4><pre>every pod → kube-dns:53 UDP\nkubelet → adservice:9555 (health probe)</pre>` },
  { ch:'Solution', t:'Decide. Don’t just record.',
@@ -300,9 +329,10 @@ const STEPS=[
    svg:s=>{ const chips=s.d>=2?chipRow([['java ✓','ok'],['+6 ?','ask'],['sh','a']]):chipRow([['java','ok']]);
      const kept=s.d>=2?`<line x1="212" y1="158" x2="222" y2="86" class="e kept"/>${xmark(222,84,false,true)}<g class="flag"><rect x="150" y="38" width="110" height="32" rx="6"/><text x="205" y="51" text-anchor="middle">KEPT OUT</text><text x="205" y="64" text-anchor="middle" style="font-size:9px">sh → 203.0.113.7</text></g>`:'';
      return sceneB({tint:false,need:true,exc:s.d>=1,chips,extra:kept}); },
-   live:s=>['','<span class="k a">116 EXCESS</span>Paths that are allowed today but <b>never declared and never used</b>. They will be closed.','<span class="k al">17 NEEDED</span>stay open. <span class="k" style="background:var(--warn);color:var(--bg)">6 ASK</span>programs from the startup script go to a person. <span class="k a">KEPT OUT</span><b>sh → 203.0.113.7</b> was seen once while learning: not the app’s binary, no manifest, no DNS name. Never learned.'][s.d],
+   live:s=>{ const R=[['a','116 EXCESS','Allowed today, <b>never declared, never used</b>. Will be closed.'],['al','17 NEEDED','Declared or seen, and makes sense. Stays open.'],['ask','6 ASK','Programs from the startup script. <b>A person confirms.</b>'],['a','KEPT OUT','<b>sh → 203.0.113.7</b>, seen once while learning. Not the app’s binary, no manifest, no DNS name. <b>Never learned.</b>']];
+     const n=[0,1,4][s.d]; if(!n) return ''; return `<div class="slist">${R.slice(0,n).map(([c,k,t],i)=>`<div class="sr cur" style="opacity:1"><span class="k ${c==='ask'?'':c}" style="min-width:82px;${c==='ask'?'background:var(--warn);color:var(--bg)':''}">${k}</span><div class="tt" style="white-space:normal;font-size:13.5px">${t}</div></div>`).join('')}</div>`; },
    actl:s=>s.d<2?['Find the excess','Check what was seen'][s.d]:'Decided', done:s=>s.d>=2, run:s=>{ s.d++; },
-   end:s=>s.d>=2?'Bad behavior seen during learning never becomes policy.':'',
+   end:s=>'',
    det:()=>`<h4>adservice · paths</h4><table><tr><td>IN frontend :9555</td><td class="g">CONFIRMED · manifest + 144 flows</td></tr><tr><td>IN kubelet :9555</td><td class="g">NEEDED · platform</td></tr><tr><td>OUT kube-dns :53</td><td class="g">NEEDED · platform</td></tr><tr><td>OUT 11 workloads</td><td class="x">EXCESS · 0 flows, not declared</td></tr><tr><td>IN 10 workloads</td><td class="x">EXCESS · 0 flows, not declared</td></tr></table><h4>adservice · programs</h4><table><tr><td>AdService, /bin/sh</td><td class="g">declared in the image</td></tr><tr><td>java, sed, uname, tr, xargs, echo</td><td class="y">started by the script · a person confirms</td></tr></table><h4>Kept out</h4><pre>/bin/sh → 203.0.113.7:443  seen 1×\nnot the app binary · no manifest · no DNS name\n→ flagged, never allowed</pre>` },
  { ch:'Solution', t:'Seven layers. Each one decided.',
    p:s=>s.z?`Inside one workload. Least privilege is more than the network: every layer gets its own rule.`:`So far: paths between workloads. Now let’s go <b>inside one</b>.`,
@@ -378,6 +408,19 @@ const STEPS=[
 
 // ---------- engine
 let at=0, ST=[], watching=false;
+// ---------- chapter interstitials: the whole process, where we are
+const CHAP=[['Problem',['One bug, full breach','Engines, no rules']],['Solution',['Evidence','Decide','7 layers','Prove']],['Proof',['Enforce in stages','Same attack, stopped']],['Why now',['AI agents','× 1,000']],['Vision',['The decision layer']]];
+const BRIDGE={Solution:'The engines exist. What’s missing is <b>the decision</b>. Here is how we make it.',Proof:'Decided from evidence, proven offline. <b>Now it goes live.</b>',['Why now']:'That was one Java service. <b>Now: AI agents.</b>',Vision:'Same layer, every workload, every agent. <b>Where this goes.</b>'};
+let interTo=null;
+function inter(i){ const ch=STEPS[i].ch, ci=CHAP.findIndex(c=>c[0]===ch);
+  $('interK').textContent=`Chapter ${ci+1} of ${CHAP.length}`; $('interH').innerHTML=BRIDGE[ch]||ch;
+  $('road').innerHTML=CHAP.map(([n,ss],j)=>`<li class="${j<ci?'d':j===ci?'n':''}"><span class="dot">${j<ci?'✓':j+1}</span><b>${n}</b><div class="ss">${ss.map(x=>`<span>${x}</span>`).join(j===ci?'<i>›</i>':'')}</div></li>`).join('');
+  const go=()=>{ clearTimeout(interTo); $('inter').classList.remove('on'); $('interA').classList.remove('run'); show(i); };
+  $('interGo').onclick=go; $('inter').classList.add('on');
+  $('interA').style.display=watching?'':'none'; $('interA').classList.remove('run'); void $('interA').offsetWidth;
+  if(watching){ $('interA').classList.add('run'); interTo=setTimeout(go,reduce?50:3200); } }
+function forward(i){ if(i>0&&STEPS[i].ch!==STEPS[i-1].ch){ stop(); closeSheet(); inter(i); } else show(i); }
+
 function meter(){ const s=ST[at]; let n=0; if(at===6) n=[0,2,3,4,6][s.k]; else if(at>6) n=6;
   $('meter').className='meter'+(n>=6?' okm':''); $('meter').innerHTML=`<div>${[0,1,2,3,4,5,6].map(i=>`<span class="${i<n?'c':''}"></span>`).join('')}</div>${7-n}/7 open`; $('meter').title=n>=6?'attack surface: files are next':'attack surface: 7 layers'; }
 function render(fade){
@@ -402,12 +445,12 @@ function render(fade){
 function doAct(){ const st=STEPS[at], s=ST[at]; if(!st.run) return; st.run(s,()=>render()); render(); }
 function show(i,fade=true){ stop(); closeSheet(); at=i; ST[i]=STEPS[i].init(); render(fade); if(watching) autoplay(); }
 $('act').onclick=()=>{ if(watching){ watching=false; stop(); } doAct(); };
-$('next').onclick=()=>{ if(at===STEPS.length-1){ watching=false; stop(); $('cover').hidden=false; return; } show(at+1); };
+$('next').onclick=()=>{ if(at===STEPS.length-1){ watching=false; stop(); $('cover').hidden=false; return; } forward(at+1); };
 $('back').onclick=()=>{ if(at>0) show(at-1); };
 // watch: [delay, 'a' = press the action, 'n' = next step]
 const W=(acts,gap,tail)=>{ const r=[]; let t=1400; for(let i=0;i<acts;i++){ r.push([t,'a']); t+=gap; } r.push([t+tail,'n']); return r; };
 const PLAY={0:W(6,3200,1500),1:W(1,3500,3500),2:W(4,2600,2000),3:W(2,3600,1500),4:W(8,2600,2500),5:[[1200,'a'],[5200,'a'],[9500,'n']],6:W(4,2200,1500),7:[[1200,'a'],[4200,'a'],[7600,'a'],[12500,'n']],8:W(5,3200,1800),9:W(2,2600,2500),10:[]};
-function autoplay(){ stop(); (PLAY[at]||[]).forEach(([ms,a])=>later(ms,()=>{ if(!watching) return; if(a==='n'){ if(at<STEPS.length-1) show(at+1); } else doAct(); })); }
+function autoplay(){ stop(); (PLAY[at]||[]).forEach(([ms,a])=>later(ms,()=>{ if(!watching) return; if(a==='n'){ if(at<STEPS.length-1) forward(at+1); } else doAct(); })); }
 function sheet(t,h){ $('shT').textContent=t; $('shB').innerHTML=h; $('sheet').classList.add('on'); $('scrim').classList.add('on'); if(watching){ watching=false; stop(); render(); } }
 function closeSheet(){ $('sheet').classList.remove('on'); $('scrim').classList.remove('on'); }
 $('shX').onclick=closeSheet; $('scrim').onclick=closeSheet;
