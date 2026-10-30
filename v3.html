@@ -226,6 +226,7 @@ function glyph(t,x,y){ const g=(d)=>`<path class="gl" d="${d}"/>`;
   if(t==='app') return `<rect class="gl" x="${x-7}" y="${y-6}" width="14" height="12" rx="2"/>`+g(`M${x-7} ${y-2}H${x+7}`);
   if(t==='skull') return g(`M${x} ${y-7}L${x+7} ${y+6}H${x-7}Z`)+g(`M${x} ${y-2}V${y+1.5}`)+`<circle cx="${x}" cy="${y+3.8}" r=".9" fill="#FF5C5C"/>`;
   if(t==='ai') return g(`M${x} ${y-7}L${x+2} ${y-2}L${x+7} ${y}L${x+2} ${y+2}L${x} ${y+7}L${x-2} ${y+2}L${x-7} ${y}L${x-2} ${y-2}Z`);
+  if(t==='pkg') return g(`M${x} ${y-7}L${x+6.5} ${y-3.5}V${y+3.5}L${x} ${y+7}L${x-6.5} ${y+3.5}V${y-3.5}Z`)+g(`M${x-6.5} ${y-3.5}L${x} ${y}L${x+6.5} ${y-3.5}M${x} ${y}V${y+7}`);
   if(t==='doc') return `<rect class="gl" x="${x-5.5}" y="${y-7}" width="11" height="14" rx="1.5"/>`+g(`M${x-3} ${y-3}H${x+3}M${x-3} ${y}H${x+3}M${x-3} ${y+3}H${x+1}`);
   return ''; }
 function node(x,y,label,sub,ic,cls=''){ return `<g class="nd ${cls}"><rect class="bg" x="${x-15}" y="${y-15}" width="30" height="30" rx="8"/>${glyph(ic,x,y)}<text x="${x}" y="${y+29}" text-anchor="middle">${label}</text>${sub?`<text x="${x}" y="${y+40}" text-anchor="middle" class="sub">${sub}</text>`:''}</g>`; }
@@ -309,6 +310,25 @@ const seqLive=(L,s,cnt)=>{ const n=cnt!=null?cnt:s.n; if(n<1) return ''; const c
     return `<div class="sr ${on?'cur':''}" data-k="${i}"><span class="k ${tag[0]}">${i+1}${on?' · '+tag[1]:''}</span><div class="tt">${st[4]}${on?`<small>${st[5]}</small>${blocked?`<span class="rule"><i>${st[6]}</i>${st[7]}</span>`:''}`:''}</div></div>`; }).join('')}</div>`; };
 const trackHTML=(L,s)=>L.map((st,i)=>{ const done=i<s.n; const blocked=s.enf&&st[3]==='a'&&st[6]; const c=!done?'':blocked?'b':st[3]==='r'?'r':st[3]==='al'?'al':'a'; return `<button data-k="${i}" class="${c} ${(s.sel!=null?s.sel:s.n-1)===i?'cur':''}" ${done?'':'disabled'}>${i+1}</button>`; }).join('');
 
+
+// ---------- the opening: three ways in, one question
+const EN={bug:[46,62,'a bug','Log4Shell','app','att'],pkg:[180,34,'a package','xz backdoor','pkg','att'],agt:[314,62,'an agent','prompt injection','ai','att'],
+          net:[50,252,'internet','','net',''],api:[180,262,'K8s API','','api',''],data:[310,252,'customer data','','db','']};
+const ENTRY=[['bug','A bug','in code you wrote or imported','<b>Log4Shell</b> (2021): one log line runs the attacker’s code. Almost every Java shop was exposed.'],
+ ['pkg','A poisoned package','in code you trust','The <b>xz backdoor</b> (2024) shipped inside a trusted Linux library. Malicious npm and PyPI packages appear every week.'],
+ ['agt','A hijacked agent','following someone else’s instructions','<b>Prompt injection</b>: a ticket, a web page or a tool result tells the agent what to do. It has your credentials.']];
+function sceneE(k){ const P=[118,104,124,100], C=[180,142]; let s=DEFS;
+  s+=`<rect x="6" y="6" width="348" height="278" rx="14" class="zone"/>`;
+  s+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="14" class="pod"/><text x="180" y="${P[1]+P[3]-9}" text-anchor="middle" class="podl">your workload</text>`;
+  ['bug','pkg','agt'].forEach((n,i)=>{ if(k<=i) return; const [x1,y1]=trim(EN[n],C,17,0); const [bx,by]=exitRect(x1,y1,C[0],C[1],P);
+    s+=`<line x1="${x1}" y1="${y1}" x2="${bx}" y2="${by}" class="e atk ${k===i+1?'drawn':''}" marker-end="url(#m-atk)"/>`; });
+  if(k>=4) ['net','api','data'].forEach(n=>{ const [ax,ay]=EN[n]; const [x1,y1,x2,y2]=trim(C,[ax,ay],19,18); const [bx,by]=exitRect(x1,y1,x2,y2,P);
+    s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e atk drawn" style="stroke-dasharray:5 4;animation:none" marker-end="url(#m-atk)"/>`; });
+  s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="16"/><text x="${C[0]}" y="${C[1]+4}" text-anchor="middle">app</text></g>`;
+  s+=Object.entries(EN).map(([n,[x,y,l,sub,ic,c]])=>node(x,y,l,sub,ic,(['bug','pkg','agt'].includes(n)&&k<=['bug','pkg','agt'].indexOf(n))?'dimn':(['net','api','data'].includes(n)&&k<4?'dimn':c))).join('');
+  if(k>=4) s+=`<text x="180" y="226" text-anchor="middle" class="zl" style="paint-order:stroke;stroke:#140F14;stroke-width:6px">EVERYTHING IS ALLOWED</text>`;
+  return s; }
+
 // ---------- the seven layers of one workload
 const LAYERS=[
  ['Ingress','who may call it','Cilium','Only <b>frontend → :9555</b>, plus the kubelet health probe. A compromised checkout or cart can’t reach it. <b class="ok">Stops lateral movement in.</b>','',1,'lab'],
@@ -342,8 +362,18 @@ const layerLive=(s)=>{ if(!s.k) return '<span class="k" style="background:var(--
     return `<div class="sr ${o?'cur':''}" data-k="${i}"><span class="k ${nx?'':'b'}" ${nx?'style="background:var(--warn);color:var(--bg)"':''}>${i+1}</span><div class="tt"><b>${L[0]}</b> · ${L[1]}${o?`<span class="rule"><i>${L[2]}</i>${nx?'design · next':'in the lab'}</span><small>${L[3]}${L[4]?` <b class="ok">Stops attack step ${L[4]}.</b>`:''}</small>`:''}</div></div>`; }).join('')}</div>`; };
 const STAGES=['Namespace isolation · K8s API','Egress lock · internet','East-west · pod to pod','Inside the pod · programs, privileges'];
 const STEPS=[
+ { ch:'Problem', t:'Something will get in.',
+   p:s=>s.k<4?`There are many ways in. You can’t close all of them.`:`What it does next depends on one thing.`,
+   init:()=>({k:0,sel:null}),
+   svg:s=>sceneE(s.k),
+   live:s=>{ if(!s.k) return ''; const cur=s.sel!=null?s.sel:Math.min(s.k,3)-1;
+     let r=`<div class="slist">${ENTRY.slice(0,Math.min(s.k,3)).map(([n,t,sub,txt],i)=>`<div class="sr ${i===cur&&s.k<4?'cur':''}" data-k="${i}"><span class="k a">${i+1}</span><div class="tt"><b>${t}</b> · ${sub}${i===cur&&s.k<4?`<small>${txt}</small>`:''}</div></div>`).join('')}</div>`;
+     if(s.k>=4) r+=`<small class="foot" style="font-size:14px;color:var(--text)">Once inside, it can do <b>whatever the workload is allowed to do</b>. By default: reach the internet, the K8s API and your data.</small>`; return r; },
+   actl:s=>s.k<3?['A bug','A poisoned package','A hijacked agent'][s.k]:s.k===3?'Then what?':'All three shown', done:s=>s.k>=4, run:s=>{ s.k++; s.sel=null; },
+   end:s=>s.k>=4?'<b>We don’t find bugs. We decide what anything inside can do.</b>':'',
+   det:()=>`<h4>Three ways in</h4><table><tr><td>Log4Shell · CVE-2021-44228</td><td>remote code via a log line</td></tr><tr><td>xz backdoor · CVE-2024-3094</td><td>backdoor in a trusted library</td></tr><tr><td>Prompt injection</td><td>agent follows hidden instructions</td></tr></table><h4>The common part</h4><p>None of them needs a new permission. Each one uses what the workload is already allowed to do. Least privilege takes that away, whatever the way in.</p>` },
  { ch:'Problem', t:'One bug, full breach.',
-   p:()=>`adservice is a Java service in boutique, a 12-service shop in our lab. Its logging library has a remote-code bug: <b>Log4Shell</b>.`,
+   p:()=>`The first one, step by step. adservice is a Java service in boutique, a 12-service shop in our lab. It has <b>Log4Shell</b>.`,
    init:()=>({n:0,sel:null}), seq:ATK,
    svg:s=>sceneA('app',{steps:ATK.map(x=>[x[0],x[1],x[2],'a']),n:s.n,fresh:s.n-1,label:'adservice pod'}),
    live:s=>s.n?seqLive(ATK,s):'Nothing stands in the way: <b class="bad">every path in the namespace is open.</b>',
@@ -457,7 +487,7 @@ const STEPS=[
 // ---------- engine
 let at=0, ST=[], watching=false;
 // ---------- chapter interstitials: the whole process, where we are
-const CHAP=[['Problem',['One bug, full breach','Engines, no rules']],['Solution',['Evidence','Decide','7 layers','Prove']],['Proof',['Enforce in stages','Same attack, stopped']],['Why now',['AI agents','× 1,000']],['Vision',['The decision layer']]];
+const CHAP=[['Problem',['Something gets in','One bug, full breach','Engines, no rules']],['Solution',['Evidence','Decide','7 layers','Prove']],['Proof',['Enforce in stages','Same attack, stopped']],['Why now',['AI agents','× 1,000']],['Vision',['The decision layer']]];
 const BRIDGE={Solution:'The engines exist. What’s missing is <b>the decision</b>. Here is how we make it.',Proof:'Decided from evidence, proven offline. <b>Now it goes live.</b>',['Why now']:'That was one Java service. <b>Now: AI agents.</b>',Vision:'Same layer, every workload, every agent. <b>Where this goes.</b>'};
 let interTo=null;
 function inter(i){ const ch=STEPS[i].ch, ci=CHAP.findIndex(c=>c[0]===ch);
@@ -469,7 +499,7 @@ function inter(i){ const ch=STEPS[i].ch, ci=CHAP.findIndex(c=>c[0]===ch);
   if(watching){ $('interA').classList.add('run'); interTo=setTimeout(go,reduce?50:3200); } }
 function forward(i){ if(i>0&&STEPS[i].ch!==STEPS[i-1].ch){ stop(); closeSheet(); inter(i); } else show(i); }
 
-function meter(){ const s=ST[at]; let n=0; if(at===6) n=[0,2,3,4,6][s.k]; else if(at>6) n=6;
+function meter(){ const s=ST[at]; let n=0; if(at===7) n=[0,2,3,4,6][s.k]; else if(at>7) n=6;
   $('meter').className='meter'+(n>=6?' okm':''); $('meter').innerHTML=`<div>${[0,1,2,3,4,5,6].map(i=>`<span class="${i<n?'c':''}"></span>`).join('')}</div>${7-n}/7 open`; $('meter').title=n>=6?'attack surface: files are next':'attack surface: 7 layers'; }
 function render(fade){
   const st=STEPS[at], s=ST[at];
@@ -484,7 +514,7 @@ function render(fade){
   $('cap').querySelectorAll('.sr[data-k]').forEach(r=>r.onclick=()=>{ s.sel=(s.sel===+r.dataset.k?null:+r.dataset.k); render(); });
   const cr=$('cap').querySelector('.sr.cur'); if(cr){ const c=$('cap'), rb=cr.getBoundingClientRect(), cb=c.getBoundingClientRect(); if(rb.bottom>cb.bottom-4||rb.top<cb.top) c.scrollTop+=rb.bottom-cb.bottom+40; }
   const a=$('act'); a.style.display=st.actl?'':'none';
-  if(st.actl){ a.textContent=st.actl(s); a.disabled=(st.busy&&st.busy(s))||(st.done(s)&&!st.sticky)||(st.sticky&&st===STEPS[7]&&s.all)||(st.sticky&&st===STEPS[4]&&false); a.classList.toggle('go',!st.done(s)&&!watching); }
+  if(st.actl){ a.textContent=st.actl(s); a.disabled=(st.busy&&st.busy(s))||(st.done(s)&&!st.sticky)||(st.sticky&&st===STEPS[8]&&s.all)||(st.sticky&&st===STEPS[4]&&false); a.classList.toggle('go',!st.done(s)&&!watching); }
   $('back').disabled=at===0; $('next').textContent=at===STEPS.length-1?'Start over':'Next'; $('next').classList.toggle('go',st.done(s)&&!watching);
   $('modep').innerHTML=watching?`Playing · <button id="pause">Pause and explore</button>`:`<button id="play">▶ Play from here</button>`;
   if($('pause')) $('pause').onclick=()=>{ watching=false; stop(); render(); };
@@ -497,7 +527,7 @@ $('next').onclick=()=>{ if(at===STEPS.length-1){ watching=false; stop(); $('cove
 $('back').onclick=()=>{ if(at>0) show(at-1); };
 // watch: [delay, 'a' = press the action, 'n' = next step]
 const W=(acts,gap,tail)=>{ const r=[]; let t=1400; for(let i=0;i<acts;i++){ r.push([t,'a']); t+=gap; } r.push([t+tail,'n']); return r; };
-const PLAY={0:W(6,3200,1500),1:W(1,3500,3500),2:W(4,2600,2000),3:W(2,3600,1500),4:W(8,2600,2500),5:[[1200,'a'],[5200,'a'],[9500,'n']],6:W(4,2200,1500),7:[[1200,'a'],[4200,'a'],[7600,'a'],[12500,'n']],8:W(5,3200,1800),9:W(2,2600,2500),10:[]};
+const PLAY={0:W(4,2800,2500),1:W(6,3200,1500),2:W(1,3500,3500),3:W(4,2600,2000),4:W(2,3600,1500),5:W(8,2600,2500),6:[[1200,'a'],[5200,'a'],[9500,'n']],7:W(4,2200,1500),8:[[1200,'a'],[4200,'a'],[7600,'a'],[12500,'n']],9:W(5,3200,1800),10:W(2,2600,2500),11:[]};
 function autoplay(){ stop(); (PLAY[at]||[]).forEach(([ms,a])=>later(ms,()=>{ if(!watching) return; if(a==='n'){ if(at<STEPS.length-1) forward(at+1); } else doAct(); })); }
 function sheet(t,h){ $('shT').textContent=t; $('shB').innerHTML=h; $('sheet').classList.add('on'); $('scrim').classList.add('on'); if(watching){ watching=false; stop(); render(); } }
 function closeSheet(){ $('sheet').classList.remove('on'); $('scrim').classList.remove('on'); }
