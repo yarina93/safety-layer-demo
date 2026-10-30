@@ -25,7 +25,7 @@ button{font:inherit;cursor:pointer}
 .chap{flex:none;margin:9px 0 6px;display:flex;justify-content:space-between;align-items:center;font:800 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--info)}
 .chap em{font-style:normal;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:600}
 /* stage */
-.stage{flex:none;position:relative;height:min(46dvh,420px);border:1px solid var(--line);border-radius:16px;background:radial-gradient(120% 90% at 50% 0%,#141B2B 0%,#0E131D 70%);overflow:hidden;display:flex;flex-direction:column}
+.stage{flex:none;position:relative;height:min(42dvh,400px);border:1px solid var(--line);border-radius:16px;background:radial-gradient(120% 90% at 50% 0%,#141B2B 0%,#0E131D 70%);overflow:hidden;display:flex;flex-direction:column}
 .stage svg{flex:1;min-height:0;width:100%;display:block}
 .stage.fade svg{animation:fin .45s ease}@keyframes fin{from{opacity:0}to{opacity:1}}
 .track{flex:none;display:flex;justify-content:center;gap:6px;padding:0 8px 9px}
@@ -197,6 +197,18 @@ body,.app{font-feature-settings:'cv11','ss01','tnum'}
 .flow{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap}.flow span{border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--text);font:500 12px var(--body)}.flow i{font-style:normal;color:var(--dim)}
 .chap .ill{font-weight:600;color:var(--warn)}
 .fullb{margin-top:10px;background:transparent;border:1px solid var(--line);color:var(--info);border-radius:9px;padding:9px 12px;font:600 13px var(--body);text-align:left;width:100%}
+
+.flag rect{fill:#2A1418}
+.bah{font:600 10px var(--body);letter-spacing:.12em}.bah.b{fill:var(--bad)}.bah.a{fill:var(--ok)}
+.ban{font:600 11px var(--body);fill:var(--ink)}
+.bb{fill:rgba(229,72,77,.1);stroke:rgba(229,72,77,.45)}.bbt{font:500 10px var(--mono);fill:#F2B8BA}
+.barr{stroke:var(--dim);stroke-width:1.4;fill:none}
+.ba{fill:#141A25;stroke:#2A3344;transition:all .25s}.bat{font:600 10px var(--mono);fill:var(--ok)}
+.bar.on .ba{fill:rgba(76,195,138,.12);stroke:rgba(76,195,138,.6)}.bar.on .ba.d{fill:rgba(232,163,61,.1);stroke:rgba(232,163,61,.6)}.bat.d{fill:var(--warn)}
+.mull{font:600 12px var(--body);fill:var(--muted)}.muls{font:500 10.5px var(--body);fill:var(--dim)}.mulv{font:700 24px var(--body);fill:var(--ink)}
+.mut{fill:#161C27}.mub{fill:var(--info);transition:width .6s cubic-bezier(.2,0,0,1)}.mul.g .mub{fill:var(--prog)}.mul.on .mull{fill:var(--ink)}.mul.on .muls{fill:var(--muted)}
+.grp{font:600 10.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
+.tiles2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tile2{border:1px solid var(--line);background:#0F141D;border-radius:9px;padding:6px 9px}.tile2 span{display:block;font:500 11px var(--body);color:var(--muted)}.tile2 div{display:flex;align-items:baseline;gap:6px}.tile2 em{font-style:normal;font-weight:700;font-size:18px}.tile2 .b{color:var(--bad);text-decoration:line-through;font-size:14px;opacity:.85}.tile2 .a{color:var(--ok)}.tile2 i{font-style:normal;color:var(--dim)}
 </style>
 </head>
 <body>
@@ -215,9 +227,9 @@ body,.app{font-feature-settings:'cv11','ss01','tnum'}
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="sh"><b id="shT"></b><button id="shX">Close</button></div><div class="sb" id="shB"></div></div>
   <section class="cover" id="cover">
-    <div class="k">Safety Layer</div>
-    <h1>The decision layer for runtime enforcement</h1>
-    <p class="msg">Every cluster has the engines to enforce least privilege. <b>Nobody can safely decide the rules.</b> We decide them from evidence, and prove they won't break production.</p>
+    <div class="k">Safety Layer · the decision layer for runtime enforcement</div>
+    <h1>Something will get in. We decide what it can do.</h1>
+    <p class="msg">A bug, a poisoned package, a hijacked agent. Every cluster has the engines to limit them. <b>Nobody can safely decide the rules.</b> We decide them from evidence, and prove they won't break production.</p>
     <div class="mini"><svg id="coverMap" viewBox="0 0 360 290" preserveAspectRatio="xMidYMid meet"></svg></div>
     <div class="btns"><button id="watch">Watch the story<small>about 2 minutes · plays by itself</small></button><button class="sec" id="explore">Explore step by step<small>at your pace · open the evidence</small></button></div>
     <div class="foot">Kubernetes · eBPF (Cilium, Tetragon) · lab data from a real namespace</div>
@@ -270,6 +282,7 @@ const SCN={
    ['core','api','atk','a','It calls the <b>K8s API</b> with the pod’s service-account token','Read secrets, start new pods.','Cilium','kube-apiserver not in adservice egress → DROP.'],
    ['core','rd','atk','a','It connects to <b>redis-cart:6379</b>','Every customer’s cart.','Cilium','redis-cart not in adservice egress → DROP.'],
    ['core','#root','','a','It tries to become <b>root</b>','setuid, new capabilities.','securityContext','allowPrivilegeEscalation: false · capabilities: drop ALL.']],
+  ba:[['Ingress','any pod','frontend only','lab'],['K8s API','reachable','no path','lab'],['Internet','anywhere','none','lab'],['East-west','11 workloads','kube-dns only','lab'],['Programs','any binary','8 programs','lab'],['Privileges','14 capabilities','0','lab'],['Files','write anywhere','own paths','design']],
   recap:['Manifests, <b>33,411</b> real flows, the programs it starts.','<b>sh → 203.0.113.7</b>, seen once while learning, kept out.','All 33,411 flows replayed against the policy: <b>PASS</b>.','4 stages, each approved, <b>0 needed flows dropped</b>.'],
   breachT:'One bug, full breach.', breachP:'adservice is a Java service in boutique, a 12-service shop in our lab. It has <b>Log4Shell</b>.', startL:'Start the attack',
   breachEnd:'<b>The bug is not the problem. The problem is that everything is allowed.</b>',
@@ -305,6 +318,7 @@ const SCN={
    ['core','api','atk','a','It calls the <b>K8s API</b> with the pod’s token','Read secrets, start new pods.','Cilium','kube-apiserver not in its egress → DROP.'],
    ['core','rd','atk','a','It connects to <b>redis-cart:6379</b>','Every customer’s cart.','Cilium','redis-cart not in its egress → DROP.'],
    ['core','#root','','a','It tries to become <b>root</b> to stay','setuid, new capabilities.','securityContext','allowPrivilegeEscalation: false · capabilities: drop ALL.']],
+  ba:[['Ingress','any pod','frontend only'],['K8s API','reachable','no path'],['Internet','anywhere','none'],['East-west','every pod','catalog + DNS'],['Programs','any binary','python only'],['Privileges','root possible','none'],['Files','write anywhere','/app read','design']],
   recap:['frontend and catalog in its manifests, a week of flows, one program: <b>python</b>.','The backdoor’s call home was <b>already running while learning</b>. Not declared, not a cluster service: <b>kept out</b>.','Its recorded traffic replayed: <b>PASS</b>. Product pages still get recommendations.','The same 4 stages. <b>The backdoor is still inside, with nowhere to go.</b>'],
   breachT:'One package, full breach.', breachP:'recommendation is a Python service in the same shop. A new release pulls a dependency with a <b>backdoor</b>, like xz in 2024.', startL:'Ship the release',
   breachEnd:'<b>Nobody wrote a bug. Trusted code did what it was allowed to do.</b>',
@@ -339,6 +353,7 @@ const SCN={
    ['core','att','atk','a','It posts customer data to a <b>paste site</b>','paste.example.net:443','Cilium','egress: llm-gateway + mcp-tickets + kb only → DROP.'],
    ['core','#curl','','a','Its shell tool runs <b>curl … | sh</b>','Downloads and runs a script.','Tetragon','exec allow-list: python only → blocked.'],
    ['core','api','atk','a','It reads <b>cloud credentials</b> from the metadata service','169.254.169.254','Cilium','169.254.169.254 not in its egress → DROP.']],
+  ba:[['Ingress','any pod','support UI only'],['K8s API','reachable','no path'],['Internet','anywhere','llm-gateway only'],['East-west','every pod + metadata','mcp-tickets, kb'],['Programs','any (shell tool)','python only'],['Privileges','root possible','none'],['Files','cloud credentials','none','design']],
   recap:['Its <b>config</b> (model, MCP tools, kb), a week of traffic, python only.','Shell tool <b>declared, never used</b>: tightened. Undeclared hosts: <b>kept out</b>.','Its real tool calls replayed: <b>PASS</b>. It still answers tickets.','The same 4 stages, the same engines. <b>Its profile comes from its config.</b>'],
   breachT:'One ticket, full breach.', breachP:'support-agent is an AI agent with a model API, a ticket tool (MCP) and a shell tool. A customer ticket hides instructions.', startL:'Send the ticket',
   breachEnd:'<b>The model was fooled. With default-allow, everything it tried worked.</b>',
@@ -458,6 +473,16 @@ const layerLive=(s)=>{ if(!s.k) return '<span class="k" style="background:var(--
   return `<div class="slist">${SC.layers.slice(0,s.k).map((L,i)=>{ const o=i===cur, nx=L[5]==='next';
     return `<div class="sr ${o?'cur':''}" data-k="${i}"><span class="k ${nx?'':'b'}" ${nx?'style="background:var(--warn);color:var(--bg)"':''}>${i+1}</span><div class="tt"><b>${L[0]}</b> · ${L[1]}${o?`<span class="rule"><i>${L[2]}</i>${LST[L[5]]}</span><small>${L[3]}${L[4]?` <b class="ok">Stops attack step ${L[4]}.</b>`:''}</small>`:''}</div></div>`; }).join('')}</div>`; };
 const STAGES=['Namespace isolation · K8s API','Egress lock · internet','East-west · pod to pod','Inside the pod · programs, privileges'];
+function sceneBA(k){ const B=SC.ba; let s=DEFS;
+  s+=`<text x="128" y="26" text-anchor="middle" class="bah b">BEFORE</text><text x="270" y="26" text-anchor="middle" class="bah a">AFTER</text>`;
+  B.forEach(([n,b,a,t],i)=>{ const y=40+i*34, on=i<k;
+    s+=`<g class="bar ${on?'on':''}"><text x="14" y="${y+15}" class="ban">${n}</text>`+
+      `<rect x="72" y="${y}" width="112" height="22" rx="6" class="bb"/><text x="128" y="${y+15}" text-anchor="middle" class="bbt">${b}</text>`+
+      `<path d="M188 ${y+11}H206" class="barr"/>`+
+      `<rect x="212" y="${y}" width="136" height="22" rx="6" class="ba ${t==='design'?'d':''}"/><text x="280" y="${y+15}" text-anchor="middle" class="bat ${t==='design'?'d':''}">${on?a:''}</text></g>`; });
+  return s; }
+const BAT=(l,b,a)=>`<div class="tile2"><span>${l}</span><div><em class="b">${b}</em><i>→</i><em class="a">${a}</em></div></div>`;
+const NSBA=`<div class="grp">Lab · boutique, 12 workloads · network</div><div class="tiles2">${BAT('network paths open','133','17')}${BAT('reach the K8s API','12','0')}${BAT('internet egress','12','0')}${BAT('needed flows dropped','','0')}</div><div class="grp">Inside the pods</div><div class="tiles2">${BAT('programs allowed','any','25')}${BAT('capabilities','168','0')}</div>`;
 const TILES=`<div class="tiles"><div><span>network paths · lab</span><b><s>133</s><span class="g" style="font:inherit;display:inline">17</span></b></div><div><span>needed flows dropped</span><b class="g">0</b></div><div><span>programs (adservice)</span><b><s>any</s><span class="g" style="font:inherit;display:inline">8</span></b></div><div><span>flows replayed first</span><b>33,411</b></div></div>`;
 
 const STEPS=[
@@ -552,17 +577,23 @@ const STEPS=[
    done:s=>s.n>SC.allow, run:s=>{ if(s.n<=SC.allow){ s.n++; } else s.all=true; s.sel=null; }, sticky:true,
    end:s=>'',
    det:()=>`<h4>The rules that stop it</h4><table>${ATK.filter(a=>a[6]).map((a)=>`<tr><td>${ATK.indexOf(a)+1}. ${a[6]}</td><td>${a[7]}</td></tr>`).join('')}</table>` },
- { ch:'Why now', t:'Every team will run agents.',
-   p:()=>`Each agent has its own model, tools and data, and they change every week. Each needs its own profile, kept current.`,
+ { ch:'Proof', sc:true, t:'What changed.',
+   p:()=>`${SC.wl}, before and after. Same code, same bug or backdoor inside.`,
    init:()=>({k:0}),
-   svg:s=>{ const L=[1,40,1000][s.k], cols=[1,8,40][s.k], r=[22,8,2.7][s.k], gap=[0,24,7.8][s.k];
-     const rows=Math.ceil(L/cols), w=(cols-1)*gap, h=(rows-1)*gap, x0=180-w/2, y0=(s.k===2?120:118)-h/2;
-     let g=''; for(let i=0;i<L;i++){ const x=x0+(i%cols)*gap, y=y0+Math.floor(i/cols)*gap; g+=`<circle cx="${x}" cy="${y}" r="${r}" class="ag"/>`; }
-     if(s.k===0) g+=glyph('ai',180,118).replace(/class="gl"/g,'class="gl" style="stroke:#B392F0"');
-     return g+`<text x="180" y="244" text-anchor="middle" class="cnt">${L.toLocaleString('en-US')}</text><text x="180" y="264" text-anchor="middle" class="cntl">${['one agent','agents in one team','agents across the company'][s.k]}</text>`; },
-   live:s=>['One profile, written by hand: possible.','40 agents in one team: someone’s full-time job.','<b>1,000 agents, changing weekly.</b><small>Only a product can decide each profile and keep it current.</small>'][s.k],
-   actl:s=>s.k<2?['× 40','× 1,000'][s.k]:'Multiplied', done:s=>s.k>=2, run:s=>{ s.k++; },
+   svg:s=>sceneBA(s.k),
+   live:s=>s.k<7?'':`<b>7 of 7 layers decided.</b> Nothing the ${SC.id==='agt'?'agent':'app'} needs was dropped.<small>${SC.lab?'Green: in the lab today. Yellow: design, next.':'Same engines as the lab run. Yellow: design, next.'}</small>`,
+   actl:s=>s.k<7?'Show what changed':'All layers closed', done:s=>s.k>=7, run:(s,re)=>{ for(let i=1;i<=7;i++) later(i*260,()=>{ s.k=i; re(); }); s.k=0.01; }, busy:s=>s.k>0&&s.k<7,
    end:s=>'', det:null },
+ { ch:'Why now', t:'The decisions multiply.',
+   p:()=>`One workload is 7 decisions. Now count them across a company, and add the agents.`,
+   init:()=>({k:0}),
+   svg:s=>{ const R=[['one namespace','12 workloads × 7 layers',84,'w'],['one company','× 50 namespaces',4200,'w'],['all clusters','× 10 clusters',42000,'w'],['plus agents','1,000 agents × 7 layers',7000,'g']]; const mx=Math.log10(50000); let g=DEFS;
+     R.forEach(([l,sub,v,c],i)=>{ const y=30+i*64, on=i<s.k, w=Math.max(8,316*Math.log10(v)/mx);
+       g+=`<g class="mul ${on?'on':''} ${c}"><text x="22" y="${y+12}" class="mull">${l}</text><text x="22" y="${y+27}" class="muls">${sub}</text><text x="338" y="${y+26}" text-anchor="end" class="mulv">${on?v.toLocaleString('en-US'):''}</text><rect x="22" y="${y+36}" width="316" height="7" rx="3.5" class="mut"/><rect x="22" y="${y+36}" width="${on?w:0}" height="7" rx="3.5" class="mub"/></g>`; });
+     return g; },
+   live:s=>['','<b>84 decisions</b> in one small namespace. A person can still do this.','<b>4,200.</b> Now it is a team’s full-time job.','<b>42,000</b>, and every release changes some of them.','<b>+ 7,000 for agents</b>, whose tools change every week.<small>Only a product can decide each one, prove it, and keep it current.</small>'][s.k],
+   actl:s=>s.k<4?['Count one namespace','× 50 namespaces','× 10 clusters','Add the agents'][s.k]:'Multiplied', done:s=>s.k>=4, run:s=>{ s.k++; },
+   end:s=>'', det:()=>`<h4>The math</h4><table><tr><td>12 workloads × 7 layers</td><td>84</td></tr><tr><td>× 50 namespaces</td><td>4,200</td></tr><tr><td>× 10 clusters</td><td>42,000</td></tr><tr><td>1,000 agents × 7 layers</td><td>+ 7,000</td></tr><tr><td>every release</td><td>re-check</td></tr></table><p>Illustrative company size. Benchmark: Fairwinds 2024, 58% of organizations had no network policy on most workloads.</p>` },
  { ch:'Summary', t:'What you just saw.', close:true,
    p:()=>`Three ways in. One process. <b>Whatever gets in can only do what it needs.</b>`,
    init:()=>({}),
@@ -570,24 +601,24 @@ const STEPS=[
    live:()=>`<div class="slist">${ENTRY.map(([id,t])=>{ const seen=SEEN.has(id), S=SCN[id]; return `<div class="sr cur sumr" style="opacity:1;align-items:center"><span class="k ${seen?'b':''}" style="min-width:22px;${seen?'':'background:var(--line);color:var(--muted)'}">${seen?'✓':'·'}</span><div class="tt" style="white-space:normal"><b>${t}</b><small>${seen?`<span class="ok">Stopped at step ${S.allow+1}</span> · ${S.wl}`:'Not watched yet'}</small></div><button class="watchb" data-sc="${id}">${seen?'Again':'Watch'} ›</button></div>`; }).join('')}</div><div class="flow"><span>Evidence</span><i>›</i><span>Decide</span><i>›</i><span>Prove</span><i>›</i><span>Enforce</span></div>`,
    actl:()=>{ const u=ENTRY.find(e=>!SEEN.has(e[0])); return u?`Watch ${u[1][0].toLowerCase()+u[1].slice(1)} ›`:'All three seen'; }, done:()=>!ENTRY.some(e=>!SEEN.has(e[0])),
    run:()=>{ const u=ENTRY.find(e=>!SEEN.has(e[0])); if(u) choose(u[0]); },
-   end:()=>`${TILES}<span style="display:block;margin-top:8px;font:500 12px var(--body);color:var(--muted)">Lab numbers: adservice in boutique, network + programs. Package and agent runs: illustration with the same engines.</span>`,
+   end:()=>`${NSBA}<span style="display:block;margin-top:8px;font:500 12px var(--body);color:var(--muted)">Before → after, measured in the lab. Package and agent runs: illustration with the same engines.</span>`,
    det:()=>`<h4>What is real today</h4><p>Lab namespace boutique (12 workloads): evidence from manifests, Hubble and Tetragon; classification; CiliumNetworkPolicy generation; flow replay; staged enforcement with rollback; program allow-lists with exec replay.</p><h4>Design, next</h4><p>File profiles, agent profiles from agent config, more engines.</p>` },
  { ch:'Solution', sc:true, t:'Same process, its own decisions.',
    p:()=>`You’ve seen the full process. Here is what it decided for <b>${SC.wl}</b>.`,
    init:()=>({k:0,sel:null}),
    svg:s=>sceneL(Math.min(7,[0,2,4,6,7][s.k]),-1),
    live:s=>{ if(!s.k) return ''; const N=['Evidence','Decide','Prove','Enforce']; const cur=s.sel!=null?s.sel:s.k-1;
-     return `<div class="slist">${N.slice(0,s.k).map((n,i)=>`<div class="sr ${i===cur?'cur':''}" data-k="${i}"><span class="k ${i===1?'a':i===0?'r':'b'}" style="min-width:66px">${n}</span><div class="tt">${SC.recap[i]}</div></div>`).join('')}</div>`; },
+     return `<div class="slist">${N.slice(0,s.k).map((n,i)=>`<div class="sr cur" style="opacity:1"><span class="k ${i===1?'a':i===0?'r':'b'}" style="min-width:66px">${n}</span><div class="tt" style="white-space:normal;font-size:13.5px">${SC.recap[i]}</div></div>`).join('')}</div>`; },
    actl:s=>s.k<4?['Evidence','Decide','Prove','Enforce'][s.k]+' ›':'Decided and enforced', done:s=>s.k>=4, run:s=>{ s.k++; s.sel=null; },
    end:s=>`<button class="fullb" id="fullp">Show the full process (7 steps) ›</button>`,
    det:()=>SC.decDet }
 ];
 // ---------- engine
 let at=0, ST=[], watching=false;
-const FULL=[0,1,2,3,4,5,6,7,8,9,10], SHORT=[0,1,11,8,10]; let ROUTE=FULL;
+const FULL=[0,1,2,3,4,5,6,7,8,9,10,11], SHORT=[0,1,12,8,9,11]; let ROUTE=FULL;
 const ri=()=>ROUTE.indexOf(at), nextOf=()=>ROUTE[ri()+1], prevOf=()=>ROUTE[ri()-1];
 // ---------- chapter interstitials: the whole process, where we are
-const CHAP=[['Problem',['Ways in','Full breach','Engines, no rules']],['Solution',['Evidence','Decide','7 layers','Prove']],['Proof',['Enforce in stages','Same attack, stopped']],['Why now',['× 1,000 agents']],['Summary',['What you saw']]];
+const CHAP=[['Problem',['Ways in','Full breach','Engines, no rules']],['Solution',['Evidence','Decide','7 layers','Prove']],['Proof',['Enforce in stages','Same attack, stopped','Before → after']],['Why now',['42,000 decisions']],['Summary',['What you saw']]];
 const BRIDGE={Solution:'The engines exist. What’s missing is <b>the decision</b>. Here is how we make it.',Proof:'Decided from evidence, proven offline. <b>Now it goes live.</b>',['Why now']:'That was one workload. <b>Now multiply it.</b>',Summary:'Whatever gets in, <b>can only do what it needs.</b>'};
 let interTo=null;
 function inter(i){ const ch=STEPS[i].ch, ci=CHAP.findIndex(c=>c[0]===ch);
@@ -609,7 +640,8 @@ function render(fade){
   const tr=$('track'); if(st.seq){ const cnt=st.track?st.track(s):s.n; const fake={...s,n:cnt}; tr.innerHTML=trackHTML(st.seq(),fake); tr.style.display=''; tr.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ s.sel=+b.dataset.k; render(); }); } else { tr.innerHTML=''; tr.style.display='none'; }
   if(fade){ $('stage').classList.remove('fade'); void $('stage').offsetWidth; $('stage').classList.add('fade'); }
   const lv=st.live(s), en=st.end?st.end(s):'', T=typeof st.t==='function'?st.t():st.t;
-  $('cap').innerHTML=`<h1>${T}</h1><p>${st.p(s)}</p>${lv?`<div class="live">${lv}</div>`:''}${en?`<div class="endp">${en}</div>`:''}<div class="spacer"></div>${st.det?`<button class="det" id="det">Details: the evidence ›</button>`:''}`;
+  const fresh=JSON.stringify(s)===JSON.stringify(st.init());
+  $('cap').innerHTML=`<h1>${T}</h1>${fresh||st.close?`<p>${st.p(s)}</p>`:''}${lv?`<div class="live">${lv}</div>`:''}${en?`<div class="endp">${en}</div>`:''}<div class="spacer"></div>${st.det?`<button class="det" id="det">Details ›</button>`:''}`;
   if($('det')) $('det').onclick=()=>sheet(T,st.det());
   if($('fullp')) $('fullp').onclick=()=>{ ROUTE=FULL; show(2); };
   $('cap').querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{ watching=false; stop(); choose(b.dataset.sc); });
@@ -629,12 +661,12 @@ $('next').onclick=()=>{ if(nextOf()==null){ watching=false; stop(); $('cover').h
 $('back').onclick=()=>{ if(ri()>0) show(prevOf()); };
 // watch: [delay, 'a' = press the action, 'n' = next step]
 const W=(acts,gap,tail)=>{ const r=[]; let t=1400; for(let i=0;i<acts;i++){ r.push([t,'a']); t+=gap; } r.push([t+tail,'n']); return r; };
-const PLAY={0:W(4,2300,2000),1:()=>W(ATK.length,2600,1200),2:W(1,3000,2500),3:W(4,2000,1500),4:W(2,3000,1200),5:W(8,1700,1500),6:[[1200,'a'],[4600,'a'],[8000,'n']],7:W(4,1800,1000),8:()=>{ const r=[]; let t=1200; for(let i=0;i<SC.allow+2;i++){ r.push([t,'a']); t+=2800; } r.push([t+2000,'n']); return r; },9:W(2,2200,2000),10:[],11:W(4,2400,1500)};
+const PLAY={0:W(4,2300,2000),1:()=>W(ATK.length,2400,1200),2:W(1,3000,2500),3:W(4,2000,1500),4:W(2,3000,1200),5:W(8,1500,1200),6:[[1200,'a'],[4600,'a'],[8000,'n']],7:W(4,1800,1000),8:()=>{ const r=[]; let t=1200; for(let i=0;i<SC.allow+2;i++){ r.push([t,'a']); t+=2800; } r.push([t+2000,'n']); return r; },9:W(1,3600,1500),10:W(4,1900,2200),11:[],12:W(4,2400,1500)};
 function autoplay(){ stop(); const pl=PLAY[at]; (typeof pl==='function'?pl():(pl||[])).forEach(([ms,a])=>later(ms,()=>{ if(!watching) return; if(a==='n'){ if(nextOf()!=null) forward(nextOf()); } else doAct(); })); }
 function sheet(t,h){ $('shT').textContent=t; $('shB').innerHTML=h; $('sheet').classList.add('on'); $('scrim').classList.add('on'); if(watching){ watching=false; stop(); render(); } }
 function closeSheet(){ $('sheet').classList.remove('on'); $('scrim').classList.remove('on'); }
 $('shX').onclick=closeSheet; $('scrim').onclick=closeSheet;
-$('coverMap').innerHTML=sceneA({steps:[],n:0});
+$('coverMap').innerHTML=sceneE(4);
 $('watch').onclick=()=>{ $('cover').hidden=true; watching=true; ROUTE=FULL; setSC('bug'); show(0); };
 $('explore').onclick=()=>{ $('cover').hidden=true; watching=false; ROUTE=FULL; show(0); };
 ST=STEPS.map(s=>s.init()); render();
