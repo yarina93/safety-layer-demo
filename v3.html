@@ -9,11 +9,11 @@
 <meta property="og:title" content="Safety Layer · The decision layer for runtime enforcement">
 <meta property="og:description" content="One attack, one map: how the decision layer turns evidence into tested, staged eBPF enforcement. Lab data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
 :root{--bg:#0A0D14;--panel:#10151F;--panel2:#151B27;--ink:#E9EDF5;--text:#BAC3D4;--muted:#7F8AA0;--dim:#4C576B;--line:#232C3C;
-  --ok:#3DD68C;--bad:#FF5C5C;--warn:#F5B947;--info:#6EA8FE;--prog:#B392F0;
-  --body:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace}
+  --ok:#4CC38A;--bad:#E5484D;--warn:#E8A33D;--info:#7AA2F7;--prog:#B392F0;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-text-size-adjust:100%}
 button{font:inherit;cursor:pointer}
 .app{position:relative;max-width:460px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;padding:10px 14px calc(10px + env(safe-area-inset-bottom));overflow:hidden}
@@ -138,6 +138,55 @@ button{font:inherit;cursor:pointer}
 .inter .auto{height:3px;border-radius:2px;background:var(--line);margin-bottom:10px;overflow:hidden}.inter .auto i{display:block;height:100%;width:0;background:var(--warn)}
 .inter .auto.run i{animation:fill 3.2s linear forwards}@keyframes fill{to{width:100%}}
 @media (max-height:700px){.inter h2{font-size:21px;margin-bottom:14px}.road li{padding-bottom:12px}.road b{font-size:15px}.road li.n b{font-size:17px}}
+
+/* ---------- refined: calmer, product-grade */
+body,.app{font-feature-settings:'cv11','ss01','tnum'}
+.brand{font-weight:700;font-size:14.5px;letter-spacing:-.01em}
+.prog i{height:3px}
+.meter{font:600 11px var(--body);letter-spacing:.01em}.meter span{width:5px;height:10px;border-radius:1.5px}
+.chap{font:600 11px var(--body);letter-spacing:.09em}
+.stage{border-radius:14px;background:#0D1119}
+.zone{fill:rgba(229,72,77,.035);stroke:rgba(229,72,77,.28);stroke-dasharray:3 4}.zone.ok{fill:rgba(76,195,138,.03);stroke:rgba(76,195,138,.25)}
+.zl{font:600 9px var(--body);letter-spacing:.12em}
+.nd .bg{fill:#141A25;stroke:#3A4558;stroke-width:1.2}
+.nd text{font:600 11.5px var(--body);letter-spacing:-.005em;stroke-width:3.5px}.nd .sub{font:500 9px var(--body);fill:var(--muted)}
+.nd .gl{stroke:#9AA6BA;stroke-width:1.4}
+.nd.att .bg{fill:rgba(229,72,77,.12);stroke:rgba(229,72,77,.7)}
+.nd.okn .bg{fill:rgba(76,195,138,.1);stroke:rgba(76,195,138,.7)}
+.core .bg{fill:#1B1F27;stroke:var(--warn);stroke-width:1.5}
+.pod{fill:rgba(122,162,247,.035);stroke:#3E4A5E;stroke-dasharray:4 4;stroke-width:1.2}.pod.on{stroke:var(--ok);stroke-width:1.6;stroke-dasharray:none}
+.podl{font:600 9.5px var(--body);letter-spacing:.06em;text-transform:uppercase;stroke-width:3.5px}
+.pc rect{fill:#141A25;stroke:#323C4E;stroke-width:1}.pc text{font:500 10px var(--mono)}
+.pc.a rect{fill:rgba(229,72,77,.18);stroke:rgba(229,72,77,.8)}.pc.a text{fill:#F2B8BA}
+.pc.b rect{fill:transparent;stroke:rgba(76,195,138,.55)}
+.pc.ok rect{fill:rgba(76,195,138,.08);stroke:rgba(76,195,138,.55)}
+.pc.ask rect{fill:rgba(232,163,61,.08);stroke:rgba(232,163,61,.6)}
+.e.need{stroke-width:1.6;opacity:.85}.e.ex{opacity:.45}
+.e.atk{stroke-width:2}.e.run{stroke-width:2}.e.alw{stroke-width:2}.e.kept{stroke-width:1.5}
+.nb circle{fill:#0D1119;stroke:#8C97AB;stroke-width:1}.nb text{font:600 9.5px var(--body)}
+.xm circle{stroke-width:1.6}.xm path{stroke-width:1.8}
+.src rect{fill:#141A25;stroke:#323C4E}.src text{font:600 10px var(--body)}.src.on rect{stroke:rgba(122,162,247,.6);fill:rgba(122,162,247,.08)}
+.flag text{font:600 9.5px var(--body)}.rowl{font:600 8px var(--body);letter-spacing:.1em}.crumb{font:600 9px var(--body);letter-spacing:.1em;fill:var(--muted)}
+.track button{height:22px;min-width:24px;border-radius:6px;font:600 11px var(--body);background:transparent}
+.track button.a{background:rgba(229,72,77,.14);color:#F2B8BA;border-color:rgba(229,72,77,.6)}
+.track button.cur{outline:1px solid var(--ink);outline-offset:1px}
+.cap h1{font-weight:700;letter-spacing:-.02em}
+.live{border-radius:10px;background:#0F141D}
+.live .k{font:600 10.5px var(--body);letter-spacing:.03em;border-radius:4px}
+.live .k.a{background:rgba(229,72,77,.16);color:#F2B8BA}.live .k.b,.live .k.al{background:rgba(76,195,138,.14);color:var(--ok)}.live .k.r{background:rgba(122,162,247,.14);color:var(--info)}
+.live .rule{font:500 11.5px/1.45 var(--mono)}.live .rule i{background:rgba(76,195,138,.14);color:var(--ok);font:600 10.5px var(--body)}
+.det{font:600 12.5px var(--body)}
+.bar .act{border-radius:10px;font-weight:600;font-size:15px}
+.bar .act.go{box-shadow:none}
+.bar .back,.bar .next{border-radius:10px;font-weight:600}
+.bar .next.go{border-color:var(--ink);box-shadow:none;background:rgba(233,237,245,.06)}
+.modep,.modep button{font:500 11.5px var(--body)}
+.inter .ik{font:600 11px var(--body);letter-spacing:.1em}.inter h2{font-weight:700;letter-spacing:-.02em}
+.road .ss span{font:500 11.5px var(--body);border-radius:6px}.road .dot{font:600 10.5px var(--body)}
+.road li.d .dot{background:transparent;color:var(--ok)}
+.inter .go2,.cover .btns button{border-radius:12px;font-weight:600}
+.cover .k,.cover .foot,.cover .btns small{font-family:var(--body)}
+.tiles span{font:500 11px var(--body)}
 </style>
 </head>
 <body>
@@ -179,12 +228,12 @@ function glyph(t,x,y){ const g=(d)=>`<path class="gl" d="${d}"/>`;
   if(t==='ai') return g(`M${x} ${y-7}L${x+2} ${y-2}L${x+7} ${y}L${x+2} ${y+2}L${x} ${y+7}L${x-2} ${y+2}L${x-7} ${y}L${x-2} ${y-2}Z`);
   if(t==='doc') return `<rect class="gl" x="${x-5.5}" y="${y-7}" width="11" height="14" rx="1.5"/>`+g(`M${x-3} ${y-3}H${x+3}M${x-3} ${y}H${x+3}M${x-3} ${y+3}H${x+1}`);
   return ''; }
-function node(x,y,label,sub,ic,cls=''){ return `<g class="nd ${cls}"><circle class="bg" cx="${x}" cy="${y}" r="15"/>${glyph(ic,x,y)}<text x="${x}" y="${y+29}" text-anchor="middle">${label}</text>${sub?`<text x="${x}" y="${y+40}" text-anchor="middle" class="sub">${sub}</text>`:''}</g>`; }
+function node(x,y,label,sub,ic,cls=''){ return `<g class="nd ${cls}"><rect class="bg" x="${x-15}" y="${y-15}" width="30" height="30" rx="8"/>${glyph(ic,x,y)}<text x="${x}" y="${y+29}" text-anchor="middle">${label}</text>${sub?`<text x="${x}" y="${y+40}" text-anchor="middle" class="sub">${sub}</text>`:''}</g>`; }
 function exitRect(x1,y1,x2,y2,R){ const [rx,ry,rw,rh]=R; let tmin=1; const tryT=t=>{ if(t>0&&t<tmin){ const x=x1+(x2-x1)*t,y=y1+(y2-y1)*t; if(x>=rx-.1&&x<=rx+rw+.1&&y>=ry-.1&&y<=ry+rh+.1) tmin=t; } };
   if(x2!==x1){ tryT((rx-x1)/(x2-x1)); tryT((rx+rw-x1)/(x2-x1)); } if(y2!==y1){ tryT((ry-y1)/(y2-y1)); tryT((ry+rh-y1)/(y2-y1)); } return [x1+(x2-x1)*tmin,y1+(y2-y1)*tmin]; }
 function trim(a,b,r1=18,r2=20){ const [x1,y1]=a,[x2,y2]=b,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L; return [x1+ux*r1,y1+uy*r1,x2-ux*r2,y2-uy*r2]; }
 const DEFS=`<defs>${[['atk','#FF5C5C'],['run','#6EA8FE'],['alw','#3DD68C']].map(([c,f])=>`<marker id="m-${c}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="${f}"/></marker>`).join('')}</defs>`;
-const nb=(x,y,n)=>`<g class="nb"><circle cx="${x}" cy="${y}" r="9"/><text x="${x}" y="${y+3.8}" text-anchor="middle">${n}</text></g>`;
+const nb=(x,y,n)=>`<g class="nb"><circle cx="${x}" cy="${y}" r="7.5"/><text x="${x}" y="${y+3.3}" text-anchor="middle">${n}</text></g>`;
 const xmark=(x,y,ok=true,now=false)=>`<g class="xm ${ok?'':'xb'} ${now?'now':''}"><circle cx="${x}" cy="${y}" r="10"/><path d="M${x-4.5} ${y-4.5}L${x+4.5} ${y+4.5}M${x+4.5} ${y-4.5}L${x-4.5} ${y+4.5}"/></g>`;
 // an action along a line: a packet travels, then the line stays. blocked: stops at the pod wall
 function action(a,b,cls,{n,fresh,stopAt}={}){ let [x1,y1,x2,y2]=trim(a,b); let bx,by;
