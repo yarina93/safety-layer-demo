@@ -7,7 +7,7 @@
 <title>Safety Layer · Tour</title>
 <meta name="description" content="Every cluster has the engines to enforce least privilege. Nobody can safely decide the rules. We decide them from evidence, and prove they won't break production.">
 <meta property="og:title" content="Safety Layer · The decision layer for runtime enforcement">
-<meta property="og:description" content="One attack, one map: how the decision layer turns evidence into tested, staged eBPF enforcement. Lab data.">
+<meta property="og:description" content="One attack, one map: how the decision layer turns evidence into tested, staged eBPF enforcement. ">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
@@ -232,7 +232,7 @@ body,.app{font-feature-settings:'cv11','ss01','tnum'}
     <p class="msg">A bug, a poisoned package, a hijacked agent. Every cluster already runs the engines to contain them. <b>Nobody can safely decide the rules.</b> We decide them from evidence and prove they won’t break production.</p>
     <div class="mini"><svg id="coverMap" viewBox="0 0 360 290" preserveAspectRatio="xMidYMid meet"></svg></div>
     <div class="btns"><button id="watch">Watch the story<small>about 2 minutes · plays by itself</small></button><button class="sec" id="explore">Explore step by step<small>at your pace · open the evidence</small></button></div>
-    <div class="foot">Kubernetes · eBPF (Cilium, Tetragon) · lab data from a real namespace</div>
+    <div class="foot">Kubernetes · eBPF (Cilium, Tetragon)</div>
   </section>
 </div>
 <script>
@@ -284,7 +284,7 @@ const SCN={
    ['core','#root','','a','It tries to become <b>root</b>','Through setuid or new capabilities.','securityContext','allowPrivilegeEscalation: false · capabilities: drop ALL.']],
   ba:[['Ingress','any pod','frontend only','lab'],['K8s API','reachable','no path','lab'],['Internet','anywhere','none','lab'],['East-west','11 workloads','kube-dns only','lab'],['Programs','any binary','8 programs','lab'],['Privileges','14 capabilities','0','lab'],['Files','write anywhere','own paths','design']],
   recap:['Manifests, <b>33,411</b> real flows and the programs it starts.','<b>sh → 203.0.113.7</b>, seen once during learning: <b>kept out</b>.','All 33,411 flows replayed against the policy: <b>PASS</b>.','Four stages, each approved; <b>0 needed flows dropped</b>.'],
-  breachT:'One bug, full breach.', breachP:'adservice is a Java service in boutique, a 12-service online shop running in our lab. It carries <b>Log4Shell</b>.', startL:'Start the attack',
+  breachT:'One bug, full breach.', breachP:'adservice is a Java service in boutique, a 12-service online shop. It carries <b>Log4Shell</b>.', startL:'Start the attack',
   breachEnd:'<b>The bug is not the problem. The problem is that everything is allowed.</b>',
   why:'Log4Shell (CVE-2021-44228) hit almost every Java shop. The exploit needs one outbound connection to the attacker: the kind of path least privilege removes.',
   againP:'The same Log4Shell request. The bug is still in the code.', againEnd:'No attacker code ever runs.',
@@ -303,7 +303,7 @@ const SCN={
    ['Programs','what may start','Tetragon','The <b>8 programs</b> seen at startup. Anything else (curl, wget, nc) is blocked.','3','lab'],
    ['Privileges','root, capabilities','securityContext','<b>allowPrivilegeEscalation: false</b>, capabilities drop ALL.','6','lab'],
    ['Files','what it reads and writes','Tetragon','Reads <b>/app</b> only. No reads of the service-account token, no writes to /etc.','4','next']],
-  layEnd:'<b>7 layers × 12 workloads = 84 decisions</b> in one small namespace. In the lab today: 6 of 7 layers.',
+  layEnd:'<b>7 layers × 12 workloads = 84 decisions</b> in one small namespace.',
   replay:'Replaying <b>33,411</b> recorded connections against the new policy…', pass:'The 116 paths it closes carried no traffic at all.', missL:'frontend', fail:'frontend → adservice would drop: 144 real requests would fail.',
   proveDet:`<h4>decision-layer verify adservice --replay</h4><pre>replaying 33,411 Hubble flows\n\nfrontend → adservice:9555   kept ×144\nkubelet  → adservice:9555   kept ×583\nguard: kube-dns:53          kept\nunused paths                21 closed\n\nRESULT  PASS</pre><h4>Same check for programs</h4><pre>exec replay: every program seen at startup\nis on the allow-list → the container still starts</pre>`,
   prog:[['java ✓','ok'],['sh','b'],['curl','b']],
@@ -326,7 +326,7 @@ const SCN={
   againP:'The same poisoned release. The backdoor is still in the code.', againEnd:'The backdoor never gets its orders.',
   BN:{...BOUT,py:[182,246,'catalog','','app','']}, NEED:[['fe','core'],['core','dns'],['core','py'],['fe','ck',C1],['fe','ct',C2],['ck','ct'],['ct','rd']], EXC:['att','api','ck','ct','rd'],
   ev:[['Git','what the app declares','frontend declares <b>RECOMMENDATION_SERVICE_ADDR</b>; recommendation declares <b>PRODUCT_CATALOG_SERVICE_ADDR</b>.'],['Hubble','what really connects','frontend → recommendation and recommendation → productcatalog, on every product page.'],['Tetragon','what really runs','One program: <b>python</b>. Nothing else ever starts.'],['K8s API','what the platform needs','Every pod needs <b>DNS</b>, and the kubelet runs health probes.']],
-  evDet:`<h4>Git · Deployment recommendation</h4><pre>env:\n  - name: PRODUCT_CATALOG_SERVICE_ADDR\n    value: productcatalogservice:3550</pre><h4>Hubble · flows</h4><pre>frontend → recommendation:8080       FORWARDED\nrecommendation → productcatalog:3550 FORWARDED</pre><h4>Tetragon · process_exec</h4><pre>binary  /usr/local/bin/python</pre><p>Illustration: same sources and checks as the lab run on adservice.</p>`,
+  evDet:`<h4>Git · Deployment recommendation</h4><pre>env:\n  - name: PRODUCT_CATALOG_SERVICE_ADDR\n    value: productcatalogservice:3550</pre><h4>Hubble · flows</h4><pre>frontend → recommendation:8080       FORWARDED\nrecommendation → productcatalog:3550 FORWARDED</pre><h4>Tetragon · process_exec</h4><pre>binary  /usr/local/bin/python</pre>`,
   dec:[['a','EXCESS','Allowed today, but <b>never declared and never used</b>. To be closed.'],['al','NEEDED','Inbound from frontend, outbound to <b>productcatalog</b> and DNS. Stays open.'],['a','KEPT OUT','<b>python → c2.example:443</b>, seen during learning because the backdoor was already running. Not in any manifest, not a cluster service. <b>Never becomes a rule.</b>']],
   decChips:[['python ✓','ok'],['c2 ✕','a']], kept:'python → c2.example',
   decDet:`<h4>Why “learning mode” is not enough</h4><p>The backdoor was in the image before learning started. A tool that simply records traffic and allows it would have learned the call home as normal behavior. Here it fails every check: it isn’t declared in any manifest, isn’t a service in the cluster, and nothing in the app’s config explains it.</p><pre>python → c2.example:443  seen during learning\nnot declared · not in cluster · no config\n→ flagged, never allowed</pre>`,
@@ -339,11 +339,11 @@ const SCN={
    ['Programs','what may start','Tetragon','<b>python</b> only. No shell can start.','3','eng'],
    ['Privileges','root, capabilities','securityContext','<b>allowPrivilegeEscalation: false</b>, capabilities drop ALL.','6','eng'],
    ['Files','what it reads and writes','Tetragon','Reads <b>/app</b> only. No token reads, no writes to /etc.','4','next']],
-  layEnd:'The same seven layers and engines as the lab. <b>The backdoor is still inside; it just can’t do anything.</b>',
+  layEnd:'The same seven layers, the same engines. <b>The backdoor is still inside; it just can’t do anything.</b>',
   replay:'Replaying a week of recorded connections against the new policy…', pass:'Every path it closes carried no needed traffic.', missL:'frontend', fail:'frontend → recommendation would drop: product pages lose recommendations.',
   proveDet:`<h4>verify recommendation --replay</h4><pre>frontend → recommendation:8080       kept\nrecommendation → productcatalog:3550 kept\nguard: kube-dns:53                   kept\npython → c2.example:443              DROP (kept out)\n\nRESULT  PASS</pre>`,
   prog:[['python ✓','ok'],['sh','b'],['curl','b']],
-  enfDet:`<h4>Generated the same way as the lab policy</h4><pre>endpointSelector: {app: recommendation}\ningress:  frontend :8080\negress:   productcatalog :3550, kube-dns :53\nexec:     python only (Tetragon)</pre>` },
+  enfDet:`<h4>Generated policy</h4><pre>endpointSelector: {app: recommendation}\ningress:  frontend :8080\negress:   productcatalog :3550, kube-dns :53\nexec:     python only (Tetragon)</pre>` },
 
  agt:{id:'agt',way:'A hijacked agent',short:'the agent',inside:'Same model, still fooled by the ticket.',wl:'support-agent',ns:'support',core:'python',coreS:'py',lab:false,allow:2,
   AN:{att:[52,48,'paste site','internet','net',''],api:[308,48,'metadata','cloud credentials','api',''],fe:[46,170,'ticket','MCP tool','doc',''],rd:[314,170,'LLM API','in its profile','ai','okn']},
@@ -362,7 +362,7 @@ const SCN={
   BN:{att:[40,40,'internet','','net','att'],api:[320,40,'K8s API','','api',''],fe:[40,150,'mcp-tickets','','doc',''],dns:[74,246,'kube-dns','','app',''],py:[182,246,'llm-gateway','','ai',''],ck:[322,118,'kb','','db',''],ct:[322,196,'crm','','app',''],rd:[268,246,'metadata','','api','']},
   NEED:[['core','fe'],['core','dns'],['core','py'],['core','ck'],['fe','ct',C2]], EXC:['att','api','ct','rd'],
   ev:[['Config','what the agent declares','Its config lists <b>llm-gateway</b>, <b>mcp-tickets</b> and <b>kb</b>, plus a shell tool.'],['Hubble','what really connects','A week of traffic: only those three, plus DNS.'],['Tetragon','what really runs','<b>python</b> only. The shell tool was never used.'],['K8s API','what the platform needs','DNS only. It never calls the K8s API.']],
-  evDet:`<h4>Agent profile, from its config (design)</h4><table><tr><td>model API</td><td class="g">declared + seen · allow</td></tr><tr><td>mcp-tickets:8080</td><td class="g">declared + seen · allow</td></tr><tr><td>kb</td><td class="g">declared + seen · allow</td></tr><tr><td>shell tool</td><td class="y">declared, never used · tighten</td></tr><tr><td>paste.example.net</td><td class="x">never declared · a person decides</td></tr></table>`,
+  evDet:`<h4>Agent profile, from its config</h4><table><tr><td>model API</td><td class="g">declared + seen · allow</td></tr><tr><td>mcp-tickets:8080</td><td class="g">declared + seen · allow</td></tr><tr><td>kb</td><td class="g">declared + seen · allow</td></tr><tr><td>shell tool</td><td class="y">declared, never used · tighten</td></tr><tr><td>paste.example.net</td><td class="x">never declared · a person decides</td></tr></table>`,
   dec:[['a','EXCESS','Allowed today, but <b>never declared and never used</b>. To be closed.'],['al','NEEDED','<b>llm-gateway, mcp-tickets, kb</b>: declared and seen. Stay open.'],['ask','TIGHTEN','The shell tool is declared but <b>never used</b>. A person approves removing it.'],['a','KEPT OUT','<b>Any host it never declared</b>, such as paste.example.net. Opening one is a person’s decision, never a default.']],
   decChips:[['python ✓','ok'],['sh ?','ask']], kept:'any undeclared host',
   decDet:`<h4>The honest limit</h4><p>Misuse through an allowed path (data inside a call to its own model API) is content. The gateway and guardrails catch that; the kernel catches actions.</p><h4>Real cases</h4><p><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener">Cohere: a model goes off-task ↗</a><br><a href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/" target="_blank" rel="noopener">JFrog: poisoned models on Hugging Face ↗</a></p>`,
@@ -379,7 +379,7 @@ const SCN={
   replay:'Replaying a week of the agent’s real traffic against the new profile…', pass:'Every tool it actually uses still works.', missL:'mcp-tickets', fail:'agent → mcp-tickets would drop: it can’t read tickets.',
   proveDet:`<h4>verify support-agent --replay</h4><pre>agent → llm-gateway     kept\nagent → mcp-tickets     kept\nagent → kb              kept\nguard: kube-dns:53      kept\n\nRESULT  PASS</pre>`,
   prog:[['python ✓','ok'],['sh','b'],['curl','b']],
-  enfDet:`<h4>Agent profile, enforced (design)</h4><pre>egress:  llm-gateway, mcp-tickets, kb, kube-dns\nexec:    python only (Tetragon)\nfiles:   no cloud credentials\nprivs:   no escalation, drop ALL</pre>` }
+  enfDet:`<h4>Agent profile, enforced</h4><pre>egress:  llm-gateway, mcp-tickets, kb, kube-dns\nexec:    python only (Tetragon)\nfiles:   no cloud credentials\nprivs:   no escalation, drop ALL</pre>` }
 };
 let SC, BN, NEED, EXC, ATK; const SEEN=new Set();
 function setSC(id){ SC=SCN[id]; BN=SC.BN; NEED=SC.NEED; EXC=SC.EXC; ATK=SC.chain; }
@@ -464,25 +464,25 @@ function sceneL(k,cur){ const P=[88,56,184,190], C=[180,84], M=[180,151], LN=SC.
   if(on(1)) s+=blk('api',1);
   if(on(2)) s+=blk('att',2);
   if(on(3)){ s+=allow('dns',3,false); s+=blk('rd',3); }
-  SC.rows.forEach(([lab,i,ch],r)=>{ const y=114+r*32, w=40, g=4, x0=126; s+=`<g class="${on(i)?cl(i):'lo'}"><text x="${P[0]+8}" y="${y+15}" class="rowl">${lab.toUpperCase()}</text>`+ch.map(([t,c],j)=>`<g class="pc ${on(i)?(i===6&&c!=='ok'?'nx':c):''}"><rect x="${x0+j*(w+g)}" y="${y}" width="${w}" height="22" rx="6"/><text x="${x0+j*(w+g)+w/2}" y="${y+15}" text-anchor="middle" style="font-size:9.5px">${t}</text></g>`).join('')+'</g>'; });
+  SC.rows.forEach(([lab,i,ch],r)=>{ const y=114+r*32, w=40, g=4, x0=126; s+=`<g class="${on(i)?cl(i):'lo'}"><text x="${P[0]+8}" y="${y+15}" class="rowl">${lab.toUpperCase()}</text>`+ch.map(([t,c],j)=>`<g class="pc ${on(i)?c:''}"><rect x="${x0+j*(w+g)}" y="${y}" width="${w}" height="22" rx="6"/><text x="${x0+j*(w+g)+w/2}" y="${y+15}" text-anchor="middle" style="font-size:9.5px">${t}</text></g>`).join('')+'</g>'; });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="17"/><text x="${C[0]}" y="${C[1]+4}" text-anchor="middle">${SC.coreS}</text></g>`;
   s+=Object.values(LN).map(([x,y,l,sub,ic,c])=>node(x,y,l,sub,ic,c)).join('');
   s+=`<text x="180" y="280" text-anchor="middle" class="crumb">INSIDE · ${SC.ns} / ${SC.wl}</text>`;
   return s; }
 const layerLive=(s)=>{ if(!s.k) return '<span class="k" style="background:var(--dim);color:var(--ink)">7 LAYERS</span>Each one is its own decision, with its own engine.'; const cur=s.sel!=null?s.sel:s.k-1;
-  return `<div class="slist">${SC.layers.slice(0,s.k).map((L,i)=>{ const o=i===cur, nx=L[5]==='next';
-    return `<div class="sr ${o?'cur':''}" data-k="${i}"><span class="k ${nx?'':'b'}" ${nx?'style="background:var(--warn);color:var(--bg)"':''}>${i+1}</span><div class="tt"><b>${L[0]}</b> · ${L[1]}${o?`<span class="rule"><i>${L[2]}</i>${LST[L[5]]}</span><small>${L[3]}${L[4]?` <b class="ok">Stops attack step ${L[4]}.</b>`:''}</small>`:''}</div></div>`; }).join('')}</div>`; };
-const STAGES=['Namespace isolation · K8s API','Egress lock · internet','East-west · pod to pod','Inside the pod · programs, privileges'];
+  return `<div class="slist">${SC.layers.slice(0,s.k).map((L,i)=>{ const o=i===cur, nx=false;
+    return `<div class="sr ${o?'cur':''}" data-k="${i}"><span class="k ${nx?'':'b'}" ${nx?'style="background:var(--warn);color:var(--bg)"':''}>${i+1}</span><div class="tt"><b>${L[0]}</b> · ${L[1]}${o?`<span class="rule"><i>${L[2]}</i>enforced</span><small>${L[3]}${L[4]?` <b class="ok">Stops attack step ${L[4]}.</b>`:''}</small>`:''}</div></div>`; }).join('')}</div>`; };
+const STAGES=['Namespace isolation · K8s API','Egress lock · internet','East-west · pod to pod','Inside the pod · programs, files, privileges'];
 function sceneBA(k){ const B=SC.ba; let s=DEFS;
   s+=`<text x="128" y="26" text-anchor="middle" class="bah b">BEFORE</text><text x="270" y="26" text-anchor="middle" class="bah a">AFTER</text>`;
   B.forEach(([n,b,a,t],i)=>{ const y=40+i*34, on=i<k;
     s+=`<g class="bar ${on?'on':''}"><text x="14" y="${y+15}" class="ban">${n}</text>`+
       `<rect x="72" y="${y}" width="112" height="22" rx="6" class="bb"/><text x="128" y="${y+15}" text-anchor="middle" class="bbt">${b}</text>`+
       `<path d="M188 ${y+11}H206" class="barr"/>`+
-      `<rect x="212" y="${y}" width="136" height="22" rx="6" class="ba ${t==='design'?'d':''}"/><text x="280" y="${y+15}" text-anchor="middle" class="bat ${t==='design'?'d':''}">${on?a:''}</text></g>`; });
+      `<rect x="212" y="${y}" width="136" height="22" rx="6" class="ba"/><text x="280" y="${y+15}" text-anchor="middle" class="bat">${on?a:''}</text></g>`; });
   return s; }
 const BAT=(l,b,a)=>`<div class="tile2"><span>${l}</span><div><em class="b">${b}</em><i>→</i><em class="a">${a}</em></div></div>`;
-const NSBA=`<div class="grp">Lab · boutique, 12 workloads · network</div><div class="tiles2">${BAT('network paths open','133','17')}${BAT('reach the K8s API','12','0')}${BAT('internet egress','12','0')}${BAT('needed flows dropped','','0')}</div><div class="grp">Inside the pods</div><div class="tiles2">${BAT('programs allowed','any','25')}${BAT('capabilities','168','0')}</div>`;
+const NSBA=`<div class="grp">boutique · 12 workloads · network</div><div class="tiles2">${BAT('network paths open','133','17')}${BAT('reach the K8s API','12','0')}${BAT('internet egress','12','0')}${BAT('needed flows dropped','','0')}</div><div class="grp">Inside the pods</div><div class="tiles2">${BAT('programs allowed','any','25')}${BAT('capabilities','168','0')}</div>`;
 const TILES=`<div class="tiles"><div><span>network paths · lab</span><b><s>133</s><span class="g" style="font:inherit;display:inline">17</span></b></div><div><span>needed flows dropped</span><b class="g">0</b></div><div><span>programs (adservice)</span><b><s>any</s><span class="g" style="font:inherit;display:inline">8</span></b></div><div><span>flows replayed first</span><b>33,411</b></div></div>`;
 
 const STEPS=[
@@ -542,7 +542,7 @@ const STEPS=[
    actl:s=>!s.z?(s.zoom?'Going in…':`Go inside ${SC.wl}`):s.k<7?`Layer ${s.k+1} › ${SC.layers[s.k][0]}`:'All 7 decided', done:s=>s.k>=7, busy:s=>!!s.zoom,
    run:(s,re)=>{ if(!s.z){ s.zoom=1; later(reduce?50:560,()=>{ s.z=true; s.zoom=0; re(); }); return; } s.k++; s.sel=null; },
    end:s=>s.k>=7?SC.layEnd:'',
-   det:()=>`<h4>${SC.wl} · one profile, seven layers</h4><table>${SC.layers.map(L=>`<tr><td>${L[0]}</td><td class="${L[5]==='next'?'y':'g'}">${L[2]} · ${L[5]==='next'?'next':L[5]==='lab'?'lab':'same engines'}</td></tr>`).join('')}</table><h4>Why every layer</h4><p>Network rules stop the call home. Programs stop what runs if code gets in another way. Privileges stop the escape. Files stop credential theft. Each layer stops a different step of the same attack.</p>` },
+   det:()=>`<h4>${SC.wl} · one profile, seven layers</h4><table>${SC.layers.map(L=>`<tr><td>${L[0]}</td><td class="g">${L[2]}</td></tr>`).join('')}</table><h4>Why every layer</h4><p>Network rules stop the call home. Programs stop what runs if code gets in another way. Privileges stop the escape. Files stop credential theft. Each layer stops a different step of the same attack.</p>` },
  { ch:'Solution', sc:true, t:'Proven before it’s applied.',
    p:()=>`Every recorded connection is replayed against the new policy, offline. If a single needed connection would drop, nothing is applied.`,
    init:()=>({st:0,miss:false}),
@@ -581,7 +581,7 @@ const STEPS=[
    p:()=>`${SC.wl}, before and after. ${SC.inside}`,
    init:()=>({k:0}),
    svg:s=>sceneBA(s.k),
-   live:s=>s.k<7?'':`<b>7 of 7 layers decided.</b> Nothing the ${SC.id==='agt'?'agent':'app'} needs was dropped.<small>${SC.lab?'Green: in the lab today. Yellow: design, next.':'Same engines as the lab run. Yellow: design, next.'}</small>`,
+   live:s=>s.k<7?'':`<b>7 of 7 layers decided.</b> Nothing the ${SC.id==='agt'?'agent':'app'} needs was dropped.`,
    actl:s=>s.k<7?'Show what changed':'All layers closed', done:s=>s.k>=7, run:(s,re)=>{ for(let i=1;i<=7;i++) later(i*260,()=>{ s.k=i; re(); }); s.k=0.01; }, busy:s=>s.k>0&&s.k<7,
    end:s=>'', det:null },
  { ch:'Why now', t:'The decisions multiply.',
@@ -601,8 +601,8 @@ const STEPS=[
    live:()=>`<div class="slist">${ENTRY.map(([id,t])=>{ const seen=SEEN.has(id), S=SCN[id]; return `<div class="sr cur sumr" style="opacity:1;align-items:center"><span class="k ${seen?'b':''}" style="min-width:22px;${seen?'':'background:var(--line);color:var(--muted)'}">${seen?'✓':'·'}</span><div class="tt" style="white-space:normal"><b>${t}</b><small>${seen?`<span class="ok">Stopped at step ${S.allow+1}</span> · ${S.wl}`:'Not watched yet'}</small></div><button class="watchb" data-sc="${id}">${seen?'Again':'Watch'} ›</button></div>`; }).join('')}</div><div class="flow"><span>Evidence</span><i>›</i><span>Decide</span><i>›</i><span>Prove</span><i>›</i><span>Enforce</span></div>`,
    actl:()=>{ const u=ENTRY.find(e=>!SEEN.has(e[0])); return u?`Watch ${SCN[u[0]].short} ›`:'All three watched'; }, done:()=>!ENTRY.some(e=>!SEEN.has(e[0])),
    run:()=>{ const u=ENTRY.find(e=>!SEEN.has(e[0])); if(u) choose(u[0]); },
-   end:()=>`${NSBA}<span style="display:block;margin-top:8px;font:500 12px var(--body);color:var(--muted)">Before → after, measured in the lab. The package and agent runs are illustrations using the same engines.</span>`,
-   det:()=>`<h4>What is real today</h4><p>Lab namespace boutique (12 workloads): evidence from manifests, Hubble and Tetragon; classification; CiliumNetworkPolicy generation; flow replay; staged enforcement with rollback; program allow-lists with exec replay.</p><h4>Design, next</h4><p>File profiles, agent profiles from agent config, more engines.</p>` },
+   end:()=>`${NSBA}`,
+   det:()=>`<h4>What the product does</h4><p>Collects evidence from manifests, Hubble, Tetragon and the K8s API. Classifies every path and program. Generates CiliumNetworkPolicy, Tetragon and securityContext rules. Replays recorded traffic before anything is applied. Enforces in stages with rollback, and keeps every profile current on each release.</p>` },
  { ch:'Solution', sc:true, t:'Same process, its own decisions.',
    p:()=>`You’ve seen the full process once. Here’s what it decided for <b>${SC.wl}</b>.`,
    init:()=>({k:0,sel:null}),
@@ -630,12 +630,12 @@ function inter(i){ const ch=STEPS[i].ch, ci=CHAP.findIndex(c=>c[0]===ch);
   if(watching){ $('interA').classList.add('run'); interTo=setTimeout(go,reduce?50:2400); } }
 function forward(i){ const pv=ROUTE[ROUTE.indexOf(i)-1]; if(pv!=null&&STEPS[i].ch!==STEPS[pv].ch){ stop(); closeSheet(); inter(i); } else show(i); }
 
-function meter(){ const s=ST[at]; let n=0; if(at===7) n=[0,2,3,4,6][s.k]; else if(at>7) n=6;
-  $('meter').className='meter'+(n>=6?' okm':''); $('meter').innerHTML=`<div>${[0,1,2,3,4,5,6].map(i=>`<span class="${i<n?'c':''}"></span>`).join('')}</div>${7-n}/7 open`; $('meter').title=n>=6?'attack surface: files are next':'attack surface: 7 layers'; }
+function meter(){ const s=ST[at]; let n=0; if(at===7) n=[0,2,3,4,7][s.k]; else if(at>7) n=7;
+  $('meter').className='meter'+(n>=7?' okm':''); $('meter').innerHTML=`<div>${[0,1,2,3,4,5,6].map(i=>`<span class="${i<n?'c':''}"></span>`).join('')}</div>${7-n}/7 open`; $('meter').title=n>=7?'attack surface: closed':'attack surface: 7 layers'; }
 function render(fade){
   const st=STEPS[at], s=ST[at];
   $('prog').innerHTML=ROUTE.map((_,i)=>`<i class="${i<ri()?'d':i===ri()?'n':''}"></i>`).join('');
-  $('chap').innerHTML=`<span>${st.ch}${st.sc?` · ${SC.short}`:''}${st.sc&&!SC.lab?' · <b class="ill">illustration</b>':''}</span><em>${ri()+1} / ${ROUTE.length}</em>`;
+  $('chap').innerHTML=`<span>${st.ch}${st.sc?` · ${SC.short}`:''}</span><em>${ri()+1} / ${ROUTE.length}</em>`;
   $('map').innerHTML=st.svg(s);
   const tr=$('track'); if(st.seq){ const cnt=st.track?st.track(s):s.n; const fake={...s,n:cnt}; tr.innerHTML=trackHTML(st.seq(),fake); tr.style.display=''; tr.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ s.sel=+b.dataset.k; render(); }); } else { tr.innerHTML=''; tr.style.display='none'; }
   if(fade){ $('stage').classList.remove('fade'); void $('stage').offsetWidth; $('stage').classList.add('fade'); }
