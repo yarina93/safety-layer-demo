@@ -85,9 +85,11 @@ button{font:inherit;cursor:pointer;color:inherit}
 .fadein{animation:fin .4s ease}
 .pod.on{stroke:#2B6B48;stroke-dasharray:none}.foot.ok{fill:#3E8E64}
 .xm circle{fill:#0A0D14;stroke:var(--ok);stroke-width:1.4}.xm path{stroke:var(--ok);stroke-width:1.6;stroke-linecap:round}
+.eng-l{font:600 9.5px var(--body);fill:var(--ok);letter-spacing:.02em}.eng-l.y{fill:var(--warn)}
 .chip.blk rect{fill:#0F1F17;stroke:#2B6B48}.chip.blk text{fill:#6FA98A;text-decoration:line-through}.chip.runs rect{fill:#2A2213;stroke:#6B5223}.chip.runs text{fill:var(--warn)}
-.steps li.b .n,.steps li.b .tag{background:#123222;color:var(--ok)}.steps li.y .tag{background:#33281A;color:var(--warn)}
+.steps li.r .tag{background:#17233A;color:var(--info)}.steps li.b .n,.steps li.b .tag{background:#123222;color:var(--ok)}.steps li.y .tag{background:#33281A;color:var(--warn)}
 .st rect{fill:#0F141E;stroke:#1E2633}.st.on rect{fill:#0F1F17;stroke:#2B6B48}.st text{font:600 10.5px var(--body);fill:var(--dim)}.st.on text{fill:var(--ok)}
+.bap .frame{fill:#0F141E;stroke:#1E2633}.bap.aft .frame{stroke:#1F4A33}.bap .h{font:600 10px var(--body);letter-spacing:.12em;fill:var(--muted)}.bap .pt{font:600 10.5px var(--mono);fill:#F08A8D}.bap.aft .pt{fill:var(--ok)}.bap .cnt{font:500 10px var(--body);fill:var(--muted)}
 .ba .h{font:600 9.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.ba .n{font:600 12px var(--body);fill:var(--text)}.ba .b{font:500 11.5px var(--mono);fill:#C06A6E}.ba .a{font:600 11.5px var(--mono);fill:var(--ok)}.ba rect{fill:#0F141E}
 .e.al{stroke:#5C6880}.e.ex{stroke:var(--bad);stroke-dasharray:3 4;opacity:.8}
 .pc rect{fill:#151B27;stroke:#2C3546}.pc text{font:600 10px var(--mono);fill:var(--text)}
@@ -204,20 +206,28 @@ const C2={N:{hf:[50,56,'Hugging Face','model file','pkg'],c2:[310,56,'attacker',
   {from:'core',to:'nb',c:'a',t:'A kernel bug like <b>Copy Fail</b> reaches the pods next to it.',s:'Every pod on a node shares one kernel. One bad pod can corrupt what its neighbors run.'}]};
 const POD=[110,80,140,118], CORE=[180,104];
 const xm=(x,y)=>`<g class="xm"><circle cx="${x}" cy="${y}" r="8"/><path d="M${x-3.2} ${y-3.2}L${x+3.2} ${y+3.2}M${x+3.2} ${y-3.2}L${x-3.2} ${y+3.2}"/></g>`;
-const E1=[['r','Allowed. It’s the agent’s job.'],['b','Tetragon: only python may start. bash never runs.'],['b','Same rule. No shell, no look-around.'],['b','Same rule.'],['b','Cilium: egress to model-store, task queue, kb and DNS only. DROP.']];
-const E2=[['r','The file was already in the model store. Loading it is allowed.'],['r','The hidden code runs inside python. That part no runtime rule can see.'],['b','Tetragon: only python may start. /bin/sh is killed.'],['b','Cilium: no internet egress. Even python can’t call out.'],['b','Kernel rule: socket(AF_ALG) is refused. The Copy Fail path is closed.']];
+const E1=[['r','','The task arrives.','Allowed. It’s the agent’s job.'],
+  ['b','Tetragon','The model tries to run <b>ls</b> through the shell.','Only python may start. The shell never runs.'],
+  ['b','Tetragon','It tries <b>which curl wget</b>.','No shell, so no look-around.'],
+  ['b','Tetragon','It tries to <b>read the DNS settings</b>.','Same rule: cat can’t start.'],
+  ['b','Cilium','It tries to <b>upload to the bucket</b> in Beijing.','Egress only to model-store, task queue, kb and DNS. Dropped.']];
+const E2=[['r','','The agent <b>loads the model file</b>.','Allowed: it’s in the approved model store.'],
+  ['y','','The hidden code <b>runs inside python</b>.','Not blocked. No runtime rule sees inside an allowed process.'],
+  ['b','Tetragon','It tries to start <b>/bin/sh</b>.','Only python may start. Killed.'],
+  ['b','Cilium','It tries to <b>call the attacker</b>.','No internet egress, even from python. Dropped.'],
+  ['b','Tetragon','It tries <b>Copy Fail</b>: an AF_ALG socket.','The syscall is refused.']];
 function sceneCase(C,n,fresh,E){ const [px,py,pw,ph]=POD; let s=DEFS, chips=0;
   s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod ${E?'on':''}"/><text x="180" y="${py+ph+15}" text-anchor="middle" class="podl">AGENT POD</text>`;
   const P=k=>k==='core'?CORE:C.N[k];
   C.chain.forEach((st,i)=>{ if(i>=n) return; const f=fresh&&i===n-1;
     const B=E&&E[i][0]==='b';
     if(st.chip){ const y=128+chips*22; chips++; const w=Math.max(70,st.chip.length*6.6+14);
-      s+=`<g class="chip ${B?'blk':''} ${E&&!B?'runs':''} ${f?'fadein':''}"><rect x="${180-w/2}" y="${y}" width="${w}" height="18" rx="5"/><text x="180" y="${y+12.5}" text-anchor="middle">${st.chip}</text></g><g class="${f?'fadein':''}">${badge(180-w/2-11,y+9,i+1,'a')}</g>`; return; }
-    if(B){ const [x1,y1,x2,y2]=trim(CORE,P(st.to)); const [bx,by]=exitRect(x1,y1,x2,y2,POD); s+=`<line x1="${x1}" y1="${y1}" x2="${bx}" y2="${by}" class="e a ${f?'draw':''}" pathLength="1"/><line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e x"/><g class="${f?'fadein':''}">${xm(bx,by)}${badge((x1+bx)/2,(y1+by)/2,i+1,'a')}</g>`; return; }
+      s+=`<g class="chip ${B?'blk':''} ${E&&!B?'runs':''} ${f?'fadein':''}"><rect x="${180-w/2}" y="${y}" width="${w}" height="18" rx="5"/><text x="180" y="${y+12.5}" text-anchor="middle">${st.chip}</text></g><g class="${f?'fadein':''}">${badge(180-w/2-11,y+9,i+1,'a')}${B?`<text x="${180+w/2+6}" y="${y+12.5}" class="eng-l">✕ ${E[i][1]}</text>`:''}</g>`; return; }
+    if(B){ const [x1,y1,x2,y2]=trim(CORE,P(st.to)); const [bx,by]=exitRect(x1,y1,x2,y2,POD); s+=`<line x1="${x1}" y1="${y1}" x2="${bx}" y2="${by}" class="e a ${f?'draw':''}" pathLength="1"/><line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e x"/><g class="${f?'fadein':''}">${xm(bx,by)}<text x="${bx+(bx>180?12:-12)}" y="${by-10}" text-anchor="${bx>180?'start':'end'}" class="eng-l">${E[i][1]}</text>${badge((x1+bx)/2,(y1+by)/2,i+1,'a')}</g>`; return; }
     s+=line(P(st.from),P(st.to),E?'r':st.c,f,i+1); });
   s+=`<g class="nd core"><circle class="bg" cx="${CORE[0]}" cy="${CORE[1]}" r="16"/>${glyph('ai',CORE[0],CORE[1])}</g>`;
   s+=Object.entries(C.N).map(([k,[x,y,l,sub,ic]])=>{ const hit=C.chain.slice(0,n).some(c=>c.from===k||c.to===k); const inb=C.chain[0].from===k; return node(x,y,l,sub,ic,hit?(inb||E?'':'att'):'dim'); }).join('');
-  s+=E?`<text x="180" y="254" text-anchor="middle" class="foot ok">LEAST PRIVILEGE · ENFORCED</text>`:`<text x="180" y="254" text-anchor="middle" class="foot">DEFAULT-ALLOW · EVERY PATH OPEN</text>`;
+  s+=E?`<text x="180" y="254" text-anchor="middle" class="foot ok">ENFORCED · ${E.slice(0,n).filter(e=>e[0]==='b').length} BLOCKED · ${E.slice(0,n).filter(e=>e[0]!=='b').length} ALLOWED</text>`:`<text x="180" y="254" text-anchor="middle" class="foot">DEFAULT-ALLOW · EVERY PATH OPEN</text>`;
   return s; }
 
 // ---------- the gap: allowed vs needed
@@ -289,10 +299,19 @@ function sceneStage(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS; const
   return s; }
 // ---------- before and after
 const BA=[['Network','8 destinations','4 needed'],['Programs','any binary','python'],['Privileges','root possible','none'],['Kernel calls','all of them','the ones it uses'],['Case 1','upload to Beijing','blocked'],['Case 2','shell, call-out, Copy Fail','blocked'],['Needed, dropped','','0']];
-function sceneBA(k){ let s=DEFS+'<g class="ba">'; const BA=baRows();
-  s+=`<text x="96" y="22" class="h">BEFORE</text><text x="232" y="22" class="h">AFTER</text>`;
-  BA.forEach(([n,b,a],i)=>{ const y=32+i*31, on=i<k; s+=`<rect x="8" y="${y}" width="344" height="26" rx="6"/><text x="16" y="${y+17}" class="n">${n}</text><text x="96" y="${y+17}" class="b">${b}</text><text x="232" y="${y+17}" class="a">${on?a:''}</text>`; });
-  return s+'</g>'; }
+function sceneBA(k){ let s=DEFS;
+  const panel=(x0,after)=>{ const C=[x0+84,128], P=[x0+52,100,64,56]; let g=`<g class="bap ${after?'aft':''}"><rect x="${x0}" y="10" width="168" height="240" rx="14" class="frame"/><text x="${x0+14}" y="32" class="h">${after?'AFTER':'BEFORE'}</text>`;
+    const ends=[[0,-1,1],[0.7,-0.7,0],[1,0,1],[0.7,0.7,0],[0,1,1],[-0.7,0.7,0],[-1,0,1],[-0.7,-0.7,0]];
+    ends.forEach(([dx,dy,need])=>{ const x=C[0]+dx*70, y=C[1]+dy*78; const [bx,by]=exitRect(C[0],C[1],x,y,P);
+      if(!after) g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e a" style="opacity:.75"/><circle cx="${x}" cy="${y}" r="4" fill="#22151A" stroke="#E5484D"/>`;
+      else if(need) g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e ok"/><circle cx="${x}" cy="${y}" r="4" fill="#123222" stroke="#4CC38A"/>`;
+      else g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x"/><circle cx="${x}" cy="${y}" r="3.5" fill="none" stroke="#3A4558"/>`+xm(bx,by); });
+    g+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="10" class="pod ${after?'on':''}"/><text x="${C[0]}" y="${C[1]+4}" text-anchor="middle" class="pt">${after?'python':'anything'}</text>`;
+    g+=`<text x="${x0+84}" y="236" text-anchor="middle" class="cnt">${after?'4 paths · least privilege':'8 paths · root · any binary'}</text>`;
+    return g+'</g>'; };
+  s+=panel(6,false);
+  s+=k>=1?`<g class="fadein">${panel(186,true)}</g>`:`<g class="bap"><rect x="186" y="10" width="168" height="240" rx="14" class="frame" style="opacity:.35"/><text x="270" y="134" text-anchor="middle" class="h">AFTER</text></g>`;
+  return s; }
 
 // ---------- screens
 const CASES={
@@ -301,14 +320,14 @@ const CASES={
    a0:'Give it the task',take:'The model went off-task on its own. <span>You can’t fully trust a model you didn’t train.</span>',
    src:['Cohere, Oct 2026','https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model'],
    used:'It used a shell, curl and the internet. <span>All excess.</span>',
-   againP:'Same agent, same model, same task. The model goes off-task again.',againTake:'The model misbehaved. <span>Nothing left the pod.</span>',
+   againP:'The pod is now enforced. Same model, same task: <b>watch where each step is stopped</b>.',againTake:'4 of 5 steps blocked, by two engines. <span>The model misbehaved, and nothing left the pod.</span>',
    ba:['upload to Beijing','blocked']},
  c2:{id:'c2',short:'case 2',name:'The model file is the attack',who:'JFrog, Hugging Face',C:C2,E:E2,
    t:'The model file is the attack.',p:'Same kind of agent, a different risk: <b>the model file itself</b>. JFrog found about 100 malicious models on Hugging Face.',
    a0:'Load the model',take:'Nothing was prompted. <span>Opening the file was enough, and the damage left the pod.</span>',
    src:['JFrog, 2024','https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/'],
    used:'It used a shell, the internet and an AF_ALG socket. <span>All excess.</span>',
-   againP:'Same poisoned model file. This time the pod is enforced.',againTake:'The file was still malicious. <span>It had nowhere to go.</span>',
+   againP:'The pod is now enforced. Same poisoned file: <b>watch where each step is stopped</b>.',againTake:'The code ran, but every next step was blocked. <span>It had nowhere to go.</span>',
    ba:['shell, call-out, Copy Fail','blocked']}};
 let SC=CASES.c1; const SEEN=new Set();
 const PARTS=[['The problem','A real case · the gap · why it stays open'],['How we decide','Evidence · decide · prove'],['The result','Enforce · the same case · before and after']];
@@ -406,7 +425,7 @@ const STEPS=[
    t:()=>`${SC.short[0].toUpperCase()+SC.short.slice(1)}, again.`, p:()=>SC.againP,
    init:()=>({n:0}),
    svg:(s,f)=>sceneCase(SC.C,s.n,f,SC.E),
-   list:s=>SC.C.chain.slice(0,s.n).map((c,i)=>({c:SC.E[i][0]==='b'?'b':(SC.id==='c2'&&i===1?'y':'r'),t:c.t,s:SC.E[i][1]})),
+   list:s=>SC.E.slice(0,s.n).map(([st,eng,t,why])=>({k:st==='b'?'BLOCKED':st==='y'?'RUNS':'ALLOWED',c:st==='b'?'b':st==='y'?'y':'r',t:t,s:(eng?`<b>${eng}:</b> `:'')+why})),
    act:s=>s.n===0?SC.a0:s.n<SC.C.chain.length?'What it tries next':'Stopped',
    done:s=>s.n>=SC.C.chain.length, run:s=>{ s.n++; },
    take:s=>s.n>=SC.C.chain.length?SC.againTake:'' },
@@ -415,8 +434,8 @@ const STEPS=[
    p:'One agent: decided from evidence, proven, enforced.',
    init:()=>({k:0}),
    svg:s=>sceneBA(s.k),
-   list:()=>[],
-   act:s=>s.k<baRows().length?'Show the next':'All shown',
+   list:s=>baRows().slice(0,s.k).map(([k,t],i)=>({k,c:i===3?'b':'g',t})),
+   act:s=>s.k===0?'Show after':s.k<baRows().length?'Next difference':'All shown',
    done:s=>s.k>=baRows().length, run:s=>{ s.k++; },
    take:s=>s.k>=baRows().length?'Others alert after the fact, or lock down whatever they saw. <span>We decide, prove, then enforce.</span>':'' },
  { part:3, label:()=>'Next',
@@ -431,9 +450,9 @@ const STEPS=[
    act:()=>'Start over', done:()=>false, run:()=>{ watching=false; stop(); $('cover').hidden=false; } }
 ];
 const FULL=[0,1,2,3,4,5,6,7,8,9,10], SHORT=[1,2,8,9,10]; let ROUTE=FULL;
-function baRows(){ return [['Network','8 destinations','4 needed'],['Programs','any binary','python'],['Privileges','root possible','none'],['Syscalls','all of them','the few it uses'],[SC.short[0].toUpperCase()+SC.short.slice(1),SC.ba[0],SC.ba[1]],['Needed, dropped','','0']]; }
-function scenePick(){ let s=DEFS; const B=[[20,'Case 1','model goes off-task','Cohere · 2026','ai'],[188,'Case 2','model file is the attack','Hugging Face · JFrog','pkg']];
-  B.forEach(([x,h,d,w,ic])=>{ s+=`<g class="pk"><rect x="${x}" y="40" width="152" height="170" rx="14"/><g class="nd att"><rect class="bg" x="${x+16}" y="58" width="30" height="30" rx="8"/>${glyph(ic,x+31,73)}</g><text x="${x+16}" y="120" class="ph">${h}</text><text x="${x+16}" y="142" class="pd">${d}</text><text x="${x+16}" y="190" class="pw">${w}</text></g>`; });
+function baRows(){ return [['NETWORK','<b>8 → 4</b> destinations'],['PROGRAMS','<b>any binary → python</b>'],['PRIVILEGES','<b>root → none</b>, syscalls cut to what it uses'],[SC.short.toUpperCase(),`<b>${SC.ba[0]}</b> → ${SC.ba[1]}`],['DROPPED','<b>0</b> needed connections']]; }
+function scenePick(){ let s=DEFS; const B=[[20,'Case 1',['The model','goes off-task'],'Cohere · 2026','ai'],[188,'Case 2',['The model file','is the attack'],'Hugging Face · JFrog','pkg']];
+  B.forEach(([x,h,d,w,ic])=>{ s+=`<g class="pk"><rect x="${x}" y="40" width="152" height="170" rx="14"/><g class="nd att"><rect class="bg" x="${x+16}" y="58" width="30" height="30" rx="8"/>${glyph(ic,x+31,73)}</g><text x="${x+16}" y="120" class="ph">${h}</text><text x="${x+16}" y="142" class="pd">${d[0]}</text><text x="${x+16}" y="160" class="pd">${d[1]}</text><text x="${x+16}" y="190" class="pw">${w}</text></g>`; });
   return s; }
 function sceneNext(){ let s=DEFS; const F=[['Evidence','r'],['Decide','a'],['Prove','b'],['Enforce','b']];
   F.forEach(([t,c],i)=>{ const x=12+i*86; s+=`<g class="fl ${c}"><rect x="${x}" y="80" width="76" height="40" rx="10"/><text x="${x+38}" y="105" text-anchor="middle">${t}</text></g>`; if(i<3) s+=`<path d="M${x+78} 100H${x+84}" class="flar"/>`; });
