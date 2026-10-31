@@ -49,6 +49,11 @@ button{font:inherit;cursor:pointer;color:inherit}
 .steps li .t b{font-weight:600}
 .take{margin:12px 0 0;font-size:15px;line-height:1.45;color:var(--ink);font-weight:600}
 .take span{color:var(--muted);font-weight:400}
+.pick{display:flex;flex-direction:column;gap:8px;margin-top:4px}.pick button{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:12px 14px}
+.pick b{display:block;font-size:15px;font-weight:600;color:var(--ink)}.pick small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}.pick em{font-style:normal;margin-left:auto;color:var(--muted);font-size:18px}
+.pk rect{fill:#10151F;stroke:#2C3546}.ph{font:600 11px var(--body);letter-spacing:.1em;fill:var(--info)}.pd{font:600 13.5px var(--body);fill:var(--ink)}.pw{font:500 11px var(--body);fill:var(--muted)}
+.fl rect{fill:#121823;stroke:#2A3445}.fl text{font:600 12px var(--body);fill:var(--ink)}.fl.r rect{stroke:var(--info)}.fl.a rect{stroke:var(--warn)}.fl.b rect{stroke:var(--ok)}.flar{stroke:var(--muted);stroke-width:1.4}
+.flsub{font:500 11px var(--body);fill:var(--muted)}.ch2 rect{fill:#0F1F17;stroke:#1F4A33}.ch2 text{font:600 11px var(--mono);fill:var(--ok)}
 .srcl{display:inline-block;margin-top:8px;font-size:13px;color:var(--info);text-decoration:none}
 
 /* bottom bar */
@@ -78,6 +83,12 @@ button{font:inherit;cursor:pointer;color:inherit}
 .chip rect{fill:#22151A;stroke:#6B2C32}.chip text{font:600 10.5px var(--mono);fill:#F08A8D}
 .foot{font:600 9.5px var(--body);letter-spacing:.1em;fill:#8A4A50}
 .fadein{animation:fin .4s ease}
+.pod.on{stroke:#2B6B48;stroke-dasharray:none}.foot.ok{fill:#3E8E64}
+.xm circle{fill:#0A0D14;stroke:var(--ok);stroke-width:1.4}.xm path{stroke:var(--ok);stroke-width:1.6;stroke-linecap:round}
+.chip.blk rect{fill:#0F1F17;stroke:#2B6B48}.chip.blk text{fill:#6FA98A;text-decoration:line-through}.chip.runs rect{fill:#2A2213;stroke:#6B5223}.chip.runs text{fill:var(--warn)}
+.steps li.b .n,.steps li.b .tag{background:#123222;color:var(--ok)}.steps li.y .tag{background:#33281A;color:var(--warn)}
+.st rect{fill:#0F141E;stroke:#1E2633}.st.on rect{fill:#0F1F17;stroke:#2B6B48}.st text{font:600 10.5px var(--body);fill:var(--dim)}.st.on text{fill:var(--ok)}
+.ba .h{font:600 9.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.ba .n{font:600 12px var(--body);fill:var(--text)}.ba .b{font:500 11.5px var(--mono);fill:#C06A6E}.ba .a{font:600 11.5px var(--mono);fill:var(--ok)}.ba rect{fill:#0F141E}
 .e.al{stroke:#5C6880}.e.ex{stroke:var(--bad);stroke-dasharray:3 4;opacity:.8}
 .pc rect{fill:#151B27;stroke:#2C3546}.pc text{font:600 10px var(--mono);fill:var(--text)}
 .pc.ok rect{fill:#123222;stroke:#2B6B48}.pc.ok text{fill:var(--ok)}.pc.b rect{fill:#22151A;stroke:#6B2C32}.pc.b text{fill:#F08A8D;text-decoration:line-through}
@@ -186,22 +197,27 @@ const C1={N:{tasks:[50,56,'task','from Cohere','doc'],bucket:[310,56,'cloud buck
   {from:'core',to:'bucket',c:'a',t:'It tries to <b>upload a file</b> to a bucket in Beijing.',s:'It was a test string, and a sandbox blocked it. In a normal pod, nothing would.'}]};
 const C2={N:{hf:[50,56,'Hugging Face','model file','pkg'],c2:[310,56,'attacker','server','net'],store:[50,206,'model-store','','db'],nb:[310,152,'other pods','same node','doc']},
   chain:[
-  {from:'hf',to:'core',c:'r',t:'The agent downloads a model from <b>Hugging Face</b>.',s:'Most teams get open-weight models this way.'},
+  {from:'hf',to:'core',c:'r',t:'The agent loads a model from <b>Hugging Face</b>.',s:'Most teams get open-weight models this way.'},
   {chip:'pickle.load',c:'a',t:'Opening the file <b>runs hidden code</b>.',s:'Pickle files can carry code. Loading the model is enough to run it.'},
   {chip:'/bin/sh',c:'a',t:'The hidden code <b>starts a shell</b>.',s:'Inside the agent’s pod, with its identity.'},
   {from:'core',to:'c2',c:'a',t:'The shell <b>calls the attacker</b>.',s:'A reverse shell: the attacker now types commands in your pod.'},
   {from:'core',to:'nb',c:'a',t:'A kernel bug like <b>Copy Fail</b> reaches the pods next to it.',s:'Every pod on a node shares one kernel. One bad pod can corrupt what its neighbors run.'}]};
 const POD=[110,80,140,118], CORE=[180,104];
-function sceneCase(C,n,fresh){ const [px,py,pw,ph]=POD; let s=DEFS, chips=0;
-  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/><text x="180" y="${py+ph+15}" text-anchor="middle" class="podl">AGENT POD</text>`;
+const xm=(x,y)=>`<g class="xm"><circle cx="${x}" cy="${y}" r="8"/><path d="M${x-3.2} ${y-3.2}L${x+3.2} ${y+3.2}M${x+3.2} ${y-3.2}L${x-3.2} ${y+3.2}"/></g>`;
+const E1=[['r','Allowed. It’s the agent’s job.'],['b','Tetragon: only python may start. bash never runs.'],['b','Same rule. No shell, no look-around.'],['b','Same rule.'],['b','Cilium: egress to model-store, task queue, kb and DNS only. DROP.']];
+const E2=[['r','The file was already in the model store. Loading it is allowed.'],['r','The hidden code runs inside python. That part no runtime rule can see.'],['b','Tetragon: only python may start. /bin/sh is killed.'],['b','Cilium: no internet egress. Even python can’t call out.'],['b','Kernel rule: socket(AF_ALG) is refused. The Copy Fail path is closed.']];
+function sceneCase(C,n,fresh,E){ const [px,py,pw,ph]=POD; let s=DEFS, chips=0;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod ${E?'on':''}"/><text x="180" y="${py+ph+15}" text-anchor="middle" class="podl">AGENT POD</text>`;
   const P=k=>k==='core'?CORE:C.N[k];
   C.chain.forEach((st,i)=>{ if(i>=n) return; const f=fresh&&i===n-1;
+    const B=E&&E[i][0]==='b';
     if(st.chip){ const y=128+chips*22; chips++; const w=Math.max(70,st.chip.length*6.6+14);
-      s+=`<g class="chip ${f?'fadein':''}"><rect x="${180-w/2}" y="${y}" width="${w}" height="18" rx="5"/><text x="180" y="${y+12.5}" text-anchor="middle">${st.chip}</text></g><g class="${f?'fadein':''}">${badge(180-w/2-11,y+9,i+1,'a')}</g>`; return; }
-    s+=line(P(st.from),P(st.to),st.c,f,i+1); });
+      s+=`<g class="chip ${B?'blk':''} ${E&&!B?'runs':''} ${f?'fadein':''}"><rect x="${180-w/2}" y="${y}" width="${w}" height="18" rx="5"/><text x="180" y="${y+12.5}" text-anchor="middle">${st.chip}</text></g><g class="${f?'fadein':''}">${badge(180-w/2-11,y+9,i+1,'a')}</g>`; return; }
+    if(B){ const [x1,y1,x2,y2]=trim(CORE,P(st.to)); const [bx,by]=exitRect(x1,y1,x2,y2,POD); s+=`<line x1="${x1}" y1="${y1}" x2="${bx}" y2="${by}" class="e a ${f?'draw':''}" pathLength="1"/><line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e x"/><g class="${f?'fadein':''}">${xm(bx,by)}${badge((x1+bx)/2,(y1+by)/2,i+1,'a')}</g>`; return; }
+    s+=line(P(st.from),P(st.to),E?'r':st.c,f,i+1); });
   s+=`<g class="nd core"><circle class="bg" cx="${CORE[0]}" cy="${CORE[1]}" r="16"/>${glyph('ai',CORE[0],CORE[1])}</g>`;
-  s+=Object.entries(C.N).map(([k,[x,y,l,sub,ic]])=>{ const hit=C.chain.slice(0,n).some(c=>c.from===k||c.to===k); const inb=C.chain[0].from===k; return node(x,y,l,sub,ic,hit?(inb?'':'att'):'dim'); }).join('');
-  s+=`<text x="180" y="254" text-anchor="middle" class="foot">DEFAULT-ALLOW · EVERY PATH OPEN</text>`;
+  s+=Object.entries(C.N).map(([k,[x,y,l,sub,ic]])=>{ const hit=C.chain.slice(0,n).some(c=>c.from===k||c.to===k); const inb=C.chain[0].from===k; return node(x,y,l,sub,ic,hit?(inb||E?'':'att'):'dim'); }).join('');
+  s+=E?`<text x="180" y="254" text-anchor="middle" class="foot ok">LEAST PRIVILEGE · ENFORCED</text>`:`<text x="180" y="254" text-anchor="middle" class="foot">DEFAULT-ALLOW · EVERY PATH OPEN</text>`;
   return s; }
 
 // ---------- the gap: allowed vs needed
@@ -214,7 +230,7 @@ function sceneGap(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
     const c=k<1?'al':need?'ok':'ex'; s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${c}"/>`; });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
   const chips=(y,lab,items)=>{ const W=items.map(([t])=>Math.max(38,t.length*6.3+10)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="16" rx="5"/><text x="${x+W[i]/2}" y="${y+11.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
-  s+=chips(118,'',[['python',k>=2?'ok':''],['bash',k>=2?'b':''],['curl',k>=2?'b':'']]);
+  s+=chips(118,'',[['python',k>=2?'ok':''],['shell',k>=2?'b':''],['curl',k>=2?'b':'']]);
   s+=chips(140,'',[['root',k>=3?'b':''],['caps',k>=3?'b':'']]);
   s+=chips(162,'',[['AF_ALG',k>=4?'b':''],['unshare',k>=4?'b':'']]);
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,k>=1&&!need?'att':'')).join('');
@@ -228,12 +244,12 @@ function sceneWhy(k){ let s=DEFS;
   return s; }
 
 // ---------- evidence
-const SRC=[['Config','what it declares'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','platform needs']];
+const SRC=[['Agent config','model, tools, MCP'],['Model source','where it comes from'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','platform needs']];
 function sceneEv(k){ let s=DEFS;
-  SRC.forEach(([n,sub],i)=>{ const y=22+i*56, on=i<k; s+=`<g class="src ${on?'on':''}"><rect x="12" y="${y}" width="118" height="44" rx="10"/><text x="24" y="${y+20}">${n}</text><text x="24" y="${y+35}" class="ss">${sub}</text></g><path d="M134 ${y+22} C 168 ${y+22}, 168 130, 196 130" class="flow ${on?'on':''}"/>`; });
-  const R=[['NETWORK','model-store',1],['','task queue · kb',1],['','kube-dns',4],['PROGRAMS','python',3],['BASH TOOL','declared, unused',3],['PRIVILEGES','none',3]];
-  s+=`<g class="prof"><rect class="card" x="198" y="18" width="150" height="236" rx="12"/><text x="212" y="44" class="h">support-agent</text><text x="212" y="58" class="rl">PROFILE</text>`;
-  const LY=[80,null,null,150,188,226], VY=[96,112,128,166,204,242]; R.forEach(([l,v,need],i)=>{ const on=k>=need; s+=`${l?`<text x="212" y="${LY[i]}" class="rl">${l}</text>`:''}<text x="212" y="${VY[i]}" class="rv ${on?'on':''}">${on?v:'·'}</text>`; });
+  SRC.forEach(([n,sub],i)=>{ const y=14+i*48, on=i<k; s+=`<g class="src ${on?'on':''}"><rect x="10" y="${y}" width="122" height="40" rx="10"/><text x="22" y="${y+18}">${n}</text><text x="22" y="${y+32}" class="ss">${sub}</text></g><path d="M136 ${y+20} C 168 ${y+20}, 168 134, 196 134" class="flow ${on?'on':''}"/>`; });
+  const R=[['MODEL','model-store only',2,74,88],['NETWORK','task queue · kb',1,110,124],['','kube-dns',5,0,140],['PROGRAMS','python',4,162,176],['SHELL TOOL','declared, unused',4,198,212],['SYSCALLS','the few it uses',4,234,248]];
+  s+=`<g class="prof"><rect class="card" x="198" y="14" width="152" height="244" rx="12"/><text x="212" y="38" class="h">agent</text><text x="212" y="52" class="rl">PROFILE</text>`;
+  R.forEach(([l,v,need,ly,vy])=>{ const on=k>=need; s+=`${l?`<text x="212" y="${ly}" class="rl">${l}</text>`:''}<text x="212" y="${vy}" class="rv ${on?'on':''}">${on?v:'·'}</text>`; });
   return s+'</g>'; }
 
 // ---------- decide
@@ -243,7 +259,7 @@ function sceneDec(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
     if(need) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=1?'ok':'al'}"/>`;
     else { s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=2?'x':'al'}"/>`; if(k>=2) s+=`<circle cx="${bx}" cy="${by}" r="6" fill="#0A0D14" stroke="#4A5468"/><path d="M${bx-2.6} ${by-2.6}L${bx+2.6} ${by+2.6}M${bx+2.6} ${by-2.6}L${bx-2.6} ${by+2.6}" stroke="#9AA4B6" stroke-width="1.3" stroke-linecap="round"/>`; } });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
-  const w=38,g=4,x0=180-(3*w+2*g)/2; [['python','ok'],['bash',k>=4?'w':''],['curl','']].forEach(([t,c],i)=>{ s+=`<g class="pc ${c}"><rect x="${x0+i*(w+g)}" y="126" width="${w}" height="16" rx="5"/><text x="${x0+i*(w+g)+w/2}" y="137.5" text-anchor="middle">${t}${c==='w'?' ?':''}</text></g>`; });
+  const w=38,g=4,x0=180-(3*w+2*g)/2; [['python','ok'],['shell',k>=4?'w':''],['curl','']].forEach(([t,c],i)=>{ s+=`<g class="pc ${c}"><rect x="${x0+i*(w+g)}" y="126" width="${w}" height="16" rx="5"/><text x="${x0+i*(w+g)+w/2}" y="137.5" text-anchor="middle">${t}${c==='w'?' ?':''}</text></g>`; });
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,!need&&k>=2?'dim':'')).join('');
   if(k>=3) s+=`<g class="flag fadein"><rect x="236" y="4" width="118" height="20" rx="6"/><text x="295" y="17.5" text-anchor="middle">KEPT OUT · cloud bucket</text></g>`;
   return s; }
@@ -257,121 +273,208 @@ function sceneProve(k){ let s=DEFS+'<g class="rp">';
   if(k>=1){ const pass=k!==2; s+=`<g class="res ${pass?'pass':'fail'} ${k===1?'rev':''}" style="animation-delay:1.2s;${k===1?'opacity:0;animation:fin .3s ease 1.2s forwards':''}"><rect x="10" y="202" width="340" height="40" rx="9"/><text x="180" y="227" text-anchor="middle" class="${pass?'ok':'bad'}">${pass?'PASS · every needed connection still works':'FAIL · the policy is not applied'}</text></g>`; }
   return s+'</g>'; }
 
+// ---------- enforce in stages
+const STG=[['K8s API, metadata',['api','meta']],['Internet',['net']],['East-west',['pods']],['Inside the pod',[]]];
+function sceneStage(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS; const closed=STG.slice(0,k).flatMap(x=>x[1]);
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod ${k>=4?'on':''}"/>`;
+  Object.entries(GP.N).forEach(([key,[x,y,l,ic,need]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18);
+    if(need) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ok"/>`;
+    else if(closed.includes(key)) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e x"/>`+xm(bx,by);
+    else s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ex"/>`; });
+  s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
+  const row=(y,items)=>{ const W=items.map(([t])=>Math.max(38,t.length*6.3+10)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="16" rx="5"/><text x="${x+W[i]/2}" y="${y+11.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
+  const c4=k>=4?'b':'';
+  s+=row(118,[['python','ok'],['shell',c4],['curl',c4]])+row(140,[['root',c4],['caps',c4]])+row(162,[['AF_ALG',c4],['unshare',c4]]);
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,closed.includes(key)?'dim':need?'':'att')).join('');
+  return s; }
+// ---------- before and after
+const BA=[['Network','8 destinations','4 needed'],['Programs','any binary','python'],['Privileges','root possible','none'],['Kernel calls','all of them','the ones it uses'],['Case 1','upload to Beijing','blocked'],['Case 2','shell, call-out, Copy Fail','blocked'],['Needed, dropped','','0']];
+function sceneBA(k){ let s=DEFS+'<g class="ba">'; const BA=baRows();
+  s+=`<text x="96" y="22" class="h">BEFORE</text><text x="232" y="22" class="h">AFTER</text>`;
+  BA.forEach(([n,b,a],i)=>{ const y=32+i*31, on=i<k; s+=`<rect x="8" y="${y}" width="344" height="26" rx="6"/><text x="16" y="${y+17}" class="n">${n}</text><text x="96" y="${y+17}" class="b">${b}</text><text x="232" y="${y+17}" class="a">${on?a:''}</text>`; });
+  return s+'</g>'; }
+
 // ---------- screens
-const PARTS=[['The problem','Two real cases · the gap · why it stays open'],['How we decide','Evidence · decide · prove'],['The result','Enforce · same attack · before and after']];
+const CASES={
+ c1:{id:'c1',short:'case 1',name:'The model goes off-task',who:'Cohere, Oct 2026',C:C1,E:E1,
+   t:'The model goes off-task.',p:'In its own test, Cohere ran an AI agent on a popular open-weight model. There was <b>no attacker</b> and no malicious prompt.',
+   a0:'Give it the task',take:'The model went off-task on its own. <span>You can’t fully trust a model you didn’t train.</span>',
+   src:['Cohere, Oct 2026','https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model'],
+   used:'It used a shell, curl and the internet. <span>All excess.</span>',
+   againP:'Same agent, same model, same task. The model goes off-task again.',againTake:'The model misbehaved. <span>Nothing left the pod.</span>',
+   ba:['upload to Beijing','blocked']},
+ c2:{id:'c2',short:'case 2',name:'The model file is the attack',who:'JFrog, Hugging Face',C:C2,E:E2,
+   t:'The model file is the attack.',p:'Same kind of agent, a different risk: <b>the model file itself</b>. JFrog found about 100 malicious models on Hugging Face.',
+   a0:'Load the model',take:'Nothing was prompted. <span>Opening the file was enough, and the damage left the pod.</span>',
+   src:['JFrog, 2024','https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/'],
+   used:'It used a shell, the internet and an AF_ALG socket. <span>All excess.</span>',
+   againP:'Same poisoned model file. This time the pod is enforced.',againTake:'The file was still malicious. <span>It had nowhere to go.</span>',
+   ba:['shell, call-out, Copy Fail','blocked']}};
+let SC=CASES.c1; const SEEN=new Set();
+const PARTS=[['The problem','A real case · the gap · why it stays open'],['How we decide','Evidence · decide · prove'],['The result','Enforce · the same case · before and after']];
 const HEAD=['Your agent runs a model you didn’t write. <span>What its pod is allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>'];
+const lst=(rows)=>rows;
 const STEPS=[
- { part:0, label:'The problem · real case 1',
-   t:'The model goes off-task.',
-   p:'In its own test, Cohere ran an AI agent on a popular open-weight model. There was <b>no attacker</b> and no malicious prompt.',
+ { part:0, label:()=>'The problem',
+   t:'Two real cases. Follow one.',
+   p:'Both happened to AI agents running open-weight models. Each one goes through the full process.',
+   init:()=>({}),
+   svg:()=>scenePick(),
+   list:()=>[],
+   extra:()=>`<div class="pick">${Object.values(CASES).map(c=>`<button data-case="${c.id}"><span><b>${c.name}</b><small>${c.who}${SEEN.has(c.id)?' · seen':''}</small></span><em>›</em></button>`).join('')}</div>`,
+   act:()=>'Pick a case', done:()=>true, run:()=>{} },
+ { part:0, label:()=>`The problem · ${SC.short}`,
+   t:()=>SC.t, p:()=>SC.p,
    init:()=>({n:0}),
-   svg:(s,f)=>sceneCase(C1,s.n,f),
-   list:s=>C1.chain.slice(0,s.n),
-   act:s=>s.n===0?'Give it the task':s.n<C1.chain.length?'What it did next':'That’s what happened',
-   done:s=>s.n>=C1.chain.length, run:s=>{ s.n++; },
-   take:s=>s.n>=C1.chain.length?'The model went off-task on its own. <span>You can’t fully trust a model you didn’t train.</span>':'',
-   src:['Cohere, Oct 2026','https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model'] },
- { part:0, label:'The problem · real case 2',
-   t:'The model file is the attack.',
-   p:'Same kind of agent, a different risk: <b>the model file itself</b>. JFrog found about 100 malicious models on Hugging Face.',
-   init:()=>({n:0}),
-   svg:(s,f)=>sceneCase(C2,s.n,f),
-   list:s=>C2.chain.slice(0,s.n),
-   act:s=>s.n===0?'Load the model':s.n<C2.chain.length?'What happened next':'That’s what happened',
-   done:s=>s.n>=C2.chain.length, run:s=>{ s.n++; },
-   take:s=>s.n>=C2.chain.length?'Nothing was prompted. <span>Opening the file was enough, and the damage left the pod.</span>':'',
-   src:['JFrog, 2024','https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/'] },
- { part:0, label:'The problem',
+   svg:(s,f)=>sceneCase(SC.C,s.n,f),
+   list:s=>SC.C.chain.slice(0,s.n),
+   act:s=>s.n===0?SC.a0:s.n<SC.C.chain.length?'What happened next':'That’s what happened',
+   done:s=>s.n>=SC.C.chain.length, run:s=>{ s.n++; },
+   take:s=>s.n>=SC.C.chain.length?SC.take:'', src:()=>SC.src },
+ { part:0, label:()=>`The problem · ${SC.short}`,
    t:'Allowed far more than it needs.',
-   p:'Both cases used the same thing: what the pod <b>may</b> do but <b>never needs</b>. That’s the attack surface.',
+   p:'Put what the agent’s pod <b>may</b> do next to what it <b>actually needs</b>. The difference is the attack surface.',
    init:()=>({k:0}),
    svg:s=>sceneGap(s.k),
    list:s=>[{k:'NETWORK',c:'a',t:'<b>8 destinations open.</b> It needs 4.',s:'The model store, the task queue, the knowledge base and DNS. The internet, the K8s API, the metadata service and other pods are excess.'},
-            {k:'PROGRAMS',c:'a',t:'<b>Any binary can start.</b> It runs one.',s:'Only python ever ran. bash, sh and curl are allowed anyway.'},
+            {k:'PROGRAMS',c:'a',t:'<b>Any binary can start.</b> It runs one.',s:'Only python ever ran. A shell and curl are allowed anyway.'},
             {k:'PRIVILEGES',c:'a',t:'<b>Root is possible.</b> It needs none.',s:'It never used a single Linux capability.'},
-            {k:'KERNEL',c:'a',t:'<b>Hundreds of kernel calls open.</b> It uses a few.',s:'It never opened an AF_ALG socket or created a namespace. That’s exactly what Copy Fail and Dirty Frag need.'}].slice(0,s.k),
-   act:s=>['Compare the network','Compare programs','Compare privileges','Compare the kernel'][s.k]||'Compared',
+            {k:'SYSCALLS',c:'a',t:'<b>Hundreds of syscalls allowed.</b> It uses a few.',s:'It never opened an AF_ALG socket or created a namespace. Kernel bugs like Copy Fail and Dirty Frag need exactly those.'}].slice(0,s.k),
+   act:s=>['Compare the network','Compare programs','Compare privileges','Compare syscalls'][s.k]||'Compared',
    done:s=>s.k>=4, run:s=>{ s.k++; },
-   take:s=>s.k>=4?'Every step in both cases used excess. <span>Nothing the agent needed.</span>':'' },
- { part:0, label:'The problem',
+   take:s=>s.k>=4?SC.used:'' },
+ { part:0, label:()=>'The problem',
    t:'The engines are there. The rules aren’t.',
    p:'Cilium and Tetragon can block all of that excess. In most clusters, <b>nothing is enforced</b>.',
    init:()=>({k:0}),
    svg:s=>sceneWhy(s.k),
    list:s=>[{k:'KNOWLEDGE',c:'w',t:'<b>No one knows the full answer.</b>',s:'It’s split between developers, platform and security.'},
-            {k:'SCALE',c:'w',t:'<b>Thousands of decisions.</b>',s:'Seven layers per workload, hundreds of workloads, every cluster.'},
+            {k:'SCALE',c:'w',t:'<b>Thousands of decisions.</b>',s:'Network, programs, privileges and syscalls, for every workload and agent.'},
             {k:'CHANGE',c:'w',t:'<b>Every release changes the answer.</b>',s:'Miss one dependency and production breaks. So it stays open.'}].slice(0,s.k),
    act:s=>['Why?','And?','And?'][s.k]||'Three reasons',
    done:s=>s.k>=3, run:s=>{ s.k++; },
    take:s=>s.k>=3?'The missing piece isn’t the engine. <span>It’s the decision.</span>':'' },
- { part:1, label:'How we decide',
+ { part:1, label:()=>'How we decide',
    t:'Evidence first.',
-   p:'What the agent needs is already written down, in four places. The product reads all of them.',
+   p:'What the agent needs is already written down, in five places. The product reads all of them.',
    init:()=>({k:0}),
    svg:s=>sceneEv(s.k),
-   list:s=>[{k:'CONFIG',c:'r',t:'<b>Declares</b> its model store, task queue, knowledge base, and a bash tool.'},
-            {k:'HUBBLE',c:'r',t:'<b>Connects</b> to those three, plus DNS. Nothing else in a week.'},
-            {k:'TETRAGON',c:'r',t:'<b>Runs</b> python only. The bash tool was never used.'},
+   list:s=>[{k:'AGENT CONFIG',c:'r',t:'<b>Declares</b> its model, a task queue and kb (via MCP), and two tools: python and a shell.'},
+            {k:'MODEL SOURCE',c:'r',t:'<b>Weights</b> come only from the internal model store.'},
+            {k:'HUBBLE',c:'r',t:'<b>Connects</b> to the model store, task queue and kb. Nothing else in a week.'},
+            {k:'TETRAGON',c:'r',t:'<b>Runs</b> python only, with a short list of syscalls. The shell tool was never used.'},
             {k:'K8S API',c:'r',t:'<b>Needs</b> DNS from the platform. Never calls the K8s API.'}].slice(0,s.k),
-   act:s=>s.k<4?`Read ${SRC[s.k][0]}`:'All four read',
-   done:s=>s.k>=4, run:s=>{ s.k++; },
-   take:s=>s.k>=4?'One profile per workload. <span>Every line backed by evidence.</span>':'' },
- { part:1, label:'How we decide',
+   act:s=>s.k<5?`Read ${SRC[s.k][0]}`:'All five read',
+   done:s=>s.k>=5, run:s=>{ s.k++; },
+   take:s=>s.k>=5?'One profile per agent. <span>Every line backed by evidence.</span>':'' },
+ { part:1, label:()=>'How we decide',
    t:'Decide. Don’t just record.',
-   p:'Every path and program is checked against the evidence. <b>Being seen isn’t enough.</b> It has to make sense.',
+   p:'Every path, program and syscall is checked against the evidence. <b>Being seen isn’t enough.</b> It has to make sense.',
    init:()=>({k:0}),
    svg:s=>sceneDec(s.k),
    list:s=>[{k:'NEEDED',c:'g',t:'<b>Stays open.</b> Declared and seen: model store, task queue, kb and DNS.'},
-            {k:'EXCESS',c:'a',t:'<b>Closes.</b> Allowed, never declared, never used: internet, K8s API, metadata, other pods.'},
-            {k:'KEPT OUT',c:'a',t:'<b>Seen isn’t trusted.</b>',s:'If the model called the bucket during learning, it’s in the traffic. It was never declared, so it never becomes a rule.'},
-            {k:'ASK',c:'w',t:'<b>A person decides.</b>',s:'The bash tool is declared but never used. Removing it is one approval.'}].slice(0,s.k),
+            {k:'EXCESS',c:'a',t:'<b>Closes.</b> Allowed, never declared, never used: internet, K8s API, metadata, other pods, unused syscalls.'},
+            {k:'KEPT OUT',c:'a',t:'<b>Seen isn’t trusted.</b>',s:'If the model called out during learning, that call is in the traffic. It was never declared, so it never becomes a rule.'},
+            {k:'ASK',c:'w',t:'<b>A person decides.</b>',s:'The shell tool is declared but never used. Removing it is one approval.'}].slice(0,s.k),
    act:s=>['Mark what it needs','Close the excess','Check what was seen','Find what’s unclear'][s.k]||'Decided',
    done:s=>s.k>=4, run:s=>{ s.k++; },
    take:s=>s.k>=4?'Recording copies the past. <span>Deciding removes what doesn’t belong.</span>':'' },
- { part:1, label:'How we decide',
+ { part:1, label:()=>'How we decide',
    t:'Proven before it applies.',
    p:'Recorded traffic is replayed against the new policy, offline. If one needed connection would drop, <b>nothing is applied</b>.',
    init:()=>({k:0}),
    svg:s=>sceneProve(s.k),
-   list:s=>[{k:'PASS',c:'g',t:'<b>Every needed connection still works.</b>',s:'The bucket drops, as decided.'},
+   list:s=>[{k:'PASS',c:'g',t:'<b>Every needed connection still works.</b>',s:'The call-out drops, as decided.'},
             {k:'WHAT IF',c:'a',t:'<b>We missed the task queue?</b>',s:'The replay fails. The policy is not applied, and production never changes.'},
             {k:'PASS',c:'g',t:'<b>Back to the real policy.</b>',s:'Only a passing policy can be approved.'}].slice(0,s.k),
    act:s=>['Replay the traffic','What if we missed one?','Back to the real policy'][s.k]||'Proven',
    done:s=>s.k>=3, run:s=>{ s.k++; },
-   take:s=>s.k>=3?'Nothing reaches production <span>until the replay passes.</span>':'' }
+   take:s=>s.k>=3?'Nothing reaches production <span>until the replay passes.</span>':'' },
+ { part:2, label:()=>'The result',
+   t:'Enforced in stages.',
+   p:'Each stage goes live only after <b>a person approves it</b>, and is checked in production.',
+   init:()=>({k:0}),
+   svg:s=>sceneStage(s.k),
+   list:s=>[{k:'STAGE 1',c:'b',t:'<b>K8s API and metadata closed.</b>',s:'0 needed connections dropped.'},
+            {k:'STAGE 2',c:'b',t:'<b>Internet closed.</b>',s:'No upload, no call to an attacker.'},
+            {k:'STAGE 3',c:'b',t:'<b>Other pods closed.</b>',s:'Only the model store, task queue, kb and DNS remain.'},
+            {k:'STAGE 4',c:'b',t:'<b>Inside the pod.</b>',s:'Only python starts. No root, no capabilities, no unused syscalls.'}].slice(0,s.k),
+   act:s=>s.k<4?`Approve stage ${s.k+1}`:'All stages live',
+   done:s=>s.k>=4, run:s=>{ s.k++; },
+   take:s=>s.k>=4?'The agent still does its job. <span>It just can’t do anything else.</span>':'' },
+ { part:2, label:()=>`The result · ${SC.short} again`,
+   t:()=>`${SC.short[0].toUpperCase()+SC.short.slice(1)}, again.`, p:()=>SC.againP,
+   init:()=>({n:0}),
+   svg:(s,f)=>sceneCase(SC.C,s.n,f,SC.E),
+   list:s=>SC.C.chain.slice(0,s.n).map((c,i)=>({c:SC.E[i][0]==='b'?'b':(SC.id==='c2'&&i===1?'y':'r'),t:c.t,s:SC.E[i][1]})),
+   act:s=>s.n===0?SC.a0:s.n<SC.C.chain.length?'What it tries next':'Stopped',
+   done:s=>s.n>=SC.C.chain.length, run:s=>{ s.n++; },
+   take:s=>s.n>=SC.C.chain.length?SC.againTake:'' },
+ { part:2, label:()=>'The result',
+   t:'Before and after.',
+   p:'One agent: decided from evidence, proven, enforced.',
+   init:()=>({k:0}),
+   svg:s=>sceneBA(s.k),
+   list:()=>[],
+   act:s=>s.k<baRows().length?'Show the next':'All shown',
+   done:s=>s.k>=baRows().length, run:s=>{ s.k++; },
+   take:s=>s.k>=baRows().length?'Others alert after the fact, or lock down whatever they saw. <span>We decide, prove, then enforce.</span>':'' },
+ { part:3, label:()=>'Next',
+   t:'Where this goes next.',
+   p:'A decision layer for running agents and workloads you didn’t write, on open-source eBPF engines.',
+   init:()=>({}),
+   svg:()=>sceneNext(),
+   list:()=>[{k:'PLATFORM',c:'r',t:'<b>For platform and AI teams.</b>',s:'Start with one namespace. Evidence and decisions first; nothing is enforced without approval.'},
+             {k:'PARTNERS',c:'r',t:'<b>For vendors and integrators.</b>',s:'Turn Cilium and Tetragon into enforced least privilege, without hand-written rules.'},
+             {k:'TALK',c:'g',t:'<b>Build it with us.</b>',s:'We’re working with a small group of early partners.'}],
+   extra:()=>{ const o=Object.values(CASES).find(c=>!SEEN.has(c.id)); return o?`<div class="pick">${`<button data-case="${o.id}"><span><b>See ${o.short}: ${o.name.toLowerCase()}</b><small>${o.who} · short version</small></span><em>›</em></button>`}</div>`:''; },
+   act:()=>'Start over', done:()=>false, run:()=>{ watching=false; stop(); $('cover').hidden=false; } }
 ];
-const ROUTE=STEPS.map((_,i)=>i);
+const FULL=[0,1,2,3,4,5,6,7,8,9,10], SHORT=[1,2,8,9,10]; let ROUTE=FULL;
+function baRows(){ return [['Network','8 destinations','4 needed'],['Programs','any binary','python'],['Privileges','root possible','none'],['Syscalls','all of them','the few it uses'],[SC.short[0].toUpperCase()+SC.short.slice(1),SC.ba[0],SC.ba[1]],['Needed, dropped','','0']]; }
+function scenePick(){ let s=DEFS; const B=[[20,'Case 1','model goes off-task','Cohere · 2026','ai'],[188,'Case 2','model file is the attack','Hugging Face · JFrog','pkg']];
+  B.forEach(([x,h,d,w,ic])=>{ s+=`<g class="pk"><rect x="${x}" y="40" width="152" height="170" rx="14"/><g class="nd att"><rect class="bg" x="${x+16}" y="58" width="30" height="30" rx="8"/>${glyph(ic,x+31,73)}</g><text x="${x+16}" y="120" class="ph">${h}</text><text x="${x+16}" y="142" class="pd">${d}</text><text x="${x+16}" y="190" class="pw">${w}</text></g>`; });
+  return s; }
+function sceneNext(){ let s=DEFS; const F=[['Evidence','r'],['Decide','a'],['Prove','b'],['Enforce','b']];
+  F.forEach(([t,c],i)=>{ const x=12+i*86; s+=`<g class="fl ${c}"><rect x="${x}" y="80" width="76" height="40" rx="10"/><text x="${x+38}" y="105" text-anchor="middle">${t}</text></g>`; if(i<3) s+=`<path d="M${x+78} 100H${x+84}" class="flar"/>`; });
+  s+=`<text x="180" y="160" text-anchor="middle" class="flsub">on open-source eBPF engines</text>`;
+  [['Cilium',40,80],['Tetragon',128,92],['seccomp',228,92]].forEach(([t,x,w])=>{ s+=`<g class="ch2"><rect x="${x}" y="176" width="${w}" height="26" rx="7"/><text x="${x+w/2}" y="193" text-anchor="middle">${t}</text></g>`; });
+  return s; }
 
 // ---------- engine
 let at=0, ST=STEPS.map(s=>s.init()), watching=false;
+const pos=()=>ROUTE.indexOf(at), nextOf=()=>ROUTE[pos()+1], prevOf=()=>ROUTE[pos()-1];
+const val=(v,s)=>typeof v==='function'?v(s):v;
 function render(changed,fresh){
   const st=STEPS[at], s=ST[at];
-  $('prog').innerHTML=ROUTE.map((_,i)=>`<i class="${i<at?'d':i===at?'n':''}"></i>`).join('');
-  $('chap').innerHTML=`<span>${st.label}</span><em>${at+1} / ${ROUTE.length}</em>`;
+  $('prog').innerHTML=ROUTE.map((_,i)=>`<i class="${i<pos()?'d':i===pos()?'n':''}"></i>`).join('');
+  $('chap').innerHTML=`<span>${val(st.label)}</span><em>${pos()+1} / ${ROUTE.length}</em>`;
   $('map').innerHTML=st.svg(s,fresh);
   if(changed){ const g=$('stage'); g.classList.remove('in'); void g.offsetWidth; g.classList.add('in'); }
-  const L=st.list?st.list(s):[], tk=st.take?st.take(s):'';
-  $('cap').innerHTML=`<h1>${st.t}</h1><p class="intro">${st.p}</p>${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1?'cur':''}">${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${i===L.length-1&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${tk?`<p class="take">${tk}</p>`:''}${st.src&&tk?`<a class="srcl" href="${st.src[1]}" target="_blank" rel="noopener">Source: ${st.src[0]} ↗</a>`:''}`;
-  const c=$('cap'); if(fresh){ const cur=c.querySelector('li.cur'), tk=c.querySelector('.take'), el=tk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
-  const a=$('act'); a.textContent=st.act(s); a.disabled=st.done(s); a.classList.toggle('done',st.done(s));
-  $('back').disabled=at===0; $('next').classList.toggle('go',st.done(s)&&!watching);
-  $('mode').innerHTML=watching?`Playing · <button id="pause">&nbsp;Pause</button>`:`<button id="play">Play from here</button>`;
+  const L=st.list?st.list(s):[], tk=st.take?st.take(s):'', src=val(st.src);
+  $('cap').innerHTML=`<h1>${val(st.t)}</h1><p class="intro">${val(st.p)}</p>${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1||!st.take?'cur':''}">${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${(i===L.length-1||!st.take)&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${st.extra?st.extra():''}${tk?`<p class="take">${tk}</p>`:''}${src&&tk?`<a class="srcl" href="${src[1]}" target="_blank" rel="noopener">Source: ${src[0]} ↗</a>`:''}`;
+  $('cap').querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{ watching=false; stop(); choose(b.dataset.case); });
+  const c=$('cap'); if(fresh){ const cur=c.querySelector('li.cur:last-of-type'), tkk=c.querySelector('.take'), el=tkk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
+  const a=$('act'); a.textContent=st.act(s); const pick=at===0; a.disabled=pick||st.done(s); a.classList.toggle('done',pick||st.done(s));
+  $('back').disabled=pos()<=0; $('next').disabled=nextOf()==null; $('next').classList.toggle('go',!pick&&st.done(s)&&!watching&&nextOf()!=null);
+  $('mode').innerHTML=watching?`Playing · <button id="pause">&nbsp;Pause</button>`:(nextOf()!=null?`<button id="play">Play from here</button>`:'');
   if($('pause')) $('pause').onclick=()=>{ watching=false; stop(); render(); };
   if($('play')) $('play').onclick=()=>{ watching=true; autoplay(); render(); };
 }
 function show(i){ stop(); at=i; ST[i]=STEPS[i].init(); render(true,false); if(watching) autoplay(); }
-function act(){ const st=STEPS[at], s=ST[at]; if(st.done(s)) return; st.run(s); render(false,true); }
+function act(){ const st=STEPS[at], s=ST[at]; if(st.done(s)) return; st.run(s); if(!$('cover').hidden) return; render(false,true); }
 function inter(i,go){ const p=STEPS[i].part;
-  $('interK').textContent=`Part ${p+1} of ${PARTS.length}`; $('interH').innerHTML=HEAD[p]||PARTS[p][0];
+  $('interK').textContent=ROUTE===SHORT&&p===0?`${SC.short} · short version`:p<PARTS.length?`Part ${p+1} of ${PARTS.length}`:'Next'; $('interH').innerHTML=p<PARTS.length?(HEAD[p]||PARTS[p][0]):'That’s the product. <span>Here’s where it goes next.</span>';
   $('road').innerHTML=PARTS.map(([n,d],j)=>`<li class="${j<p?'d':j===p?'n':''}"><span class="dot">${j<p?'✓':j+1}</span><b>${n}</b><small>${d}</small></li>`).join('');
   $('inter').classList.add('on'); const done=()=>{ stop(); $('inter').classList.remove('on'); go(); };
   $('interGo').onclick=done; if(watching) later(3200,done); }
-function forward(i){ if(i>=STEPS.length){ watching=false; stop(); $('cover').hidden=false; return; }
-  const prev=STEPS[i-1]; if(!prev||prev.part!==STEPS[i].part) inter(i,()=>show(i)); else show(i); }
-function autoplay(){ stop(); const tick=()=>{ if(!watching) return; const st=STEPS[at],s=ST[at]; if(!st.done(s)){ act(); later(2600,tick); } else later(3600,()=>{ if(watching) forward(at+1); }); }; later(1400,tick); }
+function goTo(i){ const r=ROUTE.indexOf(i), prev=ROUTE[r-1]; if(prev==null||STEPS[prev].part!==STEPS[i].part) inter(i,()=>show(i)); else show(i); }
+function choose(id){ SC=CASES[id]; SEEN.add(id); ROUTE=SEEN.size>1?SHORT:FULL; ST=STEPS.map(s=>s.init()); if(ROUTE===SHORT) goTo(1); else show(1); }
+function autoplay(){ stop(); if(at===0){ later(2200,()=>{ if(watching) choose('c1'); }); return; }
+  const tick=()=>{ if(!watching) return; const st=STEPS[at],s=ST[at]; if(!st.done(s)){ act(); later(2600,tick); } else later(3600,()=>{ if(watching&&nextOf()!=null) goTo(nextOf()); else { watching=false; render(); } }); }; later(1400,tick); }
 $('act').onclick=()=>{ if(watching){ watching=false; stop(); } act(); };
-$('next').onclick=()=>{ watching=false; stop(); forward(at+1); };
-$('back').onclick=()=>{ if(at>0){ watching=false; show(at-1); } };
+$('next').onclick=()=>{ watching=false; stop(); if(at===0){ choose('c1'); return; } if(nextOf()!=null) goTo(nextOf()); };
+$('back').onclick=()=>{ if(pos()>0){ watching=false; show(prevOf()); } };
 
 // ---------- cover visual: needed stays, excess closes
 (function(){ const C=[180,100], R=[136,70,88,60]; let s=DEFS, xs=[];
@@ -385,8 +488,8 @@ $('back').onclick=()=>{ if(at>0){ watching=false; show(at-1); } };
   s+=`<circle cx="112" cy="204" r="4" fill="#123222" stroke="#4CC38A"/><text x="121" y="207.5" class="lg">needed stays</text><g stroke="#7C879B" stroke-width="1.3" stroke-linecap="round"><path d="M205 200.5l7 7M212 200.5l-7 7"/></g><text x="218" y="207.5" class="lg">excess closes</text>`;
   $('coverVis').innerHTML=s; })();
 
-$('watch').onclick=()=>{ $('cover').hidden=true; watching=true; ST=STEPS.map(s=>s.init()); forward(0); };
-$('explore').onclick=()=>{ $('cover').hidden=true; watching=false; ST=STEPS.map(s=>s.init()); forward(0); };
+$('watch').onclick=()=>{ $('cover').hidden=true; watching=true; SEEN.clear(); ROUTE=FULL; ST=STEPS.map(s=>s.init()); goTo(0); };
+$('explore').onclick=()=>{ $('cover').hidden=true; watching=false; SEEN.clear(); ROUTE=FULL; ST=STEPS.map(s=>s.init()); goTo(0); };
 render(true,false);
 if(/skip/.test(location.search)) $('cover').hidden=true;
 </script>
