@@ -448,13 +448,13 @@ const STEPS=[
    take:s=>s.k>=baRows().length?'Others alert after the fact, or lock down whatever they saw. <span>We decide, prove, then enforce.</span>':'' },
  { part:3, label:()=>'Why now',
    t:'Why now.',
-   p:'The gap was always there. <b>Agents and AI-found kernel bugs</b> make it urgent.',
+   p:'The gap was always there. <b>Agents and a run of kernel bugs</b> make it urgent.',
    init:()=>({k:0}),
    svg:s=>sceneWhyNow(s.k),
    list:s=>[{k:'GAP',c:'a',t:'<b>Most workloads run with no network policy.</b>',s:'Fairwinds 2024: 58% of organizations miss one on more than half their workloads.'},
             {k:'RUNTIME',c:'a',t:'<b>Incidents happen at runtime.</b>',s:'Red Hat 2024: 45% had a runtime security incident in the last 12 months.'},
-            {k:'KERNEL',c:'a',t:'<b>Kernel bugs arrive faster.</b>',s:'Copy Fail and Dirty Frag, five weeks apart. AI is finding more. Patching can’t keep up; unused syscalls can be closed today.'},
-            {k:'AGENTS',c:'a',t:'<b>Agents run code nobody wrote.</b>',s:'Gartner expects 40% of enterprise apps to include AI agents by 2026. Each one needs its own least privilege.'}].slice(0,s.k),
+            {k:'KERNEL',c:'a',t:'<b>Kernel bugs arrive faster.</b>',s:'Copy Fail and Dirty Frag went public eight days apart. Patching takes time; unused syscalls can be closed today.'},
+            {k:'AGENTS',c:'a',t:'<b>Agents run code nobody wrote.</b>',s:'Gartner forecast (2025): 40% of enterprise apps will include task-specific AI agents by 2026, up from under 5%. Each one needs its own least privilege.'}].slice(0,s.k),
    act:s=>['The gap','Runtime','The kernel','Agents'][s.k]||'Shown',
    done:s=>s.k>=4, run:s=>{ s.k++; },
    take:s=>s.k>=4?'The engines are ready. <span>The decision layer is what’s missing.</span>':'' },
@@ -472,7 +472,7 @@ const STEPS=[
 ];
 const FULL=[0,1,2,3,4,5,6,7,8,9,10,11], SHORT=[1,2,8,9,11]; let ROUTE=FULL;
 function baRows(){ return [['NETWORK','<b>8 → 4 destinations.</b> Internet, K8s API, metadata and other pods closed.','Close the network'],['PROGRAMS','<b>Any binary → python only.</b> No shell, no curl.','Lock programs'],['PRIVILEGES','<b>Root → no root.</b> No capabilities.','Drop privileges'],['SYSCALLS','<b>All → the few it uses.</b> No AF_ALG, no namespaces.','Cut syscalls'],[SC.short.toUpperCase(),`<b>${SC.ba[0]} → ${SC.ba[1]}.</b>`,`Replay ${SC.short}`],['DROPPED','<b>0</b> needed connections. The agent still works.','Check what broke']]; }
-const WN=[['58%','of organizations miss a network policy on most workloads','Fairwinds, 2024'],['45%','had a security incident at runtime in the last year','Red Hat, 2024'],['2','Linux root bugs, five weeks apart, reachable from inside a pod','Copy Fail · Dirty Frag, 2026'],['40%','of enterprise apps will include AI agents by 2026','Gartner']];
+const WN=[['58%','of organizations miss a network policy on most workloads','Fairwinds, 2024'],['45%','had a security incident at runtime in the last year','Red Hat, 2024'],['2','Linux root bugs, eight days apart, reachable from inside a pod','Copy Fail · Dirty Frag, 2026'],['40%','of enterprise apps to include AI agents by 2026','Gartner forecast, 2025']];
 function sceneWhyNow(k){ let s=DEFS;
   WN.forEach(([n,t,src],i)=>{ const x=8+(i%2)*176, y=8+Math.floor(i/2)*124, on=i<k;
     s+=`<g class="wn ${on?'on':''}"><rect x="${x}" y="${y}" width="168" height="116" rx="12"/><text x="${x+14}" y="${y+38}" class="wnn">${on?n:'·'}</text>`;
