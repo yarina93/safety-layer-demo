@@ -450,7 +450,7 @@ const STEPS=[
  { part:3, label:()=>'Why now',
    t:'Why now.',
    p:'The gap was always there. <b>Agents and a run of kernel bugs</b> make it urgent.',
-   init:()=>({k:0}),
+   allSubs:true, init:()=>({k:0}),
    svg:s=>sceneWhyNow(s.k),
    list:s=>[{k:'GAP',c:'a',t:'<b>Most workloads run with no network policy.</b>',s:'Based on: Fairwinds 2024 Kubernetes benchmark, 330,000+ workloads. 58% of organizations miss a network policy on more than half of them. <a href="https://www.cncf.io/blog/2024/04/09/k8s-benchmark-report-are-organizations-meeting-nsa-hardening-checks/" target="_blank" rel="noopener" style="color:var(--info);text-decoration:none">Source ↗</a>'},
             {k:'RUNTIME',c:'a',t:'<b>Incidents happen at runtime.</b>',s:'Based on: Red Hat State of Kubernetes Security 2024, a survey of 600 practitioners. 45% had a runtime incident in the last 12 months. <a href="https://www.redhat.com/en/blog/state-kubernetes-security-2024" target="_blank" rel="noopener" style="color:var(--info);text-decoration:none">Source ↗</a>'},
