@@ -99,7 +99,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .bap .frame{fill:#0F141E;stroke:#1E2633}.bap .h{font:600 10px var(--body);letter-spacing:.12em;fill:var(--muted)}.bap .pt{font:600 10px var(--mono);fill:#F08A8D}.bap .cnt{font:500 10px var(--body);fill:var(--muted)}
 .ba .h{font:600 9.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.ba .n{font:600 12px var(--body);fill:var(--text)}.ba .b{font:500 11.5px var(--mono);fill:#C06A6E}.ba .a{font:600 11.5px var(--mono);fill:var(--ok)}.ba rect{fill:#0F141E}
 .e.al{stroke:#5C6880}.e.ex{stroke:var(--bad);stroke-dasharray:3 4;opacity:.8}
-.pc rect{fill:#151B27;stroke:#2C3546}.pc text{font:600 10px var(--mono);fill:var(--text)}
+.pc rect{fill:#151B27;stroke:#2C3546}.pc text{font:600 11px var(--mono);fill:var(--text)}
 .pc.ok rect{fill:#123222;stroke:#2B6B48}.pc.ok text{fill:var(--ok)}.pc.b rect{fill:#22151A;stroke:#6B2C32}.pc.b text{fill:#F08A8D;text-decoration:line-through}
 .rowl{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}
 .eng rect{fill:#121823;stroke:#2C3546}.eng .en{font:600 13px var(--body);fill:var(--ink)}.eng .es{font:500 10.5px var(--body);fill:var(--muted)}.eng .z{font:600 11px var(--mono);fill:#F08A8D}
@@ -249,7 +249,7 @@ function sceneCase(C,n,fresh,E){ const [px,py,pw,ph]=POD; let s=DEFS, chips=0;
   return s; }
 
 // ---------- the gap: allowed vs needed
-const GP={core:[180,92],pod:[112,64,136,146],
+const GP={core:[180,88],pod:[92,58,176,158],
   N:{store:[44,40,'model-store','db',1],tasks:[44,124,'task queue','doc',1],kb:[44,208,'kb','db',1],dns:[180,26,'kube-dns','api',1],
      net:[316,40,'internet','net',0],api:[316,124,'K8s API','api',0],meta:[316,208,'metadata','key',0],pods:[180,226,'other pods','doc',0]}};
 function sceneGap(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
@@ -257,11 +257,11 @@ function sceneGap(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
   Object.entries(GP.N).forEach(([key,[x,y,l,ic,need]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18);
     const c=k<1?'al':need?'ok':'ex'; s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${c}"/>`; });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
-  const chips=(y,lab,items)=>{ const W=items.map(([t])=>Math.max(38,t.length*6.3+10)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="16" rx="5"/><text x="${x+W[i]/2}" y="${y+11.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
-  s+=chips(118,'',[['python',k>=2?'ok':''],['shell',k>=2?'b':''],['curl',k>=2?'b':'']]);
-  s+=chips(140,'',[['root',k>=3?'b':''],['caps',k>=3?'b':'']]);
-  s+=chips(162,'',[['AF_ALG',k>=4?'b':''],['unshare',k>=4?'b':'']]);
-  s+=chips(184,'',[['/app',k>=5?'ok':''],['token',k>=5?'b':''],['~/.aws',k>=5?'b':'']]);
+  const chips=(y,lab,items)=>{ const W=items.map(([t])=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
+  s+=chips(108,'',[['python',k>=2?'ok':''],['shell',k>=2?'b':''],['curl',k>=2?'b':'']]);
+  s+=chips(132,'',[['root',k>=3?'b':''],['caps',k>=3?'b':'']]);
+  s+=chips(156,'',[['AF_ALG',k>=4?'b':''],['unshare',k>=4?'b':'']]);
+  s+=chips(180,'',[['/app',k>=5?'ok':''],['token',k>=5?'b':''],['~/.aws',k>=5?'b':'']]);
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,k>=1&&!need?'att':'')).join('');
   return s; }
 
@@ -288,12 +288,12 @@ function sceneDec(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
     if(need) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=1?'ok':'al'}"/>`;
     else { s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=2?'x':'al'}"/>`; if(k>=2) s+=`<circle cx="${bx}" cy="${by}" r="6" fill="#0A0D14" stroke="#4A5468"/><path d="M${bx-2.6} ${by-2.6}L${bx+2.6} ${by+2.6}M${bx+2.6} ${by-2.6}L${bx-2.6} ${by+2.6}" stroke="#9AA4B6" stroke-width="1.3" stroke-linecap="round"/>`; } });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
-  const crow=(y,it)=>{ const W=it.map(([t])=>Math.max(38,t.length*6.3+10)), g=4; let x=180-(W.reduce((a,b)=>a+b,0)+g*(it.length-1))/2; it.forEach(([t,c],n)=>{ s+=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[n]}" height="16" rx="5"/><text x="${x+W[n]/2}" y="${y+11.5}" text-anchor="middle">${t}</text></g>`; x+=W[n]+g; }); };
+  const crow=(y,it)=>{ const W=it.map(([t])=>Math.max(42,t.length*7+12)), g=4; let x=180-(W.reduce((a,b)=>a+b,0)+g*(it.length-1))/2; it.forEach(([t,c],n)=>{ s+=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[n]}" height="19" rx="5"/><text x="${x+W[n]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[n]+g; }); };
   const X=k>=2?'b':'';
-  crow(118,[['python',k>=1?'ok':''],[k>=4?'shell ?':'shell',k>=4?'w':''],['curl',X]]);
-  crow(140,[['root',X],['caps',X]]);
-  crow(162,[['AF_ALG',X],['unshare',X]]);
-  crow(184,[['/app',k>=1?'ok':''],['token',X],['~/.aws',X]]);
+  crow(108,[['python',k>=1?'ok':''],[k>=4?'shell ?':'shell',k>=4?'w':''],['curl',X]]);
+  crow(132,[['root',X],['caps',X]]);
+  crow(156,[['AF_ALG',X],['unshare',X]]);
+  crow(180,[['/app',k>=1?'ok':''],['token',X],['~/.aws',X]]);
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,!need&&k>=2?'dim':'')).join('');
   if(k>=3) s+=`<g class="flag fadein"><rect x="214" y="4" width="140" height="20" rx="6"/><text x="284" y="17.5" text-anchor="middle">KEPT OUT · cloud bucket</text></g>`;
   return s; }
@@ -316,9 +316,9 @@ function sceneStage(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS; const
     else if(closed.includes(key)) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e x"/>`+xm(bx,by);
     else s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ex"/>`; });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
-  const row=(y,items)=>{ const W=items.map(([t])=>Math.max(38,t.length*6.3+10)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="16" rx="5"/><text x="${x+W[i]/2}" y="${y+11.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
+  const row=(y,items)=>{ const W=items.map(([t])=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
   const c4=k>=4?'b':'';
-  s+=row(118,[['python','ok'],['shell',c4],['curl',c4]])+row(140,[['root',c4],['caps',c4]])+row(162,[['AF_ALG',c4],['unshare',c4]])+row(184,[['/app','ok'],['token',c4],['~/.aws',c4]]);
+  s+=row(108,[['python','ok'],['shell',c4],['curl',c4]])+row(132,[['root',c4],['caps',c4]])+row(156,[['AF_ALG',c4],['unshare',c4]])+row(180,[['/app','ok'],['token',c4],['~/.aws',c4]]);
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,closed.includes(key)?'dim':need?'':'att')).join('');
   return s; }
 // ---------- before and after
