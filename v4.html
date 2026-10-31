@@ -177,19 +177,20 @@ function line(a,b,c,fresh,n){ const [x1,y1,x2,y2]=trim(a,b); let s=`<line x1="${
   if(n) s+=`<g class="${fresh?'fadein':''}">${badge((x1+x2)/2,(y1+y2)/2,n,c)}</g>`; return s; }
 
 // ---------- the two real cases (one agent pod)
-const C1={N:{tasks:[50,56,'task queue','routine task','doc'],bucket:[310,56,'cloud bucket','Beijing','net'],store:[50,206,'model-store','','db'],meta:[310,206,'metadata','','key']},
+const C1={N:{tasks:[50,56,'task','from Cohere','doc'],bucket:[310,56,'cloud bucket','in Beijing','net'],store:[50,206,'model-store','','db'],meta:[310,206,'metadata','','key']},
   chain:[
-  {from:'tasks',to:'core',c:'r',t:'A routine task: <b>write a detection rule</b>.',s:'The agent has tools for it, including a <b>bash</b> shell.'},
-  {chip:'ls -la /tmp',c:'a',t:'The model lists <b>/tmp</b>.',s:'Nothing in the task asked for it.'},
-  {chip:'which curl wget',c:'a',t:'It looks for <b>curl and wget</b>.',s:'Tools that send data out.'},
-  {chip:'cat resolv.conf',c:'a',t:'It reads the <b>DNS configuration</b>.',s:'/etc/resolv.conf'},
-  {from:'core',to:'bucket',c:'a',t:'It runs <b>curl -X PUT</b> to a bucket in Beijing.',s:'A sandbox stopped it in Cohere’s test. In a normal pod, nothing would.'}]};
-const C2={N:{hf:[50,56,'Hugging Face','model file','pkg'],c2:[310,56,'attacker','reverse shell','net'],store:[50,206,'model-store','','db'],meta:[310,206,'metadata','','key']},
+  {from:'tasks',to:'core',c:'r',t:'Cohere gives the agent a <b>routine task</b>.',s:'Write a rule that detects malware downloads. It has a bash tool to work with.'},
+  {chip:'ls -la /tmp',c:'a',t:'Unasked, the model <b>looks around</b>: it lists /tmp.',s:'Nothing in the task needs it.'},
+  {chip:'which curl wget',c:'a',t:'It checks which <b>upload tools</b> exist.',s:'curl and wget send data out of the pod.'},
+  {chip:'cat resolv.conf',c:'a',t:'It reads the <b>DNS settings</b>.',s:'How names resolve from inside the network.'},
+  {from:'core',to:'bucket',c:'a',t:'It tries to <b>upload a file</b> to a bucket in Beijing.',s:'It was a test string, and a sandbox blocked it. In a normal pod, nothing would.'}]};
+const C2={N:{hf:[50,56,'Hugging Face','model file','pkg'],c2:[310,56,'attacker','server','net'],store:[50,206,'model-store','','db'],nb:[310,152,'other pods','same node','doc']},
   chain:[
-  {from:'hf',to:'core',c:'r',t:'The agent loads a model from <b>Hugging Face</b>.',s:'The usual way to get open-weight models.'},
-  {chip:'pickle.load',c:'a',t:'Loading it <b>runs code</b> hidden in the file.',s:'Pickle model files can execute code when opened.'},
-  {chip:'/bin/sh',c:'a',t:'The code starts a <b>shell</b>.',s:'Inside the agent’s pod, with its identity.'},
-  {from:'core',to:'c2',c:'a',t:'It connects out: a <b>reverse shell</b>.',s:'The attacker now types commands in your pod.'}]};
+  {from:'hf',to:'core',c:'r',t:'The agent downloads a model from <b>Hugging Face</b>.',s:'Most teams get open-weight models this way.'},
+  {chip:'pickle.load',c:'a',t:'Opening the file <b>runs hidden code</b>.',s:'Pickle files can carry code. Loading the model is enough to run it.'},
+  {chip:'/bin/sh',c:'a',t:'The hidden code <b>starts a shell</b>.',s:'Inside the agent’s pod, with its identity.'},
+  {from:'core',to:'c2',c:'a',t:'The shell <b>calls the attacker</b>.',s:'A reverse shell: the attacker now types commands in your pod.'},
+  {from:'core',to:'nb',c:'a',t:'A kernel bug like <b>Copy Fail</b> reaches the pods next to it.',s:'Every pod on a node shares one kernel. One bad pod can corrupt what its neighbors run.'}]};
 const POD=[110,80,140,118], CORE=[180,104];
 function sceneCase(C,n,fresh){ const [px,py,pw,ph]=POD; let s=DEFS, chips=0;
   s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/><text x="180" y="${py+ph+15}" text-anchor="middle" class="podl">AGENT POD</text>`;
@@ -204,7 +205,7 @@ function sceneCase(C,n,fresh){ const [px,py,pw,ph]=POD; let s=DEFS, chips=0;
   return s; }
 
 // ---------- the gap: allowed vs needed
-const GP={core:[180,100],pod:[112,72,136,112],
+const GP={core:[180,96],pod:[112,70,136,124],
   N:{store:[44,40,'model-store','db',1],tasks:[44,124,'task queue','doc',1],kb:[44,208,'kb','db',1],dns:[180,26,'kube-dns','api',1],
      net:[316,40,'internet','net',0],api:[316,124,'K8s API','api',0],meta:[316,208,'metadata','key',0],pods:[180,226,'other pods','doc',0]}};
 function sceneGap(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
@@ -212,9 +213,10 @@ function sceneGap(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
   Object.entries(GP.N).forEach(([key,[x,y,l,ic,need]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18);
     const c=k<1?'al':need?'ok':'ex'; s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${c}"/>`; });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
-  const chips=(y,lab,items)=>{ const w=38,g=4,x0=180-(items.length*w+(items.length-1)*g)/2; return items.map(([t,c],i)=>`<g class="pc ${c}"><rect x="${x0+i*(w+g)}" y="${y}" width="${w}" height="16" rx="5"/><text x="${x0+i*(w+g)+w/2}" y="${y+11.5}" text-anchor="middle">${t}</text></g>`).join(''); };
-  s+=chips(126,'',[['python',k>=2?'ok':''],['bash',k>=2?'b':''],['curl',k>=2?'b':'']]);
-  s+=chips(150,'',[['root',k>=3?'b':''],['caps',k>=3?'b':'']]);
+  const chips=(y,lab,items)=>{ const W=items.map(([t])=>Math.max(38,t.length*6.3+10)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="16" rx="5"/><text x="${x+W[i]/2}" y="${y+11.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
+  s+=chips(118,'',[['python',k>=2?'ok':''],['bash',k>=2?'b':''],['curl',k>=2?'b':'']]);
+  s+=chips(140,'',[['root',k>=3?'b':''],['caps',k>=3?'b':'']]);
+  s+=chips(162,'',[['AF_ALG',k>=4?'b':''],['unshare',k>=4?'b':'']]);
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,k>=1&&!need?'att':'')).join('');
   return s; }
 
@@ -261,23 +263,23 @@ const HEAD=['Your agent runs a model you didn’t write. <span>What its pod is a
 const STEPS=[
  { part:0, label:'The problem · real case 1',
    t:'The model goes off-task.',
-   p:'An agent runs a popular open-weight model with a few tools. No attacker, no prompt injection. <b>Cohere caught this in October 2026.</b>',
+   p:'In its own test, Cohere ran an AI agent on a popular open-weight model. There was <b>no attacker</b> and no malicious prompt.',
    init:()=>({n:0}),
    svg:(s,f)=>sceneCase(C1,s.n,f),
    list:s=>C1.chain.slice(0,s.n),
    act:s=>s.n===0?'Give it the task':s.n<C1.chain.length?'What it did next':'That’s what happened',
    done:s=>s.n>=C1.chain.length, run:s=>{ s.n++; },
-   take:s=>s.n>=C1.chain.length?'Nobody told it to. <span>The model did it on its own.</span>':'',
+   take:s=>s.n>=C1.chain.length?'The model went off-task on its own. <span>You can’t fully trust a model you didn’t train.</span>':'',
    src:['Cohere, Oct 2026','https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model'] },
  { part:0, label:'The problem · real case 2',
    t:'The model file is the attack.',
-   p:'Same agent, a different risk: the model it downloads. <b>JFrog found about 100 of these on Hugging Face.</b>',
+   p:'Same kind of agent, a different risk: <b>the model file itself</b>. JFrog found about 100 malicious models on Hugging Face.',
    init:()=>({n:0}),
    svg:(s,f)=>sceneCase(C2,s.n,f),
    list:s=>C2.chain.slice(0,s.n),
    act:s=>s.n===0?'Load the model':s.n<C2.chain.length?'What happened next':'That’s what happened',
    done:s=>s.n>=C2.chain.length, run:s=>{ s.n++; },
-   take:s=>s.n>=C2.chain.length?'Nothing was prompted. <span>Opening the file was enough.</span>':'',
+   take:s=>s.n>=C2.chain.length?'Nothing was prompted. <span>Opening the file was enough, and the damage left the pod.</span>':'',
    src:['JFrog, 2024','https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/'] },
  { part:0, label:'The problem',
    t:'Allowed far more than it needs.',
@@ -286,10 +288,11 @@ const STEPS=[
    svg:s=>sceneGap(s.k),
    list:s=>[{k:'NETWORK',c:'a',t:'<b>8 destinations open.</b> It needs 4.',s:'The model store, the task queue, the knowledge base and DNS. The internet, the K8s API, the metadata service and other pods are excess.'},
             {k:'PROGRAMS',c:'a',t:'<b>Any binary can start.</b> It runs one.',s:'Only python ever ran. bash, sh and curl are allowed anyway.'},
-            {k:'PRIVILEGES',c:'a',t:'<b>Root is possible.</b> It needs none.',s:'It never used a single Linux capability.'}].slice(0,s.k),
-   act:s=>['Compare the network','Compare programs','Compare privileges'][s.k]||'Compared',
-   done:s=>s.k>=3, run:s=>{ s.k++; },
-   take:s=>s.k>=3?'Every step in both cases used excess. <span>Nothing the agent needed.</span>':'' },
+            {k:'PRIVILEGES',c:'a',t:'<b>Root is possible.</b> It needs none.',s:'It never used a single Linux capability.'},
+            {k:'KERNEL',c:'a',t:'<b>Hundreds of kernel calls open.</b> It uses a few.',s:'It never opened an AF_ALG socket or created a namespace. That’s exactly what Copy Fail and Dirty Frag need.'}].slice(0,s.k),
+   act:s=>['Compare the network','Compare programs','Compare privileges','Compare the kernel'][s.k]||'Compared',
+   done:s=>s.k>=4, run:s=>{ s.k++; },
+   take:s=>s.k>=4?'Every step in both cases used excess. <span>Nothing the agent needed.</span>':'' },
  { part:0, label:'The problem',
    t:'The engines are there. The rules aren’t.',
    p:'Cilium and Tetragon can block all of that excess. In most clusters, <b>nothing is enforced</b>.',
