@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0D14">
+<title>Safety Layer · Tour</title>
+<meta name="description" content="Zero Trust inside the cluster: least privilege for every workload, decided from evidence and proven before it applies.">
+<meta property="og:title" content="Safety Layer · The decision layer for runtime enforcement">
+<meta property="og:description" content="Zero Trust inside the cluster: least privilege for every workload, decided from evidence and proven before it applies.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+:root{--bg:#0A0D14;--panel:#10151F;--panel2:#141A25;--ink:#E9EDF5;--text:#B4BDCD;--muted:#7C879B;--dim:#4A5468;--line:#222A38;
+  --ok:#4CC38A;--bad:#E5484D;--warn:#E8A33D;--info:#7AA2F7;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-text-size-adjust:100%}
+button{font:inherit;cursor:pointer;color:inherit}
+.app{position:relative;max-width:460px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;padding:12px 16px calc(12px + env(safe-area-inset-bottom));overflow:hidden}
+@media (min-width:700px){body{display:grid;place-items:center;min-height:100vh}.app{height:min(100dvh,880px);border:1px solid var(--line);border-radius:28px}}
+
+/* header */
+.top{flex:none;display:flex;align-items:center;gap:12px;height:28px}
+.brand{display:flex;align-items:center;gap:7px;font-weight:600;font-size:14.5px;white-space:nowrap}.brand svg{width:18px;height:18px}
+.prog{flex:1;display:flex;gap:3px}.prog i{flex:1;height:3px;border-radius:2px;background:var(--line);transition:background .3s}.prog i.d{background:#5D687D}.prog i.n{background:var(--ink)}
+.chap{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:10px 0 8px;font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--info)}
+.chap em{font-style:normal;letter-spacing:0;color:var(--muted);font-weight:500}
+
+/* stage: fixed height, never moves */
+.stage{flex:none;height:clamp(200px,33dvh,290px);border:1px solid var(--line);border-radius:14px;background:#0D1119;overflow:hidden}
+.stage svg{width:100%;height:100%;display:block}
+.stage.in svg{animation:fin .35s ease}@keyframes fin{from{opacity:0}to{opacity:1}}
+
+/* caption: fixed region, scrolls inside */
+.cap{flex:1;min-height:0;overflow-y:auto;padding:14px 2px 6px;scrollbar-width:none}.cap::-webkit-scrollbar{display:none}
+.cap h1{font-size:22px;line-height:1.2;letter-spacing:-.015em;margin:0 0 6px;font-weight:700}
+.cap p.intro{font-size:15px;line-height:1.45;color:var(--text);margin:0 0 12px}
+.cap p.intro b{color:var(--ink);font-weight:600}
+.steps{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.steps li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);color:var(--muted);font-size:14px;line-height:1.4}
+.steps li .n{flex:none;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font:600 11px var(--mono);background:#1A2130;color:var(--muted);margin-top:0}
+.steps li.a .n{background:#3A1C20;color:#F08A8D}
+.steps li.r .n{background:#17233A;color:var(--info)}
+.steps li.cur{color:var(--ink)}
+.steps li .t small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.steps li .t b{font-weight:600}
+.take{margin:12px 0 0;font-size:15px;line-height:1.45;color:var(--ink);font-weight:600}
+.take span{color:var(--muted);font-weight:400}
+
+/* bottom bar */
+.bar{flex:none;display:flex;gap:8px;padding-top:10px}
+.bar button{height:50px;border-radius:12px;border:1px solid var(--line);background:transparent;font-weight:600;font-size:15.5px}
+.bar .nav{width:52px;font-size:20px;color:var(--text)}.bar .nav:disabled{opacity:.3}
+.bar .act{flex:1;background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar .act.done{background:transparent;color:var(--muted);border-color:var(--line)}
+.bar .nav.go{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.mode{flex:none;height:22px;display:flex;justify-content:center;align-items:flex-end;font:500 12px var(--body);color:var(--muted)}
+.mode button{background:none;border:0;color:var(--info);font-weight:600;padding:0}
+
+/* svg */
+.nd .bg{fill:#121823;stroke:#2C3546;stroke-width:1}
+.nd text{font:600 12.5px var(--body);fill:var(--text)}.nd .sub{font:500 10.5px var(--body);fill:var(--muted)}
+.nd .gl{fill:none;stroke:#8C98AE;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.nd.att .bg{fill:#22151A;stroke:#6B2C32}.nd.att .gl{stroke:#F08A8D}
+.nd.dim{opacity:.4}
+.pod{fill:#111723;stroke:#2C3546;stroke-dasharray:4 4}
+.podl{font:600 9.5px var(--body);letter-spacing:.1em;fill:var(--muted)}
+.core .bg{fill:#151B27;stroke:var(--warn);stroke-width:1.5}.core .gl{fill:none;stroke:var(--warn);stroke-width:1.4;stroke-linejoin:round}
+.e{fill:none;stroke-width:1.6;stroke-linecap:round}
+.e.a{stroke:var(--bad)}.e.r{stroke:var(--info)}.e.ok{stroke:var(--ok)}.e.x{stroke:#3A4558;stroke-dasharray:3 4}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:dr .6s ease forwards}@keyframes dr{to{stroke-dashoffset:0}}
+.nb circle{fill:#0D1119;stroke:#3A4558}.nb text{font:600 10px var(--mono);fill:var(--text)}
+.nb.a circle{stroke:#8A3238}.nb.a text{fill:#F08A8D}
+.chip rect{fill:#22151A;stroke:#6B2C32}.chip text{font:600 10.5px var(--mono);fill:#F08A8D}
+.foot{font:600 9.5px var(--body);letter-spacing:.1em;fill:#8A4A50}
+.fadein{animation:fin .4s ease}
+
+/* cover */
+.cover{position:absolute;inset:0;z-index:5;background:var(--bg);display:flex;flex-direction:column;padding:28px 22px calc(18px + env(safe-area-inset-bottom))}.cover[hidden]{display:none}
+.cover .k{font:600 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--info)}
+.cover h1{font-size:31px;line-height:1.12;letter-spacing:-.02em;margin:12px 0 12px;font-weight:700}
+.cover .msg{font-size:16px;line-height:1.5;color:var(--text);margin:0}
+.cover .vis{flex:1;min-height:120px;display:flex;align-items:center;justify-content:center;margin:14px 0}
+.cover .vis svg{width:100%;max-height:220px}
+.cover .btns{display:flex;flex-direction:column;gap:9px}
+.cover .btns button{height:54px;border-radius:13px;font-weight:600;font-size:16px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;gap:8px}
+.cover .btns button.sec{background:transparent;border-color:var(--line);color:var(--ink)}
+.cover .btns small{font-weight:500;font-size:13px;opacity:.6}
+.cover .ft{text-align:center;font-size:12px;color:var(--muted);margin-top:12px}
+.lg{font:500 10.5px var(--body);fill:var(--muted)}
+
+/* chapter screen */
+.inter{position:absolute;inset:0;z-index:4;background:var(--bg);display:flex;flex-direction:column;padding:28px 22px calc(18px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .3s}
+.inter.on{opacity:1;pointer-events:auto}
+.inter .ik{font:600 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--info);margin-top:auto}
+.inter h2{font-size:24px;line-height:1.25;letter-spacing:-.01em;margin:10px 0 26px;font-weight:700}
+.inter h2 span{color:var(--muted);font-weight:500}
+.road{list-style:none;margin:0 0 auto;padding:0}
+.road li{position:relative;padding:0 0 20px 36px;color:var(--dim)}
+.road li::before{content:'';position:absolute;left:11px;top:26px;bottom:2px;width:1.5px;background:var(--line)}
+.road li:last-child::before{display:none}
+.road .dot{position:absolute;left:0;top:0;width:23px;height:23px;border-radius:50%;border:1.5px solid var(--dim);display:grid;place-items:center;font:600 11px var(--mono)}
+.road li.d .dot{border-color:var(--ok);color:var(--ok)}.road li.d::before{background:#2B6B48}
+.road li.n .dot{border-color:var(--ink);color:var(--ink)}
+.road b{display:block;font-size:16.5px;line-height:23px;font-weight:600}
+.road li.n b{color:var(--ink)}.road li.d b{color:var(--text)}
+.road small{display:block;font-size:13px;margin-top:2px}
+.road li.n small{color:var(--text)}
+.inter .go{height:54px;border-radius:13px;border:0;background:var(--ink);color:var(--bg);font-weight:600;font-size:16px;margin-top:22px}
+
+@media (max-height:700px){.cap h1{font-size:19.5px}.cap p.intro{font-size:14px;margin-bottom:9px}.steps li{padding:7px 0;font-size:13.5px}.bar button{height:46px}.cover h1{font-size:27px}.cover .msg{font-size:15px}.inter h2{font-size:21px;margin-bottom:18px}.road li{padding-bottom:14px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand"><svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.8v5.6c0 4.8 3.3 8.8 8 10.1 4.7-1.3 8-5.3 8-10.1V5.8z" fill="none" stroke="#7AA2F7" stroke-width="1.6"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#4CC38A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Safety Layer</div>
+    <div class="prog" id="prog"></div>
+  </div>
+  <div class="chap" id="chap"></div>
+  <div class="stage" id="stage"><svg id="map" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="cap" id="cap"></div>
+  <div class="bar"><button class="nav" id="back" aria-label="Back">‹</button><button class="act" id="act"></button><button class="nav" id="next" aria-label="Next">›</button></div>
+  <div class="mode" id="mode"></div>
+
+  <section class="inter" id="inter"><div class="ik" id="interK"></div><h2 id="interH"></h2><ol class="road" id="road"></ol><button class="go" id="interGo">Continue</button></section>
+
+  <section class="cover" id="cover">
+    <div class="k">Safety Layer</div>
+    <h1>Zero Trust inside the cluster. Decided for you.</h1>
+    <p class="msg">Every workload gets only what it needs. We decide the rules from evidence, and prove them before they apply.</p>
+    <div class="vis"><svg id="coverVis" viewBox="0 0 360 210"></svg></div>
+    <div class="btns"><button id="watch">Watch the story <small>3 min</small></button><button class="sec" id="explore">Explore at your pace</button></div>
+    <div class="ft">Kubernetes · Cilium · Tetragon</div>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let timers=[]; const later=(ms,f)=>timers.push(setTimeout(f,reduce?Math.min(ms,60):ms)); const stop=()=>{ timers.forEach(clearTimeout); timers=[]; };
+
+// ---------- drawing helpers
+function glyph(t,x,y){ const g=d=>`<path class="gl" d="${d}"/>`;
+  if(t==='net') return `<circle class="gl" cx="${x}" cy="${y}" r="7"/><ellipse class="gl" cx="${x}" cy="${y}" rx="3.2" ry="7"/>`+g(`M${x-7} ${y}H${x+7}`);
+  if(t==='api') return `<circle class="gl" cx="${x}" cy="${y}" r="6.5"/><circle class="gl" cx="${x}" cy="${y}" r="2"/>`+[0,60,120,180,240,300].map(a=>{ const r=a*Math.PI/180; return g(`M${x+Math.cos(r)*2.5} ${y+Math.sin(r)*2.5}L${x+Math.cos(r)*8.5} ${y+Math.sin(r)*8.5}`); }).join('');
+  if(t==='db') return `<ellipse class="gl" cx="${x}" cy="${y-5}" rx="7" ry="2.6"/>`+g(`M${x-7} ${y-5}V${y+5}A7 2.6 0 0 0 ${x+7} ${y+5}V${y-5}`)+g(`M${x-7} ${y}A7 2.6 0 0 0 ${x+7} ${y}`);
+  if(t==='ai') return g(`M${x} ${y-7}L${x+2} ${y-2}L${x+7} ${y}L${x+2} ${y+2}L${x} ${y+7}L${x-2} ${y+2}L${x-7} ${y}L${x-2} ${y-2}Z`);
+  if(t==='doc') return `<rect class="gl" x="${x-5.5}" y="${y-7}" width="11" height="14" rx="1.5"/>`+g(`M${x-3} ${y-3}H${x+3}M${x-3} ${y}H${x+3}M${x-3} ${y+3}H${x+1}`);
+  if(t==='key') return `<circle class="gl" cx="${x-3}" cy="${y}" r="3.5"/>`+g(`M${x+.5} ${y}H${x+7.5}M${x+5} ${y}V${y+3}`);
+  return ''; }
+function node(x,y,label,sub,ic,cls=''){ return `<g class="nd ${cls}"><rect class="bg" x="${x-15}" y="${y-15}" width="30" height="30" rx="8"/>${glyph(ic,x,y)}<text x="${x}" y="${y+29}" text-anchor="middle">${label}</text>${sub?`<text x="${x}" y="${y+42}" text-anchor="middle" class="sub">${sub}</text>`:''}</g>`; }
+function exitRect(x1,y1,x2,y2,R){ const [rx,ry,rw,rh]=R; let tmin=1; const tryT=t=>{ if(t>0&&t<tmin){ const x=x1+(x2-x1)*t,y=y1+(y2-y1)*t; if(x>=rx-.1&&x<=rx+rw+.1&&y>=ry-.1&&y<=ry+rh+.1) tmin=t; } };
+  if(x2!==x1){ tryT((rx-x1)/(x2-x1)); tryT((rx+rw-x1)/(x2-x1)); } if(y2!==y1){ tryT((ry-y1)/(y2-y1)); tryT((ry+rh-y1)/(y2-y1)); } return [x1+(x2-x1)*tmin,y1+(y2-y1)*tmin]; }
+function trim(a,b,r1=19,r2=19){ const [x1,y1]=a,[x2,y2]=b,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L; return [x1+ux*r1,y1+uy*r1,x2-ux*r2,y2-uy*r2]; }
+const DEFS=`<defs>${[['a','#E5484D'],['r','#7AA2F7'],['ok','#4CC38A']].map(([c,f])=>`<marker id="m-${c}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="${f}"/></marker>`).join('')}</defs>`;
+const badge=(x,y,n,c)=>`<g class="nb ${c}"><circle cx="${x}" cy="${y}" r="8"/><text x="${x}" y="${y+3.5}" text-anchor="middle">${n}</text></g>`;
+function line(a,b,c,fresh,n){ const [x1,y1,x2,y2]=trim(a,b); let s=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" pathLength="1" class="e ${c} ${fresh?'draw':''}" marker-end="url(#m-${c})"/>`;
+  if(n) s+=`<g class="${fresh?'fadein':''}">${badge((x1+x2)/2,(y1+y2)/2,n,c)}</g>`; return s; }
+
+// ---------- the agent scene
+const AG={core:[180,126],pod:[118,86,124,92],
+  N:{ticket:[50,56,'ticket','hidden instruction','doc'],llm:[50,196,'llm-gateway','model API','ai'],paste:[310,56,'paste site','internet','net'],meta:[310,196,'metadata','cloud credentials','key']}};
+const CHAIN=[
+  {from:'ticket',to:'core',c:'r',t:'A ticket arrives with a <b>hidden instruction</b>.',s:'Reading tickets is the agent’s job.'},
+  {from:'core',to:'llm',c:'r',t:'The model <b>follows it</b>.',s:'Calling its model is allowed. Judging the words is the guardrail’s job.'},
+  {from:'core',to:'paste',c:'a',t:'It sends customer data to a <b>paste site</b>.',s:'Outbound internet is open. Nothing stops it.'},
+  {chip:'curl | sh',c:'a',t:'Its shell tool runs <b>curl | sh</b>.',s:'It downloads a script and runs it inside the pod.'},
+  {from:'core',to:'meta',c:'a',t:'It reads <b>cloud credentials</b>.',s:'The metadata service is reachable from every pod.'}];
+const P=k=>k==='core'?AG.core:AG.N[k];
+function sceneAgent(n,fresh){ const [px,py,pw,ph]=AG.pod; let s=DEFS;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/><text x="180" y="${py+ph+16}" text-anchor="middle" class="podl">SUPPORT-AGENT POD</text>`;
+  CHAIN.forEach((st,i)=>{ if(i>=n) return; const f=fresh&&i===n-1;
+    if(st.chip){ s+=`<g class="chip ${f?'fadein':''}"><rect x="146" y="148" width="68" height="20" rx="6"/><text x="180" y="162" text-anchor="middle">${st.chip}</text></g>`+`<g class="${f?'fadein':''}">${badge(146,149,i+1,'a')}</g>`; return; }
+    s+=line(P(st.from),P(st.to),st.c,f,i+1); });
+  s+=`<g class="nd core"><circle class="bg" cx="180" cy="122" r="18"/>${glyph('ai',180,122)}</g>`;
+  s+=Object.entries(AG.N).map(([k,[x,y,l,sub,ic]])=>{ const hit=CHAIN.slice(0,n).some(c=>c.from===k||c.to===k); return node(x,y,l,sub,ic,hit&&k!=='llm'?'att':(hit?'':'dim')); }).join('');
+  s+=`<text x="180" y="252" text-anchor="middle" class="foot">DEFAULT-ALLOW · EVERY PATH OPEN</text>`;
+  return s; }
+
+// ---------- screens
+const PARTS=[['The problem','An agent is fooled · the gap · why it stays open'],['How we decide','Evidence · decide · prove'],['The result','Enforce · same attack · before and after']];
+const HEAD=['An AI agent <b>will</b> be fooled. <span>What it can reach decides the damage.</span>','',''];
+const STEPS=[
+ { part:0, label:'The problem',
+   t:'One ticket. Full breach.',
+   p:'support-agent answers customer tickets with a model, a ticket tool and a shell. Its pod can reach <b>anything</b>.',
+   init:()=>({n:0}),
+   svg:(s,f)=>sceneAgent(s.n,f),
+   list:s=>CHAIN.slice(0,s.n).map((c,i)=>({c:c.c,t:c.t,s:c.s})),
+   act:s=>s.n===0?'Send the ticket':s.n<CHAIN.length?'Next step':'Breach complete',
+   done:s=>s.n>=CHAIN.length, run:s=>{ s.n++; },
+   take:s=>s.n>=CHAIN.length?'The model was fooled. <span>Default-allow did the rest.</span>':'' }
+];
+const ROUTE=STEPS.map((_,i)=>i);
+
+// ---------- engine
+let at=0, ST=STEPS.map(s=>s.init()), watching=false;
+function render(changed,fresh){
+  const st=STEPS[at], s=ST[at];
+  $('prog').innerHTML=ROUTE.map((_,i)=>`<i class="${i<at?'d':i===at?'n':''}"></i>`).join('');
+  $('chap').innerHTML=`<span>${st.label}</span><em>${at+1} / ${ROUTE.length}</em>`;
+  $('map').innerHTML=st.svg(s,fresh);
+  if(changed){ const g=$('stage'); g.classList.remove('in'); void g.offsetWidth; g.classList.add('in'); }
+  const L=st.list?st.list(s):[], tk=st.take?st.take(s):'';
+  $('cap').innerHTML=`<h1>${st.t}</h1><p class="intro">${st.p}</p>${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1?'cur':''}"><span class="n">${i+1}</span><span class="t">${x.t}${i===L.length-1&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${tk?`<p class="take">${tk}</p>`:''}`;
+  const c=$('cap'); if(fresh){ const cur=c.querySelector('li.cur'), tk=c.querySelector('.take'), el=tk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
+  const a=$('act'); a.textContent=st.act(s); a.disabled=st.done(s); a.classList.toggle('done',st.done(s));
+  $('back').disabled=at===0; $('next').classList.toggle('go',st.done(s)&&!watching);
+  $('mode').innerHTML=watching?`Playing · <button id="pause">&nbsp;Pause</button>`:`<button id="play">Play from here</button>`;
+  if($('pause')) $('pause').onclick=()=>{ watching=false; stop(); render(); };
+  if($('play')) $('play').onclick=()=>{ watching=true; autoplay(); render(); };
+}
+function show(i){ stop(); at=i; ST[i]=STEPS[i].init(); render(true,false); if(watching) autoplay(); }
+function act(){ const st=STEPS[at], s=ST[at]; if(st.done(s)) return; st.run(s); render(false,true); }
+function inter(i,go){ const p=STEPS[i].part;
+  $('interK').textContent=`Part ${p+1} of ${PARTS.length}`; $('interH').innerHTML=HEAD[p]||PARTS[p][0];
+  $('road').innerHTML=PARTS.map(([n,d],j)=>`<li class="${j<p?'d':j===p?'n':''}"><span class="dot">${j<p?'✓':j+1}</span><b>${n}</b><small>${d}</small></li>`).join('');
+  $('inter').classList.add('on'); const done=()=>{ stop(); $('inter').classList.remove('on'); go(); };
+  $('interGo').onclick=done; if(watching) later(3200,done); }
+function forward(i){ if(i>=STEPS.length){ watching=false; stop(); $('cover').hidden=false; return; }
+  const prev=STEPS[i-1]; if(!prev||prev.part!==STEPS[i].part) inter(i,()=>show(i)); else show(i); }
+function autoplay(){ stop(); const tick=()=>{ if(!watching) return; const st=STEPS[at],s=ST[at]; if(!st.done(s)){ act(); later(2600,tick); } else later(3600,()=>{ if(watching) forward(at+1); }); }; later(1400,tick); }
+$('act').onclick=()=>{ if(watching){ watching=false; stop(); } act(); };
+$('next').onclick=()=>{ watching=false; stop(); forward(at+1); };
+$('back').onclick=()=>{ if(at>0){ watching=false; show(at-1); } };
+
+// ---------- cover visual: needed stays, excess closes
+(function(){ const C=[180,100], R=[136,70,88,60]; let s=DEFS, xs=[];
+  const ends=[[40,44,'ok'],[40,156,'ok'],[322,100,'ok'],[96,186,'x'],[264,186,'x'],[318,28,'x'],[180,12,'x'],[322,172,'x'],[42,100,'x']];
+  ends.forEach(([x,y,c])=>{ const [x1,y1,x2,y2]=trim(C,[x,y],0,6);
+    if(c==='ok') s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e ok" style="stroke-width:1.8"/><circle cx="${x}" cy="${y}" r="5" fill="#123222" stroke="#4CC38A"/>`;
+    else { const [bx,by]=exitRect(C[0],C[1],x,y,R);
+      s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e x" style="marker-end:none"/><circle cx="${x}" cy="${y}" r="4" fill="none" stroke="#3A4558"/>`; xs.push([bx,by]); } });
+  s+=`<rect x="${R[0]}" y="${R[1]}" width="${R[2]}" height="${R[3]}" rx="12" fill="#111723" stroke="#2B6B48"/><text x="180" y="104" text-anchor="middle" class="lg" style="fill:var(--text);font-weight:600">workload</text>`;
+  s+=xs.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="6" fill="#0A0D14" stroke="#4A5468"/><path d="M${x-2.6} ${y-2.6}L${x+2.6} ${y+2.6}M${x+2.6} ${y-2.6}L${x-2.6} ${y+2.6}" stroke="#9AA4B6" stroke-width="1.3" stroke-linecap="round"/>`).join('');
+  s+=`<circle cx="112" cy="204" r="4" fill="#123222" stroke="#4CC38A"/><text x="121" y="207.5" class="lg">needed stays</text><g stroke="#7C879B" stroke-width="1.3" stroke-linecap="round"><path d="M205 200.5l7 7M212 200.5l-7 7"/></g><text x="218" y="207.5" class="lg">excess closes</text>`;
+  $('coverVis').innerHTML=s; })();
+
+$('watch').onclick=()=>{ $('cover').hidden=true; watching=true; ST=STEPS.map(s=>s.init()); forward(0); };
+$('explore').onclick=()=>{ $('cover').hidden=true; watching=false; ST=STEPS.map(s=>s.init()); forward(0); };
+render(true,false);
+if(/skip/.test(location.search)) $('cover').hidden=true;
+</script>
+</body>
+</html>
