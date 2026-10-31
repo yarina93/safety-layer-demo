@@ -60,6 +60,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .jc rect{fill:#151B27;stroke:#2C3546}.jc text{font:600 9px var(--mono);fill:var(--text)}.jt{font:500 11.5px var(--body);fill:var(--ink)}.jc.b0 rect{fill:#22151A;stroke:#6B2C32}.jc.b0 text{fill:#F08A8D}.jc.r0 rect{fill:#17233A;stroke:#34507F}.jc.r0 text{fill:var(--info)}.jr.g .jc rect{fill:#0F1F17;stroke:#2B6B48}.jr.g .jc text{fill:var(--ok)}
 .jh2{font:600 9px var(--body);letter-spacing:.12em;fill:var(--muted)}.dec1 rect{fill:#0F1F17;stroke:#2B6B48;stroke-width:1.4}.d1{font:700 12px var(--body);fill:var(--ink)}.d2{font:500 10px var(--mono);fill:var(--ok)}.jres{font:500 10.5px var(--body);fill:var(--muted)}.jc.g0 rect{fill:#0F1F17;stroke:#2B6B48}.jc.g0 text{fill:var(--ok)}
 .diff{margin-top:12px;border-top:1px solid var(--line)}.diff div{padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.4;color:var(--muted)}.diff b{color:var(--ok);font-weight:600}
+.srcs{margin:10px 0 0;font-size:12.5px;color:var(--muted)}.srcs a{color:var(--info);text-decoration:none}
 .srcl{display:inline-block;margin-top:8px;font-size:13px;color:var(--info);text-decoration:none}
 
 /* bottom bar */
@@ -474,11 +475,9 @@ const STEPS=[
    p:'The gap was always there. <b>Agents and a run of kernel bugs</b> make it urgent.',
    allSubs:true, init:()=>({k:0}),
    svg:s=>sceneWhyNow(s.k),
-   list:s=>[{k:'GAP',c:'a',t:'<b>Most workloads run with no network policy.</b>',s:'Based on: Fairwinds 2024 Kubernetes benchmark, 330,000+ workloads. 58% of organizations miss a network policy on more than half of them. <a href="https://www.cncf.io/blog/2024/04/09/k8s-benchmark-report-are-organizations-meeting-nsa-hardening-checks/" target="_blank" rel="noopener" style="color:var(--info);text-decoration:none">Source ↗</a>'},
-            {k:'RUNTIME',c:'a',t:'<b>Incidents happen at runtime.</b>',s:'Based on: Red Hat State of Kubernetes Security 2024, a survey of 600 practitioners. 45% had a runtime incident in the last 12 months. <a href="https://www.redhat.com/en/blog/state-kubernetes-security-2024" target="_blank" rel="noopener" style="color:var(--info);text-decoration:none">Source ↗</a>'},
-            {k:'KERNEL',c:'a',t:'<b>Kernel bugs arrive faster.</b>',s:'Based on: the public disclosures of Copy Fail (Apr 29, 2026) and Dirty Frag (May 7, 2026). Patching takes time; unused syscalls can be closed today. <a href="https://copy.fail/" target="_blank" rel="noopener" style="color:var(--info);text-decoration:none">Copy Fail ↗</a> · <a href="https://www.netskope.com/blog/dirtyfrag-two-kernel-bugs-give-root-on-all-major-linux-distros" target="_blank" rel="noopener" style="color:var(--info);text-decoration:none">Dirty Frag ↗</a>'},
-            {k:'AGENTS',c:'a',t:'<b>Agents run code nobody wrote.</b>',s:'Based on: a Gartner forecast from 2025, a prediction rather than a count. 40% of enterprise apps to include task-specific AI agents by 2026, up from under 5%. <a href="https://uctoday.com/gartner-predicts-40-of-enterprise-apps-will-feature-ai-agents-by-2026" target="_blank" rel="noopener" style="color:var(--info);text-decoration:none">Source ↗</a>'}].slice(0,s.k),
-   act:s=>['The gap','Runtime','The kernel','Agents'][s.k]||'Shown',
+   list:()=>[],
+   extra:s=>s.k>=4?`<p class="srcs">Sources: <a href="https://www.cncf.io/blog/2024/04/09/k8s-benchmark-report-are-organizations-meeting-nsa-hardening-checks/" target="_blank" rel="noopener">Fairwinds</a> · <a href="https://www.redhat.com/en/blog/state-kubernetes-security-2024" target="_blank" rel="noopener">Red Hat</a> · <a href="https://copy.fail/" target="_blank" rel="noopener">Copy Fail</a> · <a href="https://www.netskope.com/blog/dirtyfrag-two-kernel-bugs-give-root-on-all-major-linux-distros" target="_blank" rel="noopener">Dirty Frag</a> · <a href="https://uctoday.com/gartner-predicts-40-of-enterprise-apps-will-feature-ai-agents-by-2026" target="_blank" rel="noopener">Gartner</a></p>`:'',
+   act:s=>['Next','Next','Next','Next'][s.k]||'Shown',
    done:s=>s.k>=4, run:s=>{ s.k++; },
    take:s=>s.k>=4?'The engines are ready. <span>The decision layer is what’s missing.</span>':'' },
  { part:2, label:()=>'Summary',
