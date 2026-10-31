@@ -51,8 +51,10 @@ button{font:inherit;cursor:pointer;color:inherit}
 .take span{color:var(--muted);font-weight:400}
 .pick{display:flex;flex-direction:column;gap:8px;margin-top:4px}.pick button{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:12px 14px}
 .pick b{display:block;font-size:15px;font-weight:600;color:var(--ink)}.pick small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}.pick em{font-style:normal;margin-left:auto;color:var(--muted);font-size:18px}
+.wn rect{fill:#0F141E;stroke:#1E2633}.wn.on rect{fill:#121823;stroke:#2C3546}.wnn{font:700 30px var(--body);fill:var(--dim);letter-spacing:-.02em}.wn.on .wnn{fill:var(--ink)}.wnt{font:500 10.5px var(--body);fill:var(--text)}.wns{font:500 9.5px var(--body);fill:var(--muted)}
 .pk rect{fill:#10151F;stroke:#2C3546}.ph{font:600 11px var(--body);letter-spacing:.1em;fill:var(--info)}.pd{font:600 13.5px var(--body);fill:var(--ink)}.pw{font:500 11px var(--body);fill:var(--muted)}
 .fl rect{fill:#121823;stroke:#2A3445}.fl text{font:600 12px var(--body);fill:var(--ink)}.fl.r rect{stroke:var(--info)}.fl.a rect{stroke:var(--warn)}.fl.b rect{stroke:var(--ok)}.flar{stroke:var(--muted);stroke-width:1.4}
+.fls{font:500 9.5px var(--body);fill:var(--muted)}
 .flsub{font:500 11px var(--body);fill:var(--muted)}.ch2 rect{fill:#0F1F17;stroke:#1F4A33}.ch2 text{font:600 11px var(--mono);fill:var(--ok)}
 .srcl{display:inline-block;margin-top:8px;font-size:13px;color:var(--info);text-decoration:none}
 
@@ -270,9 +272,9 @@ function sceneDec(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
     if(need) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=1?'ok':'al'}"/>`;
     else { s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=2?'x':'al'}"/>`; if(k>=2) s+=`<circle cx="${bx}" cy="${by}" r="6" fill="#0A0D14" stroke="#4A5468"/><path d="M${bx-2.6} ${by-2.6}L${bx+2.6} ${by+2.6}M${bx+2.6} ${by-2.6}L${bx-2.6} ${by+2.6}" stroke="#9AA4B6" stroke-width="1.3" stroke-linecap="round"/>`; } });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
-  const w=38,g=4,x0=180-(3*w+2*g)/2; [['python','ok'],['shell',k>=4?'w':''],['curl','']].forEach(([t,c],i)=>{ s+=`<g class="pc ${c}"><rect x="${x0+i*(w+g)}" y="126" width="${w}" height="16" rx="5"/><text x="${x0+i*(w+g)+w/2}" y="137.5" text-anchor="middle">${t}${c==='w'?' ?':''}</text></g>`; });
+  { const it=[['python','ok'],[k>=4?'shell ?':'shell',k>=4?'w':''],['curl','']], W=it.map(([t])=>Math.max(38,t.length*6.3+10)), g=4; let x=180-(W.reduce((a,b)=>a+b,0)+g*2)/2; it.forEach(([t,c],i)=>{ s+=`<g class="pc ${c}"><rect x="${x}" y="122" width="${W[i]}" height="16" rx="5"/><text x="${x+W[i]/2}" y="133.5" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; }); }
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,!need&&k>=2?'dim':'')).join('');
-  if(k>=3) s+=`<g class="flag fadein"><rect x="236" y="4" width="118" height="20" rx="6"/><text x="295" y="17.5" text-anchor="middle">KEPT OUT · cloud bucket</text></g>`;
+  if(k>=3) s+=`<g class="flag fadein"><rect x="214" y="4" width="140" height="20" rx="6"/><text x="284" y="17.5" text-anchor="middle">KEPT OUT · cloud bucket</text></g>`;
   return s; }
 
 // ---------- prove
@@ -336,8 +338,8 @@ const CASES={
    againP:'The pod is now enforced. Same poisoned file: <b>watch where each step is stopped</b>.',againTake:'The code ran, but every next step was blocked. <span>It had nowhere to go.</span>',
    ba:['shell, call-out, Copy Fail','blocked']}};
 let SC=CASES.c1; const SEEN=new Set();
-const PARTS=[['The problem','A real case · the gap · why it stays open'],['How we decide','Evidence · decide · prove'],['The result','Enforce · the same case · before and after']];
-const HEAD=['Your agent runs a model you didn’t write. <span>What its pod is allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>'];
+const PARTS=[['The problem','A real case · the gap · why it stays open'],['How we decide','Evidence · decide · prove'],['The result','Enforce · the same case · before and after'],['Why now','The gap · runtime · kernel · agents']];
+const HEAD=['Your agent runs a model you didn’t write. <span>What its pod is allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>','That was one agent. <span>Here’s why this matters now.</span>'];
 const lst=(rows)=>rows;
 const STEPS=[
  { part:0, label:()=>'The problem',
@@ -444,24 +446,44 @@ const STEPS=[
    act:s=>s.k<baRows().length?baRows()[s.k][2]:'All shown',
    done:s=>s.k>=baRows().length, run:s=>{ s.k++; },
    take:s=>s.k>=baRows().length?'Others alert after the fact, or lock down whatever they saw. <span>We decide, prove, then enforce.</span>':'' },
- { part:3, label:()=>'Next',
-   t:'Where this goes next.',
-   p:'A decision layer for running agents and workloads you didn’t write, on open-source eBPF engines.',
+ { part:3, label:()=>'Why now',
+   t:'Why now.',
+   p:'The gap was always there. <b>Agents and AI-found kernel bugs</b> make it urgent.',
+   init:()=>({k:0}),
+   svg:s=>sceneWhyNow(s.k),
+   list:s=>[{k:'GAP',c:'a',t:'<b>Most workloads run with no network policy.</b>',s:'Fairwinds 2024: 58% of organizations miss one on more than half their workloads.'},
+            {k:'RUNTIME',c:'a',t:'<b>Incidents happen at runtime.</b>',s:'Red Hat 2024: 45% had a runtime security incident in the last 12 months.'},
+            {k:'KERNEL',c:'a',t:'<b>Kernel bugs arrive faster.</b>',s:'Copy Fail and Dirty Frag, five weeks apart. AI is finding more. Patching can’t keep up; unused syscalls can be closed today.'},
+            {k:'AGENTS',c:'a',t:'<b>Agents run code nobody wrote.</b>',s:'Gartner expects 40% of enterprise apps to include AI agents by 2026. Each one needs its own least privilege.'}].slice(0,s.k),
+   act:s=>['The gap','Runtime','The kernel','Agents'][s.k]||'Shown',
+   done:s=>s.k>=4, run:s=>{ s.k++; },
+   take:s=>s.k>=4?'The engines are ready. <span>The decision layer is what’s missing.</span>':'' },
+ { part:4, label:()=>'Summary',
+   t:'What you just saw.',
+   p:'A decision layer for agents and workloads you didn’t write. It <b>decides</b> least privilege from evidence, <b>proves</b> it, and <b>enforces</b> it on open-source eBPF engines.',
    init:()=>({}),
    svg:()=>sceneNext(),
-   list:()=>[{k:'PLATFORM',c:'r',t:'<b>For platform and AI teams.</b>',s:'Start with one namespace. Evidence and decisions first; nothing is enforced without approval.'},
-             {k:'PARTNERS',c:'r',t:'<b>For vendors and integrators.</b>',s:'Turn Cilium and Tetragon into enforced least privilege, without hand-written rules.'},
-             {k:'TALK',c:'g',t:'<b>Build it with us.</b>',s:'We’re working with a small group of early partners.'}],
-   extra:()=>{ const o=Object.values(CASES).find(c=>!SEEN.has(c.id)); return o?`<div class="pick">${`<button data-case="${o.id}"><span><b>See ${o.short}: ${o.name.toLowerCase()}</b><small>${o.who} · short version</small></span><em>›</em></button>`}</div>`:''; },
+   extraFirst:true,
+   extra:()=>{ const o=Object.values(CASES).find(c=>!SEEN.has(c.id)); return o?`<div class="pick" style="margin-bottom:12px">${`<button data-case="${o.id}"><span><b>Now see ${o.short}: ${o.name.toLowerCase()}</b><small>${o.who} · 5 screens</small></span><em>›</em></button>`}</div>`:''; },
+   list:()=>[{k:'TEAMS',c:'r',t:'<b>Platform and AI teams:</b> start with one namespace. Nothing is enforced without approval.'},
+             {k:'PARTNERS',c:'r',t:'<b>Vendors and integrators:</b> turn Cilium and Tetragon into enforced least privilege.'},
+             {k:'TALK',c:'g',t:'<b>Build it with us.</b> We’re working with a small group of early partners.'}],
    act:()=>'Start over', done:()=>false, run:()=>{ watching=false; stop(); $('cover').hidden=false; } }
 ];
-const FULL=[0,1,2,3,4,5,6,7,8,9,10], SHORT=[1,2,8,9,10]; let ROUTE=FULL;
+const FULL=[0,1,2,3,4,5,6,7,8,9,10,11], SHORT=[1,2,8,9,11]; let ROUTE=FULL;
 function baRows(){ return [['NETWORK','<b>8 → 4 destinations.</b> Internet, K8s API, metadata and other pods closed.','Close the network'],['PROGRAMS','<b>Any binary → python only.</b> No shell, no curl.','Lock programs'],['PRIVILEGES','<b>Root → no root.</b> No capabilities.','Drop privileges'],['SYSCALLS','<b>All → the few it uses.</b> No AF_ALG, no namespaces.','Cut syscalls'],[SC.short.toUpperCase(),`<b>${SC.ba[0]} → ${SC.ba[1]}.</b>`,`Replay ${SC.short}`],['DROPPED','<b>0</b> needed connections. The agent still works.','Check what broke']]; }
+const WN=[['58%','of organizations miss a network policy on most workloads','Fairwinds, 2024'],['45%','had a security incident at runtime in the last year','Red Hat, 2024'],['2','Linux root bugs, five weeks apart, reachable from inside a pod','Copy Fail · Dirty Frag, 2026'],['40%','of enterprise apps will include AI agents by 2026','Gartner']];
+function sceneWhyNow(k){ let s=DEFS;
+  WN.forEach(([n,t,src],i)=>{ const x=8+(i%2)*176, y=8+Math.floor(i/2)*124, on=i<k;
+    s+=`<g class="wn ${on?'on':''}"><rect x="${x}" y="${y}" width="168" height="116" rx="12"/><text x="${x+14}" y="${y+38}" class="wnn">${on?n:'·'}</text>`;
+    if(on){ const words=t.split(' '); let line='',ly=y+60; words.forEach(w=>{ if((line+' '+w).trim().length>24){ s+=`<text x="${x+14}" y="${ly}" class="wnt">${line.trim()}</text>`; ly+=14; line=w; } else line+=' '+w; }); s+=`<text x="${x+14}" y="${ly}" class="wnt">${line.trim()}</text><text x="${x+14}" y="${y+106}" class="wns">${src}</text>`; }
+    s+='</g>'; });
+  return s; }
 function scenePick(){ let s=DEFS; const B=[[20,'Case 1',['The model','goes off-task'],'Cohere · 2026','ai'],[188,'Case 2',['The model file','is the attack'],'Hugging Face · JFrog','pkg']];
   B.forEach(([x,h,d,w,ic])=>{ s+=`<g class="pk"><rect x="${x}" y="40" width="152" height="170" rx="14"/><g class="nd att"><rect class="bg" x="${x+16}" y="58" width="30" height="30" rx="8"/>${glyph(ic,x+31,73)}</g><text x="${x+16}" y="120" class="ph">${h}</text><text x="${x+16}" y="142" class="pd">${d[0]}</text><text x="${x+16}" y="160" class="pd">${d[1]}</text><text x="${x+16}" y="190" class="pw">${w}</text></g>`; });
   return s; }
-function sceneNext(){ let s=DEFS; const F=[['Evidence','r'],['Decide','a'],['Prove','b'],['Enforce','b']];
-  F.forEach(([t,c],i)=>{ const x=12+i*86; s+=`<g class="fl ${c}"><rect x="${x}" y="80" width="76" height="40" rx="10"/><text x="${x+38}" y="105" text-anchor="middle">${t}</text></g>`; if(i<3) s+=`<path d="M${x+78} 100H${x+84}" class="flar"/>`; });
+function sceneNext(){ let s=DEFS; const F=[['Evidence','r','5 sources'],['Decide','a','keep · close'],['Prove','b','replay first'],['Enforce','b','in stages']];
+  F.forEach(([t,c,sub],i)=>{ const x=10+i*86; s+=`<g class="fl ${c}"><rect x="${x}" y="70" width="82" height="54" rx="10"/><text x="${x+41}" y="94" text-anchor="middle">${t}</text><text x="${x+41}" y="112" text-anchor="middle" class="fls">${sub}</text></g>`; });
   s+=`<text x="180" y="160" text-anchor="middle" class="flsub">on open-source eBPF engines</text>`;
   [['Cilium',40,80],['Tetragon',128,92],['seccomp',228,92]].forEach(([t,x,w])=>{ s+=`<g class="ch2"><rect x="${x}" y="176" width="${w}" height="26" rx="7"/><text x="${x+w/2}" y="193" text-anchor="middle">${t}</text></g>`; });
   return s; }
@@ -477,7 +499,7 @@ function render(changed,fresh){
   $('map').innerHTML=st.svg(s,fresh);
   if(changed){ const g=$('stage'); g.classList.remove('in'); void g.offsetWidth; g.classList.add('in'); }
   const L=st.list?st.list(s):[], tk=st.take?st.take(s):'', src=val(st.src);
-  $('cap').innerHTML=`<h1>${val(st.t)}</h1><p class="intro">${val(st.p)}</p>${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1||!st.take?'cur':''}">${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${(i===L.length-1||!st.take)&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${st.extra?st.extra():''}${tk?`<p class="take">${tk}</p>`:''}${src&&tk?`<a class="srcl" href="${src[1]}" target="_blank" rel="noopener">Source: ${src[0]} ↗</a>`:''}`;
+  $('cap').innerHTML=`<h1>${val(st.t)}</h1><p class="intro">${val(st.p)}</p>${st.extraFirst&&st.extra?st.extra():''}${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1||!st.take?'cur':''}">${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${(i===L.length-1||!st.take)&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${!st.extraFirst&&st.extra?st.extra():''}${tk?`<p class="take">${tk}</p>`:''}${src&&tk?`<a class="srcl" href="${src[1]}" target="_blank" rel="noopener">Source: ${src[0]} ↗</a>`:''}`;
   $('cap').querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{ watching=false; stop(); choose(b.dataset.case); });
   const c=$('cap'); if(fresh){ const cur=c.querySelector('li.cur:last-of-type'), tkk=c.querySelector('.take'), el=tkk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
   const a=$('act'); a.textContent=st.act(s); const pick=at===0; a.disabled=pick||st.done(s); a.classList.toggle('done',pick||st.done(s));
