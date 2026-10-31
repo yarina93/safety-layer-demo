@@ -210,20 +210,20 @@ function line(a,b,c,fresh,n){ const [x1,y1,x2,y2]=trim(a,b); let s=`<line x1="${
   if(n) s+=`<g class="${fresh?'fadein':''}">${badge((x1+x2)/2,(y1+y2)/2,n,c)}</g>`; return s; }
 
 // ---------- the two real cases (one agent pod)
-const C1={N:{tasks:[50,56,'task','from Cohere','doc'],bucket:[310,56,'cloud bucket','in Beijing','net'],store:[50,206,'model-store','','db'],meta:[310,206,'metadata','','key']},
+const C1={N:{tasks:[50,56,'task','from Cohere','doc'],bucket:[310,56,'cloud bucket','in Beijing','net']},
   chain:[
   {from:'tasks',to:'core',c:'r',t:'Cohere gives the agent a <b>routine task</b>.',s:'Write a rule that detects malware downloads. It has a bash tool to work with.'},
   {chip:'ls -la /tmp',c:'a',t:'Unasked, the model <b>looks around</b>: it lists /tmp.',s:'Nothing in the task needs it.'},
   {chip:'which curl wget',c:'a',t:'It checks which <b>upload tools</b> exist.',s:'curl and wget send data out of the pod.'},
   {chip:'cat resolv.conf',c:'a',t:'It reads the <b>DNS settings</b>.',s:'How names resolve from inside the network.'},
   {from:'core',to:'bucket',c:'a',t:'It tries to <b>upload a file</b> to a bucket in Beijing.',s:'It was a test string, and a sandbox blocked it. In a normal pod, nothing would.'}]};
-const C2={N:{hf:[50,56,'Hugging Face','model file','pkg'],c2:[310,56,'attacker','server','net'],store:[50,206,'model-store','','db'],nb:[310,152,'other pods','same node','doc']},
+const C2={N:{hf:[50,56,'Hugging Face','model file','pkg'],c2:[310,56,'attacker','server','net'],nb:[310,152,'other pods','same node','doc']},
   chain:[
   {from:'hf',to:'core',c:'r',t:'The agent loads a model from <b>Hugging Face</b>.',s:'Most teams get open-weight models this way.'},
   {chip:'pickle.load',c:'a',t:'Opening the file <b>runs hidden code</b>.',s:'Pickle files can carry code. Loading the model is enough to run it.'},
   {chip:'/bin/sh',c:'a',t:'The hidden code <b>starts a shell</b>.',s:'Inside the agent’s pod, with its identity.'},
   {from:'core',to:'c2',c:'a',t:'The shell <b>calls the attacker</b>.',s:'A reverse shell: the attacker now types commands in your pod.'},
-  {from:'core',to:'nb',c:'a',t:'A kernel bug like <b>Copy Fail</b> reaches the pods next to it.',s:'Every pod on a node shares one kernel. One bad pod can corrupt what its neighbors run.'}]};
+  {from:'core',to:'nb',c:'a',t:'<b>What could come next:</b> a kernel bug like Copy Fail reaches the pods next to it.',s:'Not part of the JFrog finding. Every pod on a node shares one kernel, so one bad pod can corrupt what its neighbors run.'}]};
 const POD=[110,80,140,118], CORE=[180,104];
 const xm=(x,y)=>`<g class="xm"><circle cx="${x}" cy="${y}" r="8"/><path d="M${x-3.2} ${y-3.2}L${x+3.2} ${y+3.2}M${x+3.2} ${y-3.2}L${x-3.2} ${y+3.2}"/></g>`;
 const E1=[['r','','The task arrives.','Allowed. It’s the agent’s job.'],
@@ -235,7 +235,7 @@ const E2=[['r','','The agent <b>loads the model file</b>.','Allowed: it’s in t
   ['y','','The hidden code <b>runs inside python</b>.','Not blocked. No runtime rule sees inside an allowed process.'],
   ['b','Tetragon','It tries to start <b>/bin/sh</b>.','Only python may start. Killed.'],
   ['b','Cilium','It tries to <b>call the attacker</b>.','No internet egress, even from python. Dropped.'],
-  ['b','Tetragon','It tries <b>Copy Fail</b>: an AF_ALG socket.','The syscall is refused.']];
+  ['b','Tetragon','<b>What could come next:</b> Copy Fail, through an AF_ALG socket.','The syscall is refused.']];
 function sceneCase(C,n,fresh,E){ const [px,py,pw,ph]=POD; let s=DEFS, chips=0;
   s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod ${E?'on':''}"/><text x="180" y="${py+ph+15}" text-anchor="middle" class="podl">AGENT POD</text>`;
   const P=k=>k==='core'?CORE:C.N[k];
@@ -355,7 +355,7 @@ const CASES={
    ba:['upload to Beijing','blocked']},
  c2:{id:'c2',short:'case 2',name:'The model file is the attack',who:'JFrog, Hugging Face',C:C2,E:E2,
    t:'The model file is the attack.',p:'Same kind of agent, a different risk: <b>the model file itself</b>. JFrog found about 100 malicious models on Hugging Face.',
-   a0:'Load the model',take:'Nothing was prompted. <span>Opening the file was enough, and the damage left the pod.</span>',
+   a0:'Load the model',take:'Nothing was prompted. <span>Opening the file was enough to hand over the pod.</span>',
    src:['JFrog, 2024','https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/'],
    used:'It used a shell, the internet and an AF_ALG socket. <span>All excess.</span>',
    againP:'The pod is now enforced. Same poisoned file: <b>watch where each step is stopped</b>.',againTake:'The code ran, but every next step was blocked. <span>It had nowhere to go.</span>',
