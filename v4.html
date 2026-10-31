@@ -113,8 +113,11 @@ button{font:inherit;cursor:pointer;color:inherit}
 .cover .k{font:600 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--info)}
 .cover h1{font-size:31px;line-height:1.12;letter-spacing:-.02em;margin:12px 0 12px;font-weight:700}
 .cover .msg{font-size:16px;line-height:1.5;color:var(--text);margin:0}
-.cover .vis{flex:1;min-height:120px;display:flex;align-items:center;justify-content:center;margin:14px 0}
-.cover .vis svg{width:100%;max-height:220px}
+.cover .vis{flex:1;min-height:150px;display:flex;flex-direction:column;align-items:stretch;justify-content:center;margin:10px 0 12px}
+.cover .vis svg{width:100%;flex:1;min-height:0;max-height:300px}
+.cvcap{position:relative;height:20px;margin-top:6px;text-align:center;font:500 13px var(--body);color:var(--text)}.cvcap span{position:absolute;left:0;right:0;opacity:0}
+.cc1{animation:capio 1.5s ease forwards}.cc2{animation:capio 2.2s ease 1.5s forwards}.cc3{animation:fin .5s ease 3.9s forwards;color:var(--ok)}
+@keyframes capio{0%{opacity:0}12%{opacity:1}85%{opacity:1}100%{opacity:0}}
 .cover .btns{display:flex;flex-direction:column;gap:9px;opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .5s ease,transform .5s ease}.cover .btns.on{opacity:1;transform:none;pointer-events:auto}
 .cover .btns button{height:54px;border-radius:13px;font-weight:600;font-size:16px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;gap:8px}
 .cover .btns button.sec{background:transparent;border-color:var(--line);color:var(--ink)}
@@ -122,9 +125,12 @@ button{font:inherit;cursor:pointer;color:inherit}
 .cover .ft{text-align:center;font-size:12px;color:var(--muted);margin-top:12px}
 .lg{font:500 10.5px var(--body);fill:var(--muted)}
 .cv-out{animation:cvo .45s ease forwards}
-.cl-frame{fill:none;stroke:#2C3546;stroke-dasharray:4 4}.cl-l{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.cl-e{stroke:#E5484D;stroke-width:1;opacity:.45}.cl-p{fill:#151B27;stroke:#4A5468}.cl-p.t{stroke:var(--warn);stroke-width:1.5}
-.cv-zoom{transform-box:view-box;animation:cvz 1s cubic-bezier(.4,0,.2,1) 1.3s forwards}@keyframes cvz{to{transform:scale(4);opacity:0}}
-.cv-inner{opacity:0;animation:fin .6s ease 2s forwards}
+.cl-frame{fill:none;stroke:#2C3546;stroke-dasharray:4 4}.cl-l{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.cl-e{stroke:#E5484D;stroke-width:1;opacity:.5}.cl-p{fill:#151B27;stroke:#4A5468}.cl-p.t{stroke:var(--warn);stroke-width:1.5}
+.cv-zoom{transform-box:view-box;animation:cvz .7s cubic-bezier(.4,0,.2,1) 1.05s forwards}@keyframes cvz{to{transform:scale(4);opacity:0}}
+.cv-inner{opacity:0;transform-box:view-box;animation:fin .4s ease 1.45s forwards,cvzo .6s cubic-bezier(.4,0,.2,1) 3.6s forwards}@keyframes cvzo{from{opacity:1;transform:none}to{opacity:0;transform:scale(.25)}}
+.cv-final{opacity:0;animation:fin .5s ease 3.85s forwards}.cl-x{stroke:#2C3546;stroke-width:1;stroke-dasharray:3 4}.cl-g{stroke:var(--ok);stroke-width:1.4}.cl-p.g{stroke:#2B6B48}
+.cv-out2{animation:cvo .2s ease forwards}.cv-in2{opacity:0;animation:fin .25s ease forwards}
+.cv-row{fill:none;stroke:var(--warn);stroke-width:1;opacity:0;animation:rowf .9s ease forwards}@keyframes rowf{0%{opacity:0}20%{opacity:.9}100%{opacity:0}}
 .cv-h{font:600 8.5px var(--body);letter-spacing:.12em;fill:var(--muted)}.cv-k{font:600 8.5px var(--body);letter-spacing:.08em;fill:var(--muted)}.cv-b{font:600 10.5px var(--mono);fill:#F08A8D}.cv-a{font:600 10.5px var(--mono);fill:var(--ok)}.cv-in{opacity:0;animation:fin .45s ease forwards}@keyframes cvo{to{opacity:0}}
 
 /* chapter screen */
@@ -147,7 +153,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .inter .go{height:54px;border-radius:13px;border:0;background:var(--ink);color:var(--bg);font-weight:600;font-size:16px;margin-top:22px}
 
 @media (max-height:700px){.cap h1{font-size:19.5px}.cap p.intro{font-size:14px;margin-bottom:9px}.steps li{padding:7px 0;font-size:13.5px}.bar button{height:46px}.cover h1{font-size:27px}.cover .msg{font-size:15px}.inter h2{font-size:21px;margin-bottom:18px}.road li{padding-bottom:14px}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0}.cv-in,.cv-inner{opacity:1}.cv-out,.cv-zoom{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0}.cv-final,.cc3{opacity:1}.cv-out,.cv-zoom,.cv-inner,.cc1,.cc2{display:none}}
 </style>
 </head>
 <body>
@@ -168,7 +174,7 @@ button{font:inherit;cursor:pointer;color:inherit}
     <div class="k">Safety Layer</div>
     <h1>Zero Trust inside the cluster. Decided for you.</h1>
     <p class="msg">Every workload gets only what it needs. We decide the rules from evidence, and prove them before they apply.</p>
-    <div class="vis"><svg id="coverVis" viewBox="0 0 360 210"></svg></div>
+    <div class="vis"><svg id="coverVis" viewBox="0 0 360 210" preserveAspectRatio="xMidYMid meet"></svg><div class="cvcap" id="cvcap"></div></div>
     <div class="btns" id="coverBtns"><button id="explore">Start the tour <small>step by step · about 3 min</small></button></div>
     <div class="ft">Kubernetes · Cilium · Tetragon</div>
   </section>
@@ -527,32 +533,40 @@ $('act').onclick=()=>{ if(watching){ watching=false; stop(); } act(); };
 $('next').onclick=()=>{ watching=false; stop(); if(at===0){ choose('c1'); return; } if(nextOf()!=null) goTo(nextOf()); };
 $('back').onclick=()=>{ if(pos()>0){ watching=false; show(prevOf()); } };
 
-// ---------- cover visual: the cluster, into one workload, every layer closes
+// ---------- cover visual: the cluster, into one workload, every layer closes, back out to the whole cluster
 let coverT=null;
-function drawCover(){ let s=DEFS; const D=reduce?0:1;
-  // phase 1: a cluster where everything can reach everything
-  const G=[]; for(let r=0;r<3;r++) for(let c=0;c<4;c++) G.push([60+c*80,40+r*62]);
-  const tgt=G[5];
-  let cl=`<g class="cv-zoom" style="transform-origin:${tgt[0]}px ${tgt[1]}px">`;
-  cl+=`<rect x="14" y="8" width="332" height="190" rx="14" class="cl-frame"/><text x="26" y="24" class="cl-l">CLUSTER · DEFAULT-ALLOW</text>`;
-  for(let a=0;a<G.length;a++) for(let b=a+1;b<G.length;b++){ const [x1,y1]=G[a],[x2,y2]=G[b]; if(Math.hypot(x2-x1,y2-y1)<130) cl+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="cl-e"/>`; }
-  G.forEach(([x,y],i)=>{ cl+=`<rect x="${x-13}" y="${y-10}" width="26" height="20" rx="5" class="cl-p ${i===5?'t':''}"/>`; });
-  cl+=`</g>`;
+function drawCover(){ let s=DEFS;
+  const G=[]; for(let r=0;r<3;r++) for(let c=0;c<4;c++) G.push([60+c*80,42+r*62]);
+  const T=5, tgt=G[T];
+  const mesh=[]; for(let a=0;a<G.length;a++) for(let b=a+1;b<G.length;b++){ const [x1,y1]=G[a],[x2,y2]=G[b]; if(Math.hypot(x2-x1,y2-y1)<130) mesh.push([a,b]); }
+  const pods=(cls)=>G.map(([x,y],i)=>`<rect x="${x-14}" y="${y-11}" width="28" height="22" rx="5" class="cl-p ${cls} ${i===T&&cls!=='g'?'t':''}"/>`).join('');
+  // phase 1: everything reaches everything
+  let cl=`<g class="cv-zoom" style="transform-origin:${tgt[0]}px ${tgt[1]}px"><rect x="14" y="8" width="332" height="194" rx="14" class="cl-frame"/>`;
+  mesh.forEach(([a,b])=>{ cl+=`<line x1="${G[a][0]}" y1="${G[a][1]}" x2="${G[b][0]}" y2="${G[b][1]}" class="cl-e"/>`; });
+  cl+=pods('')+`</g>`;
   // phase 2: inside one workload
-  const P=[96,40,168,132], C=[180,106];
-  let inn=`<g class="cv-inner">`;
-  const ends=[[22,36,1],[22,106,1],[22,176,0],[338,36,0],[338,106,1],[338,176,0],[180,10,0],[180,204,1]];
-  ends.forEach(([x,y,need],i)=>{ const [bx,by]=exitRect(C[0],C[1],x,y,P); const t=2.6;
-    inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e a cv-out" style="animation-delay:${t*D}s"/><circle cx="${x}" cy="${y}" r="3.5" fill="#22151A" stroke="#E5484D" class="cv-out" style="animation-delay:${t*D}s"/>`;
-    if(need) inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e ok cv-in" style="animation-delay:${t*D}s"/><circle cx="${x}" cy="${y}" r="4" fill="#123222" stroke="#4CC38A" class="cv-in" style="animation-delay:${t*D}s"/>`;
-    else inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x cv-in" style="animation-delay:${t*D}s"/><g class="cv-in" style="animation-delay:${t*D}s"><circle cx="${bx}" cy="${by}" r="5.5" fill="#0A0D14" stroke="#4CC38A"/><path d="M${bx-2.3} ${by-2.3}L${bx+2.3} ${by+2.3}M${bx+2.3} ${by-2.3}L${bx-2.3} ${by+2.3}" stroke="#4CC38A" stroke-width="1.3" stroke-linecap="round"/></g>`; });
-  inn+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="#111723" stroke="#4A5468"/><rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="none" stroke="#2B6B48" stroke-width="1.4" class="cv-in" style="animation-delay:${4.6*D}s"/>`;
-  inn+=`<text x="180" y="${P[1]+18}" text-anchor="middle" class="cv-h">ONE WORKLOAD</text>`;
-  [['NETWORK','8 open','4 needed',2.6],['PROGRAMS','any binary','python',3.2],['PRIVILEGES','root','none',3.7],['SYSCALLS','all','only used',4.2]].forEach(([l,b,a,t],r)=>{ const y=P[1]+42+r*23;
-    inn+=`<text x="${P[0]+10}" y="${y}" class="cv-k">${l}</text><text x="${P[0]+P[2]-10}" y="${y}" text-anchor="end" class="cv-b cv-out" style="animation-delay:${t*D}s">${b}</text><text x="${P[0]+P[2]-10}" y="${y}" text-anchor="end" class="cv-a cv-in" style="animation-delay:${t*D}s">${a}</text>`; });
+  const P=[86,34,188,142], C=[180,105];
+  let inn=`<g class="cv-inner" style="transform-origin:180px 105px">`;
+  const ends=[[18,34,1],[18,105,1],[18,176,0],[342,34,0],[342,105,1],[342,176,0],[180,8,0],[180,202,1]];
+  ends.forEach(([x,y,need])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,P); const t=1.9;
+    inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e a cv-out" style="animation-delay:${t}s"/><circle cx="${x}" cy="${y}" r="3.5" fill="#22151A" stroke="#E5484D" class="cv-out" style="animation-delay:${t}s"/>`;
+    if(need) inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e ok cv-in" style="animation-delay:${t}s"/><circle cx="${x}" cy="${y}" r="4" fill="#123222" stroke="#4CC38A" class="cv-in" style="animation-delay:${t}s"/>`;
+    else inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x cv-in" style="animation-delay:${t}s"/><g class="cv-in" style="animation-delay:${t}s"><circle cx="${bx}" cy="${by}" r="5.5" fill="#0A0D14" stroke="#4CC38A"/><path d="M${bx-2.3} ${by-2.3}L${bx+2.3} ${by+2.3}M${bx+2.3} ${by-2.3}L${bx-2.3} ${by+2.3}" stroke="#4CC38A" stroke-width="1.3" stroke-linecap="round"/></g>`; });
+  inn+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="#111723" stroke="#4A5468"/><rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="none" stroke="#2B6B48" stroke-width="1.5" class="cv-in" style="animation-delay:3.3s"/>`;
+  inn+=`<text x="180" y="${P[1]+19}" text-anchor="middle" class="cv-h">ONE WORKLOAD</text>`;
+  [['NETWORK','8 open','4 needed',1.9],['PROGRAMS','any binary','python',2.3],['PRIVILEGES','root','none',2.65],['SYSCALLS','all','only used',3.0]].forEach(([l,b,a,t],r)=>{ const y=P[1]+46+r*25;
+    inn+=`<rect x="${P[0]+6}" y="${y-14}" width="${P[2]-12}" height="20" rx="5" class="cv-row" style="animation-delay:${t}s"/>`;
+    inn+=`<text x="${P[0]+14}" y="${y}" class="cv-k">${l}</text><text x="${P[0]+P[2]-14}" y="${y}" text-anchor="end" class="cv-b cv-out2" style="animation-delay:${t}s">${b}</text><text x="${P[0]+P[2]-14}" y="${y}" text-anchor="end" class="cv-a cv-in2" style="animation-delay:${t+0.2}s">${a}</text>`; });
   inn+=`</g>`;
-  $('coverVis').innerHTML=s+cl+inn;
-  const btn=$('coverBtns'); btn.classList.remove('on'); clearTimeout(coverT); coverT=setTimeout(()=>btn.classList.add('on'),reduce?0:5000); }
+  // phase 3: back out, the whole cluster
+  const keep=[[0,1],[1,5],[5,6],[6,10],[2,3],[4,8],[9,10],[7,11]];
+  let fin=`<g class="cv-final"><rect x="14" y="8" width="332" height="194" rx="14" class="cl-frame"/>`;
+  mesh.forEach(([a,b])=>{ fin+=`<line x1="${G[a][0]}" y1="${G[a][1]}" x2="${G[b][0]}" y2="${G[b][1]}" class="cl-x"/>`; });
+  keep.forEach(([a,b])=>{ fin+=`<line x1="${G[a][0]}" y1="${G[a][1]}" x2="${G[b][0]}" y2="${G[b][1]}" class="cl-g"/>`; });
+  fin+=pods('g')+`</g>`;
+  $('coverVis').innerHTML=s+cl+inn+fin;
+  $('cvcap').innerHTML=`<span class="cc1">A cluster where everything can reach everything</span><span class="cc2">Inside one workload</span><span class="cc3">Only what it needs, on every layer</span>`;
+  const btn=$('coverBtns'); btn.classList.remove('on'); clearTimeout(coverT); coverT=setTimeout(()=>btn.classList.add('on'),reduce?0:4600); }
 $('cover').addEventListener('click',e=>{ if(!e.target.closest('button')) $('coverBtns').classList.add('on'); });
 drawCover();
 
