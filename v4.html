@@ -82,6 +82,13 @@ button{font:inherit;cursor:pointer;color:inherit}
 .pc.ok rect{fill:#123222;stroke:#2B6B48}.pc.ok text{fill:var(--ok)}.pc.b rect{fill:#22151A;stroke:#6B2C32}.pc.b text{fill:#F08A8D;text-decoration:line-through}
 .rowl{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}
 .eng rect{fill:#121823;stroke:#2C3546}.eng .en{font:600 13px var(--body);fill:var(--ink)}.eng .es{font:500 10.5px var(--body);fill:var(--muted)}.eng .z{font:600 11px var(--mono);fill:#F08A8D}
+.src rect{fill:#0F141E;stroke:#1E2633}.src text{font:600 11.5px var(--body);fill:var(--dim)}.src .ss{font:500 9.5px var(--body)}.src.on rect{fill:#17233A;stroke:#34507F}.src.on text{fill:var(--info)}.src.on .ss{fill:var(--muted)}
+.prof rect.card{fill:#111723;stroke:#2C3546}.prof .h{font:600 12px var(--body);fill:var(--ink)}.prof .rl{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.prof .rv{font:600 10.5px var(--mono);fill:var(--dim)}.prof .rv.on{fill:var(--ok)}
+.flow{stroke:#2C3546;stroke-width:1.3;fill:none}.flow.on{stroke:#34507F}
+.flag rect{fill:#2A1418;stroke:#6B2C32}.flag text{font:600 9.5px var(--body);letter-spacing:.06em;fill:#F08A8D}
+.pc.w rect{fill:#2A2213;stroke:#6B5223}.pc.w text{fill:var(--warn)}
+.rp .row rect{fill:#0F141E}.rp text{font:500 11px var(--mono);fill:var(--dim)}.rp .row.on text{fill:var(--text)}.rp .ok{fill:var(--ok)!important}.rp .bad{fill:#F08A8D!important}.rp .muted{fill:var(--muted)!important}
+.rp .row.rev{opacity:0;animation:fin .3s ease forwards}.rp .res rect{fill:#0F141E;stroke:#1E2633}.rp .res.pass rect{fill:#0F1F17;stroke:#2B6B48}.rp .res.fail rect{fill:#22151A;stroke:#6B2C32}.rp .res text{font:600 12px var(--body)}
 .why rect{fill:#0F141E;stroke:#1E2633;transition:fill .3s,stroke .3s}.why text{font:600 12px var(--body);fill:var(--dim)}.why.on rect{fill:#2A2213;stroke:#6B5223}.why.on text{fill:var(--warn)}
 
 /* cover */
@@ -209,9 +216,39 @@ function sceneWhy(k){ let s=DEFS;
   ['Knowledge','Scale','Change'].forEach((t,i)=>{ const x=22+i*110; s+=`<g class="why ${i<k?'on':''}"><rect x="${x}" y="162" width="96" height="44" rx="10"/><text x="${x+48}" y="188" text-anchor="middle">${t}</text></g>`; });
   return s; }
 
+// ---------- evidence
+const SRC=[['Config','what it declares'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','what the platform needs']];
+function sceneEv(k){ let s=DEFS;
+  SRC.forEach(([n,sub],i)=>{ const y=22+i*56, on=i<k; s+=`<g class="src ${on?'on':''}"><rect x="12" y="${y}" width="118" height="44" rx="10"/><text x="24" y="${y+20}">${n}</text><text x="24" y="${y+35}" class="ss">${sub}</text></g><path d="M134 ${y+22} C 168 ${y+22}, 168 130, 196 130" class="flow ${on?'on':''}"/>`; });
+  const R=[['NETWORK','llm-gateway',1],['','mcp-tickets · kb',1],['','kube-dns',4],['PROGRAMS','python',3],['SHELL TOOL','declared, unused',3],['PRIVILEGES','none',3]];
+  s+=`<g class="prof"><rect class="card" x="198" y="22" width="150" height="216" rx="12"/><text x="212" y="44" class="h">support-agent</text><text x="212" y="58" class="rl">PROFILE</text>`;
+  R.forEach(([l,v,need],i)=>{ const y=76+i*26+(i>=3?8:0)+(i>=4?4:0)+(i>=5?4:0), on=k>=need; s+=`${l?`<text x="212" y="${y}" class="rl">${l}</text>`:''}<text x="212" y="${y+15}" class="rv ${on?'on':''}">${on?v:'·'}</text>`; });
+  return s+'</g>'; }
+
+// ---------- decide
+function sceneDec(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/>`;
+  Object.entries(GP.N).forEach(([key,[x,y,l,ic,need]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18);
+    if(need) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=1?'ok':'al'}"/>`;
+    else { s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=2?'x':'al'}"/>`; if(k>=2) s+=`<circle cx="${bx}" cy="${by}" r="6" fill="#0A0D14" stroke="#4A5468"/><path d="M${bx-2.6} ${by-2.6}L${bx+2.6} ${by+2.6}M${bx+2.6} ${by-2.6}L${bx-2.6} ${by+2.6}" stroke="#9AA4B6" stroke-width="1.3" stroke-linecap="round"/>`; } });
+  s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
+  const w=38,g=4,x0=180-(3*w+2*g)/2; [['python','ok'],['sh',k>=4?'w':''],['curl','']].forEach(([t,c],i)=>{ s+=`<g class="pc ${c}"><rect x="${x0+i*(w+g)}" y="126" width="${w}" height="16" rx="5"/><text x="${x0+i*(w+g)+w/2}" y="137.5" text-anchor="middle">${t}${c==='w'?' ?':''}</text></g>`; });
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,!need&&k>=2?'dim':'')).join('');
+  if(k>=3) s+=`<g class="flag fadein"><rect x="236" y="4" width="118" height="20" rx="6"/><text x="295" y="17.5" text-anchor="middle">KEPT OUT · paste site</text></g>`;
+  return s; }
+
+// ---------- prove
+const RP=[['agent → llm-gateway','kept'],['agent → mcp-tickets','kept'],['agent → kb','kept'],['agent → kube-dns','kept'],['agent → paste site','dropped']];
+function sceneProve(k){ let s=DEFS+'<g class="rp">';
+  s+=`<text x="16" y="28" class="muted" style="font-family:var(--body);font-weight:600;font-size:10px;letter-spacing:.1em">REPLAY · A WEEK OF RECORDED TRAFFIC</text>`;
+  RP.forEach(([c,r],i)=>{ const y=42+i*30, on=k>=1, miss=k===2&&i===1; const res=!on?'':miss?'would drop':r; const cl=!on?'':miss?'bad':r==='kept'?'ok':'muted';
+    s+=`<g class="row ${on?'on':''} ${on&&k===1?'rev':''}" style="animation-delay:${i*.22}s"><rect x="10" y="${y}" width="340" height="24" rx="6"/><text x="20" y="${y+16}">${c}</text><text x="340" y="${y+16}" text-anchor="end" class="${cl}">${res}</text></g>`; });
+  if(k>=1){ const pass=k!==2; s+=`<g class="res ${pass?'pass':'fail'} ${k===1?'rev':''}" style="animation-delay:1.2s;${k===1?'opacity:0;animation:fin .3s ease 1.2s forwards':''}"><rect x="10" y="202" width="340" height="40" rx="9"/><text x="180" y="227" text-anchor="middle" class="${pass?'ok':'bad'}">${pass?'PASS · every needed connection still works':'FAIL · the policy is not applied'}</text></g>`; }
+  return s+'</g>'; }
+
 // ---------- screens
 const PARTS=[['The problem','An agent is fooled · the gap · why it stays open'],['How we decide','Evidence · decide · prove'],['The result','Enforce · same attack · before and after']];
-const HEAD=['An AI agent <b>will</b> be fooled. <span>What it can reach decides the damage.</span>','',''];
+const HEAD=['An AI agent will be fooled. <span>What it’s allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>'];
 const STEPS=[
  { part:0, label:'The problem',
    t:'One ticket. Full breach.',
@@ -243,7 +280,42 @@ const STEPS=[
             {k:'CHANGE',c:'w',t:'<b>Every release changes the answer.</b>',s:'Miss one dependency and production breaks. So it stays open.'}].slice(0,s.k),
    act:s=>['Why?','And?','And?'][s.k]||'Three reasons',
    done:s=>s.k>=3, run:s=>{ s.k++; },
-   take:s=>s.k>=3?'The missing piece isn’t the engine. <span>It’s the decision.</span>':'' }
+   take:s=>s.k>=3?'The missing piece isn’t the engine. <span>It’s the decision.</span>':'' },
+ { part:1, label:'How we decide',
+   t:'Evidence first.',
+   p:'What the agent needs is already written down, in four places. The product reads all of them.',
+   init:()=>({k:0}),
+   svg:s=>sceneEv(s.k),
+   list:s=>[{k:'CONFIG',c:'r',t:'<b>Declares</b> its model, a ticket tool, a knowledge base and a shell tool.'},
+            {k:'HUBBLE',c:'r',t:'<b>Connects</b> to those three, plus DNS. Nothing else in a week.'},
+            {k:'TETRAGON',c:'r',t:'<b>Runs</b> python only. The shell tool was never used.'},
+            {k:'K8S API',c:'r',t:'<b>Needs</b> DNS from the platform. Never calls the K8s API.'}].slice(0,s.k),
+   act:s=>s.k<4?`Read ${SRC[s.k][0]}`:'All four read',
+   done:s=>s.k>=4, run:s=>{ s.k++; },
+   take:s=>s.k>=4?'One profile per workload. <span>Every line backed by evidence.</span>':'' },
+ { part:1, label:'How we decide',
+   t:'Decide. Don’t just record.',
+   p:'Every path and program is checked against the evidence. <b>Being seen isn’t enough.</b> It has to make sense.',
+   init:()=>({k:0}),
+   svg:s=>sceneDec(s.k),
+   list:s=>[{k:'NEEDED',c:'g',t:'<b>Stays open.</b> Declared and seen: the model, tickets, kb and DNS.'},
+            {k:'EXCESS',c:'a',t:'<b>Closes.</b> Allowed, never declared, never used: internet, K8s API, metadata, other pods.'},
+            {k:'KEPT OUT',c:'a',t:'<b>Seen isn’t trusted.</b>',s:'If the agent was fooled during learning, the paste site is in the traffic. It was never declared, so it never becomes a rule.'},
+            {k:'ASK',c:'w',t:'<b>A person decides.</b>',s:'The shell tool is declared but never used. Removing it is one approval.'}].slice(0,s.k),
+   act:s=>['Mark what it needs','Close the excess','Check what was seen','Find what’s unclear'][s.k]||'Decided',
+   done:s=>s.k>=4, run:s=>{ s.k++; },
+   take:s=>s.k>=4?'Recording copies the past. <span>Deciding removes what doesn’t belong.</span>':'' },
+ { part:1, label:'How we decide',
+   t:'Proven before it applies.',
+   p:'Recorded traffic is replayed against the new policy, offline. If one needed connection would drop, <b>nothing is applied</b>.',
+   init:()=>({k:0}),
+   svg:s=>sceneProve(s.k),
+   list:s=>[{k:'PASS',c:'g',t:'<b>Every needed connection still works.</b>',s:'The paste site drops, as decided.'},
+            {k:'WHAT IF',c:'a',t:'<b>We missed mcp-tickets?</b>',s:'The replay fails. The policy is not applied, and production never changes.'},
+            {k:'PASS',c:'g',t:'<b>Back to the real policy.</b>',s:'Only a passing policy can be approved.'}].slice(0,s.k),
+   act:s=>['Replay the traffic','What if we missed one?','Back to the real policy'][s.k]||'Proven',
+   done:s=>s.k>=3, run:s=>{ s.k++; },
+   take:s=>s.k>=3?'Nothing reaches production <span>until the replay passes.</span>':'' }
 ];
 const ROUTE=STEPS.map((_,i)=>i);
 
