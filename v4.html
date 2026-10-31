@@ -302,8 +302,7 @@ function sceneStage(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS; const
   return s; }
 // ---------- before and after
 const BA=[['Network','8 destinations','4 needed'],['Programs','any binary','python'],['Privileges','root possible','none'],['Kernel calls','all of them','the ones it uses'],['Case 1','upload to Beijing','blocked'],['Case 2','shell, call-out, Copy Fail','blocked'],['Needed, dropped','','0']];
-function sceneBA(k){ let s=DEFS;
-  const panel=(x0,st,after)=>{ const C=[x0+84,130], P=[x0+30,100,108,62]; let g=`<g class="bap ${after?'aft':''}"><rect x="${x0}" y="8" width="168" height="244" rx="14" class="frame ${after&&k>=6?'done':''}"/><text x="${x0+14}" y="28" class="h">${after?'AFTER':'BEFORE'}</text>`;
+function baPanel(x0,st,after,k){ return (function(){ const panel=(x0,st,after)=>{ const C=[x0+84,130], P=[x0+30,100,108,62]; let g=`<g class="bap ${after?'aft':''}"><rect x="${x0}" y="8" width="168" height="244" rx="14" class="frame ${after&&k>=6?'done':''}"/><text x="${x0+14}" y="28" class="h">${after?'AFTER':'BEFORE'}</text>`;
     const net=st>=1, E=[[x0+84,44,1],[x0+150,56,0],[x0+158,130,1],[x0+150,206,0],[x0+84,218,1],[x0+18,206,0],[x0+10,130,1],[x0+18,56,0]];
     g+=`<g class="${after&&k===1?'hl-net':''}">`;
     E.forEach(([x,y,need])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,P);
@@ -318,8 +317,9 @@ function sceneBA(k){ let s=DEFS;
     const n=[st>=1?'4 paths':'8 paths', st>=2?'python':'any binary', st>=3?'no root':'root'];
     g+=`<text x="${x0+84}" y="240" text-anchor="middle" class="cnt">${n.join(' · ')}</text>`;
     return g+'</g>'; };
-  s+=panel(6,0,false)+panel(186,Math.min(k,4),true);
-  return s; }
+  return panel(x0,st,after); })(); }
+function sceneBA(k){ return DEFS+baPanel(6,0,false,k)+baPanel(186,Math.min(k,4),true,k); }
+function sceneSum(){ return DEFS+baPanel(96,4,true,6); }
 
 // ---------- screens
 const CASES={
@@ -459,15 +459,14 @@ const STEPS=[
    done:s=>s.k>=4, run:s=>{ s.k++; },
    take:s=>s.k>=4?'The engines are ready. <span>The decision layer is what’s missing.</span>':'' },
  { part:4, label:()=>'Summary',
-   t:'What you just saw.',
-   p:'A decision layer for agents and workloads you didn’t write. It <b>decides</b> least privilege from evidence, <b>proves</b> it, and <b>enforces</b> it on open-source eBPF engines.',
+   t:()=>SEEN.size>1?'Two real attacks. Nothing left the pod.':SC.id==='c1'?'The model misbehaved. Nothing left the pod.':'The file was malicious. Nothing left the pod.',
+   p:'0 needed connections dropped. The agent still does its job.',
    init:()=>({}),
-   svg:()=>sceneNext(),
-   extraFirst:true,
-   extra:()=>{ const o=Object.values(CASES).find(c=>!SEEN.has(c.id)); return o?`<div class="pick" style="margin-bottom:12px">${`<button data-case="${o.id}"><span><b>Now see ${o.short}: ${o.name.toLowerCase()}</b><small>${o.who} · 5 screens</small></span><em>›</em></button>`}</div>`:''; },
-   list:()=>[{k:'TEAMS',c:'r',t:'<b>Platform and AI teams:</b> start with one namespace. Nothing is enforced without approval.'},
-             {k:'PARTNERS',c:'r',t:'<b>Vendors and integrators:</b> turn Cilium and Tetragon into enforced least privilege.'},
-             {k:'TALK',c:'g',t:'<b>Build it with us.</b> We’re working with a small group of early partners.'}],
+   svg:()=>sceneSum(),
+   list:()=>[{k:'DECIDES',c:'g',t:'<b>Decides, not records.</b> What was seen isn’t trusted until it makes sense.'},
+             {k:'PROVEN',c:'g',t:'<b>Proven first.</b> Nothing applies until the replay passes.'},
+             {k:'ONE PROFILE',c:'g',t:'<b>Every layer, one decision.</b> Network, programs and syscalls, on Cilium, Tetragon and seccomp.'}],
+   extra:()=>{ const o=Object.values(CASES).find(c=>!SEEN.has(c.id)); return `${o?`<div class="pick" style="margin-top:12px"><button data-case="${o.id}"><span><b>See ${o.short}: ${o.name.toLowerCase()}</b><small>${o.who} · 5 screens</small></span><em>›</em></button></div>`:''}<p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`; },
    act:()=>'Start over', done:()=>false, run:()=>{ watching=false; stop(); $('cover').hidden=false; } }
 ];
 const FULL=[0,1,2,3,4,5,6,7,8,9,10,11], SHORT=[1,2,8,9,11]; let ROUTE=FULL;
@@ -501,7 +500,7 @@ function render(changed,fresh){
   const L=st.list?st.list(s):[], tk=st.take?st.take(s):'', src=val(st.src);
   $('cap').innerHTML=`<h1>${val(st.t)}</h1><p class="intro">${val(st.p)}</p>${st.extraFirst&&st.extra?st.extra():''}${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1||!st.take?'cur':''}">${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${(i===L.length-1||!st.take)&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${!st.extraFirst&&st.extra?st.extra():''}${tk?`<p class="take">${tk}</p>`:''}${src&&tk?`<a class="srcl" href="${src[1]}" target="_blank" rel="noopener">Source: ${src[0]} ↗</a>`:''}`;
   $('cap').querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{ watching=false; stop(); choose(b.dataset.case); });
-  const c=$('cap'); if(fresh){ const cur=c.querySelector('li.cur:last-of-type'), tkk=c.querySelector('.take'), el=tkk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
+  const c=$('cap'); if(changed) c.scrollTop=0; if(fresh){ const cur=c.querySelector('li.cur:last-of-type'), tkk=c.querySelector('.take'), el=tkk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
   const a=$('act'); a.textContent=st.act(s); const pick=at===0; a.disabled=pick||st.done(s); a.classList.toggle('done',pick||st.done(s));
   $('back').disabled=pos()<=0; $('next').disabled=nextOf()==null; $('next').classList.toggle('go',!pick&&st.done(s)&&!watching&&nextOf()!=null);
   $('mode').innerHTML=watching?`Playing · <button id="pause">&nbsp;Pause</button>`:(nextOf()!=null?`<button id="play">Play from here</button>`:'');
