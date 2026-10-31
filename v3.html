@@ -216,6 +216,8 @@ body,.app{font-feature-settings:'cv11','ss01','tnum'}
 .nx3{display:flex;flex-direction:column;gap:8px}.nx3 div{border-left:2px solid var(--info);padding:2px 0 2px 10px}.nx3 b{display:block;font-size:14px;color:var(--ink)}.nx3 span{font-size:13.5px;line-height:1.4;color:var(--text)}
 .fl rect{fill:#121823;stroke:#2A3445}.fl text{font:700 12px var(--body);fill:var(--ink)}.fl.r rect{stroke:var(--info)}.fl.a rect{stroke:var(--warn)}.fl.b rect{stroke:var(--ok)}.flar{stroke:var(--muted);stroke-width:1.4}
 .flsub{font:500 11px var(--body);fill:var(--muted);letter-spacing:.02em}.ch2 rect{fill:#0F1F17;stroke:#1F4A33}.ch2 text{font:600 11px var(--mono);fill:var(--ok)}
+.cmh{font:600 9.5px var(--body);fill:var(--muted);letter-spacing:.04em}.cmr rect{fill:#0F141E;stroke:#1E2633}.cmr.on rect{fill:#121823;stroke:#2A3445}.cmr.us.on rect{fill:#0F1F17;stroke:#2B6B48}.cmn{font:600 12px var(--body);fill:var(--muted)}.cmr.on .cmn{fill:var(--ink)}.cmv{font:700 15px var(--body);fill:#3A4558}.cmr.on .cmv.g{fill:var(--ok)}.cmr.on .cmv.r{fill:var(--bad)}.cmr.on .cmv.y{fill:var(--warn)}
+.gp rect{fill:#121823;stroke:#2A3445}.gpt{font:700 12.5px var(--body);fill:var(--ink)}.gps{font:500 10px var(--body);fill:var(--muted)}.ge rect{fill:#0F141E;stroke:#1E2633}.ge.on rect{fill:#0F1F17;stroke:#2B6B48}.gen{font:700 12px var(--body);fill:var(--muted)}.ge.on .gen{fill:var(--ink)}.gef{font:500 10.5px var(--mono);fill:#4A5568}.ge.on .gef{fill:var(--ok)}
 .grp{font:600 10.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
 .tiles2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tile2{border:1px solid var(--line);background:#0F141D;border-radius:9px;padding:6px 9px}.tile2 span{display:block;font:500 11px var(--body);color:var(--muted)}.tile2 div{display:flex;align-items:baseline;gap:6px}.tile2 em{font-style:normal;font-weight:700;font-size:18px}.tile2 .b{color:var(--bad);text-decoration:line-through;font-size:14px;opacity:.85}.tile2 .a{color:var(--ok)}.tile2 i{font-style:normal;color:var(--dim)}
 </style>
@@ -240,7 +242,7 @@ body,.app{font-feature-settings:'cv11','ss01','tnum'}
     <h1>Zero Trust inside the cluster. Decided for you.</h1>
     <p class="msg">Every workload gets only what it needs: network, programs, files, privileges. We derive the rules from evidence, <b>prove they won’t break production</b>, and enforce them on open-source eBPF engines (Cilium, Tetragon).</p>
     <div class="mini"><svg id="coverMap" viewBox="0 -4 360 304" preserveAspectRatio="xMidYMid meet"></svg></div>
-    <div class="btns"><button id="watch">Watch the story<small>about 2 minutes · plays by itself</small></button><button class="sec" id="explore">Explore step by step<small>at your pace · open the evidence</small></button></div>
+    <div class="btns"><button id="watch">Watch the story<small>about 3 minutes · plays by itself</small></button><button class="sec" id="explore">Explore step by step<small>at your pace · open the evidence</small></button></div>
     <div class="foot">Kubernetes · eBPF (Cilium, Tetragon)</div>
   </section>
 </div>
@@ -312,6 +314,7 @@ const SCN={
    ['Programs','what may start','Tetragon','The <b>8 programs</b> seen at startup. Anything else (curl, wget, nc) is blocked.','3','lab'],
    ['Privileges','root, capabilities','securityContext','<b>allowPrivilegeEscalation: false</b>, capabilities drop ALL.','6','lab'],
    ['Files','what it reads and writes','Tetragon','Reads <b>/app</b> only. No reads of the service-account token, no writes to /etc.','4','next']],
+  gen:[['ingress: frontend → :9555, kubelet probe','egress: kube-dns:53 · nothing else'],['exec: the 8 startup programs (java, …)','files: read /app · no SA token'],['allowPrivilegeEscalation: false','capabilities: drop ALL']],
   layEnd:'<b>7 layers × 12 workloads = 84 decisions</b> in one small namespace.', replayN:'33,411 flows',
   replay:'Replaying <b>33,411</b> recorded connections against the new policy…', pass:'The 116 paths it closes carried no traffic at all.', missL:'frontend', fail:'frontend → adservice would drop: 144 real requests would fail.',
   proveDet:`<h4>decision-layer verify adservice --replay</h4><pre>replaying 33,411 Hubble flows\n\nfrontend → adservice:9555   kept ×144\nkubelet  → adservice:9555   kept ×583\nguard: kube-dns:53          kept\nunused paths                21 closed\n\nRESULT  PASS</pre><h4>Same check for programs</h4><pre>exec replay: every program seen at startup\nis on the allow-list → the container still starts</pre>`,
@@ -348,6 +351,7 @@ const SCN={
    ['Programs','what may start','Tetragon','<b>python</b> only. No shell can start.','3','eng'],
    ['Privileges','root, capabilities','securityContext','<b>allowPrivilegeEscalation: false</b>, capabilities drop ALL.','6','eng'],
    ['Files','what it reads and writes','Tetragon','Reads <b>/app</b> only. No token reads, no writes to /etc.','4','next']],
+  gen:[['ingress: frontend → :8080','egress: productcatalog:3550, DNS'],['exec: python only','files: read /app · no SA token'],['allowPrivilegeEscalation: false','capabilities: drop ALL']],
   layEnd:'The same seven layers, the same engines. <b>The backdoor is still inside; it just can’t do anything.</b>',
   replay:'Replaying a week of recorded connections against the new policy…', pass:'Every path it closes carried no needed traffic.', missL:'frontend', fail:'frontend → recommendation would drop: product pages lose recommendations.',
   proveDet:`<h4>verify recommendation --replay</h4><pre>frontend → recommendation:8080       kept\nrecommendation → productcatalog:3550 kept\nguard: kube-dns:53                   kept\npython → c2.example:443              DROP (kept out)\n\nRESULT  PASS</pre>`,
@@ -384,6 +388,7 @@ const SCN={
    ['Programs','what may start','Tetragon','<b>python</b> only. The shell tool can’t start curl or sh.','4','eng'],
    ['Privileges','root, capabilities','securityContext','<b>allowPrivilegeEscalation: false</b>, capabilities drop ALL.','','eng'],
    ['Files','what it reads and writes','Tetragon','No access to cloud credential files or the service-account token.','5','next']],
+  gen:[['ingress: support UI only','egress: llm-gateway, mcp-tickets, kb, DNS'],['exec: python only','files: no cloud credentials, no SA token'],['allowPrivilegeEscalation: false','capabilities: drop ALL']],
   layEnd:'An agent gets the same seven layers. <b>Its profile comes from its config, not from a guess.</b>',
   replay:'Replaying a week of the agent’s real traffic against the new profile…', pass:'Every tool it actually uses still works.', missL:'mcp-tickets', fail:'agent → mcp-tickets would drop: it can’t read tickets.',
   proveDet:`<h4>verify support-agent --replay</h4><pre>agent → llm-gateway     kept\nagent → mcp-tickets     kept\nagent → kb              kept\nguard: kube-dns:53      kept\n\nRESULT  PASS</pre>`,
@@ -565,7 +570,7 @@ const STEPS=[
      const cnt=`<g class="cnt"><text x="180" y="20" text-anchor="middle"><tspan class="w">ALLOWED ${tot}</tspan>${s.d>=1?`  ·  <tspan class="g">NEEDED ${nd.length}</tspan>`:''}${s.d>=2?`  ·  <tspan class="r">EXCESS ${EXC.length}</tspan>`:''}</text></g>`;
      return sceneB({tint:s.d<2?'open':false,need:false,chips:s.d>=3?chipRow(SC.decChips):coreChip(),extra:ex,over:s.d>=3?'':cnt}); },
    live:s=>{ const nd=NEED.filter(([a,b])=>a==='core'||b==='core').length, tot=nd+EXC.length, R=SC.dec, NR=R.find(r=>r[0]==='al'), XR=R[0];
-     const rows=[['w','ALLOWED',`<b>${tot} paths</b> open today. Nobody decided them; it’s the default.`]];
+     const rows=[['w','ALLOWED',`<b>${tot} paths</b> open today, by default.`]];
      if(s.d>=1) rows.push(['al','NEEDED',`<b>${nd}</b> · `+NR[2]]);
      if(s.d>=2) rows.push(['a','EXCESS',`<b>${EXC.length}</b> · `+XR[2]]);
      if(s.d>=3) R.filter(r=>r!==NR&&r!==XR).forEach(r=>rows.push([r[0],r[1].replace(/^\d+ /,''),r[2]]));
@@ -668,8 +673,38 @@ const STEPS=[
    init:()=>({}),
    svg:()=>sceneN(),
    live:()=>`<div class="nx3"><div><b>For platform teams</b><span>Start with one namespace. Evidence and decisions first; nothing is enforced without your approval.</span></div><div><b>For vendors and integrators</b><span>Turn Cilium and Tetragon into enforced least privilege, without hand-written rules.</span></div><div><b>Build it with us</b><span>We’re working with a small group of early partners. Let’s talk.</span></div></div>`,
-   done:()=>true, end:()=>'', det:null }
+   done:()=>true, end:()=>'', det:null },
+ { ch:'Solution', sc:true, t:'One decision. Every engine.',
+   p:()=>`The decisions become one profile per workload. The product compiles it into each engine’s <b>native policy</b>.`,
+   init:()=>({k:0,sel:null}),
+   svg:s=>sceneG(s.k),
+   live:s=>{ if(!s.k) return ''; const E=[['Cilium','CiliumNetworkPolicy','network'],['Tetragon','TracingPolicy','programs, files'],['Kubernetes','securityContext','privileges']];
+     return `<div class="slist">${E.slice(0,s.k).map(([e,f,w],i)=>`<div class="sr cur" style="opacity:1"><span class="k b" style="min-width:76px">${e}</span><div class="tt" style="white-space:normal;font-size:13.5px"><b>${f}</b> · ${w}<small style="font-family:var(--mono);font-size:11.5px">${SC.gen[i].join('<br>')}</small></div></div>`).join('')}</div>`; },
+   actl:s=>s.k<3?['Compile for Cilium','Compile for Tetragon','Compile for Kubernetes'][s.k]:'Compiled', done:s=>s.k>=3, run:s=>{ s.k++; },
+   end:s=>s.k>=3?'<b>The product decides. The engines enforce.</b> No new agent in the data path.':'',
+   det:()=>`<h4>${SC.wl} · CiliumNetworkPolicy (excerpt)</h4><pre>${SC.id==='agt'?`spec:\n  endpointSelector:\n    matchLabels: {app: support-agent}\n  egress:\n  - toEndpoints:\n    - matchLabels: {app: llm-gateway}\n    - matchLabels: {app: mcp-tickets}\n    - matchLabels: {app: kb}\n  - toEndpoints:\n    - matchLabels: {k8s-app: kube-dns}\n    toPorts: [{ports: [{port: "53"}]}]`:`spec:\n  endpointSelector:\n    matchLabels: {app: ${SC.wl}}\n  ingress:\n  - fromEndpoints:\n    - matchLabels: {app: frontend}\n  egress:\n  - toEndpoints:\n    - matchLabels: {k8s-app: kube-dns}\n    toPorts: [{ports: [{port: "53"}]}]`}</pre><h4>Every rule keeps its evidence</h4><p>Each line links back to the manifest, flow or process event that justified it, so a reviewer can see why it exists.</p>` },
+ { ch:'Proof', t:'Why the usual ways don’t get there.',
+   p:()=>`Three common approaches, measured on what matters: does it prevent, is it safe for production, does it keep up with change?`,
+   init:()=>({k:0,sel:null}),
+   svg:s=>sceneC(s.k),
+   live:s=>{ if(!s.k) return ''; const R=CMP.slice(0,s.k); const cur=s.sel!=null?s.sel:s.k-1;
+     return `<div class="slist">${R.map(([n,c,v,t],i)=>`<div class="sr ${i===cur?'cur':''}" data-k="${i}"><span class="k ${c}" style="min-width:22px">${i+1}</span><div class="tt" style="white-space:normal"><b>${n}</b>${i===cur?`<small>${t}</small>`:''}</div></div>`).join('')}</div>`; },
+   actl:s=>s.k<4?CMP[s.k][0]+' ›':'Compared', done:s=>s.k>=4, run:s=>{ s.k++; s.sel=null; },
+   end:s=>s.k>=4?'<b>Others detect, or lock down what they saw. This decides, and proves it first.</b>':'',
+   det:()=>`<h4>What each approach misses</h4><table><tr><td>Detect &amp; alert</td><td>Acts after the step succeeded.</td></tr><tr><td>Learn &amp; lock</td><td>Turns whatever was seen into a rule, including a backdoor. Re-learn on every release.</td></tr><tr><td>Write by hand</td><td>One missed dependency is an outage. Thousands of rules, by hand, every release.</td></tr><tr><td>Decide &amp; prove</td><td>Evidence from four sources, excess removed, replayed before applied, enforced in stages.</td></tr></table>` }
 ];
+const CMP=[['Detect and alert','a','',`Runtime detection sees the attack, <b>after it worked</b>. Someone still has to respond.`],['Learn and lock','a','',`Records a window and locks to it. <b>Whatever was seen becomes a rule</b>, a backdoor included. Every release means learning again.`],['Write rules by hand','a','',`Possible for one workload. <b>One missed dependency is an outage</b>, so teams roll back and leave it open.`],['Decide and prove','b','',`Evidence from four sources. Excess removed, unexplained kept out. <b>Replayed before it applies</b>, enforced in stages, kept current.`]];
+function sceneC(k){ let s=DEFS; const H=['Prevents','Safe for prod','Keeps up']; const V=[['✗','✓','✓'],['✓','~','✗'],['✓','✗','✗'],['✓','✓','✓']];
+  H.forEach((h,j)=>s+=`<text x="${196+j*58}" y="34" text-anchor="middle" class="cmh">${h}</text>`);
+  CMP.forEach(([n],i)=>{ const y=50+i*52, on=i<k, us=i===3;
+    s+=`<g class="cmr ${on?'on':''} ${us?'us':''}"><rect x="8" y="${y}" width="344" height="42" rx="9"/><text x="20" y="${y+26}" class="cmn">${n}</text>`+V[i].map((v,j)=>`<text x="${196+j*58}" y="${y+27}" text-anchor="middle" class="cmv ${v==='✓'?'g':v==='✗'?'r':'y'}">${on?v:'·'}</text>`).join('')+`</g>`; });
+  return s; }
+function sceneG(k){ let s=DEFS; const P=SC.gen; const E=[['Cilium','CiliumNetworkPolicy',58],['Tetragon','TracingPolicy',142],['Kubernetes','securityContext',226]];
+  s+=`<g class="gp"><rect x="10" y="40" width="132" height="210" rx="12"/><text x="76" y="64" text-anchor="middle" class="gpt">${SC.wl}</text><text x="76" y="79" text-anchor="middle" class="gps">one profile</text>`;
+  ['network','programs','files','privileges'].forEach((t,i)=>s+=`<g class="pc ok"><rect x="24" y="${96+i*36}" width="104" height="24" rx="6"/><text x="76" y="${112+i*36}" text-anchor="middle">${t}</text></g>`);
+  s+='</g>';
+  E.forEach(([e,f,y],i)=>{ const on=i<k; s+=`<path d="M146 145 C 180 145, 180 ${y}, 206 ${y}" class="e ${on?'need':'allw'}" style="${on?'':'opacity:.3'}"/><g class="ge ${on?'on':''}"><rect x="208" y="${y-26}" width="144" height="52" rx="10"/><text x="222" y="${y-6}" class="gen">${e}</text><text x="222" y="${y+12}" class="gef">${f}</text></g>`; });
+  return s; }
 function sceneN(){ let s=DEFS; const F=[['Evidence','r'],['Decide','a'],['Prove','b'],['Enforce','b']];
   F.forEach(([t,c],i)=>{ const x=14+i*86; s+=`<g class="fl ${c}"><rect x="${x}" y="90" width="74" height="40" rx="9"/><text x="${x+37}" y="115" text-anchor="middle">${t}</text></g>`; if(i<3) s+=`<path d="M${x+76} 110H${x+84}" class="flar"/>`; });
   s+=`<text x="180" y="170" text-anchor="middle" class="flsub">on open-source eBPF engines</text>`;
@@ -678,10 +713,10 @@ function sceneN(){ let s=DEFS; const F=[['Evidence','r'],['Decide','a'],['Prove'
   return s; }
 // ---------- engine
 let at=0, ST=[], watching=false;
-const MAIN=[0,1,2,3,4,6,13,8,11,14], SHORT=[1,12,8,11,14], DEEP=[5,9,10,11,14]; const FULL=MAIN; let ROUTE=MAIN;
+const MAIN=[0,1,2,3,4,15,6,13,8,16,11,14], SHORT=[1,12,8,11,14], DEEP=[5,9,10,11,14]; const FULL=MAIN; let ROUTE=MAIN;
 const ri=()=>ROUTE.indexOf(at), nextOf=()=>ROUTE[ri()+1], prevOf=()=>ROUTE[ri()-1];
 // ---------- chapter interstitials: the whole process, where we are
-const CHAP=[['Problem',['Agent fooled','Full breach','Engines, no rules']],['Solution',['Evidence','Decide','Prove']],['Proof',['Approve in stages','Same attack, stopped']],['Summary',['What you saw','Go deeper']],['Next',['Work with us']]];
+const CHAP=[['Problem',['Agent fooled','Full breach','Engines, no rules']],['Solution',['Evidence','Decide','Every engine','Prove']],['Proof',['Approve in stages','Same attack, stopped','Why not the usual ways']],['Summary',['What you saw','Go deeper']],['Next',['Work with us']]];
 const BRIDGE={Problem:'Every cluster can run the engines. <b>Nobody can safely decide the rules.</b>',Solution:'The engines exist. What’s missing is <b>the decision</b>. Here is how we make it.',Proof:'Decided from evidence, proven offline. <b>Now it goes live.</b>',['Why now']:'That was one workload. <b>Now multiply it.</b>',Summary:'Whatever gets in <b>can only do what it needs.</b>',Next:'That’s the product. <b>Here’s where it goes next.</b>'};
 let interTo=null;
 function inter(i){ const ch=STEPS[i].ch, ci=CHAP.findIndex(c=>c[0]===ch);
@@ -725,7 +760,7 @@ $('next').onclick=()=>{ if(nextOf()==null){ watching=false; stop(); $('cover').h
 $('back').onclick=()=>{ if(ri()>0) show(prevOf()); };
 // watch: [delay, 'a' = press the action, 'n' = next step]
 const W=(acts,gap,tail)=>{ const r=[]; let t=1400; for(let i=0;i<acts;i++){ r.push([t,'a']); t+=gap; } r.push([t+tail,'n']); return r; };
-const PLAY={0:W(2,2800,2600),1:()=>W(ATK.length,2400,1200),2:W(1,3000,2500),3:W(4,2000,1500),4:W(3,2800,1500),5:W(7,1700,1200),6:[[1200,'a'],[4800,'a'],[7800,'a'],[10400,'n']],7:W(4,1800,1000),8:()=>{ const r=[]; let t=1200; for(let i=0;i<SC.allow+2;i++){ r.push([t,'a']); t+=2800; } r.push([t+2000,'n']); return r; },9:W(1,3600,1500),10:W(4,1900,2200),11:[[7000,'n']],12:W(4,2400,1500),13:W(4,2300,1800),14:[]};
+const PLAY={0:W(2,2800,2600),1:()=>W(ATK.length,2400,1200),2:W(1,3000,2500),3:W(4,2000,1500),4:W(3,2800,1500),5:W(7,1700,1200),6:[[1200,'a'],[4800,'a'],[7800,'a'],[10400,'n']],7:W(4,1800,1000),8:()=>{ const r=[]; let t=1200; for(let i=0;i<SC.allow+2;i++){ r.push([t,'a']); t+=2800; } r.push([t+2000,'n']); return r; },9:W(1,3600,1500),10:W(4,1900,2200),11:[[7000,'n']],12:W(4,2400,1500),13:W(4,2300,1800),14:[],15:W(3,2600,1800),16:W(4,2600,2200)};
 function autoplay(){ stop(); const pl=PLAY[at]; (typeof pl==='function'?pl():(pl||[])).forEach(([ms,a])=>later(ms,()=>{ if(!watching) return; if(a==='n'){ if(nextOf()!=null) forward(nextOf()); } else doAct(); })); }
 function sheet(t,h){ $('shT').textContent=t; $('shB').innerHTML=h; $('sheet').classList.add('on'); $('scrim').classList.add('on'); if(watching){ watching=false; stop(); render(); } }
 function closeSheet(){ $('sheet').classList.remove('on'); $('scrim').classList.remove('on'); }
