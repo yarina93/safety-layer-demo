@@ -117,7 +117,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .cover .vis{flex:1;min-height:150px;display:flex;flex-direction:column;align-items:stretch;justify-content:center;margin:10px 0 12px}
 .cover .vis svg{width:100%;flex:1;min-height:0;max-height:300px}
 .cvcap{position:relative;height:20px;margin-top:6px;text-align:center;font:500 13px var(--body);color:var(--text)}.cvcap span{position:absolute;left:0;right:0;opacity:0}
-.cc1{animation:capio 2.4s ease forwards}.cc2{animation:capio 3.52s ease 2.4s forwards}.cc3{animation:fin .6s ease 6.24s forwards;color:var(--ok)}
+.cc1{animation:capio 3.45s ease forwards}.cc2{animation:capio 5.06s ease 3.45s forwards}.cc3{animation:fin .8s ease 8.97s forwards;color:var(--ok)}
 @keyframes capio{0%{opacity:0}12%{opacity:1}85%{opacity:1}100%{opacity:0}}
 .cover .btns{display:flex;flex-direction:column;gap:9px;opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .5s ease,transform .5s ease}.cover .btns.on{opacity:1;transform:none;pointer-events:auto}
 .cover .btns button{height:54px;border-radius:13px;font-weight:600;font-size:16px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;gap:8px}
@@ -127,9 +127,9 @@ button{font:inherit;cursor:pointer;color:inherit}
 .lg{font:500 10.5px var(--body);fill:var(--muted)}
 .cv-out{animation:cvo .45s ease forwards}
 .cl-frame{fill:none;stroke:#2C3546;stroke-dasharray:4 4}.cl-l{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.cl-e{stroke:#E5484D;stroke-width:1;opacity:.5}.cl-p{fill:#151B27;stroke:#4A5468}.cl-p.t{stroke:var(--warn);stroke-width:1.5}
-.cv-zoom{transform-box:view-box;animation:cvz .9s cubic-bezier(.4,0,.2,1) 1.68s forwards}@keyframes cvz{to{transform:scale(4);opacity:0}}
-.cv-inner{opacity:0;transform-box:view-box;animation:fin .5s ease 2.32s forwards,cvzo .8s cubic-bezier(.4,0,.2,1) 5.76s forwards}@keyframes cvzo{from{opacity:1;transform:none}to{opacity:0;transform:scale(.25)}}
-.cv-final{opacity:0;animation:fin .6s ease 6.16s forwards}.cl-x{stroke:#2C3546;stroke-width:1;stroke-dasharray:3 4}.cl-g{stroke:var(--ok);stroke-width:1.4}.cl-p.g{stroke:#2B6B48}
+.cv-zoom{transform-box:view-box;animation:cvz 1.2s cubic-bezier(.4,0,.2,1) 2.41s forwards}@keyframes cvz{to{transform:scale(4);opacity:0}}
+.cv-inner{opacity:0;transform-box:view-box;animation:fin .7s ease 2.95s forwards,cvzo 1.1s cubic-bezier(.4,0,.2,1) 8.28s forwards}@keyframes cvzo{from{opacity:1;transform:none}to{opacity:0;transform:scale(.25)}}
+.cv-final{opacity:0;animation:fin .8s ease 8.85s forwards}.cl-x{stroke:#2C3546;stroke-width:1;stroke-dasharray:3 4}.cl-g{stroke:var(--ok);stroke-width:1.4}.cl-p.g{stroke:#2B6B48}
 .cv-out2{animation:cvo .3s ease forwards}.cv-in2{opacity:0;animation:fin .35s ease forwards}
 .cv-row{fill:none;stroke:var(--warn);stroke-width:1;opacity:0;animation:rowf 1.3s ease forwards}@keyframes rowf{0%{opacity:0}20%{opacity:.9}100%{opacity:0}}
 .cv-h{font:600 8.5px var(--body);letter-spacing:.12em;fill:var(--muted)}.cv-k{font:600 8.5px var(--body);letter-spacing:.08em;fill:var(--muted)}.cv-b{font:600 10.5px var(--mono);fill:#F08A8D}.cv-a{font:600 10.5px var(--mono);fill:var(--ok)}.cv-in{opacity:0;animation:fin .45s ease forwards}@keyframes cvo{to{opacity:0}}
@@ -552,13 +552,13 @@ function drawCover(){ let s=DEFS;
   const P=[86,34,188,142], C=[180,105];
   let inn=`<g class="cv-inner" style="transform-origin:180px 105px">`;
   const ends=[[18,34,1],[18,105,1],[18,176,0],[342,34,0],[342,105,1],[342,176,0],[180,8,0],[180,202,1]];
-  ends.forEach(([x,y,need])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,P); const t=3.04;
+  ends.forEach(([x,y,need])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,P); const t=4.37;
     inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e a cv-out" style="animation-delay:${t}s"/><circle cx="${x}" cy="${y}" r="3.5" fill="#22151A" stroke="#E5484D" class="cv-out" style="animation-delay:${t}s"/>`;
     if(need) inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e ok cv-in" style="animation-delay:${t}s"/><circle cx="${x}" cy="${y}" r="4" fill="#123222" stroke="#4CC38A" class="cv-in" style="animation-delay:${t}s"/>`;
     else inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x cv-in" style="animation-delay:${t}s"/><g class="cv-in" style="animation-delay:${t}s"><circle cx="${bx}" cy="${by}" r="5.5" fill="#0A0D14" stroke="#4CC38A"/><path d="M${bx-2.3} ${by-2.3}L${bx+2.3} ${by+2.3}M${bx+2.3} ${by-2.3}L${bx-2.3} ${by+2.3}" stroke="#4CC38A" stroke-width="1.3" stroke-linecap="round"/></g>`; });
-  inn+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="#111723" stroke="#4A5468"/><rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="none" stroke="#2B6B48" stroke-width="1.5" class="cv-in" style="animation-delay:5.28s"/>`;
+  inn+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="#111723" stroke="#4A5468"/><rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="none" stroke="#2B6B48" stroke-width="1.5" class="cv-in" style="animation-delay:7.59s"/>`;
   inn+=`<text x="180" y="${P[1]+19}" text-anchor="middle" class="cv-h">ONE WORKLOAD</text>`;
-  [['NETWORK','8 open','4 needed',3.04],['PROGRAMS','any binary','python',3.68],['PRIVILEGES','root','none',4.24],['SYSCALLS','all','only used',4.8]].forEach(([l,b,a,t],r)=>{ const y=P[1]+46+r*25;
+  [['NETWORK','8 open','4 needed',4.37],['PROGRAMS','any binary','python',5.29],['PRIVILEGES','root','none',6.09],['SYSCALLS','all','only used',6.9]].forEach(([l,b,a,t],r)=>{ const y=P[1]+46+r*25;
     inn+=`<rect x="${P[0]+6}" y="${y-14}" width="${P[2]-12}" height="20" rx="5" class="cv-row" style="animation-delay:${t}s"/>`;
     inn+=`<text x="${P[0]+14}" y="${y}" class="cv-k">${l}</text><text x="${P[0]+P[2]-14}" y="${y}" text-anchor="end" class="cv-b cv-out2" style="animation-delay:${t}s">${b}</text><text x="${P[0]+P[2]-14}" y="${y}" text-anchor="end" class="cv-a cv-in2" style="animation-delay:${t+0.3}s">${a}</text>`; });
   inn+=`</g>`;
@@ -570,7 +570,7 @@ function drawCover(){ let s=DEFS;
   fin+=pods('g')+`</g>`;
   $('coverVis').innerHTML=s+cl+inn+fin;
   $('cvcap').innerHTML=`<span class="cc1">A cluster where everything can reach everything</span><span class="cc2">Inside one workload</span><span class="cc3">Only what it needs, on every layer</span>`;
-  const btn=$('coverBtns'); btn.classList.remove('on'); clearTimeout(coverT); coverT=setTimeout(()=>btn.classList.add('on'),reduce?0:7360); }
+  const btn=$('coverBtns'); btn.classList.remove('on'); clearTimeout(coverT); coverT=setTimeout(()=>btn.classList.add('on'),reduce?0:10579); }
 $('cover').addEventListener('click',e=>{ if(!e.target.closest('button')) $('coverBtns').classList.add('on'); });
 drawCover();
 
