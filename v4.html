@@ -217,12 +217,12 @@ function sceneWhy(k){ let s=DEFS;
   return s; }
 
 // ---------- evidence
-const SRC=[['Config','what it declares'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','what the platform needs']];
+const SRC=[['Config','what it declares'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','platform needs']];
 function sceneEv(k){ let s=DEFS;
   SRC.forEach(([n,sub],i)=>{ const y=22+i*56, on=i<k; s+=`<g class="src ${on?'on':''}"><rect x="12" y="${y}" width="118" height="44" rx="10"/><text x="24" y="${y+20}">${n}</text><text x="24" y="${y+35}" class="ss">${sub}</text></g><path d="M134 ${y+22} C 168 ${y+22}, 168 130, 196 130" class="flow ${on?'on':''}"/>`; });
   const R=[['NETWORK','llm-gateway',1],['','mcp-tickets · kb',1],['','kube-dns',4],['PROGRAMS','python',3],['SHELL TOOL','declared, unused',3],['PRIVILEGES','none',3]];
   s+=`<g class="prof"><rect class="card" x="198" y="22" width="150" height="216" rx="12"/><text x="212" y="44" class="h">support-agent</text><text x="212" y="58" class="rl">PROFILE</text>`;
-  R.forEach(([l,v,need],i)=>{ const y=76+i*26+(i>=3?8:0)+(i>=4?4:0)+(i>=5?4:0), on=k>=need; s+=`${l?`<text x="212" y="${y}" class="rl">${l}</text>`:''}<text x="212" y="${y+15}" class="rv ${on?'on':''}">${on?v:'·'}</text>`; });
+  const YS=[78,96,114,144,180,216]; R.forEach(([l,v,need],i)=>{ const y=YS[i]-(l?0:14), on=k>=need; s+=`${l?`<text x="212" y="${y}" class="rl">${l}</text>`:''}<text x="212" y="${y+15}" class="rv ${on?'on':''}">${on?v:'·'}</text>`; });
   return s+'</g>'; }
 
 // ---------- decide
