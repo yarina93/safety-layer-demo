@@ -7,7 +7,7 @@
 <title>Safety Layer · Tour</title>
 <meta name="description" content="Every cluster has the engines to enforce least privilege. Nobody can safely decide the rules. We decide them from evidence, and prove they won't break production.">
 <meta property="og:title" content="Safety Layer · The decision layer for runtime enforcement">
-<meta property="og:description" content="One attack, one map: how the decision layer turns evidence into tested, staged eBPF enforcement. ">
+<meta property="og:description" content="Zero Trust inside the cluster: rules decided from evidence, proven safe, enforced on the eBPF engines you already run.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
@@ -41,7 +41,7 @@ button{font:inherit;cursor:pointer}
 .nd.dimn{opacity:.3}
 .pod{fill:rgba(110,168,254,.06);stroke:#6D7A91;stroke-dasharray:6 4;stroke-width:1.6;transition:all .4s}.pod.on{stroke:var(--ok);stroke-dasharray:none;stroke-width:2.2}
 .podl{font:800 10.5px var(--mono);fill:var(--muted);paint-order:stroke;stroke:#0F1520;stroke-width:4px;stroke-linejoin:round}
-.zin{transform-box:view-box;transform-origin:182px 128px;animation:zin .55s cubic-bezier(.4,0,.2,1) forwards}@keyframes zin{to{transform:scale(1.8);opacity:0}}
+.zin{transform-box:view-box;transform-origin:180px 151px;animation:zin .55s cubic-bezier(.4,0,.2,1) forwards}@keyframes zin{to{transform:scale(1.8);opacity:0}}
 .zout{transform-box:view-box;transform-origin:180px 150px;animation:zout .45s cubic-bezier(.2,0,0,1)}@keyframes zout{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
 .crumb{font:800 10px var(--mono);fill:var(--info);letter-spacing:.04em}
 .hl{opacity:1}.lo{opacity:.6}.rowl{font:800 8.5px var(--mono);fill:var(--muted);letter-spacing:.04em}
@@ -228,9 +228,9 @@ body,.app{font-feature-settings:'cv11','ss01','tnum'}
   <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="sh"><b id="shT"></b><button id="shX">Close</button></div><div class="sb" id="shB"></div></div>
   <section class="cover" id="cover">
     <div class="k">Safety Layer · the decision layer for runtime enforcement</div>
-    <h1>Something will get in. We decide what it can do.</h1>
-    <p class="msg">A bug, a poisoned package, a hijacked agent. Every cluster already runs the engines to contain them. <b>Nobody can safely decide the rules.</b> We decide them from evidence and prove they won’t break production.</p>
-    <div class="mini"><svg id="coverMap" viewBox="0 0 360 290" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <h1>Zero Trust inside the cluster. Decided for you.</h1>
+    <p class="msg">Every workload gets only what it needs: network, programs, files, privileges. We derive the rules from evidence, <b>prove they won’t break production</b>, and enforce them on the eBPF engines you already run.</p>
+    <div class="mini"><svg id="coverMap" viewBox="0 -4 360 304" preserveAspectRatio="xMidYMid meet"></svg></div>
     <div class="btns"><button id="watch">Watch the story<small>about 2 minutes · plays by itself</small></button><button class="sec" id="explore">Explore step by step<small>at your pace · open the evidence</small></button></div>
     <div class="foot">Kubernetes · eBPF (Cilium, Tetragon)</div>
   </section>
@@ -453,10 +453,10 @@ function choose(id){ ROUTE=SEEN.size&&!SEEN.has(id)?SHORT:SEEN.size?SHORT:FULL; 
 
 // ---------- the seven layers of one workload
 const LST={lab:'in the lab',next:'design · next',eng:'same engines as the lab'};
-function sceneL(k,cur){ const P=[88,56,184,190], C=[180,84], M=[180,151], LN=SC.LN; let s=DEFS;
+function sceneL(k,cur,out){ const P=out?[136,112,88,78]:[88,56,184,190], C=out?[180,143]:[180,84], M=[180,151], LN=SC.LN; let s=DEFS;
   const on=i=>k>i, cl=i=>!on(i)?'':(cur<0||i===cur?'hl':'lo');
   if(k>=6) s+=`<rect x="6" y="6" width="348" height="278" rx="14" class="zone ok"/>`;
-  s+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="14" class="pod ${k>=6?'on':''}"/><text x="180" y="${P[1]+P[3]-8}" text-anchor="middle" class="podl">${SC.wl} pod</text>`;
+  s+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="14" class="pod ${k>=6?'on':''}"/>${out?'':`<text x="180" y="${P[1]+P[3]-8}" text-anchor="middle" class="podl">${SC.wl} pod</text>`}`;
   const wall=to=>{ const n=LN[to]; const [x1,y1,x2,y2]=trim(M,n,1,17); const [bx,by]=exitRect(x1,y1,x2,y2,P); return [bx,by,x2,y2]; };
   const blk=(to,i)=>{ const [bx,by,x2,y2]=wall(to); return `<g class="${cl(i)}"><line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e atk" style="stroke-width:2.2;stroke-dasharray:4 3"/>${xmark(bx,by,true,true)}</g>`; };
   const allow=(to,i,inb)=>{ const [bx,by,x2,y2]=wall(to); return `<g class="${cl(i)}"><line x1="${inb?x2:bx}" y1="${inb?y2:by}" x2="${inb?bx:x2}" y2="${inb?by:y2}" class="e alw" marker-end="url(#m-alw)"/></g>`; };
@@ -464,14 +464,15 @@ function sceneL(k,cur){ const P=[88,56,184,190], C=[180,84], M=[180,151], LN=SC.
   if(on(1)) s+=blk('api',1);
   if(on(2)) s+=blk('att',2);
   if(on(3)){ s+=allow('dns',3,false); s+=blk('rd',3); }
-  SC.rows.forEach(([lab,i,ch],r)=>{ const y=114+r*32, w=40, g=4, x0=126; s+=`<g class="${on(i)?cl(i):'lo'}"><text x="${P[0]+8}" y="${y+15}" class="rowl">${lab.toUpperCase()}</text>`+ch.map(([t,c],j)=>`<g class="pc ${on(i)?c:''}"><rect x="${x0+j*(w+g)}" y="${y}" width="${w}" height="22" rx="6"/><text x="${x0+j*(w+g)+w/2}" y="${y+15}" text-anchor="middle" style="font-size:9.5px">${t}</text></g>`).join('')+'</g>'; });
+  if(!out) SC.rows.forEach(([lab,i,ch],r)=>{ const y=114+r*32, w=40, g=4, x0=126; s+=`<g class="${on(i)?cl(i):'lo'}"><text x="${P[0]+8}" y="${y+15}" class="rowl">${lab.toUpperCase()}</text>`+ch.map(([t,c],j)=>`<g class="pc ${on(i)?c:''}"><rect x="${x0+j*(w+g)}" y="${y}" width="${w}" height="22" rx="6"/><text x="${x0+j*(w+g)+w/2}" y="${y+15}" text-anchor="middle" style="font-size:9.5px">${t}</text></g>`).join('')+'</g>'; });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="17"/><text x="${C[0]}" y="${C[1]+4}" text-anchor="middle">${SC.coreS}</text></g>`;
   s+=Object.values(LN).map(([x,y,l,sub,ic,c])=>node(x,y,l,sub,ic,c)).join('');
-  s+=`<text x="180" y="280" text-anchor="middle" class="crumb">INSIDE · ${SC.ns} / ${SC.wl}</text>`;
+  s+=`<text x="180" y="280" text-anchor="middle" class="crumb">${out?'AROUND':'INSIDE'} · ${SC.ns} / ${SC.wl}</text>`;
   return s; }
 const layerLive=(s)=>{ if(!s.k) return '<span class="k" style="background:var(--dim);color:var(--ink)">7 LAYERS</span>Each one is its own decision, with its own engine.'; const cur=s.sel!=null?s.sel:s.k-1;
   return `<div class="slist">${SC.layers.slice(0,s.k).map((L,i)=>{ const o=i===cur, nx=false;
     return `<div class="sr ${o?'cur':''}" data-k="${i}"><span class="k ${nx?'':'b'}" ${nx?'style="background:var(--warn);color:var(--bg)"':''}>${i+1}</span><div class="tt"><b>${L[0]}</b> · ${L[1]}${o?`<span class="rule"><i>${L[2]}</i>enforced</span><small>${L[3]}${L[4]?` <b class="ok">Stops attack step ${L[4]}.</b>`:''}</small>`:''}</div></div>`; }).join('')}</div>`; };
+const layIn=s=>(s.sel!=null?s.sel:s.k-1)>=4;
 const STAGES=['Namespace isolation · K8s API','Egress lock · internet','East-west · pod to pod','Inside the pod · programs, files, privileges'];
 function sceneBA(k){ const B=SC.ba; let s=DEFS;
   s+=`<text x="128" y="26" text-anchor="middle" class="bah b">BEFORE</text><text x="270" y="26" text-anchor="middle" class="bah a">AFTER</text>`;
@@ -494,7 +495,7 @@ const STEPS=[
      let r=`<div class="slist">${ENTRY.slice(0,Math.min(s.k,3)).map(([n,t,sub,txt],i)=>`<div class="sr ${i===cur&&s.k<4?'cur':''}" data-k="${i}"><span class="k a">${i+1}</span><div class="tt"><b>${t}</b> · ${sub}${i===cur&&s.k<4?`<small>${txt}</small>`:''}</div></div>`).join('')}</div>`;
      if(s.k>=4) r+=`<small class="foot" style="font-size:14px;color:var(--text)">Once inside, it can do <b>anything the workload is allowed to do</b>. By default, that means the internet, the K8s API and your data.</small>`; return r; },
    actl:s=>s.k<3?['A bug','A poisoned package','A hijacked agent'][s.k]:s.k===3?'Then what?':'Choose one to follow', done:s=>s.k>=4, run:s=>{ s.k++; s.sel=null; },
-   end:s=>s.k>=4?`<b>We don’t find bugs. We decide what anything inside can do.</b><span class="pick">${ENTRY.map(([id,t])=>`<button data-sc="${id}">Follow ${SCN[id].short}${SEEN.has(id)?' <i>✓ seen</i>':''}<em>›</em></button>`).join('')}</span>`:'',
+   end:s=>s.k>=4?`<b>We don’t chase how it got in. We decide what it can do once it’s there.</b><span class="pick">${ENTRY.map(([id,t])=>`<button data-sc="${id}">Follow ${SCN[id].short}${SEEN.has(id)?' <i>✓ seen</i>':''}<em>›</em></button>`).join('')}</span>`:'',
    det:()=>`<h4>Three ways in</h4><table><tr><td>Log4Shell · CVE-2021-44228</td><td>remote code via a log line</td></tr><tr><td>xz backdoor · CVE-2024-3094</td><td>backdoor in a trusted library</td></tr><tr><td>Prompt injection</td><td>agent follows hidden instructions</td></tr></table><h4>What they have in common</h4><p>None of them needs a new permission. Each one uses what the workload is already allowed to do. Least privilege takes that away, whatever the way in.</p>` },
  { ch:'Problem', sc:true, t:()=>SC.breachT,
    p:()=>SC.breachP,
@@ -535,12 +536,12 @@ const STEPS=[
    end:s=>'',
    det:()=>SC.decDet },
  { ch:'Solution', sc:true, t:'Seven layers. Each one decided.',
-   p:s=>s.z?`Inside one workload. Least privilege is more than the network: every layer gets its own rule.`:`So far: paths between workloads. Now, <b>inside one</b>.`,
-   init:()=>({k:0,sel:null,z:false,zoom:0}),
-   svg:s=>!s.z?`<g class="${s.zoom?'zin':''}">${sceneB({tint:false,need:true,podOn:false,chips:coreChip()})}</g>`:`<g class="${s.k===0&&s.sel==null?'zout':''}">${sceneL(s.k,s.sel!=null?s.sel:Math.max(0,s.k-1))}</g>`,
-   live:s=>s.z?layerLive(s):'',
-   actl:s=>!s.z?(s.zoom?'Going in…':`Go inside ${SC.wl}`):s.k<7?`Layer ${s.k+1} › ${SC.layers[s.k][0]}`:'All 7 decided', done:s=>s.k>=7, busy:s=>!!s.zoom,
-   run:(s,re)=>{ if(!s.z){ s.zoom=1; later(reduce?50:560,()=>{ s.z=true; s.zoom=0; re(); }); return; } s.k++; s.sel=null; },
+   p:s=>!s.k?`Least privilege is more than the network. One workload, seven layers, each with its own rule.`:layIn(s)?`<b>Inside the pod:</b> what may run, with which privileges, touching which files.`:`<b>Around the pod:</b> who may call it, and where it may go.`,
+   init:()=>({k:0,sel:null,zoom:0,zf:0}),
+   svg:s=>{ const cur=s.sel!=null?s.sel:Math.max(0,s.k-1); if(!layIn(s)) return `<g class="${s.zoom?'zin':''}">${sceneL(s.k,cur,true)}</g>`; return `<g class="${s.zf?'zout':''}">${sceneL(s.k,cur)}</g>`; },
+   live:s=>layerLive(s),
+   actl:s=>s.zoom?'Going inside…':s.k===4?`Go inside › ${SC.layers[4][0]}`:s.k<7?`Layer ${s.k+1} › ${SC.layers[s.k][0]}`:'All 7 decided', done:s=>s.k>=7, busy:s=>!!s.zoom,
+   run:(s,re)=>{ s.zf=0; if(s.k===4&&!reduce){ s.sel=null; s.zoom=1; later(560,()=>{ s.zoom=0; s.k=5; s.zf=1; re(); later(600,()=>{ s.zf=0; }); }); return; } s.k++; s.sel=null; },
    end:s=>s.k>=7?SC.layEnd:'',
    det:()=>`<h4>${SC.wl} · one profile, seven layers</h4><table>${SC.layers.map(L=>`<tr><td>${L[0]}</td><td class="g">${L[2]}</td></tr>`).join('')}</table><h4>Why every layer</h4><p>Network rules stop the call home. Programs stop what runs if code gets in another way. Privileges stop the escape. Files stop credential theft. Each layer stops a different step of the same attack.</p>` },
  { ch:'Solution', sc:true, t:'Proven before it’s applied.',
@@ -661,7 +662,7 @@ $('next').onclick=()=>{ if(nextOf()==null){ watching=false; stop(); $('cover').h
 $('back').onclick=()=>{ if(ri()>0) show(prevOf()); };
 // watch: [delay, 'a' = press the action, 'n' = next step]
 const W=(acts,gap,tail)=>{ const r=[]; let t=1400; for(let i=0;i<acts;i++){ r.push([t,'a']); t+=gap; } r.push([t+tail,'n']); return r; };
-const PLAY={0:W(4,2300,2000),1:()=>W(ATK.length,2400,1200),2:W(1,3000,2500),3:W(4,2000,1500),4:W(2,3000,1200),5:W(8,1500,1200),6:[[1200,'a'],[4600,'a'],[8000,'n']],7:W(4,1800,1000),8:()=>{ const r=[]; let t=1200; for(let i=0;i<SC.allow+2;i++){ r.push([t,'a']); t+=2800; } r.push([t+2000,'n']); return r; },9:W(1,3600,1500),10:W(4,1900,2200),11:[],12:W(4,2400,1500)};
+const PLAY={0:W(4,2300,2000),1:()=>W(ATK.length,2400,1200),2:W(1,3000,2500),3:W(4,2000,1500),4:W(2,3000,1200),5:W(7,1700,1200),6:[[1200,'a'],[4600,'a'],[8000,'n']],7:W(4,1800,1000),8:()=>{ const r=[]; let t=1200; for(let i=0;i<SC.allow+2;i++){ r.push([t,'a']); t+=2800; } r.push([t+2000,'n']); return r; },9:W(1,3600,1500),10:W(4,1900,2200),11:[],12:W(4,2400,1500)};
 function autoplay(){ stop(); const pl=PLAY[at]; (typeof pl==='function'?pl():(pl||[])).forEach(([ms,a])=>later(ms,()=>{ if(!watching) return; if(a==='n'){ if(nextOf()!=null) forward(nextOf()); } else doAct(); })); }
 function sheet(t,h){ $('shT').textContent=t; $('shB').innerHTML=h; $('sheet').classList.add('on'); $('scrim').classList.add('on'); if(watching){ watching=false; stop(); render(); } }
 function closeSheet(){ $('sheet').classList.remove('on'); $('scrim').classList.remove('on'); }
