@@ -43,6 +43,8 @@ button{font:inherit;cursor:pointer;color:inherit}
 .steps li.a .n{background:#3A1C20;color:#F08A8D}
 .steps li.r .n{background:#17233A;color:var(--info)}
 .steps li.cur{color:var(--ink)}
+.steps li .tag{flex:none;min-width:78px;height:20px;padding:0 6px;border-radius:6px;display:grid;place-items:center;font:600 10px var(--body);letter-spacing:.06em;background:#1A2130;color:var(--text)}
+.steps li.a .tag{background:#3A1C20;color:#F08A8D}.steps li.w .tag{background:#33281A;color:var(--warn)}.steps li.g .tag{background:#123222;color:var(--ok)}
 .steps li .t small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
 .steps li .t b{font-weight:600}
 .take{margin:12px 0 0;font-size:15px;line-height:1.45;color:var(--ink);font-weight:600}
@@ -75,6 +77,12 @@ button{font:inherit;cursor:pointer;color:inherit}
 .chip rect{fill:#22151A;stroke:#6B2C32}.chip text{font:600 10.5px var(--mono);fill:#F08A8D}
 .foot{font:600 9.5px var(--body);letter-spacing:.1em;fill:#8A4A50}
 .fadein{animation:fin .4s ease}
+.e.al{stroke:#5C6880}.e.ex{stroke:var(--bad);stroke-dasharray:3 4;opacity:.8}
+.pc rect{fill:#151B27;stroke:#2C3546}.pc text{font:600 10px var(--mono);fill:var(--text)}
+.pc.ok rect{fill:#123222;stroke:#2B6B48}.pc.ok text{fill:var(--ok)}.pc.b rect{fill:#22151A;stroke:#6B2C32}.pc.b text{fill:#F08A8D;text-decoration:line-through}
+.rowl{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}
+.eng rect{fill:#121823;stroke:#2C3546}.eng .en{font:600 13px var(--body);fill:var(--ink)}.eng .es{font:500 10.5px var(--body);fill:var(--muted)}.eng .z{font:600 11px var(--mono);fill:#F08A8D}
+.why rect{fill:#0F141E;stroke:#1E2633;transition:fill .3s,stroke .3s}.why text{font:600 12px var(--body);fill:var(--dim)}.why.on rect{fill:#2A2213;stroke:#6B5223}.why.on text{fill:var(--warn)}
 
 /* cover */
 .cover{position:absolute;inset:0;z-index:5;background:var(--bg);display:flex;flex-direction:column;padding:28px 22px calc(18px + env(safe-area-inset-bottom))}.cover[hidden]{display:none}
@@ -132,7 +140,7 @@ button{font:inherit;cursor:pointer;color:inherit}
     <h1>Zero Trust inside the cluster. Decided for you.</h1>
     <p class="msg">Every workload gets only what it needs. We decide the rules from evidence, and prove them before they apply.</p>
     <div class="vis"><svg id="coverVis" viewBox="0 0 360 210"></svg></div>
-    <div class="btns"><button id="watch">Watch the story <small>3 min</small></button><button class="sec" id="explore">Explore at your pace</button></div>
+    <div class="btns"><button id="watch">Watch the story <small>3 min</small></button><button class="sec" id="explore">Go step by step</button></div>
     <div class="ft">Kubernetes · Cilium · Tetragon</div>
   </section>
 </div>
@@ -179,6 +187,28 @@ function sceneAgent(n,fresh){ const [px,py,pw,ph]=AG.pod; let s=DEFS;
   s+=`<text x="180" y="252" text-anchor="middle" class="foot">DEFAULT-ALLOW · EVERY PATH OPEN</text>`;
   return s; }
 
+// ---------- the gap: allowed vs needed
+const GP={core:[180,100],pod:[112,72,136,112],
+  N:{llm:[44,40,'llm-gateway','ai',1],mcp:[44,124,'mcp-tickets','doc',1],kb:[44,208,'kb','db',1],dns:[180,26,'kube-dns','api',1],
+     net:[316,40,'internet','net',0],api:[316,124,'K8s API','api',0],meta:[316,208,'metadata','key',0],pods:[180,226,'other pods','doc',0]}};
+function sceneGap(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/>`;
+  Object.entries(GP.N).forEach(([key,[x,y,l,ic,need]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18);
+    const c=k<1?'al':need?'ok':'ex'; s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${c}"/>`; });
+  s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
+  const chips=(y,lab,items)=>{ const w=38,g=4,x0=180-(items.length*w+(items.length-1)*g)/2; return items.map(([t,c],i)=>`<g class="pc ${c}"><rect x="${x0+i*(w+g)}" y="${y}" width="${w}" height="16" rx="5"/><text x="${x0+i*(w+g)+w/2}" y="${y+11.5}" text-anchor="middle">${t}</text></g>`).join(''); };
+  s+=chips(126,'',[['python',k>=2?'ok':''],['sh',k>=2?'b':''],['curl',k>=2?'b':'']]);
+  s+=chips(150,'',[['root',k>=3?'b':''],['caps',k>=3?'b':'']]);
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,k>=1&&!need?'att':'')).join('');
+  return s; }
+
+// ---------- why it stays open
+function sceneWhy(k){ let s=DEFS;
+  [['Cilium','network policy',22],['Tetragon','runtime policy',188]].forEach(([n,sub,x])=>{ s+=`<g class="eng"><rect x="${x}" y="24" width="150" height="70" rx="12"/><text x="${x+14}" y="50" class="en">${n}</text><text x="${x+14}" y="66" class="es">installed · ${sub}</text><text x="${x+14}" y="83" class="z">0 rules enforced</text></g>`; });
+  s+=`<path d="M180 108v20" stroke="#3A4558" stroke-width="1.4"/><text x="180" y="146" text-anchor="middle" class="rowl" style="font-size:10px">WHY?</text>`;
+  ['Knowledge','Scale','Change'].forEach((t,i)=>{ const x=22+i*110; s+=`<g class="why ${i<k?'on':''}"><rect x="${x}" y="162" width="96" height="44" rx="10"/><text x="${x+48}" y="188" text-anchor="middle">${t}</text></g>`; });
+  return s; }
+
 // ---------- screens
 const PARTS=[['The problem','An agent is fooled · the gap · why it stays open'],['How we decide','Evidence · decide · prove'],['The result','Enforce · same attack · before and after']];
 const HEAD=['An AI agent <b>will</b> be fooled. <span>What it can reach decides the damage.</span>','',''];
@@ -191,7 +221,29 @@ const STEPS=[
    list:s=>CHAIN.slice(0,s.n).map((c,i)=>({c:c.c,t:c.t,s:c.s})),
    act:s=>s.n===0?'Send the ticket':s.n<CHAIN.length?'Next step':'Breach complete',
    done:s=>s.n>=CHAIN.length, run:s=>{ s.n++; },
-   take:s=>s.n>=CHAIN.length?'The model was fooled. <span>Default-allow did the rest.</span>':'' }
+   take:s=>s.n>=CHAIN.length?'The model was fooled. <span>Default-allow did the rest.</span>':'' },
+ { part:0, label:'The problem',
+   t:'Allowed far more than it needs.',
+   p:'Put what the pod <b>may</b> do next to what it <b>actually needs</b>. The difference is the attack surface.',
+   init:()=>({k:0}),
+   svg:s=>sceneGap(s.k),
+   list:s=>[{k:'NETWORK',c:'a',t:'<b>8 destinations open.</b> It needs 4.',s:'The model API, the ticket tool, the knowledge base and DNS. The internet, the K8s API, the metadata service and other pods are excess.'},
+            {k:'PROGRAMS',c:'a',t:'<b>Any binary can start.</b> It runs one.',s:'Only python ever ran. sh and curl are allowed anyway.'},
+            {k:'PRIVILEGES',c:'a',t:'<b>Root is possible.</b> It needs none.',s:'It never used a single Linux capability.'}].slice(0,s.k),
+   act:s=>['Compare the network','Compare programs','Compare privileges'][s.k]||'Compared',
+   done:s=>s.k>=3, run:s=>{ s.k++; },
+   take:s=>s.k>=3?'Every step of the attack used excess. <span>Nothing it needed.</span>':'' },
+ { part:0, label:'The problem',
+   t:'The engines are there. The rules aren’t.',
+   p:'Cilium and Tetragon can block all of that excess. In most clusters, <b>nothing is enforced</b>.',
+   init:()=>({k:0}),
+   svg:s=>sceneWhy(s.k),
+   list:s=>[{k:'KNOWLEDGE',c:'w',t:'<b>No one knows the full answer.</b>',s:'It’s split between developers, platform and security.'},
+            {k:'SCALE',c:'w',t:'<b>Thousands of decisions.</b>',s:'Seven layers per workload, hundreds of workloads, every cluster.'},
+            {k:'CHANGE',c:'w',t:'<b>Every release changes the answer.</b>',s:'Miss one dependency and production breaks. So it stays open.'}].slice(0,s.k),
+   act:s=>['Why?','And?','And?'][s.k]||'Three reasons',
+   done:s=>s.k>=3, run:s=>{ s.k++; },
+   take:s=>s.k>=3?'The missing piece isn’t the engine. <span>It’s the decision.</span>':'' }
 ];
 const ROUTE=STEPS.map((_,i)=>i);
 
@@ -204,7 +256,7 @@ function render(changed,fresh){
   $('map').innerHTML=st.svg(s,fresh);
   if(changed){ const g=$('stage'); g.classList.remove('in'); void g.offsetWidth; g.classList.add('in'); }
   const L=st.list?st.list(s):[], tk=st.take?st.take(s):'';
-  $('cap').innerHTML=`<h1>${st.t}</h1><p class="intro">${st.p}</p>${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1?'cur':''}"><span class="n">${i+1}</span><span class="t">${x.t}${i===L.length-1&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${tk?`<p class="take">${tk}</p>`:''}`;
+  $('cap').innerHTML=`<h1>${st.t}</h1><p class="intro">${st.p}</p>${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1?'cur':''}">${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${i===L.length-1&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${tk?`<p class="take">${tk}</p>`:''}`;
   const c=$('cap'); if(fresh){ const cur=c.querySelector('li.cur'), tk=c.querySelector('.take'), el=tk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
   const a=$('act'); a.textContent=st.act(s); a.disabled=st.done(s); a.classList.toggle('done',st.done(s));
   $('back').disabled=at===0; $('next').classList.toggle('go',st.done(s)&&!watching);
