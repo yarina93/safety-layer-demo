@@ -89,7 +89,8 @@ button{font:inherit;cursor:pointer;color:inherit}
 .chip.blk rect{fill:#0F1F17;stroke:#2B6B48}.chip.blk text{fill:#6FA98A;text-decoration:line-through}.chip.runs rect{fill:#2A2213;stroke:#6B5223}.chip.runs text{fill:var(--warn)}
 .steps li.r .tag{background:#17233A;color:var(--info)}.steps li.b .n,.steps li.b .tag{background:#123222;color:var(--ok)}.steps li.y .tag{background:#33281A;color:var(--warn)}
 .st rect{fill:#0F141E;stroke:#1E2633}.st.on rect{fill:#0F1F17;stroke:#2B6B48}.st text{font:600 10.5px var(--body);fill:var(--dim)}.st.on text{fill:var(--ok)}
-.bap .frame{fill:#0F141E;stroke:#1E2633}.bap.aft .frame{stroke:#1F4A33}.bap .h{font:600 10px var(--body);letter-spacing:.12em;fill:var(--muted)}.bap .pt{font:600 10.5px var(--mono);fill:#F08A8D}.bap.aft .pt{fill:var(--ok)}.bap .cnt{font:500 10px var(--body);fill:var(--muted)}
+.hlr{fill:none;stroke:var(--warn);stroke-width:1.2}.hl-net line,.hl-net circle{animation:fin .5s ease}.bap .frame.done{stroke:#2B6B48}.bap .pt.g{fill:var(--ok)}
+.bap .frame{fill:#0F141E;stroke:#1E2633}.bap .h{font:600 10px var(--body);letter-spacing:.12em;fill:var(--muted)}.bap .pt{font:600 10px var(--mono);fill:#F08A8D}.bap .cnt{font:500 10px var(--body);fill:var(--muted)}
 .ba .h{font:600 9.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.ba .n{font:600 12px var(--body);fill:var(--text)}.ba .b{font:500 11.5px var(--mono);fill:#C06A6E}.ba .a{font:600 11.5px var(--mono);fill:var(--ok)}.ba rect{fill:#0F141E}
 .e.al{stroke:#5C6880}.e.ex{stroke:var(--bad);stroke-dasharray:3 4;opacity:.8}
 .pc rect{fill:#151B27;stroke:#2C3546}.pc text{font:600 10px var(--mono);fill:var(--text)}
@@ -300,17 +301,22 @@ function sceneStage(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS; const
 // ---------- before and after
 const BA=[['Network','8 destinations','4 needed'],['Programs','any binary','python'],['Privileges','root possible','none'],['Kernel calls','all of them','the ones it uses'],['Case 1','upload to Beijing','blocked'],['Case 2','shell, call-out, Copy Fail','blocked'],['Needed, dropped','','0']];
 function sceneBA(k){ let s=DEFS;
-  const panel=(x0,after)=>{ const C=[x0+84,128], P=[x0+52,100,64,56]; let g=`<g class="bap ${after?'aft':''}"><rect x="${x0}" y="10" width="168" height="240" rx="14" class="frame"/><text x="${x0+14}" y="32" class="h">${after?'AFTER':'BEFORE'}</text>`;
-    const ends=[[0,-1,1],[0.7,-0.7,0],[1,0,1],[0.7,0.7,0],[0,1,1],[-0.7,0.7,0],[-1,0,1],[-0.7,-0.7,0]];
-    ends.forEach(([dx,dy,need])=>{ const x=C[0]+dx*70, y=C[1]+dy*78; const [bx,by]=exitRect(C[0],C[1],x,y,P);
-      if(!after) g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e a" style="opacity:.75"/><circle cx="${x}" cy="${y}" r="4" fill="#22151A" stroke="#E5484D"/>`;
-      else if(need) g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e ok"/><circle cx="${x}" cy="${y}" r="4" fill="#123222" stroke="#4CC38A"/>`;
-      else g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x"/><circle cx="${x}" cy="${y}" r="3.5" fill="none" stroke="#3A4558"/>`+xm(bx,by); });
-    g+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="10" class="pod ${after?'on':''}"/><text x="${C[0]}" y="${C[1]+4}" text-anchor="middle" class="pt">${after?'python':'anything'}</text>`;
-    g+=`<text x="${x0+84}" y="236" text-anchor="middle" class="cnt">${after?'4 paths · least privilege':'8 paths · root · any binary'}</text>`;
+  const panel=(x0,st,after)=>{ const C=[x0+84,130], P=[x0+30,100,108,62]; let g=`<g class="bap ${after?'aft':''}"><rect x="${x0}" y="8" width="168" height="244" rx="14" class="frame ${after&&k>=6?'done':''}"/><text x="${x0+14}" y="28" class="h">${after?'AFTER':'BEFORE'}</text>`;
+    const net=st>=1, E=[[x0+84,44,1],[x0+150,56,0],[x0+158,130,1],[x0+150,206,0],[x0+84,218,1],[x0+18,206,0],[x0+10,130,1],[x0+18,56,0]];
+    g+=`<g class="${after&&k===1?'hl-net':''}">`;
+    E.forEach(([x,y,need])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,P);
+      if(!net) g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e a" style="opacity:.75"/><circle cx="${x}" cy="${y}" r="3.5" fill="#22151A" stroke="#E5484D"/>`;
+      else if(need) g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e ok"/><circle cx="${x}" cy="${y}" r="3.5" fill="#123222" stroke="#4CC38A"/>`;
+      else g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x"/><circle cx="${x}" cy="${y}" r="3" fill="none" stroke="#3A4558"/>`+xm(bx,by); });
+    g+='</g>';
+    g+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="10" class="pod ${after&&k>=4?'on':''}"/>`;
+    [['any binary','python only',2],['root','no root',3],['all syscalls','few syscalls',4]].forEach(([b,a,need],r)=>{ const on=st>=need, y=P[1]+16+r*17, hl=after&&k===need;
+      if(hl) g+=`<rect x="${P[0]+6}" y="${y-11}" width="${P[2]-12}" height="15" rx="4" class="hlr"/>`;
+      g+=`<text x="${C[0]}" y="${y}" text-anchor="middle" class="pt ${on?'g':''}">${on?a:b}</text>`; });
+    const n=[st>=1?'4 paths':'8 paths', st>=2?'python':'any binary', st>=3?'no root':'root'];
+    g+=`<text x="${x0+84}" y="240" text-anchor="middle" class="cnt">${n.join(' · ')}</text>`;
     return g+'</g>'; };
-  s+=panel(6,false);
-  s+=k>=1?`<g class="fadein">${panel(186,true)}</g>`:`<g class="bap"><rect x="186" y="10" width="168" height="240" rx="14" class="frame" style="opacity:.35"/><text x="270" y="134" text-anchor="middle" class="h">AFTER</text></g>`;
+  s+=panel(6,0,false)+panel(186,Math.min(k,4),true);
   return s; }
 
 // ---------- screens
@@ -431,11 +437,11 @@ const STEPS=[
    take:s=>s.n>=SC.C.chain.length?SC.againTake:'' },
  { part:2, label:()=>'The result',
    t:'Before and after.',
-   p:'One agent: decided from evidence, proven, enforced.',
+   p:'The same agent pod, before and after. <b>One layer at a time.</b>',
    init:()=>({k:0}),
    svg:s=>sceneBA(s.k),
-   list:s=>baRows().slice(0,s.k).map(([k,t],i)=>({k,c:i===3?'b':'g',t})),
-   act:s=>s.k===0?'Show after':s.k<baRows().length?'Next difference':'All shown',
+   list:s=>baRows().slice(0,s.k).map(([k,t])=>({k,c:'g',t})),
+   act:s=>s.k<baRows().length?baRows()[s.k][2]:'All shown',
    done:s=>s.k>=baRows().length, run:s=>{ s.k++; },
    take:s=>s.k>=baRows().length?'Others alert after the fact, or lock down whatever they saw. <span>We decide, prove, then enforce.</span>':'' },
  { part:3, label:()=>'Next',
@@ -450,7 +456,7 @@ const STEPS=[
    act:()=>'Start over', done:()=>false, run:()=>{ watching=false; stop(); $('cover').hidden=false; } }
 ];
 const FULL=[0,1,2,3,4,5,6,7,8,9,10], SHORT=[1,2,8,9,10]; let ROUTE=FULL;
-function baRows(){ return [['NETWORK','<b>8 → 4</b> destinations'],['PROGRAMS','<b>any binary → python</b>'],['PRIVILEGES','<b>root → none</b>, syscalls cut to what it uses'],[SC.short.toUpperCase(),`<b>${SC.ba[0]}</b> → ${SC.ba[1]}`],['DROPPED','<b>0</b> needed connections']]; }
+function baRows(){ return [['NETWORK','<b>8 → 4 destinations.</b> Internet, K8s API, metadata and other pods closed.','Close the network'],['PROGRAMS','<b>Any binary → python only.</b> No shell, no curl.','Lock programs'],['PRIVILEGES','<b>Root → no root.</b> No capabilities.','Drop privileges'],['SYSCALLS','<b>All → the few it uses.</b> No AF_ALG, no namespaces.','Cut syscalls'],[SC.short.toUpperCase(),`<b>${SC.ba[0]} → ${SC.ba[1]}.</b>`,`Replay ${SC.short}`],['DROPPED','<b>0</b> needed connections. The agent still works.','Check what broke']]; }
 function scenePick(){ let s=DEFS; const B=[[20,'Case 1',['The model','goes off-task'],'Cohere · 2026','ai'],[188,'Case 2',['The model file','is the attack'],'Hugging Face · JFrog','pkg']];
   B.forEach(([x,h,d,w,ic])=>{ s+=`<g class="pk"><rect x="${x}" y="40" width="152" height="170" rx="14"/><g class="nd att"><rect class="bg" x="${x+16}" y="58" width="30" height="30" rx="8"/>${glyph(ic,x+31,73)}</g><text x="${x+16}" y="120" class="ph">${h}</text><text x="${x+16}" y="142" class="pd">${d[0]}</text><text x="${x+16}" y="160" class="pd">${d[1]}</text><text x="${x+16}" y="190" class="pw">${w}</text></g>`; });
   return s; }
