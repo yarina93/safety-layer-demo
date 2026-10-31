@@ -266,7 +266,7 @@ const SRC=[['Agent config','model, tools, MCP'],['Model source','where it comes 
 function sceneEv(k){ let s=DEFS;
   SRC.forEach(([n,sub],i)=>{ const y=14+i*48, on=i<k; s+=`<g class="src ${on?'on':''}"><rect x="10" y="${y}" width="122" height="40" rx="10"/><text x="22" y="${y+18}">${n}</text><text x="22" y="${y+32}" class="ss">${sub}</text></g><path d="M136 ${y+20} C 168 ${y+20}, 168 134, 196 134" class="flow ${on?'on':''}"/>`; });
   const R=[['MODEL','model-store only',2,74,88],['NETWORK','task queue · kb',1,110,124],['','kube-dns',5,0,140],['PROGRAMS','python',4,162,176],['SHELL TOOL','declared, unused',4,198,212],['SYSCALLS','the few it uses',4,234,248]];
-  s+=`<g class="prof"><rect class="card" x="198" y="14" width="152" height="244" rx="12"/><text x="212" y="38" class="h">agent</text><text x="212" y="52" class="rl">PROFILE</text>`;
+  s+=`<g class="prof"><rect class="card" x="198" y="14" width="152" height="244" rx="12"/><text x="212" y="42" class="h">Agent profile</text>`;
   R.forEach(([l,v,need,ly,vy])=>{ const on=k>=need; s+=`${l?`<text x="212" y="${ly}" class="rl">${l}</text>`:''}<text x="212" y="${vy}" class="rv ${on?'on':''}">${on?v:'·'}</text>`; });
   return s+'</g>'; }
 
