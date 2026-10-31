@@ -261,9 +261,9 @@ function sceneGap(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
   const chips=(y,lab,items)=>{ const W=items.map(([t])=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
   s+=chips(108,'',[['python',k>=2?'ok':''],['shell',k>=2?'b':''],['curl',k>=2?'b':'']]);
-  s+=chips(132,'',[['root',k>=3?'b':''],['caps',k>=3?'b':'']]);
-  s+=chips(156,'',[['AF_ALG',k>=4?'b':''],['unshare',k>=4?'b':'']]);
-  s+=chips(180,'',[['/app',k>=5?'ok':''],['token',k>=5?'b':''],['~/.aws',k>=5?'b':'']]);
+  s+=chips(132,'',[['/app',k>=3?'ok':''],['token',k>=3?'b':''],['~/.aws',k>=3?'b':'']]);
+  s+=chips(156,'',[['root',k>=4?'b':''],['caps',k>=4?'b':'']]);
+  s+=chips(180,'',[['AF_ALG',k>=5?'b':''],['unshare',k>=5?'b':'']]);
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,k>=1&&!need?'att':'')).join('');
   return s; }
 
@@ -293,9 +293,9 @@ function sceneDec(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
   const crow=(y,it)=>{ const W=it.map(([t])=>Math.max(42,t.length*7+12)), g=4; let x=180-(W.reduce((a,b)=>a+b,0)+g*(it.length-1))/2; it.forEach(([t,c],n)=>{ s+=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[n]}" height="19" rx="5"/><text x="${x+W[n]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[n]+g; }); };
   const X=k>=2?'b':'';
   crow(108,[['python',k>=1?'ok':''],[k>=4?'shell ?':'shell',k>=4?'w':''],['curl',X]]);
-  crow(132,[['root',X],['caps',X]]);
-  crow(156,[['AF_ALG',X],['unshare',X]]);
-  crow(180,[['/app',k>=1?'ok':''],['token',X],['~/.aws',X]]);
+  crow(132,[['/app',k>=1?'ok':''],['token',X],['~/.aws',X]]);
+  crow(156,[['root',X],['caps',X]]);
+  crow(180,[['AF_ALG',X],['unshare',X]]);
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,!need&&k>=2?'dim':'')).join('');
   if(k>=3) s+=`<g class="flag fadein"><rect x="214" y="4" width="140" height="20" rx="6"/><text x="284" y="17.5" text-anchor="middle">KEPT OUT · cloud bucket</text></g>`;
   return s; }
@@ -320,7 +320,7 @@ function sceneStage(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS; const
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
   const row=(y,items)=>{ const W=items.map(([t])=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
   const c4=k>=4?'b':'';
-  s+=row(108,[['python','ok'],['shell',c4],['curl',c4]])+row(132,[['root',c4],['caps',c4]])+row(156,[['AF_ALG',c4],['unshare',c4]])+row(180,[['/app','ok'],['token',c4],['~/.aws',c4]]);
+  s+=row(108,[['python','ok'],['shell',c4],['curl',c4]])+row(132,[['/app','ok'],['token',c4],['~/.aws',c4]])+row(156,[['root',c4],['caps',c4]])+row(180,[['AF_ALG',c4],['unshare',c4]]);
   s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,closed.includes(key)?'dim':need?'':'att')).join('');
   return s; }
 // ---------- before and after
@@ -334,7 +334,7 @@ function baPanel(x0,st,after,k){ return (function(){ const panel=(x0,st,after)=>
       else g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x"/><circle cx="${x}" cy="${y}" r="3" fill="none" stroke="#3A4558"/>`+xm(bx,by); });
     g+='</g>';
     g+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="10" class="pod ${after&&k>=5?'on':''}"/>`;
-    [['any binary','python only',2],['root','no root',3],['all syscalls','few syscalls',4],['any file','own files',5]].forEach(([b,a,need],r)=>{ const on=st>=need, y=P[1]+16+r*16, hl=after&&k===need;
+    [['any binary','python only',2],['any file','own files',3],['root','no root',4],['all syscalls','few syscalls',5]].forEach(([b,a,need],r)=>{ const on=st>=need, y=P[1]+16+r*16, hl=after&&k===need;
       if(hl) g+=`<rect x="${P[0]+6}" y="${y-11}" width="${P[2]-12}" height="15" rx="4" class="hlr"/>`;
       g+=`<text x="${C[0]}" y="${y}" text-anchor="middle" class="pt ${on?'g':''}">${on?a:b}</text>`; });
     const n=[st>=1?'4 paths':'8 paths', st>=2?'python':'any binary', st>=3?'no root':'root'];
@@ -388,10 +388,10 @@ const STEPS=[
    svg:s=>sceneGap(s.k),
    list:s=>[{k:'NETWORK',c:'a',t:'<b>8 destinations open.</b> It used 4.',s:'The model store, the task queue, the knowledge base and DNS. The internet, the K8s API, the metadata service and other pods: never used.'},
             {k:'PROGRAMS',c:'a',t:'<b>Any binary can start.</b> It ran one.',s:'Only python ever ran. A shell and curl are allowed anyway.'},
+            {k:'FILES',c:'a',t:'<b>Any file is readable.</b> It used one path.',s:'Only /app. The service-account token and cloud credentials are readable anyway.'},
             {k:'PRIVILEGES',c:'a',t:'<b>Root is possible.</b> It never used it.',s:'It never used a single Linux capability.'},
-            {k:'SYSCALLS',c:'a',t:'<b>Hundreds of syscalls allowed.</b> It used a few.',s:'It never opened an AF_ALG socket or created a namespace. Kernel bugs like Copy Fail and Dirty Frag need exactly those.'},
-            {k:'FILES',c:'a',t:'<b>Any file is readable.</b> It used one path.',s:'Only /app. The service-account token and cloud credentials are readable anyway.'}].slice(0,s.k),
-   act:s=>['Compare the network','Compare programs','Compare privileges','Compare syscalls','Compare files'][s.k]||'Compared',
+            {k:'SYSCALLS',c:'a',t:'<b>Hundreds of syscalls allowed.</b> It used a few.',s:'It never opened an AF_ALG socket or created a namespace. Kernel bugs like Copy Fail and Dirty Frag need exactly those.'}].slice(0,s.k),
+   act:s=>['Compare the network','Compare programs','Compare files','Compare privileges','Compare syscalls'][s.k]||'Compared',
    done:s=>s.k>=5, run:s=>{ s.k++; },
    take:s=>s.k>=5?SC.used:'' },
  { part:0, label:()=>'The problem',
@@ -400,7 +400,7 @@ const STEPS=[
    init:()=>({k:0}),
    svg:s=>sceneWhy(s.k),
    list:s=>[{k:'KNOWLEDGE',c:'w',t:'<b>No one knows the full answer.</b>',s:'It’s split between developers, platform and security.'},
-            {k:'SCALE',c:'w',t:'<b>Thousands of decisions.</b>',s:'Network, programs, privileges, syscalls and files, for every workload and agent.'},
+            {k:'SCALE',c:'w',t:'<b>Thousands of decisions.</b>',s:'Network, programs, files, privileges and syscalls, for every workload and agent.'},
             {k:'CHANGE',c:'w',t:'<b>Every release changes the answer.</b>',s:'Miss one dependency and production breaks. So it stays open.'}].slice(0,s.k),
    act:s=>['Why?','Next reason','Next reason'][s.k]||'Three reasons', allSubs:true,
    done:s=>s.k>=3, run:s=>{ s.k++; },
@@ -424,7 +424,7 @@ const STEPS=[
    init:()=>({k:0}),
    svg:s=>sceneDec(s.k),
    list:s=>[{k:'NEEDED',c:'g',t:'<b>Stays open.</b> Declared and seen: model store, task queue, kb and DNS.'},
-            {k:'EXCESS',c:'a',t:'<b>Closes.</b> Allowed, never declared, never used: internet, K8s API, metadata, other pods, unused syscalls and files.'},
+            {k:'EXCESS',c:'a',t:'<b>Closes.</b> Allowed, never declared, never used: internet, K8s API, metadata, other pods, unused files and syscalls.'},
             {k:'KEPT OUT',c:'a',t:'<b>Seen isn’t trusted.</b>',s:'If the model called out during learning, that call is in the traffic. It was never declared, so it never becomes a rule.'},
             {k:'ASK',c:'w',t:'<b>A person decides.</b>',s:'The shell tool is declared but never used. Removing it is one approval.'}].slice(0,s.k),
    act:s=>['Mark what it needs','Close the excess','Check what was seen','Find what’s unclear'][s.k]||'Decided',
@@ -449,7 +449,7 @@ const STEPS=[
    list:s=>[{k:'STAGE 1',c:'b',t:'<b>K8s API and metadata closed.</b>',s:'0 needed connections dropped.'},
             {k:'STAGE 2',c:'b',t:'<b>Internet closed.</b>',s:'No upload, no call to an attacker.'},
             {k:'STAGE 3',c:'b',t:'<b>Other pods closed.</b>',s:'Only the model store, task queue, kb and DNS remain.'},
-            {k:'STAGE 4',c:'b',t:'<b>Inside the pod.</b>',s:'Only python starts. No root, no capabilities, no unused syscalls, only its own files.'}].slice(0,s.k),
+            {k:'STAGE 4',c:'b',t:'<b>Inside the pod.</b>',s:'Only python starts. Only its own files. No root, no capabilities, no unused syscalls.'}].slice(0,s.k),
    act:s=>s.k<4?`Approve stage ${s.k+1}`:'All stages live',
    done:s=>s.k>=4, run:s=>{ s.k++; },
    take:s=>s.k>=4?'The agent still does its job. <span>It just can’t do anything else.</span>':'' },
@@ -483,7 +483,7 @@ const STEPS=[
    take:s=>s.k>=4?'The engines are ready. <span>The decision layer is what’s missing.</span>':'' },
  { part:2, label:()=>'Summary',
    t:'Every layer. One decision.',
-   p:'One decision layer for every workload: network, programs, privileges, syscalls and files. Decided from evidence, proven before it applies, enforced on open-source eBPF engines.',
+   p:'One decision layer for every workload: network, programs, files, privileges and syscalls. Decided from evidence, proven before it applies, enforced on open-source eBPF engines.',
    init:()=>({}),
    svg:()=>sceneJourney(),
    list:()=>[],
@@ -492,7 +492,7 @@ const STEPS=[
 ];
 const FULL=[0,1,2,3,10,4,5,6,7,8,9,11], SHORT=[1,2,8,9,11]; let ROUTE=FULL;
 function sceneJourney(){ let s=DEFS; const blk=SC.E.filter(e=>e[0]==='b').length, tot=SC.E.length;
-  const L=['network','programs','privileges','syscalls','files'], E=['Cilium','Tetragon','seccomp'];
+  const L=['network','programs','files','privileges','syscalls'], E=['Cilium','Tetragon','seccomp'];
   s+=`<text x="58" y="20" text-anchor="middle" class="jh2">EVERY LAYER</text><text x="180" y="20" text-anchor="middle" class="jh2">ONE DECISION</text><text x="302" y="20" text-anchor="middle" class="jh2">ENGINES</text>`;
   L.forEach((t,i)=>{ const y=34+i*34; s+=`<g class="jc g0"><rect x="10" y="${y}" width="96" height="24" rx="6"/><text x="58" y="${y+16}" text-anchor="middle">${t}</text></g><path d="M108 ${y+12} C 124 ${y+12}, 124 110, 132 110" class="flow on"/>`; });
   s+=`<g class="dec1"><rect x="132" y="66" width="96" height="88" rx="12"/><text x="180" y="98" text-anchor="middle" class="d1">one profile</text><text x="180" y="114" text-anchor="middle" class="d2">evidence</text><text x="180" y="127" text-anchor="middle" class="d2">decision</text><text x="180" y="140" text-anchor="middle" class="d2">proof</text></g>`;
@@ -501,7 +501,7 @@ function sceneJourney(){ let s=DEFS; const blk=SC.E.filter(e=>e[0]==='b').length
   return s; }
 function endBlock(){ const o=Object.values(CASES).find(c=>!SEEN.has(c.id));
   return `${o?`<div class="pick" style="margin-top:12px"><button data-case="${o.id}"><span><b>See ${o.short}: ${o.name.toLowerCase()}</b><small>${o.who} · 4 screens</small></span><em>›</em></button></div>`:''}<p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`; }
-function baRows(){ return [['NETWORK','<b>8 → 4 destinations.</b> Internet, K8s API, metadata and other pods closed.','Close the network'],['PROGRAMS','<b>Any binary → python only.</b> No shell, no curl.','Lock programs'],['PRIVILEGES','<b>Root → no root.</b> No capabilities.','Drop privileges'],['SYSCALLS','<b>All → the few it uses.</b> No AF_ALG, no namespaces.','Cut syscalls'],['FILES','<b>Any file → its own.</b> No token, no cloud credentials.','Limit files'],[SC.short.toUpperCase(),`<b>${SC.ba[0]} → ${SC.ba[1]}.</b>`,`Replay ${SC.short}`],['DROPPED','<b>0</b> needed connections. The agent still works.','Check what broke']]; }
+function baRows(){ return [['NETWORK','<b>8 → 4 destinations.</b> Internet, K8s API, metadata and other pods closed.','Close the network'],['PROGRAMS','<b>Any binary → python only.</b> No shell, no curl.','Lock programs'],['FILES','<b>Any file → its own.</b> No token, no cloud credentials.','Limit files'],['PRIVILEGES','<b>Root → no root.</b> No capabilities.','Drop privileges'],['SYSCALLS','<b>All → the few it uses.</b> No AF_ALG, no namespaces.','Cut syscalls'],[SC.short.toUpperCase(),`<b>${SC.ba[0]} → ${SC.ba[1]}.</b>`,`Replay ${SC.short}`],['DROPPED','<b>0</b> needed connections. The agent still works.','Check what broke']]; }
 const WN=[['58%','of organizations miss a network policy on most workloads',['Fairwinds benchmark, 2024','330,000+ workloads']],['45%','had a security incident at runtime in the last year',['Red Hat survey, 2024','600 practitioners']],['2','Linux root bugs, eight days apart, reachable from inside a pod',['Public disclosures','Apr 29 and May 7, 2026']],['40%','of enterprise apps to include AI agents by 2026',['Gartner forecast, 2025','a prediction, not a count']]];
 function sceneWhyNow(k){ let s=DEFS;
   WN.forEach(([n,t,src],i)=>{ const x=8+(i%2)*176, y=8+Math.floor(i/2)*124, on=i<k;
@@ -574,7 +574,7 @@ function drawCover(){ let s=DEFS;
     else inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x cv-in" style="animation-delay:${t}s"/><g class="cv-in" style="animation-delay:${t}s"><circle cx="${bx}" cy="${by}" r="5.5" fill="#0A0D14" stroke="#4CC38A"/><path d="M${bx-2.3} ${by-2.3}L${bx+2.3} ${by+2.3}M${bx+2.3} ${by-2.3}L${bx-2.3} ${by+2.3}" stroke="#4CC38A" stroke-width="1.3" stroke-linecap="round"/></g>`; });
   inn+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="#111723" stroke="#4A5468"/><rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="none" stroke="#2B6B48" stroke-width="1.5" class="cv-in" style="animation-delay:5.8s"/>`;
   inn+=`<text x="180" y="${P[1]+19}" text-anchor="middle" class="cv-h">ONE WORKLOAD</text>`;
-  [['NETWORK','8 open','4 needed',3.04],['PROGRAMS','any binary','python',3.68],['PRIVILEGES','root','none',4.24],['SYSCALLS','all','only used',4.8],['FILES','any file','own files',5.3]].forEach(([l,b,a,t],r)=>{ const y=P[1]+44+r*24;
+  [['NETWORK','8 open','4 needed',3.04],['PROGRAMS','any binary','python',3.68],['FILES','any file','own files',4.24],['PRIVILEGES','root','none',4.8],['SYSCALLS','all','only used',5.3]].forEach(([l,b,a,t],r)=>{ const y=P[1]+44+r*24;
     inn+=`<rect x="${P[0]+6}" y="${y-14}" width="${P[2]-12}" height="20" rx="5" class="cv-row" style="animation-delay:${t}s"/>`;
     inn+=`<text x="${P[0]+14}" y="${y}" class="cv-k">${l}</text><text x="${P[0]+P[2]-14}" y="${y}" text-anchor="end" class="cv-b cv-out2" style="animation-delay:${t}s">${b}</text><text x="${P[0]+P[2]-14}" y="${y}" text-anchor="end" class="cv-a cv-in2" style="animation-delay:${t+0.3}s">${a}</text>`; });
   inn+=`</g>`;
