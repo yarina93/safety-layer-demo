@@ -7,7 +7,7 @@
 <title>Safety Layer · Tour</title>
 <meta name="description" content="Every cluster has the engines to enforce least privilege. Nobody can safely decide the rules. We decide them from evidence, and prove they won't break production.">
 <meta property="og:title" content="Safety Layer · The decision layer for runtime enforcement">
-<meta property="og:description" content="Zero Trust inside the cluster: rules decided from evidence, proven safe, enforced on the eBPF engines you already run.">
+<meta property="og:description" content="Zero Trust inside the cluster: rules decided from evidence, proven safe, enforced on open-source eBPF engines.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
@@ -238,7 +238,7 @@ body,.app{font-feature-settings:'cv11','ss01','tnum'}
   <section class="cover" id="cover">
     <div class="k">Safety Layer · the decision layer for runtime enforcement</div>
     <h1>Zero Trust inside the cluster. Decided for you.</h1>
-    <p class="msg">Every workload gets only what it needs: network, programs, files, privileges. We derive the rules from evidence, <b>prove they won’t break production</b>, and enforce them on the eBPF engines you already run.</p>
+    <p class="msg">Every workload gets only what it needs: network, programs, files, privileges. We derive the rules from evidence, <b>prove they won’t break production</b>, and enforce them on open-source eBPF engines (Cilium, Tetragon).</p>
     <div class="mini"><svg id="coverMap" viewBox="0 -4 360 304" preserveAspectRatio="xMidYMid meet"></svg></div>
     <div class="btns"><button id="watch">Watch the story<small>about 2 minutes · plays by itself</small></button><button class="sec" id="explore">Explore step by step<small>at your pace · open the evidence</small></button></div>
     <div class="foot">Kubernetes · eBPF (Cilium, Tetragon)</div>
@@ -443,10 +443,21 @@ const trackHTML=(L,s)=>L.map((st,i)=>{ const done=i<s.n; const blocked=s.enf&&st
 
 // ---------- the opening and the summary: three ways in
 const EN={bug:[46,62,'bug','Log4Shell','app','att'],pkg:[180,34,'package','xz backdoor','pkg','att'],agt:[314,62,'agent','prompt injection','ai','att'],
-          net:[50,252,'internet','','net',''],api:[180,262,'K8s API','','api',''],data:[310,252,'customer data','','db','']};
+          net:[50,252,'internet','','net',''],api:[180,252,'K8s API','','api',''],data:[310,252,'customer data','','db','']};
 const ENTRY=[['bug','A bug','in code you wrote or imported','<b>Log4Shell</b> (2021): one log line runs the attacker’s code. Almost every Java shop was exposed.'],
  ['pkg','A poisoned package','in code you trust','The <b>xz backdoor</b> (2024) was hidden inside a trusted Linux library. New malicious npm and PyPI packages appear every week.'],
  ['agt','A hijacked agent','following someone else’s instructions','<b>Prompt injection</b>: a ticket, a web page or a tool result tells the agent what to do, and the agent acts with your credentials.']];
+function sceneE1(k){ const P=[118,104,124,100], C=[180,142], G=[180,42]; let s=DEFS;
+  s+=`<rect x="6" y="6" width="348" height="278" rx="14" class="zone"/>`;
+  s+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="14" class="pod"/><text x="180" y="${P[1]+P[3]-9}" text-anchor="middle" class="podl">support-agent</text>`;
+  s+=node(56,62,'ticket','hidden instructions','doc',k>=1?'att':'dimn');
+  if(k>=1){ const [x1,y1,x2,y2]=trim([56,62],C,17,0); const [bx,by]=exitRect(x1,y1,C[0],C[1],P); s+=`<line x1="${x1}" y1="${y1}" x2="${bx}" y2="${by}" class="e atk ${k===1?'drawn':''}" marker-end="url(#m-atk)"/>`; }
+  if(k>=2) ['net','api','data'].forEach(n=>{ const [ax,ay]=EN[n]; const [x1,y1,x2,y2]=trim(C,[ax,ay],19,18); const [bx,by]=exitRect(x1,y1,x2,y2,P);
+    s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e atk drawn" style="stroke-dasharray:5 4;animation:none" marker-end="url(#m-atk)"/>`; });
+  s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="17"/>${glyph('ai',C[0],C[1])}</g>`;
+  s+=['net','api','data'].map(n=>{ const [x,y,l,sub,ic]=EN[n]; return node(x,y,l,sub,ic,k<2?'dimn':''); }).join('');
+  if(k>=2) s+=`<text x="180" y="226" text-anchor="middle" class="zl" style="paint-order:stroke;stroke:#10141A;stroke-width:6px">EVERYTHING IS ALLOWED</text>`;
+  return s; }
 function sceneE(k,enf=false){ const P=[118,104,124,100], C=[180,142]; let s=DEFS; if(enf) k=4;
   s+=`<rect x="6" y="6" width="348" height="278" rx="14" class="zone ${enf?'ok':''}"/>`;
   s+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="14" class="pod ${enf?'on':''}"/><text x="180" y="${P[1]+P[3]-9}" text-anchor="middle" class="podl">your workload</text>`;
@@ -507,16 +518,14 @@ const NSBA=`<div class="grp">boutique · 12 workloads · network</div><div class
 const TILES=`<div class="tiles"><div><span>network paths · lab</span><b><s>133</s><span class="g" style="font:inherit;display:inline">17</span></b></div><div><span>needed flows dropped</span><b class="g">0</b></div><div><span>programs (adservice)</span><b><s>any</s><span class="g" style="font:inherit;display:inline">8</span></b></div><div><span>flows replayed first</span><b>33,411</b></div></div>`;
 
 const STEPS=[
- { ch:'Problem', t:'Something will get in.',
-   p:s=>s.k<4?`There are many ways in. You can’t close all of them.`:`What happens next depends on one thing.`,
-   init:()=>({k:0,sel:null}),
-   svg:s=>sceneE(s.k),
-   live:s=>{ if(!s.k) return ''; if(s.k>=4) return `Once inside, it can do <b>anything the workload is allowed to do</b>. By default, that means the internet, the K8s API and your data.`; const cur=s.sel!=null?s.sel:Math.min(s.k,3)-1;
-     let r=`<div class="slist">${ENTRY.slice(0,Math.min(s.k,3)).map(([n,t,sub,txt],i)=>`<div class="sr ${i===cur&&s.k<4?'cur':''}" data-k="${i}"><span class="k a">${i+1}</span><div class="tt"><b>${t}</b> · ${sub}${i===cur&&s.k<4?`<small>${txt}</small>`:''}</div></div>`).join('')}</div>`;
-     if(s.k>=4) r+=`<small class="foot" style="font-size:14px;color:var(--text)">Once inside, it can do <b>anything the workload is allowed to do</b>. By default, that means the internet, the K8s API and your data.</small>`; return r; },
-   actl:s=>s.k<3?['A bug','A poisoned package','A hijacked agent'][s.k]:s.k===3?'Then what?':'Choose one to follow', done:s=>s.k>=4, run:s=>{ s.k++; s.sel=null; },
-   end:s=>s.k>=4?`<b>We don’t chase how it got in. We decide what it can do once it’s there.</b><span class="pick">${['agt','bug','pkg'].map(id=>ENTRY.find(e=>e[0]===id)).map(([id,t])=>`<button data-sc="${id}">Follow ${SCN[id].short}${SEEN.has(id)?' <i>✓ seen</i>':''}<em>›</em></button>`).join('')}</span>`:'',
-   det:()=>`<h4>Three ways in</h4><table><tr><td>Log4Shell · CVE-2021-44228</td><td>remote code via a log line</td></tr><tr><td>xz backdoor · CVE-2024-3094</td><td>backdoor in a trusted library</td></tr><tr><td>Prompt injection</td><td>agent follows hidden instructions</td></tr></table><h4>What they have in common</h4><p>None of them needs a new permission. Each one uses what the workload is already allowed to do. Least privilege takes that away, whatever the way in.</p>` },
+ { ch:'Problem', t:'Your AI agent will be fooled.',
+   p:()=>`Agents read tickets, web pages and tool results. Any of them can carry instructions.`,
+   init:()=>({k:0}),
+   svg:s=>sceneE1(s.k),
+   live:s=>!s.k?'':s.k===1?`<span class="k a">PROMPT INJECTION</span>A ticket tells the agent what to do, and the agent acts with <b>your credentials</b>.<small>It can’t be fully prevented inside the model.</small>`:`Once fooled, it can do <b>anything its pod is allowed to do</b>. By default, that means the internet, the K8s API and your data.`,
+   actl:s=>['A ticket arrives','Then what?'][s.k]||'Fooled', done:s=>s.k>=2, run:s=>{ s.k++; },
+   end:s=>s.k>=2?`<b>We don’t try to make the model unfoolable. We decide what it can do when it is.</b>`:'',
+   det:()=>`<h4>Why not fix it in the model?</h4><p>Prompt injection has no complete fix inside the model. Guardrails reduce it; they don’t remove it. The agent runs with real network access and real credentials, so what its pod may do decides the damage.</p><h4>Real cases</h4><p><a href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank" rel="noopener">Cohere: a model goes off-task ↗</a><br><a href="https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/" target="_blank" rel="noopener">JFrog: poisoned models on Hugging Face ↗</a></p>` },
  { ch:'Problem', sc:true, t:()=>SC.breachT,
    p:()=>SC.breachP,
    init:()=>({n:0,sel:null}), seq:()=>ATK,
@@ -616,10 +625,10 @@ const STEPS=[
    actl:s=>s.k<4?['Count one namespace','× 50 namespaces','× 10 clusters','Add the agents'][s.k]:'Multiplied', done:s=>s.k>=4, run:s=>{ s.k++; },
    end:s=>'', det:()=>`<h4>The math</h4><table><tr><td>12 workloads × 7 layers</td><td>84</td></tr><tr><td>× 50 namespaces</td><td>4,200</td></tr><tr><td>× 10 clusters</td><td>42,000</td></tr><tr><td>1,000 agents × 7 layers</td><td>+ 7,000</td></tr><tr><td>every release</td><td>re-check</td></tr></table><p>Illustrative company size. Benchmark: Fairwinds 2024, 58% of organizations had no network policy on most workloads.</p>` },
  { ch:'Summary', t:'What you just saw.', close:true,
-   p:()=>`Three ways in. One process. <b>Whatever gets in can only do what it needs.</b>`,
+   p:()=>`The agent was fooled, and it didn’t matter. <b>The same process covers other ways in.</b>`,
    init:()=>({}),
    svg:()=>sceneE(4,true),
-   live:()=>`<div class="slist">${ENTRY.map(([id,t])=>{ const seen=SEEN.has(id), S=SCN[id]; return `<div class="sr cur sumr" style="opacity:1;align-items:center"><span class="k ${seen?'b':''}" style="min-width:22px;${seen?'':'background:var(--line);color:var(--muted)'}">${seen?'✓':'·'}</span><div class="tt" style="white-space:normal"><b>${t}</b><small>${seen?`<span class="ok">Stopped at step ${S.allow+1}</span> · ${S.wl}`:'Not watched yet'}</small></div><button class="watchb" data-sc="${id}">${seen?'Again':'Watch'} ›</button></div>`; }).join('')}</div><div class="flow"><span>Evidence</span><i>›</i><span>Decide</span><i>›</i><span>Prove</span><i>›</i><span>Enforce</span></div>`,
+   live:()=>`<div class="slist">${['agt','bug','pkg'].map(id=>ENTRY.find(e=>e[0]===id)).map(([id,t])=>{ const seen=SEEN.has(id), S=SCN[id]; return `<div class="sr cur sumr" style="opacity:1;align-items:center"><span class="k ${seen?'b':''}" style="min-width:22px;${seen?'':'background:var(--line);color:var(--muted)'}">${seen?'✓':'·'}</span><div class="tt" style="white-space:normal"><b>${t}</b><small>${seen?`<span class="ok">Stopped at step ${S.allow+1}</span> · ${S.wl}`:'Not watched yet'}</small></div><button class="watchb" data-sc="${id}">${seen?'Again':'Watch'} ›</button></div>`; }).join('')}</div><div class="flow"><span>Evidence</span><i>›</i><span>Decide</span><i>›</i><span>Prove</span><i>›</i><span>Enforce</span></div>`,
    actl:()=>{ const u=ENTRY.find(e=>!SEEN.has(e[0])); return u?`Watch ${SCN[u[0]].short} ›`:'All three watched'; }, done:()=>!ENTRY.some(e=>!SEEN.has(e[0])),
    run:()=>{ const u=ENTRY.find(e=>!SEEN.has(e[0])); if(u) choose(u[0]); },
    end:()=>`<div class="grp">Go deeper</div><span class="pick" style="margin-top:0">${[[5,'Seven layers inside one workload'],[9,'Before → after, layer by layer'],[10,'Why now: the decisions multiply']].map(([i,t])=>`<button data-deep="${i}">${t}<em>›</em></button>`).join('')}</span>${NSBA}`,
@@ -642,25 +651,25 @@ const STEPS=[
    end:s=>s.k>=4?`<b>${SC.wl}</b> now does what it needs, and nothing else.`:'',
    det:()=>SC.enfDet },
  { ch:'Next', t:'Where this goes next.', close:true,
-   p:()=>`A decision layer on the engines teams already run.`,
+   p:()=>`A decision layer for open-source eBPF enforcement.`,
    init:()=>({}),
    svg:()=>sceneN(),
-   live:()=>`<div class="nx3"><div><b>For platform teams</b><span>Start with one namespace. Evidence and decisions first; nothing is enforced without your approval.</span></div><div><b>For vendors and integrators</b><span>Turn installed Cilium and Tetragon into enforced least privilege, without hand-written rules.</span></div><div><b>Build it with us</b><span>We’re working with a small group of early partners. Let’s talk.</span></div></div>`,
+   live:()=>`<div class="nx3"><div><b>For platform teams</b><span>Start with one namespace. Evidence and decisions first; nothing is enforced without your approval.</span></div><div><b>For vendors and integrators</b><span>Turn Cilium and Tetragon into enforced least privilege, without hand-written rules.</span></div><div><b>Build it with us</b><span>We’re working with a small group of early partners. Let’s talk.</span></div></div>`,
    done:()=>true, end:()=>'', det:null }
 ];
 function sceneN(){ let s=DEFS; const F=[['Evidence','r'],['Decide','a'],['Prove','b'],['Enforce','b']];
   F.forEach(([t,c],i)=>{ const x=14+i*86; s+=`<g class="fl ${c}"><rect x="${x}" y="90" width="74" height="40" rx="9"/><text x="${x+37}" y="115" text-anchor="middle">${t}</text></g>`; if(i<3) s+=`<path d="M${x+76} 110H${x+84}" class="flar"/>`; });
-  s+=`<text x="180" y="170" text-anchor="middle" class="flsub">on the engines you already run</text>`;
+  s+=`<text x="180" y="170" text-anchor="middle" class="flsub">on open-source eBPF engines</text>`;
   [['Cilium',30,76],['Tetragon',114,86],['securityContext',208,122]].forEach(([t,x,w])=>{ s+=`<g class="ch2"><rect x="${x}" y="186" width="${w}" height="26" rx="7"/><text x="${x+w/2}" y="203" text-anchor="middle">${t}</text></g>`; });
   s+=`<text x="180" y="246" text-anchor="middle" class="flsub">every workload · every release · proven first</text>`;
   return s; }
 // ---------- engine
 let at=0, ST=[], watching=false;
-const MAIN=[0,1,2,3,4,6,13,8,11,14], SHORT=[0,1,12,8,11,14], DEEP=[5,9,10,11,14]; const FULL=MAIN; let ROUTE=MAIN;
+const MAIN=[0,1,2,3,4,6,13,8,11,14], SHORT=[1,12,8,11,14], DEEP=[5,9,10,11,14]; const FULL=MAIN; let ROUTE=MAIN;
 const ri=()=>ROUTE.indexOf(at), nextOf=()=>ROUTE[ri()+1], prevOf=()=>ROUTE[ri()-1];
 // ---------- chapter interstitials: the whole process, where we are
-const CHAP=[['Problem',['Ways in','Full breach','Engines, no rules']],['Solution',['Evidence','Decide','Prove']],['Proof',['Approve in stages','Same attack, stopped']],['Summary',['What you saw','Go deeper']],['Next',['Work with us']]];
-const BRIDGE={Solution:'The engines exist. What’s missing is <b>the decision</b>. Here is how we make it.',Proof:'Decided from evidence, proven offline. <b>Now it goes live.</b>',['Why now']:'That was one workload. <b>Now multiply it.</b>',Summary:'Whatever gets in <b>can only do what it needs.</b>',Next:'That’s the product. <b>Here’s where it goes next.</b>'};
+const CHAP=[['Problem',['Agent fooled','Full breach','Engines, no rules']],['Solution',['Evidence','Decide','Prove']],['Proof',['Approve in stages','Same attack, stopped']],['Summary',['What you saw','Go deeper']],['Next',['Work with us']]];
+const BRIDGE={Problem:'Every cluster can run the engines. <b>Nobody can safely decide the rules.</b>',Solution:'The engines exist. What’s missing is <b>the decision</b>. Here is how we make it.',Proof:'Decided from evidence, proven offline. <b>Now it goes live.</b>',['Why now']:'That was one workload. <b>Now multiply it.</b>',Summary:'Whatever gets in <b>can only do what it needs.</b>',Next:'That’s the product. <b>Here’s where it goes next.</b>'};
 let interTo=null;
 function inter(i){ const ch=STEPS[i].ch, ci=CHAP.findIndex(c=>c[0]===ch);
   $('interK').textContent=`Chapter ${ci+1} of ${CHAP.length} · following ${SC.short}`; $('interH').innerHTML=BRIDGE[ch]||ch;
@@ -669,7 +678,7 @@ function inter(i){ const ch=STEPS[i].ch, ci=CHAP.findIndex(c=>c[0]===ch);
   $('interGo').onclick=go; $('inter').classList.add('on');
   $('interA').style.display=watching?'':'none'; $('interA').classList.remove('run'); void $('interA').offsetWidth;
   if(watching){ $('interA').classList.add('run'); interTo=setTimeout(go,reduce?50:2400); } }
-function forward(i){ const pv=ROUTE[ROUTE.indexOf(i)-1]; if(ROUTE!==DEEP&&pv!=null&&STEPS[i].ch!==STEPS[pv].ch&&CHAP.some(c=>c[0]===STEPS[i].ch)){ stop(); closeSheet(); inter(i); } else show(i); }
+function forward(i){ const pv=ROUTE[ROUTE.indexOf(i)-1]; if(ROUTE!==DEEP&&(pv==null||STEPS[i].ch!==STEPS[pv].ch)&&CHAP.some(c=>c[0]===STEPS[i].ch)){ stop(); closeSheet(); inter(i); } else show(i); }
 
 function meter(){ const s=ST[at]; let n=0; if(at===7||at===13) n=[0,2,3,4,7][s.k]; else if([8,9,10,11,14].includes(at)) n=7; else if(at===12) n=s.k>=4?7:0; else if(at===5&&ROUTE===DEEP) n=7;
   $('meter').className='meter'+(n>=7?' okm':''); $('meter').innerHTML=`<div>${[0,1,2,3,4,5,6].map(i=>`<span class="${i<n?'c':''}"></span>`).join('')}</div>${7-n}/7 open`; $('meter').title=n>=7?'attack surface: closed':'attack surface: 7 layers'; }
@@ -703,14 +712,14 @@ $('next').onclick=()=>{ if(nextOf()==null){ watching=false; stop(); $('cover').h
 $('back').onclick=()=>{ if(ri()>0) show(prevOf()); };
 // watch: [delay, 'a' = press the action, 'n' = next step]
 const W=(acts,gap,tail)=>{ const r=[]; let t=1400; for(let i=0;i<acts;i++){ r.push([t,'a']); t+=gap; } r.push([t+tail,'n']); return r; };
-const PLAY={0:W(4,2300,2000),1:()=>W(ATK.length,2400,1200),2:W(1,3000,2500),3:W(4,2000,1500),4:W(2,3000,1200),5:W(7,1700,1200),6:[[1200,'a'],[4600,'a'],[8000,'n']],7:W(4,1800,1000),8:()=>{ const r=[]; let t=1200; for(let i=0;i<SC.allow+2;i++){ r.push([t,'a']); t+=2800; } r.push([t+2000,'n']); return r; },9:W(1,3600,1500),10:W(4,1900,2200),11:[[7000,'n']],12:W(4,2400,1500),13:W(4,2300,1800),14:[]};
+const PLAY={0:W(2,2800,2600),1:()=>W(ATK.length,2400,1200),2:W(1,3000,2500),3:W(4,2000,1500),4:W(2,3000,1200),5:W(7,1700,1200),6:[[1200,'a'],[4600,'a'],[8000,'n']],7:W(4,1800,1000),8:()=>{ const r=[]; let t=1200; for(let i=0;i<SC.allow+2;i++){ r.push([t,'a']); t+=2800; } r.push([t+2000,'n']); return r; },9:W(1,3600,1500),10:W(4,1900,2200),11:[[7000,'n']],12:W(4,2400,1500),13:W(4,2300,1800),14:[]};
 function autoplay(){ stop(); const pl=PLAY[at]; (typeof pl==='function'?pl():(pl||[])).forEach(([ms,a])=>later(ms,()=>{ if(!watching) return; if(a==='n'){ if(nextOf()!=null) forward(nextOf()); } else doAct(); })); }
 function sheet(t,h){ $('shT').textContent=t; $('shB').innerHTML=h; $('sheet').classList.add('on'); $('scrim').classList.add('on'); if(watching){ watching=false; stop(); render(); } }
 function closeSheet(){ $('sheet').classList.remove('on'); $('scrim').classList.remove('on'); }
 $('shX').onclick=closeSheet; $('scrim').onclick=closeSheet;
-$('coverMap').innerHTML=sceneE(4);
-$('watch').onclick=()=>{ $('cover').hidden=true; watching=true; ROUTE=MAIN; setSC('agt'); show(0); };
-$('explore').onclick=()=>{ $('cover').hidden=true; watching=false; ROUTE=MAIN; setSC('agt'); show(0); };
+$('coverMap').innerHTML=sceneE1(2);
+$('watch').onclick=()=>{ $('cover').hidden=true; watching=true; ROUTE=MAIN; setSC('agt'); ST=STEPS.map(s=>s.init()); forward(0); };
+$('explore').onclick=()=>{ $('cover').hidden=true; watching=false; ROUTE=MAIN; setSC('agt'); ST=STEPS.map(s=>s.init()); forward(0); };
 ST=STEPS.map(s=>s.init()); render();
 if(/skip/.test(location.search)) $('cover').hidden=true;
 </script>
