@@ -217,13 +217,14 @@ const C1={N:{tasks:[50,56,'task','from Cohere','doc'],bucket:[310,56,'cloud buck
   {chip:'which curl wget',c:'a',t:'It checks which <b>upload tools</b> exist.',s:'curl and wget send data out of the pod.'},
   {chip:'cat resolv.conf',c:'a',t:'It reads the <b>DNS settings</b>.',s:'How names resolve from inside the network.'},
   {from:'core',to:'bucket',c:'a',t:'It tries to <b>upload a file</b> to a bucket in Beijing.',s:'It was a test string, and a sandbox blocked it. In a normal pod, nothing would.'}]};
-const C2={N:{hf:[50,56,'Hugging Face','model file','pkg'],c2:[310,56,'attacker','server','net'],nb:[310,152,'other pods','same node','doc']},
+const C2={pod:'WORKER POD',N:{att:[50,56,'AI agent','from OpenAI’s test','ai'],paste:[310,56,'paste sites','internet','net'],api:[310,138,'K8s API','','api'],meta:[310,212,'metadata','','key']},
   chain:[
-  {from:'hf',to:'core',c:'r',t:'The agent loads a model from <b>Hugging Face</b>.',s:'Most teams get open-weight models this way.'},
-  {chip:'pickle.load',c:'a',t:'Opening the file <b>runs hidden code</b>.',s:'Pickle files can carry code. Loading the model is enough to run it.'},
-  {chip:'/bin/sh',c:'a',t:'The hidden code <b>starts a shell</b>.',s:'Inside the agent’s pod, with its identity.'},
-  {from:'core',to:'c2',c:'a',t:'The shell <b>calls the attacker</b>.',s:'A reverse shell: the attacker now types commands in your pod.'},
-  {from:'core',to:'nb',c:'a',t:'<b>What could come next:</b> a kernel bug like Copy Fail reaches the pods next to it.',s:'Not part of the JFrog finding. Every pod on a node shares one kernel, so one bad pod can corrupt what its neighbors run.'}]};
+  {from:'att',to:'core',c:'r',t:'An AI agent uploads a <b>dataset config</b> to Hugging Face.',s:'A production worker pod processes it, like any upload.'},
+  {chip:'template → python',c:'a',t:'A template in the config <b>runs code inside the worker</b>.',s:'Template injection: the agent now runs Python in production.'},
+  {chip:'read SA token',c:'a',t:'It reads the pod’s <b>secrets and service-account token</b>.',s:'From environment variables and the mounted token file.'},
+  {from:'core',to:'api',c:'a',t:'It uses the token on the <b>K8s API</b>.',s:'Over the next days it reached cluster-admin and root on a node.'},
+  {from:'core',to:'meta',c:'a',t:'It takes <b>cloud credentials</b> from the metadata service.',s:'Then replays them from outside to map the cloud account.'},
+  {from:'core',to:'paste',c:'a',t:'It runs command and control through <b>paste sites</b>.',s:'Public paste, request-capture and file-drop services. About five days in all.'}]};
 const POD=[110,80,140,118], CORE=[180,104];
 const xm=(x,y)=>`<g class="xm"><circle cx="${x}" cy="${y}" r="8"/><path d="M${x-3.2} ${y-3.2}L${x+3.2} ${y+3.2}M${x+3.2} ${y-3.2}L${x-3.2} ${y+3.2}"/></g>`;
 const E1=[['r','','The task arrives.','Allowed. It’s the agent’s job.'],
@@ -231,13 +232,14 @@ const E1=[['r','','The task arrives.','Allowed. It’s the agent’s job.'],
   ['b','Tetragon','It tries <b>which curl wget</b>.','No shell, so no look-around.'],
   ['b','Tetragon','It tries to <b>read the DNS settings</b>.','Same rule: cat can’t start.'],
   ['b','Cilium','It tries to <b>upload to the bucket</b> in Beijing.','Egress only to model-store, task queue, kb and DNS. Dropped.']];
-const E2=[['r','','The agent <b>loads the model file</b>.','Allowed: it’s in the approved model store.'],
-  ['y','','The hidden code <b>runs inside python</b>.','Not blocked. No runtime rule sees inside an allowed process.'],
-  ['b','Tetragon','It tries to start <b>/bin/sh</b>.','Only python may start. Killed.'],
-  ['b','Cilium','It tries to <b>call the attacker</b>.','No internet egress, even from python. Dropped.'],
-  ['b','Tetragon','<b>What could come next:</b> Copy Fail, through an AF_ALG socket.','The syscall is refused.']];
+const E2=[['r','','The upload <b>is processed</b> as usual.','Allowed: it’s the worker’s job.'],
+  ['y','','The template still <b>runs Python in the worker</b>.','Not blocked: python is what the worker runs. The bug is in the app.'],
+  ['b','Tetragon','It tries to read the <b>service-account token</b>.','The worker never reads it, so access is denied. Secrets already in its environment stay readable.'],
+  ['b','Cilium','It tries the <b>K8s API</b>.','The worker never calls it. Dropped.'],
+  ['b','Cilium','It tries the <b>metadata service</b>.','169.254.169.254 is not in its egress. Dropped.'],
+  ['b','Cilium','It tries to reach <b>paste sites</b>.','No internet egress. Dropped.']];
 function sceneCase(C,n,fresh,E){ const [px,py,pw,ph]=POD; let s=DEFS, chips=0;
-  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod ${E?'on':''}"/><text x="180" y="${py+ph+15}" text-anchor="middle" class="podl">AGENT POD</text>`;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod ${E?'on':''}"/><text x="180" y="${py+ph+15}" text-anchor="middle" class="podl">${C.pod||'AGENT POD'}</text>`;
   const P=k=>k==='core'?CORE:C.N[k];
   C.chain.forEach((st,i)=>{ if(i>=n) return; const f=fresh&&i===n-1;
     const B=E&&E[i][0]==='b';
@@ -264,7 +266,7 @@ function sceneGap(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
   s+=chips(132,'',[['/app',k>=3?'ok':''],['token',k>=3?'b':''],['~/.aws',k>=3?'b':'']]);
   s+=chips(156,'',[['root',k>=4?'b':''],['caps',k>=4?'b':'']]);
   s+=chips(180,'',[['AF_ALG',k>=5?'b':''],['unshare',k>=5?'b':'']]);
-  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,k>=1&&!need?'att':'')).join('');
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,pf().lab[key]||l,'',ic,k>=1&&!need?'att':'')).join('');
   return s; }
 
 // ---------- why it stays open
@@ -275,12 +277,11 @@ function sceneWhy(k){ let s=DEFS;
   return s; }
 
 // ---------- evidence
-const SRC=[['Agent config','model, tools, MCP'],['Model source','where it comes from'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','platform needs']];
-function sceneEv(k){ let s=DEFS;
+function sceneEv(k){ let s=DEFS; const SRC=pf().src;
   SRC.forEach(([n,sub],i)=>{ const y=14+i*48, on=i<k; s+=`<g class="src ${on?'on':''}"><rect x="10" y="${y}" width="122" height="40" rx="10"/><text x="22" y="${y+18}">${n}</text><text x="22" y="${y+32}" class="ss">${sub}</text></g><path d="M136 ${y+20} C 168 ${y+20}, 168 134, 196 134" class="flow ${on?'on':''}"/>`; });
-  const R=[['MODEL','model-store only',2,74,88],['NETWORK','task queue · kb',1,110,124],['','kube-dns',5,0,140],['PROGRAMS','python',4,162,176],['SHELL TOOL','declared, unused',4,198,212],['SYSCALLS','the few it uses',4,234,248]];
-  s+=`<g class="prof"><rect class="card" x="198" y="14" width="152" height="244" rx="12"/><text x="212" y="42" class="h">Agent profile</text>`;
-  R.forEach(([l,v,need,ly,vy])=>{ const on=k>=need; s+=`${l?`<text x="212" y="${ly}" class="rl">${l}</text>`:''}<text x="212" y="${vy}" class="rv ${on?'on':''}">${on?v:'·'}</text>`; });
+  const R=pf().rows, LY=[74,null,null,162,198,234], VY=[88,124,140,176,212,248];
+  s+=`<g class="prof"><rect class="card" x="198" y="14" width="152" height="244" rx="12"/><text x="212" y="42" class="h">${pf().prof}</text>`;
+  R.forEach(([l,v,need],i)=>{ const on=k>=need, ly=i===1&&l?110:LY[i], vy=i===1&&l?124:VY[i]; s+=`${l?`<text x="212" y="${ly}" class="rl">${l}</text>`:''}<text x="212" y="${vy}" class="rv ${on?'on':''}">${on?v:'·'}</text>`; });
   return s+'</g>'; }
 
 // ---------- decide
@@ -292,17 +293,17 @@ function sceneDec(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
   const crow=(y,it)=>{ const W=it.map(([t])=>Math.max(42,t.length*7+12)), g=4; let x=180-(W.reduce((a,b)=>a+b,0)+g*(it.length-1))/2; it.forEach(([t,c],n)=>{ s+=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[n]}" height="19" rx="5"/><text x="${x+W[n]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[n]+g; }); };
   const X=k>=2?'b':'';
-  crow(108,[['python',k>=1?'ok':''],[k>=4?'shell ?':'shell',k>=4?'w':''],['curl',X]]);
-  crow(132,[['/app',k>=1?'ok':''],['token',X],['~/.aws',X]]);
+  const A=pf().askChip;
+  crow(108,[['python',k>=1?'ok':''],[k>=4&&A==='shell'?'shell ?':'shell',k>=4&&A==='shell'?'w':X],['curl',X]]);
+  crow(132,[['/app',k>=1?'ok':''],[k>=4&&A==='token'?'token ?':'token',k>=4&&A==='token'?'w':X],['~/.aws',X]]);
   crow(156,[['root',X],['caps',X]]);
   crow(180,[['AF_ALG',X],['unshare',X]]);
-  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,!need&&k>=2?'dim':'')).join('');
-  if(k>=3) s+=`<g class="flag fadein"><rect x="214" y="4" width="140" height="20" rx="6"/><text x="284" y="17.5" text-anchor="middle">KEPT OUT · cloud bucket</text></g>`;
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,pf().lab[key]||l,'',ic,!need&&k>=2?'dim':'')).join('');
+  if(k>=3) s+=`<g class="flag fadein"><rect x="214" y="4" width="140" height="20" rx="6"/><text x="284" y="17.5" text-anchor="middle">KEPT OUT · ${pf().keptFlag}</text></g>`;
   return s; }
 
 // ---------- prove
-const RP=[['agent → model-store','kept'],['agent → task queue','kept'],['agent → kb','kept'],['agent → kube-dns','kept'],['agent → cloud bucket','dropped']];
-function sceneProve(k){ let s=DEFS+'<g class="rp">';
+function sceneProve(k){ let s=DEFS+'<g class="rp">'; const W=pf().who, RP=pf().rp.map((t,i)=>[`${W} → ${t}`,i<4?'kept':'dropped']);
   s+=`<text x="16" y="28" class="muted" style="font-family:var(--body);font-weight:600;font-size:10px;letter-spacing:.1em">REPLAY · A WEEK OF RECORDED TRAFFIC</text>`;
   RP.forEach(([c,r],i)=>{ const y=42+i*30, on=k>=1, miss=k===2&&i===1; const res=!on?'':miss?'would drop':r; const cl=!on?'':miss?'bad':r==='kept'?'ok':'muted';
     s+=`<g class="row ${on?'on':''} ${on&&k===1?'rev':''}" style="animation-delay:${i*.22}s"><rect x="10" y="${y}" width="340" height="24" rx="6"/><text x="20" y="${y+16}">${c}</text><text x="340" y="${y+16}" text-anchor="end" class="${cl}">${res}</text></g>`; });
@@ -321,7 +322,7 @@ function sceneStage(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS; const
   const row=(y,items)=>{ const W=items.map(([t])=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
   const c4=k>=4?'b':'';
   s+=row(108,[['python','ok'],['shell',c4],['curl',c4]])+row(132,[['/app','ok'],['token',c4],['~/.aws',c4]])+row(156,[['root',c4],['caps',c4]])+row(180,[['AF_ALG',c4],['unshare',c4]]);
-  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,l,'',ic,closed.includes(key)?'dim':need?'':'att')).join('');
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,pf().lab[key]||l,'',ic,closed.includes(key)?'dim':need?'':'att')).join('');
   return s; }
 // ---------- before and after
 const BA=[['Network','8 destinations','4 needed'],['Programs','any binary','python'],['Privileges','root possible','none'],['Kernel calls','all of them','the ones it uses'],['Case 1','upload to Beijing','blocked'],['Case 2','shell, call-out, Copy Fail','blocked'],['Needed, dropped','','0']];
@@ -353,21 +354,34 @@ const CASES={
    used:'It used a shell, curl and the internet. <span>All excess.</span>',
    againP:'The pod is now enforced. Same model, same task: <b>watch where each step is stopped</b>.',againTake:'4 of 5 steps blocked, by two engines. <span>The model misbehaved, and nothing left the pod.</span>',
    ba:['upload to Beijing','blocked']},
- c2:{id:'c2',short:'case 2',name:'The model file is the attack',who:'JFrog, Hugging Face',C:C2,E:E2,
-   t:'The model file is the attack.',p:'Same kind of agent, a different risk: <b>the model file itself</b>. JFrog found about 100 malicious models on Hugging Face.',
-   a0:'Load the model',take:'Nothing was prompted. <span>Opening the file was enough to hand over the pod.</span>',
-   src:['JFrog, 2024','https://jfrog.com/blog/data-scientists-targeted-by-malicious-hugging-face-ml-models-with-silent-backdoor/'],
-   used:'It used a shell, the internet and an AF_ALG socket. <span>All excess.</span>',
-   againP:'The pod is now enforced. Same poisoned file: <b>watch where each step is stopped</b>.',againTake:'The code ran, but every next step was blocked. <span>It had nowhere to go.</span>',
-   ba:['shell, call-out, Copy Fail','blocked']}};
-let SC=CASES.c1; const SEEN=new Set();
+ c2:{id:'c2',short:'case 2',name:'An AI agent breaks into production',who:'Hugging Face, Jul 2026',C:C2,E:E2,
+   t:'An AI agent breaks into production.',p:'In July 2026, AI agents running an OpenAI evaluation escaped their sandbox and broke into Hugging Face. <b>They got in through an ordinary worker pod.</b>',
+   a0:'Upload the config',take:'Every step used access the worker never needed. <span>Hugging Face closed it afterwards, by hand.</span>',
+   src:['Hugging Face, Jul 2026','https://huggingface.co/blog/agent-intrusion-technical-timeline'],
+   used:'It used the token, the K8s API, the metadata service and the internet. <span>All excess.</span>',
+   againP:'The worker pod is now enforced. Same upload, same bug in the app: <b>watch where each step is stopped</b>.',againTake:'The code still ran. <span>It couldn’t reach anything.</span>',
+   ba:['token, K8s API, metadata, C2','blocked']}};
+const PF={
+ c1:{who:'agent',lab:{store:'model-store',tasks:'task queue',kb:'kb'},needTxt:'The model store, the task queue, the knowledge base and DNS.',
+   src:[['Agent config','model, tools, MCP'],['Model source','where it comes from'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','platform needs']],
+   prof:'Agent profile',rows:[['MODEL','model-store only',2],['NETWORK','task queue · kb',1],['','kube-dns',5],['PROGRAMS','python',4],['SHELL TOOL','declared, unused',4],['SYSCALLS','the few it uses',4]],
+   ev:[{k:'AGENT CONFIG',c:'r',t:'<b>Declares</b> its model, a task queue and kb (via MCP), and two tools: python and a shell.'},{k:'MODEL SOURCE',c:'r',t:'<b>Weights</b> come only from the internal model store.'},{k:'HUBBLE',c:'r',t:'<b>Connects</b> to the model store, task queue and kb. Nothing else in a week.'},{k:'TETRAGON',c:'r',t:'<b>Runs</b> python only, with a short list of syscalls. The shell tool was never used.'},{k:'K8S API',c:'r',t:'<b>Needs</b> DNS from the platform. Never calls the K8s API.'}],
+   needed:'Declared and seen: model store, task queue, kb and DNS.',kept:'If the model called out during learning, that call is in the traffic. It was never declared, so it never becomes a rule.',keptFlag:'cloud bucket',
+   ask:'The shell tool is declared but never used. Removing it is one approval.',askChip:'shell',miss:'the task queue',rp:['model-store','task queue','kb','kube-dns','cloud bucket'],out:'The call to the bucket drops, as decided.'},
+ c2:{who:'worker',lab:{store:'storage',tasks:'job queue',kb:'hub API'},needTxt:'Its storage, job queue, the hub API and DNS (simplified: the real dependencies aren’t public).',
+   src:[['Manifest','what it declares'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','platform needs']],
+   prof:'Worker profile',rows:[['NETWORK','storage · job queue',1],['','hub API',1],['','kube-dns',4],['PROGRAMS','python',3],['FILES','its own paths',3],['SYSCALLS','the few it uses',3]],
+   ev:[{k:'MANIFEST',c:'r',t:'<b>Declares</b> its storage, job queue and hub API in its config.'},{k:'HUBBLE',c:'r',t:'<b>Connects</b> to those three, plus DNS. Nothing else in a week.'},{k:'TETRAGON',c:'r',t:'<b>Runs</b> python only. Never reads the service-account token.'},{k:'K8S API',c:'r',t:'<b>Needs</b> DNS from the platform. Never calls the K8s API.'}],
+   needed:'Declared and seen: storage, job queue, hub API and DNS.',kept:'If an attacker was already inside during learning, those calls are in the traffic. They were never declared, so they never become rules.',keptFlag:'paste sites',
+   ask:'Its service-account token is mounted but never read. Removing the mount is one approval.',askChip:'token',miss:'the job queue',rp:['storage','job queue','hub API','kube-dns','paste site'],out:'The call to the paste site drops, as decided.'}};
+let SC=CASES.c1; const pf=()=>PF[SC.id]; const SEEN=new Set();
 const PARTS=[['The problem','A real case · the gap · why it stays open · why now'],['How we decide','Evidence · decide · prove'],['The result','Enforce · the same case · before and after']];
-const HEAD=['Your agent runs a model you didn’t write. <span>What its pod is allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>','That was one agent. <span>Here’s why this matters now.</span>'];
+const HEAD=['AI agents already act on their own. <span>What a pod is allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>','That was one agent. <span>Here’s why this matters now.</span>'];
 const lst=(rows)=>rows;
 const STEPS=[
  { part:0, label:()=>'The problem',
    t:'Two real cases. Follow one.',
-   p:'Both happened to AI agents running open-weight models. Each one goes through the full process.',
+   p:'Two real incidents with AI agents, both in 2026. Each one goes through the full process.',
    init:()=>({}),
    svg:()=>scenePick(),
    list:()=>[],
@@ -383,10 +397,10 @@ const STEPS=[
    take:s=>s.n>=SC.C.chain.length?SC.take:'', src:()=>SC.src },
  { part:0, label:()=>`The problem · ${SC.short}`,
    t:'Allowed far more than it uses.',
-   p:'Put what the agent’s pod <b>may</b> do next to what it has <b>actually used</b>. Everything else is attack surface.',
+   p:()=>`Put what the ${pf().who}’s pod <b>may</b> do next to what it has <b>actually used</b>. Everything else is attack surface.`,
    init:()=>({k:0}),
    svg:s=>sceneGap(s.k),
-   list:s=>[{k:'NETWORK',c:'a',t:'<b>8 destinations open.</b> It used 4.',s:'The model store, the task queue, the knowledge base and DNS. The internet, the K8s API, the metadata service and other pods: never used.'},
+   list:s=>[{k:'NETWORK',c:'a',t:'<b>8 destinations open.</b> It used 4.',s:pf().needTxt+' The internet, the K8s API, the metadata service and other pods: never used.'},
             {k:'PROGRAMS',c:'a',t:'<b>Any binary can start.</b> It ran one.',s:'Only python ever ran. A shell and curl are allowed anyway.'},
             {k:'FILES',c:'a',t:'<b>Any file is readable.</b> It used one path.',s:'Only /app. The service-account token and cloud credentials are readable anyway.'},
             {k:'PRIVILEGES',c:'a',t:'<b>Root is possible.</b> It never used it.',s:'It never used a single Linux capability.'},
@@ -407,26 +421,22 @@ const STEPS=[
    take:s=>s.k>=3?'The missing piece isn’t the engine. <span>It’s the decision.</span>':'' },
  { part:1, label:()=>'How we decide',
    t:'Evidence first.',
-   p:'What the agent needs is already written down, in five places. The product reads all of them.',
+   p:()=>`What the ${pf().who} needs is already written down, in ${pf().src.length===5?'five':'four'} places. The product reads all of them.`,
    init:()=>({k:0}),
    svg:s=>sceneEv(s.k),
-   list:s=>[{k:'AGENT CONFIG',c:'r',t:'<b>Declares</b> its model, a task queue and kb (via MCP), and two tools: python and a shell.'},
-            {k:'MODEL SOURCE',c:'r',t:'<b>Weights</b> come only from the internal model store.'},
-            {k:'HUBBLE',c:'r',t:'<b>Connects</b> to the model store, task queue and kb. Nothing else in a week.'},
-            {k:'TETRAGON',c:'r',t:'<b>Runs</b> python only, with a short list of syscalls. The shell tool was never used.'},
-            {k:'K8S API',c:'r',t:'<b>Needs</b> DNS from the platform. Never calls the K8s API.'}].slice(0,s.k),
-   act:s=>s.k<5?`Read ${SRC[s.k][0]}`:'All five read',
-   done:s=>s.k>=5, run:s=>{ s.k++; },
-   take:s=>s.k>=5?'One profile per agent. <span>Every line backed by evidence.</span>':'' },
+   list:s=>pf().ev.slice(0,s.k),
+   act:s=>s.k<pf().src.length?`Read ${pf().src[s.k][0]}`:'All read',
+   done:s=>s.k>=pf().src.length, run:s=>{ s.k++; },
+   take:s=>s.k>=pf().src.length?`One profile per ${pf().who}. <span>Every line backed by evidence.</span>`:'' },
  { part:1, label:()=>'How we decide',
    t:'Decide. Don’t just record.',
    p:'Every path, program and syscall is checked against the evidence. <b>Being seen isn’t enough.</b> It has to make sense.',
    init:()=>({k:0}),
    svg:s=>sceneDec(s.k),
-   list:s=>[{k:'NEEDED',c:'g',t:'<b>Stays open.</b> Declared and seen: model store, task queue, kb and DNS.'},
+   list:s=>[{k:'NEEDED',c:'g',t:'<b>Stays open.</b> '+pf().needed},
             {k:'EXCESS',c:'a',t:'<b>Closes.</b> Allowed, never declared, never used: internet, K8s API, metadata, other pods, unused files and syscalls.'},
-            {k:'KEPT OUT',c:'a',t:'<b>Seen isn’t trusted.</b>',s:'If the model called out during learning, that call is in the traffic. It was never declared, so it never becomes a rule.'},
-            {k:'ASK',c:'w',t:'<b>A person decides.</b>',s:'The shell tool is declared but never used. Removing it is one approval.'}].slice(0,s.k),
+            {k:'KEPT OUT',c:'a',t:'<b>Seen isn’t trusted.</b>',s:pf().kept},
+            {k:'ASK',c:'w',t:'<b>A person decides.</b>',s:pf().ask}].slice(0,s.k),
    act:s=>['Mark what it needs','Close the excess','Check what was seen','Find what’s unclear'][s.k]||'Decided',
    done:s=>s.k>=4, run:s=>{ s.k++; },
    take:s=>s.k>=4?'Recording copies the past. <span>Deciding removes what doesn’t belong.</span>':'' },
@@ -435,8 +445,8 @@ const STEPS=[
    p:'Recorded traffic is replayed against the new policy, offline. If one needed connection would drop, <b>nothing is applied</b>.',
    init:()=>({k:0}),
    svg:s=>sceneProve(s.k),
-   list:s=>[{k:'PASS',c:'g',t:'<b>Every needed connection still works.</b>',s:'The call-out drops, as decided.'},
-            {k:'WHAT IF',c:'a',t:'<b>We missed the task queue?</b>',s:'The replay fails. The policy is not applied, and production never changes.'},
+   list:s=>[{k:'PASS',c:'g',t:'<b>Every needed connection still works.</b>',s:pf().out},
+            {k:'WHAT IF',c:'a',t:`<b>We missed ${pf().miss}?</b>`,s:'The replay fails. The policy is not applied, and production never changes.'},
             {k:'PASS',c:'g',t:'<b>Back to the real policy.</b>',s:'Only a passing policy can be approved.'}].slice(0,s.k),
    act:s=>['Replay the traffic','What if we missed one?','Back to the real policy'][s.k]||'Proven',
    done:s=>s.k>=3, run:s=>{ s.k++; },
@@ -448,11 +458,11 @@ const STEPS=[
    svg:s=>sceneStage(s.k),
    list:s=>[{k:'STAGE 1',c:'b',t:'<b>K8s API and metadata closed.</b>',s:'0 needed connections dropped.'},
             {k:'STAGE 2',c:'b',t:'<b>Internet closed.</b>',s:'No upload, no call to an attacker.'},
-            {k:'STAGE 3',c:'b',t:'<b>Other pods closed.</b>',s:'Only the model store, task queue, kb and DNS remain.'},
+            {k:'STAGE 3',c:'b',t:'<b>Other pods closed.</b>',s:'Only what it needs remains: '+pf().needed.replace('Declared and seen: ','')},
             {k:'STAGE 4',c:'b',t:'<b>Inside the pod.</b>',s:'Only python starts. Only its own files. No root, no capabilities, no unused syscalls.'}].slice(0,s.k),
    act:s=>s.k<4?`Approve stage ${s.k+1}`:'All stages live',
    done:s=>s.k>=4, run:s=>{ s.k++; },
-   take:s=>s.k>=4?'The agent still does its job. <span>It just can’t do anything else.</span>':'' },
+   take:s=>s.k>=4?`The ${pf().who} still does its job. <span>It just can’t do anything else.</span>`:'' },
  { part:2, label:()=>`The result · ${SC.short} again`,
    t:()=>`${SC.short[0].toUpperCase()+SC.short.slice(1)}, again.`, p:()=>SC.againP,
    init:()=>({n:0}),
@@ -463,13 +473,13 @@ const STEPS=[
    take:s=>s.n>=SC.C.chain.length?SC.againTake:'' },
  { part:2, label:()=>'The result',
    t:'Before and after.',
-   p:'The same agent pod, before and after. <b>One layer at a time.</b>',
+   p:()=>`The same ${pf().who} pod, before and after. <b>One layer at a time.</b>`,
    init:()=>({k:0}),
    svg:s=>sceneBA(s.k),
    list:s=>baRows().slice(0,s.k).map(([k,t])=>({k,c:'g',t})),
    act:s=>s.k<baRows().length?baRows()[s.k][2]:'All shown',
    done:s=>s.k>=baRows().length, run:s=>{ s.k++; },
-   take:s=>s.k>=baRows().length?(SEEN.size>1?'Two real attacks. <span>Nothing left the pod.</span>':SC.id==='c1'?'The model misbehaved. <span>Nothing left the pod.</span>':'The file was malicious. <span>Nothing left the pod.</span>'):'',
+   take:s=>s.k>=baRows().length?(SEEN.size>1?'Two real attacks. <span>Nothing left the pod.</span>':SC.id==='c1'?'The model misbehaved. <span>Nothing left the pod.</span>':'The agent got in. <span>It couldn’t reach anything.</span>'):'',
    },
  { part:0, label:()=>'The problem · why now',
    t:'Why now.',
@@ -509,7 +519,7 @@ function sceneWhyNow(k){ let s=DEFS;
     if(on){ const words=t.split(' '); let line='',ly=y+54; words.forEach(w=>{ if((line+' '+w).trim().length>25){ s+=`<text x="${x+14}" y="${ly}" class="wnt">${line.trim()}</text>`; ly+=14; line=w; } else line+=' '+w; }); s+=`<text x="${x+14}" y="${ly}" class="wnt">${line.trim()}</text><text x="${x+14}" y="${y+99}" class="wns b">${src[0]}</text><text x="${x+14}" y="${y+110}" class="wns">${src[1]}</text>`; }
     s+='</g>'; });
   return s; }
-function scenePick(){ let s=DEFS; const B=[[20,'Case 1',['The model','goes off-task'],'Cohere · 2026','ai'],[188,'Case 2',['The model file','is the attack'],'Hugging Face · JFrog','pkg']];
+function scenePick(){ let s=DEFS; const B=[[20,'Case 1',['The model','goes off-task'],'Cohere · 2026','pkg'],[188,'Case 2',['An agent breaks','into production'],'Hugging Face · 2026','ai']];
   B.forEach(([x,h,d,w,ic])=>{ s+=`<g class="pk"><rect x="${x}" y="40" width="152" height="170" rx="14"/><g class="nd att"><rect class="bg" x="${x+16}" y="58" width="30" height="30" rx="8"/>${glyph(ic,x+31,73)}</g><text x="${x+16}" y="120" class="ph">${h}</text><text x="${x+16}" y="142" class="pd">${d[0]}</text><text x="${x+16}" y="160" class="pd">${d[1]}</text><text x="${x+16}" y="190" class="pw">${w}</text></g>`; });
   return s; }
 function sceneNext(){ let s=DEFS; const F=[['Evidence','r','5 sources'],['Decide','a','keep · close'],['Prove','b','replay first'],['Enforce','b','in stages']];
