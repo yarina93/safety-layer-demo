@@ -426,10 +426,10 @@ const STEPS=[
    list:s=>[{k:'EVIDENCE',c:'r',t:'<b>Five sources, one profile.</b>',s:'Agent config (model, tools, MCP), model source, Hubble, Tetragon and the K8s API.'},
             {k:'OPEN',c:'g',t:'<b>Declared and seen.</b> Model store, task queue, kb, DNS.',s:'It needs them and uses them. They stay open.'},
             {k:'CLOSE',c:'x',t:'<b>Neither.</b> K8s API, metadata, internet, other pods.',s:'Open only because of the defaults. Closed.'},
-            {k:'KEEP OUT',c:'a',t:'<b>Seen, but never declared.</b> A call to a cloud bucket.',s:'A tool that copies traffic would turn it into a rule. We don’t.'},
+            {k:'SUSPECT',c:'a',t:'<b>Seen, but nothing declares it.</b> A call to a cloud bucket.',s:'Flagged with its evidence. Not allowed and not closed automatically: a person decides. A tool that only records would have made it a rule.'},
             {k:'ASK',c:'y',t:'<b>Declared, never used.</b> The shell tool.',s:'A person approves removing it. One click.'}].slice(0,s.k),
    allSubs:true,
-   act:s=>['Collect the evidence','Keep what it needs','Close the rest','Find the odd one','Ask a person'][s.k]||'Decided',
+   act:s=>['Collect the evidence','Keep what it needs','Close the rest','Flag the suspect','Ask a person'][s.k]||'Decided',
    done:s=>s.k>=5, run:s=>{ s.k++; },
    take:s=>s.k>=5?'Not a copy of the traffic. <span>A decision about what it should do.</span>':'' },
  { label:()=>'Station 4 · The proof',
@@ -437,7 +437,7 @@ const STEPS=[
    p:'Nothing touches production until it’s proven not to break the agent.',
    init:()=>({k:0}),
    svg:s=>s.k===0?sceneProve(0):s.k===1?sceneProve(1):s.k===2?sceneProve(2):sceneStage(4),
-   list:s=>[{k:'REPLAY',c:'g',t:'<b>A week of real traffic, replayed offline</b> against the new policy.',s:'Model store, task queue, kb, DNS: kept. The bucket: dropped, as decided.'},
+   list:s=>[{k:'REPLAY',c:'g',t:'<b>A week of real traffic, replayed offline</b> against the new policy.',s:'Model store, task queue, kb, DNS: kept. The bucket: dropped, as the reviewer decided.'},
             {k:'FAIL-SAFE',c:'a',t:'<b>One needed call would drop? Nothing is applied.</b>',s:'Say the task queue would break. The policy goes back with the reason, not to production.'},
             {k:'STAGES',c:'r',t:'<b>Live one step at a time.</b>',s:'K8s API and metadata first, then internet, other pods, and inside the pod. Each step runs in audit mode first.'}].slice(0,s.k),
    allSubs:true,
@@ -468,7 +468,7 @@ const STEPS=[
              {k:'COHERE',c:'b',t:'<b>4 of 4</b> off-task steps blocked. The upload never left.'},
              {k:'HUGGING FACE',c:'b',t:'<b>4 of 4</b> escape steps blocked. The template still ran, inside.'},
              {k:'DROPPED',c:'b',t:'<b>0</b> needed calls. The agent kept working.'}],
-   extra:()=>`<div class="diff"><div><b>Decided, not recorded.</b> Declared and seen stays. The rest closes, or goes to a person.</div><div><b>Proven before it applies.</b> Replayed offline, rolled out in stages.</div><div><b>On the engines you already run.</b> Cilium, Tetragon and seccomp. No new agent in the pod.</div></div><p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`,
+   extra:()=>`<div class="diff"><div><b>Decided, not recorded.</b> Declared and seen stays. Unused closes. Suspicious goes to a person.</div><div><b>Proven before it applies.</b> Replayed offline, rolled out in stages.</div><div><b>On the engines you already run.</b> Cilium, Tetragon and seccomp. No new agent in the pod.</div></div><p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`,
    act:()=>'Start over', done:()=>false, run:()=>{ $('cover').hidden=false; drawCover(); } }
 ];
 const FULL=[0,1,2,3,4,5]; let ROUTE=FULL;
@@ -477,8 +477,8 @@ function sceneMatrix(k){ let s=DEFS; const X0=84,Y0=34,W=134,H=104,G=4;
   s+=`<text x="10" y="${Y0+H/2-2}" class="jh2">DECLARED</text><text x="10" y="${Y0+H/2+11}" class="jh2" style="opacity:.7">in config</text><text x="10" y="${Y0+H+G+H/2-2}" class="jh2">NOT</text><text x="10" y="${Y0+H+G+H/2+11}" class="jh2">DECLARED</text>`;
   const Q=[[0,0,1,'OPEN','#4CC38A','#0F1F17','#2B6B48',['model-store','task queue','kb','kube-dns']],
            [1,1,2,'CLOSE','#9AA4B6','#141A25','#3A4558',['K8s API','metadata','internet','other pods']],
-           [0,1,3,'KEEP OUT','#F08A8D','#22151A','#6B2C32',['cloud bucket']],
-           [1,0,4,'ASK','#E8A33D','#2A2213','#6B5223',['shell tool']]];
+           [0,1,3,'SUSPECT','#F08A8D','#22151A','#6B2C32',['cloud bucket','→ a person decides']],
+           [1,0,4,'ASK','#E8A33D','#2A2213','#6B5223',['shell tool','→ approve removal']]];
   Q.forEach(([c,r,need,h,ink,bg,st,items])=>{ const x=X0+c*(W+G), y=Y0+r*(H+G), on=k>=need;
     s+=`<g class="${on&&k===need?'fadein':''}"><rect x="${x}" y="${y}" width="${W}" height="${H}" rx="10" fill="${on?bg:'#0F141E'}" stroke="${on?st:'#1E2633'}"/>`;
     if(on){ s+=`<text x="${x+12}" y="${y+20}" style="font:700 10px var(--body);letter-spacing:.1em" fill="${ink}">${h}</text>`;
