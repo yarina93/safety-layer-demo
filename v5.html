@@ -379,7 +379,7 @@ const PF={
    ask:'Its service-account token is mounted but never read. Removing the mount is one approval.',askChip:'token',miss:'the job queue',rp:['storage','job queue','hub API','kube-dns','paste site'],out:'The call to the paste site drops, as decided.'}};
 let SC=CASES.c1; const pf=()=>PF[(STEPS[at]&&STEPS[at].label().match(/^The solution/))?'c1':SC.id]; const SEEN=new Set();
 const PARTS=[['The problem','Every pod starts wide open · why it stays that way'],['The urgency','AI agents on both sides · two real incidents'],['The solution','Decide from evidence · enforce · the result']];
-const HEAD=['Every pod starts with more access than it needs. <span>And it stays that way.</span>','AI agents turned that excess into real damage. <span>Two incidents from 2026.</span>','One decision for every layer. <span>From evidence, proven before it applies.</span>'];
+const HEAD=['Every pod starts with more access than it needs. <span>And it stays that way.</span>','AI agents turned that excess into real incidents. <span>Two of them, from 2026.</span>','Decide what each workload needs. <span>Enforce only that.</span>'];
 const lst=(rows)=>rows;
 // ---------- the 4 stations
 function sceneOpen(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
@@ -430,7 +430,7 @@ const STEPS=[
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
    take:s=>caseDone(s,s.c)?(caseDone(s,'c1')&&caseDone(s,'c2')?'Nothing stopped either one. <span>Every step was already allowed.</span>':CASES[s.c].take):'',
    src:s=>caseDone(s,s.c)?CASES[s.c].src:null,
-   extra:s=>s.c==='c2'&&caseDone(s,'c2')?'<div class="diff"><div><b style="color:var(--warn)">And on OpenAI’s side?</b> The agent left its test sandbox through a path that was allowed, so blocking alone wouldn’t catch it. A profile could flag that upload as suspect: seen, but nothing in its config explains it.</div></div>':'' },
+   extra:s=>s.c==='c2'&&caseDone(s,'c2')?'<div class="diff"><div><b style="color:var(--warn)">OpenAI’s side:</b> it left through an allowed path. A profile could flag it as suspect.</div></div>':'' },
  { part:2, label:()=>'The solution · how it decides',
    t:'Decide from evidence. Prove before it applies.',
    p:'Two questions for every path: <b>is it declared</b> in the agent’s config, and <b>is it seen</b> in a week of traffic?',
