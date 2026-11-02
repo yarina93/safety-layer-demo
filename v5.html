@@ -97,7 +97,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .xm circle{fill:#0A0D14;stroke:var(--ok);stroke-width:1.4}.xm path{stroke:var(--ok);stroke-width:1.6;stroke-linecap:round}
 .eng-l{font:600 9.5px var(--body);fill:var(--ok);letter-spacing:.02em}.eng-l.y{fill:var(--warn)}
 .chip.blk rect{fill:#0F1F17;stroke:#2B6B48}.chip.blk text{fill:#6FA98A;text-decoration:line-through}.chip.runs rect{fill:#2A2213;stroke:#6B5223}.chip.runs text{fill:var(--warn)}
-.steps li.r .tag{background:#17233A;color:var(--info)}.steps li.b .n,.steps li.b .tag{background:#123222;color:var(--ok)}.steps li.y .tag{background:#33281A;color:var(--warn)}
+.steps li.r .tag{background:#17233A;color:var(--info)}.steps li.b .n,.steps li.b .tag{background:#123222;color:var(--ok)}.steps li.y .tag{background:#33281A;color:var(--warn)}.steps li.x .tag{background:#1A2030;color:#9AA4B6}
 .st rect{fill:#0F141E;stroke:#1E2633}.st.on rect{fill:#0F1F17;stroke:#2B6B48}.st text{font:600 10.5px var(--body);fill:var(--dim)}.st.on text{fill:var(--ok)}
 .hlr{fill:none;stroke:var(--warn);stroke-width:1.2}.hl-net line,.hl-net circle{animation:fin .5s ease}.bap .frame.done{stroke:#2B6B48}.bap .pt.g{fill:var(--ok)}
 .bap .frame{fill:#0F141E;stroke:#1E2633}.bap .h{font:600 10px var(--body);letter-spacing:.12em;fill:var(--muted)}.bap .pt{font:600 10px var(--mono);fill:#F08A8D}.bap .cnt{font:500 10px var(--body);fill:var(--muted)}
@@ -183,7 +183,7 @@ button{font:inherit;cursor:pointer;color:inherit}
     <h1>Least privilege for AI agents.</h1>
     <p class="msg">Decided from evidence. Proven before it applies. Enforced on the eBPF engines in your cluster.</p>
     <div class="vis"><svg id="coverVis" viewBox="0 0 360 210" preserveAspectRatio="xMidYMid meet"></svg><div class="cvcap" id="cvcap"></div></div>
-    <div class="btns" id="coverBtns"><button id="explore">Start the tour <small>4 stations · about 2 min</small></button></div>
+    <div class="btns" id="coverBtns"><button id="explore">Start the tour <small>5 stations · about 3 min</small></button></div>
     <div class="ft">Kubernetes · Cilium · Tetragon</div>
   </section>
 </div>
@@ -377,7 +377,7 @@ const PF={
    ev:[{k:'MANIFEST',c:'r',t:'<b>Declares</b> its storage, job queue and hub API in its config.'},{k:'HUBBLE',c:'r',t:'<b>Connects</b> to those three, plus DNS. Nothing else in a week.'},{k:'TETRAGON',c:'r',t:'<b>Runs</b> python only. Never reads the service-account token.'},{k:'K8S API',c:'r',t:'<b>Needs</b> DNS from the platform. Never calls the K8s API.'}],
    needed:'Declared and seen: storage, job queue, hub API and DNS.',kept:'If an attacker was already inside during learning, those calls are in the traffic. They were never declared, so they never become rules.',keptFlag:'paste sites',
    ask:'Its service-account token is mounted but never read. Removing the mount is one approval.',askChip:'token',miss:'the job queue',rp:['storage','job queue','hub API','kube-dns','paste site'],out:'The call to the paste site drops, as decided.'}};
-let SC=CASES.c1; const pf=()=>PF[(STEPS[at]&&STEPS[at].label().startsWith('Station 3'))?'c1':SC.id]; const SEEN=new Set();
+let SC=CASES.c1; const pf=()=>PF[(STEPS[at]&&STEPS[at].label().match(/^Station [34]|^Summary/))?'c1':SC.id]; const SEEN=new Set();
 const PARTS=[['The problem','A real case · the gap · why it stays open · why now'],['How we decide','Evidence · decide · prove'],['The result','Enforce · the same case · before and after']];
 const HEAD=['AI agents already act on their own. <span>What a pod is allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>','That was one agent. <span>Here’s why this matters now.</span>'];
 const lst=(rows)=>rows;
@@ -418,32 +418,73 @@ const STEPS=[
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
    take:s=>caseDone(s,s.c)?(caseDone(s,'c1')&&caseDone(s,'c2')?'No alert stopped either one. <span>Everything they needed was already allowed.</span>':CASES[s.c].take):'',
    src:s=>caseDone(s,s.c)?CASES[s.c].src:null },
- { label:()=>'Station 3 · The game changer',
-   t:'Decide from evidence. Prove it offline.',
-   p:'No hand-written rules, and nothing touches production until it’s proven safe.',
+ { label:()=>'Station 3 · The decision',
+   t:'Decide what it should do. Not just what it did.',
+   p:'Two questions for every path: <b>is it declared</b> in the agent’s config, and <b>is it seen</b> in a week of traffic?',
    init:()=>({k:0}),
-   svg:s=>s.k<=1?sceneEv(s.k?5:0):s.k===2?sceneDec(4):sceneProve(1),
+   svg:s=>s.k===0?sceneEv(0):s.k===1?sceneEv(5):sceneMatrix(s.k-1),
    list:s=>[{k:'EVIDENCE',c:'r',t:'<b>Five sources, one profile.</b>',s:'Agent config (model, tools, MCP), model source, Hubble, Tetragon and the K8s API.'},
-            {k:'DECIDE',c:'g',t:'<b>Decide. Don’t just record.</b>',s:'Needed stays open. Excess closes. Seen but unexplained stays out. Unclear goes to a person.'},
-            {k:'REPLAY',c:'b',t:'<b>A week of real traffic, replayed offline.</b>',s:'Every needed call still works. If one would break, nothing is applied.'}].slice(0,s.k),
+            {k:'OPEN',c:'g',t:'<b>Declared and seen.</b> Model store, task queue, kb, DNS.',s:'It needs them and uses them. They stay open.'},
+            {k:'CLOSE',c:'x',t:'<b>Neither.</b> K8s API, metadata, internet, other pods.',s:'Open only because of the defaults. Closed.'},
+            {k:'KEEP OUT',c:'a',t:'<b>Seen, but never declared.</b> A call to a cloud bucket.',s:'A tool that copies traffic would turn it into a rule. We don’t.'},
+            {k:'ASK',c:'y',t:'<b>Declared, never used.</b> The shell tool.',s:'A person approves removing it. One click.'}].slice(0,s.k),
    allSubs:true,
-   act:s=>['Collect the evidence','Decide','Replay'][s.k]||'Proven',
+   act:s=>['Collect the evidence','Keep what it needs','Close the rest','Find the odd one','Ask a person'][s.k]||'Decided',
+   done:s=>s.k>=5, run:s=>{ s.k++; },
+   take:s=>s.k>=5?'Not a copy of the traffic. <span>A decision about what it should do.</span>':'' },
+ { label:()=>'Station 4 · The proof',
+   t:'Prove it before it goes live.',
+   p:'Nothing touches production until it’s proven not to break the agent.',
+   init:()=>({k:0}),
+   svg:s=>s.k===0?sceneProve(0):s.k===1?sceneProve(1):s.k===2?sceneProve(2):sceneStage(4),
+   list:s=>[{k:'REPLAY',c:'g',t:'<b>A week of real traffic, replayed offline</b> against the new policy.',s:'Model store, task queue, kb, DNS: kept. The bucket: dropped, as decided.'},
+            {k:'FAIL-SAFE',c:'a',t:'<b>One needed call would drop? Nothing is applied.</b>',s:'Say the task queue would break. The policy goes back with the reason, not to production.'},
+            {k:'STAGES',c:'r',t:'<b>Live one step at a time.</b>',s:'K8s API and metadata first, then internet, other pods, and inside the pod. Each step runs in audit mode first.'}].slice(0,s.k),
+   allSubs:true,
+   act:s=>['Replay a week','What if it breaks?','Roll out in stages'][s.k]||'Proven',
    done:s=>s.k>=3, run:s=>{ s.k++; },
    take:s=>s.k>=3?'Zero enforcement paralysis. <span>Only a proven policy reaches production.</span>':'' },
- { label:()=>'Station 4 · The punchline',
+ { label:()=>'Station 5 · The punchline',
    t:'Same incidents. Enforced.',
-   p:'Rolled out in stages on Cilium, Tetragon and seccomp. Watch where each step stops.',
+   p:'On Cilium, Tetragon and seccomp. Watch where each step stops.',
    init:()=>({c:'c1',c1:0,c2:0}),
    svg:(s,f)=>sceneCase(CASES[s.c].C,s[s.c],f,CASES[s.c].E),
    tabs:true,
    list:s=>CASES[s.c].E.slice(0,s[s.c]).map(([st,eng,t,why])=>({k:st==='b'?'BLOCKED':st==='y'?'RUNS':'ALLOWED',c:st==='b'?'b':st==='y'?'y':'r',t:t,s:(eng?`<b>${eng}:</b> `:'')+why})),
-   act:s=>!caseDone(s,s.c)?(s[s.c]?'Next step':CASES[s.c].a0):!caseDone(s,s.c==='c1'?'c2':'c1')?`Now: ${CASES[s.c==='c1'?'c2':'c1'].who} ›`:'Start over',
-   done:()=>false,
-   run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else if(!caseDone(s,s.c==='c1'?'c2':'c1')){ s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } else { $('cover').hidden=false; drawCover(); } },
-   take:s=>caseDone(s,'c1')&&caseDone(s,'c2')?'The code still ran. <span>It couldn’t reach anything.</span>':caseDone(s,s.c)?CASES[s.c].againTake:'',
-   extra:s=>caseDone(s,'c1')&&caseDone(s,'c2')?`<div class="diff"><div><b>Least privilege for AI agents.</b> Every layer, one decision: network, programs, files, privileges, syscalls.</div><div><b>Decided from evidence, proven before it applies.</b> No hand-written rules, no broken production.</div></div><p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`:'' }
+   act:s=>!caseDone(s,s.c)?(s[s.c]?'Next step':CASES[s.c].a0):!caseDone(s,s.c==='c1'?'c2':'c1')?`Now: ${CASES[s.c==='c1'?'c2':'c1'].who} ›`:'Both enforced',
+   done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
+   run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
+   take:s=>caseDone(s,'c1')&&caseDone(s,'c2')?'The code still ran. <span>It couldn’t reach anything.</span>':caseDone(s,s.c)?CASES[s.c].againTake:'' },
+ { label:()=>'Summary',
+   t:'Every layer. One decision.',
+   p:'The agent pod, before and after.',
+   init:()=>({}),
+   svg:()=>sceneBA(7),
+   list:()=>[{k:'NETWORK',c:'g',t:'<b>8 → 4 destinations.</b> K8s API, metadata, internet and other pods closed.'},
+             {k:'PROGRAMS',c:'g',t:'<b>Any binary → python only.</b> No shell, no curl.'},
+             {k:'FILES',c:'g',t:'<b>Any file → its own.</b> No token, no cloud credentials.'},
+             {k:'PRIVILEGES',c:'g',t:'<b>Root → no root.</b> No capabilities.'},
+             {k:'SYSCALLS',c:'g',t:'<b>All → the few it uses.</b> No AF_ALG, no namespaces.'},
+             {k:'COHERE',c:'b',t:'<b>4 of 4</b> off-task steps blocked. The upload never left.'},
+             {k:'HUGGING FACE',c:'b',t:'<b>4 of 4</b> escape steps blocked. The template still ran, inside.'},
+             {k:'DROPPED',c:'b',t:'<b>0</b> needed calls. The agent kept working.'}],
+   extra:()=>`<div class="diff"><div><b>Decided, not recorded.</b> Declared and seen stays. The rest closes, or goes to a person.</div><div><b>Proven before it applies.</b> Replayed offline, rolled out in stages.</div><div><b>On the engines you already run.</b> Cilium, Tetragon and seccomp. No new agent in the pod.</div></div><p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`,
+   act:()=>'Start over', done:()=>false, run:()=>{ $('cover').hidden=false; drawCover(); } }
 ];
-const FULL=[0,1,2,3]; let ROUTE=FULL;
+const FULL=[0,1,2,3,4,5]; let ROUTE=FULL;
+function sceneMatrix(k){ let s=DEFS; const X0=84,Y0=34,W=134,H=104,G=4;
+  s+=`<text x="${X0+W/2}" y="22" text-anchor="middle" class="jh2">SEEN IN TRAFFIC</text><text x="${X0+W+G+W/2}" y="22" text-anchor="middle" class="jh2">NOT SEEN</text>`;
+  s+=`<text x="10" y="${Y0+H/2-2}" class="jh2">DECLARED</text><text x="10" y="${Y0+H/2+11}" class="jh2" style="opacity:.7">in config</text><text x="10" y="${Y0+H+G+H/2-2}" class="jh2">NOT</text><text x="10" y="${Y0+H+G+H/2+11}" class="jh2">DECLARED</text>`;
+  const Q=[[0,0,1,'OPEN','#4CC38A','#0F1F17','#2B6B48',['model-store','task queue','kb','kube-dns']],
+           [1,1,2,'CLOSE','#9AA4B6','#141A25','#3A4558',['K8s API','metadata','internet','other pods']],
+           [0,1,3,'KEEP OUT','#F08A8D','#22151A','#6B2C32',['cloud bucket']],
+           [1,0,4,'ASK','#E8A33D','#2A2213','#6B5223',['shell tool']]];
+  Q.forEach(([c,r,need,h,ink,bg,st,items])=>{ const x=X0+c*(W+G), y=Y0+r*(H+G), on=k>=need;
+    s+=`<g class="${on&&k===need?'fadein':''}"><rect x="${x}" y="${y}" width="${W}" height="${H}" rx="10" fill="${on?bg:'#0F141E'}" stroke="${on?st:'#1E2633'}"/>`;
+    if(on){ s+=`<text x="${x+12}" y="${y+20}" style="font:700 10px var(--body);letter-spacing:.1em" fill="${ink}">${h}</text>`;
+      items.forEach((t,i)=>{ s+=`<text x="${x+12}" y="${y+40+i*16}" style="font:500 10.5px var(--mono)" fill="${ink}" opacity=".9">${t}</text>`; }); }
+    s+='</g>'; });
+  return s; }
 
 function sceneJourney(){ let s=DEFS; const blk=SC.E.filter(e=>e[0]==='b').length, tot=SC.E.length;
   const L=['network','programs','files','privileges','syscalls'], E=['Cilium','Tetragon','seccomp'];
