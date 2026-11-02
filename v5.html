@@ -395,14 +395,17 @@ const PARTS=[['The problem','Every pod starts wide open · why it stays that way
 const HEAD=['Every pod starts with more access than it needs. <span>And it stays that way.</span>','AI agents turned that excess into real incidents. <span>Two of them, from 2026.</span>','Decide what each workload needs. <span>Enforce only that.</span>'];
 const lst=(rows)=>rows;
 // ---------- the 4 stations
-let OPENF=false, OPENI=0;
-function sceneOpen(k,fresh){ OPENF=!!fresh; OPENI=0; const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
+function sceneOpen(k,fresh){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS; const F=k&&fresh;
+  const D=(t)=>F?`style="animation:fin .4s ease ${t.toFixed(2)}s both"`:'';
   s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/>`;
-  Object.entries(GP.N).forEach(([key,[x,y]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18); s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k?'a':'al'}"/>`; if(k) s+=`<circle class="pkl" cx="${x2}" cy="${y2}" r="3" fill="#F08A8D" style="--dx:${bx-x2}px;--dy:${by-y2}px;animation-delay:${(OPENI++*.27).toFixed(2)}s"/>`; });
+  const E=Object.entries(GP.N);
+  E.forEach(([key,[x,y]],i)=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18);
+    s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e al"/>`;
+    if(k) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e a" ${D(.15+i*.12)}/><circle class="pkl" cx="${x2}" cy="${y2}" r="3.2" fill="#F08A8D" style="--dx:${bx-x2}px;--dy:${by-y2}px;animation-delay:${((F?2.5:0)+i*.27).toFixed(2)}s"/>`; });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
-  const row=(y,items)=>{ const W=items.map(t=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map((t,i)=>{ const r=`<g class="pc ${k?'b0':''}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
-  s+=row(108,['any binary'])+row(132,['any file'])+row(156,['root'])+row(180,['all syscalls']);
-  s+=Object.entries(GP.N).map(([key,[x,y,l,ic]])=>node(x,y,PF.c1.lab[key]||l,'',ic,k?'att':'')).join('');
+  const row=(y,t,j)=>{ const w=Math.max(42,t.length*7+12), x=180-w/2, ch=(c,st)=>`<g class="pc ${c}" ${st}><rect x="${x}" y="${y}" width="${w}" height="19" rx="5"/><text x="180" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; return ch('','')+(k?ch('b0',D(1.25+j*.3)):''); };
+  s+=row(108,'any binary',0)+row(132,'any file',1)+row(156,'root',2)+row(180,'all syscalls',3);
+  E.forEach(([key,[x,y,l,ic]],i)=>{ s+=node(x,y,PF.c1.lab[key]||l,'',ic,''); if(k) s+=`<g ${D(.15+i*.12)}>${node(x,y,PF.c1.lab[key]||l,'',ic,'att')}</g>`; });
   return s; }
 const tabs=(s)=>`<div class="tabs">${['c1','c2'].map(id=>`<button data-tab="${id}" class="${s.c===id?'on':''}">${CASES[id].who}${(s[id]||0)>=CASES[id].C.chain.length?' ✓':''}</button>`).join('')}</div>`;
 const caseDone=(s,id)=>(s[id]||0)>=CASES[id].C.chain.length;
@@ -418,7 +421,7 @@ const STEPS=[
               {k:'PRIVILEGES',c:'a',t:'<b>Root is possible.</b>'},
               {k:'SYSCALLS',c:'a',t:'<b>Every syscall is open,</b> including the ones kernel exploits need.'}]:[],
    allSubs:true,
-   act:()=>'Opening every layer…', autostart:700, done:s=>s.k>=1, run:s=>{ s.k=1; },
+   act:()=>'Opening every layer…', autostart:700, stagger:[.15,1.25,1.55,1.85,2.15], done:s=>s.k>=1, run:s=>{ s.k=1; },
    take:s=>s.k?'If anything goes wrong inside, <span>what the pod is allowed to do decides the damage.</span>':'' },
  { part:0, name:'Why it stays open', label:()=>'The problem · why it stays open',
    t:'The engines are there. The rules aren’t.',
@@ -546,10 +549,10 @@ function render(changed,fresh){
   if(changed){ const g=$('stage'); g.classList.remove('in'); void g.offsetWidth; g.classList.add('in'); }
   if(changed&&!reduce) $('map').querySelectorAll('[data-count]').forEach(el=>{ const n=+el.dataset.count, t0=performance.now(); const f=t=>{ const p=Math.min(1,(t-t0)/800); el.textContent=Math.round(n*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(f); }; el.textContent='0'; requestAnimationFrame(f); });
   const L=st.list?st.list(s):[], tk=st.take?st.take(s):'', src=typeof st.src==='function'?st.src(s):st.src;
-  $('cap').innerHTML=`<h1>${val(st.t)}</h1><p class="intro">${val(st.p)}</p>${st.tabs?tabs(s):''}${st.extraFirst&&st.extra?st.extra():''}${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1||!st.take||st.allSubs?'cur':''}">${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${(i===L.length-1||!st.take||st.allSubs)&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${tk?`<p class="take">${tk}</p>`:''}${!st.extraFirst&&st.extra?st.extra(s):''}${src&&tk?`<a class="srcl" href="${src[1]}" target="_blank" rel="noopener">Source: ${src[0]} ↗</a>`:''}`;
+  $('cap').innerHTML=`<h1>${val(st.t)}</h1><p class="intro">${val(st.p)}</p>${st.tabs?tabs(s):''}${st.extraFirst&&st.extra?st.extra():''}${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1||!st.take||st.allSubs?'cur':''}" ${st.stagger&&fresh?`style="animation:fin .4s ease ${st.stagger[i]}s both"`:''}>${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${(i===L.length-1||!st.take||st.allSubs)&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${tk?`<p class="take" ${st.stagger&&fresh?`style="animation:fin .4s ease 2.5s both"`:''}>${tk}</p>`:''}${!st.extraFirst&&st.extra?st.extra(s):''}${src&&tk?`<a class="srcl" href="${src[1]}" target="_blank" rel="noopener">Source: ${src[0]} ↗</a>`:''}`;
   $('cap').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ stop(); s.play=false; const id=b.dataset.tab; s.c=id; render(true,false); });
   $('cap').querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{ watching=false; stop(); choose(b.dataset.case); });
-  const c=$('cap'); if(changed) c.scrollTop=0; if(fresh){ const cur=c.querySelector('li.cur:last-of-type'), tkk=c.querySelector('.take'), el=tkk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
+  const c=$('cap'); if(changed) c.scrollTop=0; if(fresh&&!st.stagger){ const cur=c.querySelector('li.cur:last-of-type'), tkk=c.querySelector('.take'), el=tkk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
   const a=$('act'); const nx=st.done(s)&&nextOf()!=null; a.textContent=nx?`Next: ${STEPS[nextOf()].name}  ›`:st.act(s); const pick=false; a.disabled=!nx&&(st.done(s)||!!s.play); a.classList.toggle('done',!nx&&(st.done(s)||!!s.play)); a.classList.toggle('nx',nx);
   $('back').disabled=pos()<=0; $('next').disabled=nextOf()==null; $('next').classList.toggle('go',!pick&&st.done(s)&&!watching&&nextOf()!=null);
   $('mode').innerHTML='';
