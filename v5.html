@@ -99,6 +99,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .ty{animation:ty .45s steps(14) both}@keyframes ty{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 .fly{animation:pkm .65s cubic-bezier(.3,0,.2,1) both}
 .stg{animation:fin .35s ease both}
+.pkl{opacity:0;animation:pkl 1.5s cubic-bezier(.4,0,.6,1) infinite}@keyframes pkl{0%{transform:translate(var(--dx),var(--dy));opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:none;opacity:0}}
 .qon{animation:qon .45s ease both}@keyframes qon{0%{opacity:0}60%{opacity:1;filter:brightness(1.6)}100%{opacity:1;filter:none}}
 .pod.on{stroke:#2B6B48;stroke-dasharray:none}.foot.ok{fill:#3E8E64}
 .xm circle{fill:#0A0D14;stroke:var(--ok);stroke-width:1.4}.xm path{stroke:var(--ok);stroke-width:1.6;stroke-linecap:round}
@@ -169,7 +170,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .inter .go{height:54px;border-radius:13px;border:0;background:var(--ink);color:var(--bg);font-weight:600;font-size:16px;margin-top:22px}
 
 @media (max-height:700px){.cap h1{font-size:19.5px}.cap p.intro{font-size:14px;margin-bottom:9px}.steps li{padding:7px 0;font-size:13.5px}.bar button{height:46px}.cover h1{font-size:27px}.cover .msg{font-size:15px}.inter h2{font-size:21px;margin-bottom:18px}.road li{padding-bottom:14px}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.pk,.ring{display:none}.draw{stroke-dashoffset:0}.cv-final,.cc3{opacity:1}.cv-out,.cv-zoom,.cv-inner,.cc1,.cc2{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.pk,.ring,.pkl{display:none}.draw{stroke-dashoffset:0}.cv-final,.cc3{opacity:1}.cv-out,.cv-zoom,.cv-inner,.cc1,.cc2{display:none}}
 </style>
 </head>
 <body>
@@ -397,7 +398,7 @@ const lst=(rows)=>rows;
 let OPENF=false, OPENI=0;
 function sceneOpen(k,fresh){ OPENF=!!fresh; OPENI=0; const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
   s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/>`;
-  Object.entries(GP.N).forEach(([key,[x,y]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18); s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k?'a':'al'}"/>`; if(k&&OPENF) s+=`<circle class="pk" cx="${x2}" cy="${y2}" r="3" fill="#E5484D" style="--dx:${C[0]-x2}px;--dy:${C[1]-y2}px;animation-delay:${OPENI*.07}s,${OPENI++*.07+.42}s"/>`; });
+  Object.entries(GP.N).forEach(([key,[x,y]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18); s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k?'a':'al'}"/>`; if(k) s+=`<circle class="pkl" cx="${x2}" cy="${y2}" r="3" fill="#F08A8D" style="--dx:${bx-x2}px;--dy:${by-y2}px;animation-delay:${(OPENI++*.27).toFixed(2)}s"/>`; });
   s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
   const row=(y,items)=>{ const W=items.map(t=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map((t,i)=>{ const r=`<g class="pc ${k?'b0':''}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
   s+=row(108,['any binary'])+row(132,['any file'])+row(156,['root'])+row(180,['all syscalls']);
@@ -438,7 +439,7 @@ const STEPS=[
    svg:(s,f)=>sceneCase(CASES[s.c].C,s[s.c],f),
    tabs:true,
    list:s=>CASES[s.c].C.chain.slice(0,s[s.c]),
-   act:s=>{ const o=s.c==='c1'?'c2':'c1'; return s.play?`Playing · step ${s[s.c]} of ${CASES[s.c].C.chain.length}`:!caseDone(s,s.c)?(s[s.c]?'▶  Continue':`▶  Play the ${CASES[s.c].who} incident`):`▶  Play the ${CASES[o].who} incident`; }, auto:1700, pause:s=>caseDone(s,s.c), allSubs:true,
+   act:s=>{ const o=s.c==='c1'?'c2':'c1'; return s.play?`Playing · step ${s[s.c]} of ${CASES[s.c].C.chain.length}`:!caseDone(s,s.c)?(s[s.c]?'▶  Continue':`▶  Play the ${CASES[s.c].who} incident`):`▶  Play the ${CASES[o].who} incident`; }, auto:1300, pause:s=>caseDone(s,s.c), allSubs:true,
    done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
    take:s=>caseDone(s,s.c)?(caseDone(s,'c1')&&caseDone(s,'c2')?'Nothing stopped either one. <span>Every step was already allowed.</span>':CASES[s.c].take):'',
@@ -466,7 +467,7 @@ const STEPS=[
    svg:(s,f)=>sceneCase(CASES[s.c].C,s[s.c],f,CASES[s.c].E),
    tabs:true,
    list:s=>CASES[s.c].E.slice(0,s[s.c]).map(([st,eng,t,why])=>({k:st==='b'?'BLOCKED':st==='y'?'RUNS':'ALLOWED',c:st==='b'?'b':st==='y'?'y':'r',t:t,s:(eng?`<b>${eng}:</b> `:'')+why})),
-   act:s=>{ const o=s.c==='c1'?'c2':'c1'; return s.play?`Enforcing · step ${s[s.c]} of ${CASES[s.c].C.chain.length}`:!caseDone(s,s.c)?(s[s.c]?'▶  Continue':`▶  Replay ${CASES[s.c].who}, enforced`):`▶  Replay ${CASES[o].who}, enforced`; }, auto:1700, pause:s=>caseDone(s,s.c), allSubs:true,
+   act:s=>{ const o=s.c==='c1'?'c2':'c1'; return s.play?`Enforcing · step ${s[s.c]} of ${CASES[s.c].C.chain.length}`:!caseDone(s,s.c)?(s[s.c]?'▶  Continue':`▶  Replay ${CASES[s.c].who}, enforced`):`▶  Replay ${CASES[o].who}, enforced`; }, auto:1300, pause:s=>caseDone(s,s.c), allSubs:true,
    done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
    take:s=>caseDone(s,'c1')&&caseDone(s,'c2')?'The code still ran. <span>It couldn’t reach anything.</span>':caseDone(s,s.c)?CASES[s.c].againTake:'' },
