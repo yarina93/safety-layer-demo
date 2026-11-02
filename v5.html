@@ -180,10 +180,10 @@ button{font:inherit;cursor:pointer;color:inherit}
 
   <section class="cover" id="cover">
     <div class="k">Safety Layer</div>
-    <h1>Least privilege for AI agents.</h1>
-    <p class="msg">Decided from evidence. Proven before it applies. Enforced on the eBPF engines in your cluster.</p>
+    <h1>Least privilege for every workload.</h1>
+    <p class="msg">AI agents made it urgent. Decided from evidence, proven before it applies, enforced on the eBPF engines in your cluster.</p>
     <div class="vis"><svg id="coverVis" viewBox="0 0 360 210" preserveAspectRatio="xMidYMid meet"></svg><div class="cvcap" id="cvcap"></div></div>
-    <div class="btns" id="coverBtns"><button id="explore">Start the tour <small>5 stations · about 3 min</small></button></div>
+    <div class="btns" id="coverBtns"><button id="explore">Start the tour <small>6 screens · about 3 min</small></button></div>
     <div class="ft">Kubernetes · Cilium · Tetragon</div>
   </section>
 </div>
@@ -377,7 +377,7 @@ const PF={
    ev:[{k:'MANIFEST',c:'r',t:'<b>Declares</b> its storage, job queue and hub API in its config.'},{k:'HUBBLE',c:'r',t:'<b>Connects</b> to those three, plus DNS. Nothing else in a week.'},{k:'TETRAGON',c:'r',t:'<b>Runs</b> python only. Never reads the service-account token.'},{k:'K8S API',c:'r',t:'<b>Needs</b> DNS from the platform. Never calls the K8s API.'}],
    needed:'Declared and seen: storage, job queue, hub API and DNS.',kept:'If an attacker was already inside during learning, those calls are in the traffic. They were never declared, so they never become rules.',keptFlag:'paste sites',
    ask:'Its service-account token is mounted but never read. Removing the mount is one approval.',askChip:'token',miss:'the job queue',rp:['storage','job queue','hub API','kube-dns','paste site'],out:'The call to the paste site drops, as decided.'}};
-let SC=CASES.c1; const pf=()=>PF[(STEPS[at]&&STEPS[at].label().match(/^Station [34]|^Summary/))?'c1':SC.id]; const SEEN=new Set();
+let SC=CASES.c1; const pf=()=>PF[(STEPS[at]&&STEPS[at].label().match(/^The solution/))?'c1':SC.id]; const SEEN=new Set();
 const PARTS=[['The problem','A real case · the gap · why it stays open · why now'],['How we decide','Evidence · decide · prove'],['The result','Enforce · the same case · before and after']];
 const HEAD=['AI agents already act on their own. <span>What a pod is allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>','That was one agent. <span>Here’s why this matters now.</span>'];
 const lst=(rows)=>rows;
@@ -393,9 +393,9 @@ function sceneOpen(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
 const tabs=(s)=>`<div class="tabs">${['c1','c2'].map(id=>`<button data-tab="${id}" class="${s.c===id?'on':''}">${CASES[id].who}${(s[id]||0)>=CASES[id].C.chain.length?' ✓':''}</button>`).join('')}</div>`;
 const caseDone=(s,id)=>(s[id]||0)>=CASES[id].C.chain.length;
 const STEPS=[
- { label:()=>'Station 1 · The problem',
-   t:'Your agent is smart. Its blast radius isn’t.',
-   p:'An AI agent in Kubernetes runs with the defaults: it can reach, run and read almost anything.',
+ { label:()=>'The problem',
+   t:'Every pod starts wide open.',
+   p:'Take any pod, here an AI agent. With Kubernetes defaults it can reach, run and read almost anything.',
    init:()=>({k:0}),
    svg:s=>sceneOpen(s.k),
    list:s=>s.k?[{k:'NETWORK',c:'a',t:'<b>8 destinations reachable.</b> Internet, K8s API, cloud metadata, every pod.'},
@@ -405,10 +405,22 @@ const STEPS=[
               {k:'SYSCALLS',c:'a',t:'<b>Every syscall is open,</b> including the ones kernel exploits need.'}]:[],
    allSubs:true,
    act:s=>s.k?'Blast radius shown':'Show the blast radius', done:s=>s.k>=1, run:s=>{ s.k=1; },
-   take:s=>s.k?'Smart agents act on their own. <span>What the pod allows decides the damage.</span>':'' },
- { label:()=>'Station 2 · The pain',
-   t:'Two real incidents. Every step worked.',
-   p:'Both from 2026. Guardrails on the prompt can’t see what happens after the code runs.',
+   take:s=>s.k?'If anything goes wrong inside, <span>what the pod is allowed to do decides the damage.</span>':'' },
+ { label:()=>'The problem · why it stays open',
+   t:'The engines are there. The rules aren’t.',
+   p:'Cilium and Tetragon can close all of it. In most clusters <b>nothing is enforced</b>: 58% of organizations miss a network policy on most workloads.',
+   init:()=>({k:0}),
+   svg:s=>sceneWhy(s.k),
+   list:s=>[{k:'KNOWLEDGE',c:'w',t:'<b>No one knows the full answer.</b>',s:'It’s split between developers, platform and security.'},
+            {k:'SCALE',c:'w',t:'<b>Thousands of decisions.</b>',s:'Five layers, for every workload.'},
+            {k:'CHANGE',c:'w',t:'<b>Every release changes the answer.</b>',s:'Miss one dependency and production breaks. So it stays open.'}].slice(0,s.k),
+   act:s=>['Why?','Next reason','Next reason'][s.k]||'Three reasons', allSubs:true,
+   done:s=>s.k>=3, run:s=>{ s.k++; },
+   take:s=>s.k>=3?'The missing piece isn’t the engine. <span>It’s the decision.</span>':'',
+   extra:s=>s.k>=3?'<p class="srcs">Source: <a href="https://www.cncf.io/blog/2024/04/09/k8s-benchmark-report-are-organizations-meeting-nsa-hardening-checks/" target="_blank" rel="noopener">Fairwinds benchmark, 2024</a> · 330,000+ workloads</p>':'' },
+ { label:()=>'The urgency',
+   t:'AI agents are on both sides now.',
+   p:'Two real incidents from 2026: <b>your agent goes off-task</b>, and <b>someone else’s agent breaks in</b>.',
    init:()=>({c:'c1',c1:0,c2:0}),
    svg:(s,f)=>sceneCase(CASES[s.c].C,s[s.c],f),
    tabs:true,
@@ -416,35 +428,25 @@ const STEPS=[
    act:s=>!caseDone(s,s.c)?(s[s.c]?'Next step':CASES[s.c].a0):!caseDone(s,s.c==='c1'?'c2':'c1')?`Now: ${CASES[s.c==='c1'?'c2':'c1'].who} ›`:'Both incidents shown',
    done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
-   take:s=>caseDone(s,s.c)?(caseDone(s,'c1')&&caseDone(s,'c2')?'No alert stopped either one. <span>Everything they needed was already allowed.</span>':CASES[s.c].take):'',
-   src:s=>caseDone(s,s.c)?CASES[s.c].src:null },
- { label:()=>'Station 3 · The decision',
-   t:'Decide what it should do. Not just what it did.',
+   take:s=>caseDone(s,s.c)?(caseDone(s,'c1')&&caseDone(s,'c2')?'Nothing stopped either one. <span>Every step was already allowed.</span>':CASES[s.c].take):'',
+   src:s=>caseDone(s,s.c)?CASES[s.c].src:null,
+   extra:s=>s.c==='c2'&&caseDone(s,'c2')?'<div class="diff"><div><b style="color:var(--warn)">And on OpenAI’s side?</b> The agent left its test sandbox through a path that was allowed, so blocking alone wouldn’t catch it. A profile could flag that upload as suspect: seen, but nothing in its config explains it.</div></div>':'' },
+ { label:()=>'The solution · how it decides',
+   t:'Decide from evidence. Prove before it applies.',
    p:'Two questions for every path: <b>is it declared</b> in the agent’s config, and <b>is it seen</b> in a week of traffic?',
    init:()=>({k:0}),
-   svg:s=>s.k===0?sceneEv(0):s.k===1?sceneEv(5):sceneMatrix(s.k-1),
+   svg:s=>s.k===0?sceneEv(0):s.k===1?sceneEv(5):s.k<=5?sceneMatrix(s.k-1):sceneProve(1),
    list:s=>[{k:'EVIDENCE',c:'r',t:'<b>Five sources, one profile.</b>',s:'Agent config (model, tools, MCP), model source, Hubble, Tetragon and the K8s API.'},
             {k:'OPEN',c:'g',t:'<b>Declared and seen.</b> Model store, task queue, kb, DNS.',s:'It needs them and uses them. They stay open.'},
             {k:'CLOSE',c:'x',t:'<b>Neither.</b> K8s API, metadata, internet, other pods.',s:'Open only because of the defaults. Closed.'},
             {k:'SUSPECT',c:'a',t:'<b>Seen, but nothing declares it.</b> A call to a cloud bucket.',s:'Flagged with its evidence. Not allowed and not closed automatically: a person decides. A tool that only records would have made it a rule.'},
-            {k:'ASK',c:'y',t:'<b>Declared, never used.</b> The shell tool.',s:'A person approves removing it. One click.'}].slice(0,s.k),
+            {k:'ASK',c:'y',t:'<b>Declared, never used.</b> The shell tool.',s:'A person approves removing it. One click.'},
+            {k:'PROOF',c:'r',t:'<b>Nothing applies until it’s proven.</b>',s:'A week of real traffic is replayed offline. If anything needed would break, nothing is applied. Then it goes live in stages, audit mode first.'}].slice(0,s.k),
    allSubs:true,
-   act:s=>['Collect the evidence','Keep what it needs','Close the rest','Flag the suspect','Ask a person'][s.k]||'Decided',
-   done:s=>s.k>=5, run:s=>{ s.k++; },
-   take:s=>s.k>=5?'Not a copy of the traffic. <span>A decision about what it should do.</span>':'' },
- { label:()=>'Station 4 · The proof',
-   t:'Prove it before it goes live.',
-   p:'Nothing touches production until it’s proven not to break the agent.',
-   init:()=>({k:0}),
-   svg:s=>s.k===0?sceneProve(0):s.k===1?sceneProve(1):s.k===2?sceneProve(2):sceneStage(4),
-   list:s=>[{k:'REPLAY',c:'g',t:'<b>A week of real traffic, replayed offline</b> against the new policy.',s:'Model store, task queue, kb, DNS: kept. The bucket: dropped, as the reviewer decided.'},
-            {k:'FAIL-SAFE',c:'a',t:'<b>One needed call would drop? Nothing is applied.</b>',s:'Say the task queue would break. The policy goes back with the reason, not to production.'},
-            {k:'STAGES',c:'r',t:'<b>Live one step at a time.</b>',s:'K8s API and metadata first, then internet, other pods, and inside the pod. Each step runs in audit mode first.'}].slice(0,s.k),
-   allSubs:true,
-   act:s=>['Replay a week','What if it breaks?','Roll out in stages'][s.k]||'Proven',
-   done:s=>s.k>=3, run:s=>{ s.k++; },
-   take:s=>s.k>=3?'Zero enforcement paralysis. <span>Only a proven policy reaches production.</span>':'' },
- { label:()=>'Station 5 · The punchline',
+   act:s=>['Collect the evidence','Keep what it needs','Close the rest','Flag the suspect','Ask a person','Prove it'][s.k]||'Decided and proven',
+   done:s=>s.k>=6, run:s=>{ s.k++; },
+   take:s=>s.k>=6?'Not a copy of the traffic. <span>A decision, proven before it applies.</span>':'' },
+ { label:()=>'The solution · enforced',
    t:'Same incidents. Enforced.',
    p:'On Cilium, Tetragon and seccomp. Watch where each step stops.',
    init:()=>({c:'c1',c1:0,c2:0}),
@@ -455,7 +457,7 @@ const STEPS=[
    done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
    take:s=>caseDone(s,'c1')&&caseDone(s,'c2')?'The code still ran. <span>It couldn’t reach anything.</span>':caseDone(s,s.c)?CASES[s.c].againTake:'' },
- { label:()=>'Summary',
+ { label:()=>'The solution · summary',
    t:'Every layer. One decision.',
    p:'The agent pod, before and after.',
    init:()=>({}),
