@@ -484,7 +484,6 @@ const STEPS=[
              {k:'NOT SOLVED',c:'y',t:'<b>The bug and the model are still there.</b>',s:'The template still ran Python in the worker, and secrets already in its environment stay readable. We limit the damage. We don’t fix the code.'}],
    allSubs:true,
    take:()=>'Every layer. One decision. <span>Least privilege, decided from evidence.</span>',
-   extra:()=>`<p class="srcs">On Cilium, Tetragon and seccomp today. Any engine that enforces policy, by design.</p><p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`,
    act:()=>'Start over', done:()=>false, run:()=>{ $('cover').hidden=false; drawCover(); } }
 ];
 const FULL=[0,1,2,3,4,5]; let ROUTE=FULL;
