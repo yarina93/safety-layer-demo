@@ -183,7 +183,7 @@ button{font:inherit;cursor:pointer;color:inherit}
     <h1>Least privilege for every workload.</h1>
     <p class="msg">AI agents made it urgent. Decided from evidence, proven before it applies, enforced on the eBPF engines in your cluster.</p>
     <div class="vis"><svg id="coverVis" viewBox="0 0 360 210" preserveAspectRatio="xMidYMid meet"></svg><div class="cvcap" id="cvcap"></div></div>
-    <div class="btns" id="coverBtns"><button id="explore">Start the tour <small>6 screens · about 3 min</small></button></div>
+    <div class="btns" id="coverBtns"><button id="explore">Start the tour <small>6 screens · about 2 min</small></button></div>
     <div class="ft">Kubernetes · Cilium · Tetragon</div>
   </section>
 </div>
@@ -404,7 +404,7 @@ const STEPS=[
               {k:'PRIVILEGES',c:'a',t:'<b>Root is possible.</b>'},
               {k:'SYSCALLS',c:'a',t:'<b>Every syscall is open,</b> including the ones kernel exploits need.'}]:[],
    allSubs:true,
-   act:s=>s.k?'Blast radius shown':'Show the blast radius', done:s=>s.k>=1, run:s=>{ s.k=1; },
+   act:()=>'All five layers open', autostart:700, done:s=>s.k>=1, run:s=>{ s.k=1; },
    take:s=>s.k?'If anything goes wrong inside, <span>what the pod is allowed to do decides the damage.</span>':'' },
  { part:0, label:()=>'The problem · why it stays open',
    t:'The engines are there. The rules aren’t.',
@@ -414,7 +414,7 @@ const STEPS=[
    list:s=>[{k:'KNOWLEDGE',c:'w',t:'<b>No one knows the full answer.</b>',s:'It’s split between developers, platform and security.'},
             {k:'SCALE',c:'w',t:'<b>Thousands of decisions.</b>',s:'Five layers, for every workload.'},
             {k:'CHANGE',c:'w',t:'<b>Every release changes the answer.</b>',s:'Miss one dependency and production breaks. So it stays open.'}].slice(0,s.k),
-   act:s=>['Why?','Next reason','Next reason'][s.k]||'Three reasons', allSubs:true,
+   act:()=>'Three reasons', allSubs:true, autostart:700, auto:900,
    done:s=>s.k>=3, run:s=>{ s.k++; },
    take:s=>s.k>=3?'The missing piece isn’t the engine. <span>It’s the decision.</span>':'',
    extra:s=>s.k>=3?'<p class="srcs">Source: <a href="https://www.cncf.io/blog/2024/04/09/k8s-benchmark-report-are-organizations-meeting-nsa-hardening-checks/" target="_blank" rel="noopener">Fairwinds benchmark, 2024</a> · 330,000+ workloads</p>':'' },
@@ -425,7 +425,7 @@ const STEPS=[
    svg:(s,f)=>sceneCase(CASES[s.c].C,s[s.c],f),
    tabs:true,
    list:s=>CASES[s.c].C.chain.slice(0,s[s.c]),
-   act:s=>!caseDone(s,s.c)?(s[s.c]?'Next step':CASES[s.c].a0):!caseDone(s,s.c==='c1'?'c2':'c1')?`Now: ${CASES[s.c==='c1'?'c2':'c1'].who} ›`:'Both incidents shown',
+   act:s=>s.play?'Playing…':!caseDone(s,s.c)?(s[s.c]?'Continue':'Play the incident'):!caseDone(s,s.c==='c1'?'c2':'c1')?`Play: ${CASES[s.c==='c1'?'c2':'c1'].who}`:'Both incidents shown', auto:1100, pause:s=>caseDone(s,s.c),
    done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
    take:s=>caseDone(s,s.c)?(caseDone(s,'c1')&&caseDone(s,'c2')?'Nothing stopped either one. <span>Every step was already allowed.</span>':CASES[s.c].take):'',
@@ -440,10 +440,10 @@ const STEPS=[
             {k:'OPEN',c:'g',t:'<b>Declared and seen.</b> Model store, task queue, kb, DNS.',s:'It needs them and uses them. They stay open.'},
             {k:'CLOSE',c:'x',t:'<b>Neither.</b> K8s API, metadata, internet, other pods.',s:'Open only because of the defaults. Closed.'},
             {k:'SUSPECT',c:'a',t:'<b>Seen, but nothing declares it.</b> A call to a cloud bucket.',s:'Flagged with its evidence. Not allowed and not closed automatically: a person decides. A tool that only records would have made it a rule.'},
-            {k:'ASK',c:'y',t:'<b>Declared, never used.</b> The shell tool.',s:'A person approves removing it. One click.'},
+            {k:'ASK',c:'y',t:'<b>Declared, never used.</b> The shell tool.',s:'A person approves removing it.'},
             {k:'PROOF',c:'r',t:'<b>Nothing applies until it’s proven.</b>',s:'A week of real traffic is replayed offline. If anything needed would break, nothing is applied. Then it goes live in stages, audit mode first.'}].slice(0,s.k),
    allSubs:true,
-   act:s=>['Collect the evidence','Keep what it needs','Close the rest','Flag the suspect','Ask a person','Prove it'][s.k]||'Decided and proven',
+   act:s=>s.play?'Deciding…':s.k<5?'Decide':s.k<6?'Prove it':'Decided and proven', auto:1300, pause:s=>s.k===5,
    done:s=>s.k>=6, run:s=>{ s.k++; },
    take:s=>s.k>=6?'Not a copy of the traffic. <span>A decision, proven before it applies.</span>':'' },
  { part:2, label:()=>'The solution · enforced',
@@ -453,7 +453,7 @@ const STEPS=[
    svg:(s,f)=>sceneCase(CASES[s.c].C,s[s.c],f,CASES[s.c].E),
    tabs:true,
    list:s=>CASES[s.c].E.slice(0,s[s.c]).map(([st,eng,t,why])=>({k:st==='b'?'BLOCKED':st==='y'?'RUNS':'ALLOWED',c:st==='b'?'b':st==='y'?'y':'r',t:t,s:(eng?`<b>${eng}:</b> `:'')+why})),
-   act:s=>!caseDone(s,s.c)?(s[s.c]?'Next step':CASES[s.c].a0):!caseDone(s,s.c==='c1'?'c2':'c1')?`Now: ${CASES[s.c==='c1'?'c2':'c1'].who} ›`:'Both enforced',
+   act:s=>s.play?'Playing…':!caseDone(s,s.c)?(s[s.c]?'Continue':'Play it enforced'):!caseDone(s,s.c==='c1'?'c2':'c1')?`Play: ${CASES[s.c==='c1'?'c2':'c1'].who}`:'Both enforced', auto:1100, pause:s=>caseDone(s,s.c),
    done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
    take:s=>caseDone(s,'c1')&&caseDone(s,'c2')?'The code still ran. <span>It couldn’t reach anything.</span>':caseDone(s,s.c)?CASES[s.c].againTake:'' },
@@ -527,17 +527,18 @@ function render(changed,fresh){
   if(changed){ const g=$('stage'); g.classList.remove('in'); void g.offsetWidth; g.classList.add('in'); }
   const L=st.list?st.list(s):[], tk=st.take?st.take(s):'', src=typeof st.src==='function'?st.src(s):st.src;
   $('cap').innerHTML=`<h1>${val(st.t)}</h1><p class="intro">${val(st.p)}</p>${st.tabs?tabs(s):''}${st.extraFirst&&st.extra?st.extra():''}${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1||!st.take||st.allSubs?'cur':''}">${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${(i===L.length-1||!st.take||st.allSubs)&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${tk?`<p class="take">${tk}</p>`:''}${!st.extraFirst&&st.extra?st.extra(s):''}${src&&tk?`<a class="srcl" href="${src[1]}" target="_blank" rel="noopener">Source: ${src[0]} ↗</a>`:''}`;
-  $('cap').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ const id=b.dataset.tab; s.c=id; s[id]=Math.max(s[id],1); render(true,false); });
+  $('cap').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ stop(); s.play=false; const id=b.dataset.tab; s.c=id; render(true,false); });
   $('cap').querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{ watching=false; stop(); choose(b.dataset.case); });
   const c=$('cap'); if(changed) c.scrollTop=0; if(fresh){ const cur=c.querySelector('li.cur:last-of-type'), tkk=c.querySelector('.take'), el=tkk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
-  const a=$('act'); a.textContent=st.act(s); const pick=false; a.disabled=pick||st.done(s); a.classList.toggle('done',pick||st.done(s));
+  const a=$('act'); a.textContent=st.act(s); const pick=false; a.disabled=pick||st.done(s)||!!s.play; a.classList.toggle('done',pick||st.done(s)||!!s.play);
   $('back').disabled=pos()<=0; $('next').disabled=nextOf()==null; $('next').classList.toggle('go',!pick&&st.done(s)&&!watching&&nextOf()!=null);
   $('mode').innerHTML='';
   if($('pause')) $('pause').onclick=()=>{ watching=false; stop(); render(); };
   if($('play')) $('play').onclick=()=>{ watching=true; autoplay(); render(); };
 }
-function show(i){ stop(); at=i; ST[i]=STEPS[i].init(); render(true,false); if(watching) autoplay(); }
-function act(){ const st=STEPS[at], s=ST[at]; if(st.done(s)) return; st.run(s); if(!$('cover').hidden) return; render(false,true); }
+function show(i){ stop(); at=i; ST[i]=STEPS[i].init(); render(true,false); if(STEPS[i].autostart) later(STEPS[i].autostart,step); }
+function act(){ const st=STEPS[at], s=ST[at]; if(st.done(s)||s.play) return; step(); }
+function step(){ const st=STEPS[at], s=ST[at]; st.run(s); if(!$('cover').hidden) return; const more=!!st.auto&&!st.done(s)&&!(st.pause&&st.pause(s)); s.play=more; render(false,true); if(more) later(st.auto,step); }
 function inter(i,go){ const p=STEPS[i].part;
   $('interK').textContent=p<PARTS.length?`Part ${p+1} of ${PARTS.length}`:'Next'; $('interH').innerHTML=p<PARTS.length?(HEAD[p]||PARTS[p][0]):'That’s the product. <span>Here’s where it goes next.</span>';
   $('road').innerHTML=PARTS.map(([n,d],j)=>`<li class="${j<p?'d':j===p?'n':''}"><span class="dot">${j<p?'✓':j+1}</span><b>${n}</b><small>${d}</small></li>`).join('');
