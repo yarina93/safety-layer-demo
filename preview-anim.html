@@ -294,10 +294,10 @@ function sceneWhy(k){ let s=DEFS;
 
 // ---------- evidence
 function sceneEv(k,fresh){ let s=DEFS; const SRC=pf().src;
-  SRC.forEach(([n,sub],i)=>{ const y=14+i*48, on=i<k; const dl=fresh&&on?`style="animation-delay:${i*.18}s"`:''; s+=`<g class="src ${on?'on':''} ${fresh&&on?'stg':''}" ${dl}><rect x="10" y="${y}" width="122" height="40" rx="10"/><text x="22" y="${y+18}">${n}</text><text x="22" y="${y+32}" class="ss">${sub}</text></g><path d="M136 ${y+20} C 168 ${y+20}, 168 134, 196 134" class="flow ${on?'on':''} ${fresh&&on?'stg':''}" ${dl}/>`; });
+  SRC.forEach(([n,sub],i)=>{ const y=14+i*48, on=i<k; const dl=fresh&&on?`style="animation-delay:${i*.45}s"`:''; s+=`<g class="src ${on?'on':''} ${fresh&&on?'stg':''}" ${dl}><rect x="10" y="${y}" width="122" height="40" rx="10"/><text x="22" y="${y+18}">${n}</text><text x="22" y="${y+32}" class="ss">${sub}</text></g><path d="M136 ${y+20} C 168 ${y+20}, 168 134, 196 134" class="flow ${on?'on':''} ${fresh&&on?'stg':''}" ${dl}/>`; });
   const R=pf().rows, LY=[74,null,null,162,198,234], VY=[88,124,140,176,212,248];
   s+=`<g class="prof"><rect class="card" x="198" y="14" width="152" height="244" rx="12"/><text x="212" y="42" class="h">${pf().prof}</text>`;
-  R.forEach(([l,v,need],i)=>{ const on=k>=need, ly=i===1&&l?110:LY[i], vy=i===1&&l?124:VY[i]; const d2=fresh&&on?`class="stg" style="animation-delay:${.9+i*.12}s"`:''; s+=`<g ${d2}>${l?`<text x="212" y="${ly}" class="rl">${l}</text>`:''}<text x="212" y="${vy}" class="rv ${on?'on':''}">${on?v:'·'}</text></g>`; });
+  R.forEach(([l,v,need],i)=>{ const on=k>=need, ly=i===1&&l?110:LY[i], vy=i===1&&l?124:VY[i]; const d2=fresh&&on?`class="stg" style="animation-delay:${2.4+i*.3}s"`:''; s+=`<g ${d2}>${l?`<text x="212" y="${ly}" class="rl">${l}</text>`:''}<text x="212" y="${vy}" class="rv ${on?'on':''}">${on?v:'·'}</text></g>`; });
   return s+'</g>'; }
 
 // ---------- decide
@@ -460,7 +460,7 @@ const STEPS=[
             {k:'ASK',c:'y',t:'<b>Declared, never used.</b> The shell tool.',s:'A person approves removing it.'},
             {k:'PROOF',c:'r',t:'<b>Nothing applies until it’s proven.</b>',s:'A week of real traffic is replayed offline. If anything needed would break, nothing is applied. Then it goes live in stages, audit mode first.'}].slice(0,s.k),
    allSubs:true,
-   act:s=>s.play?`Deciding · ${['evidence','open','close','suspect','ask'][s.k-1]||''}`:s.k===0?'▶  Collect the evidence':s.k===1?'▶  Decide: declared × seen':'▶  Prove it: replay a week', auto:1900, pause:s=>s.k===1||s.k===5,
+   act:s=>s.play?`Deciding · ${['evidence','open','close','suspect','ask'][s.k-1]||''}`:s.k===0?'▶  Collect the evidence':s.k===1?'▶  Decide: declared × seen':'▶  Prove it: replay a week', auto:1100, pause:s=>s.k===1||s.k===5,
    done:s=>s.k>=6, run:s=>{ s.k++; },
    take:s=>s.k>=6?'Not a copy of the traffic. <span>A decision, proven before it applies.</span>':'' },
  { part:2, name:'Enforced', label:()=>'The solution · enforced',
