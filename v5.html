@@ -378,8 +378,8 @@ const PF={
    needed:'Declared and seen: storage, job queue, hub API and DNS.',kept:'If an attacker was already inside during learning, those calls are in the traffic. They were never declared, so they never become rules.',keptFlag:'paste sites',
    ask:'Its service-account token is mounted but never read. Removing the mount is one approval.',askChip:'token',miss:'the job queue',rp:['storage','job queue','hub API','kube-dns','paste site'],out:'The call to the paste site drops, as decided.'}};
 let SC=CASES.c1; const pf=()=>PF[(STEPS[at]&&STEPS[at].label().match(/^The solution/))?'c1':SC.id]; const SEEN=new Set();
-const PARTS=[['The problem','A real case · the gap · why it stays open · why now'],['How we decide','Evidence · decide · prove'],['The result','Enforce · the same case · before and after']];
-const HEAD=['AI agents already act on their own. <span>What a pod is allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>','That was one agent. <span>Here’s why this matters now.</span>'];
+const PARTS=[['The problem','Every pod starts wide open · why it stays that way'],['The urgency','AI agents on both sides · two real incidents'],['The solution','Decide from evidence · enforce · the result']];
+const HEAD=['Every pod starts with more access than it needs. <span>And it stays that way.</span>','AI agents turned that excess into real damage. <span>Two incidents from 2026.</span>','One decision for every layer. <span>From evidence, proven before it applies.</span>'];
 const lst=(rows)=>rows;
 // ---------- the 4 stations
 function sceneOpen(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
@@ -393,7 +393,7 @@ function sceneOpen(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
 const tabs=(s)=>`<div class="tabs">${['c1','c2'].map(id=>`<button data-tab="${id}" class="${s.c===id?'on':''}">${CASES[id].who}${(s[id]||0)>=CASES[id].C.chain.length?' ✓':''}</button>`).join('')}</div>`;
 const caseDone=(s,id)=>(s[id]||0)>=CASES[id].C.chain.length;
 const STEPS=[
- { label:()=>'The problem',
+ { part:0, label:()=>'The problem',
    t:'Every pod starts wide open.',
    p:'Take any pod, here an AI agent. With Kubernetes defaults it can reach, run and read almost anything.',
    init:()=>({k:0}),
@@ -406,7 +406,7 @@ const STEPS=[
    allSubs:true,
    act:s=>s.k?'Blast radius shown':'Show the blast radius', done:s=>s.k>=1, run:s=>{ s.k=1; },
    take:s=>s.k?'If anything goes wrong inside, <span>what the pod is allowed to do decides the damage.</span>':'' },
- { label:()=>'The problem · why it stays open',
+ { part:0, label:()=>'The problem · why it stays open',
    t:'The engines are there. The rules aren’t.',
    p:'Cilium and Tetragon can close all of it. In most clusters <b>nothing is enforced</b>: 58% of organizations miss a network policy on most workloads.',
    init:()=>({k:0}),
@@ -418,7 +418,7 @@ const STEPS=[
    done:s=>s.k>=3, run:s=>{ s.k++; },
    take:s=>s.k>=3?'The missing piece isn’t the engine. <span>It’s the decision.</span>':'',
    extra:s=>s.k>=3?'<p class="srcs">Source: <a href="https://www.cncf.io/blog/2024/04/09/k8s-benchmark-report-are-organizations-meeting-nsa-hardening-checks/" target="_blank" rel="noopener">Fairwinds benchmark, 2024</a> · 330,000+ workloads</p>':'' },
- { label:()=>'The urgency',
+ { part:1, label:()=>'The urgency',
    t:'AI agents are on both sides now.',
    p:'Two real incidents from 2026: <b>your agent goes off-task</b>, and <b>someone else’s agent breaks in</b>.',
    init:()=>({c:'c1',c1:0,c2:0}),
@@ -431,7 +431,7 @@ const STEPS=[
    take:s=>caseDone(s,s.c)?(caseDone(s,'c1')&&caseDone(s,'c2')?'Nothing stopped either one. <span>Every step was already allowed.</span>':CASES[s.c].take):'',
    src:s=>caseDone(s,s.c)?CASES[s.c].src:null,
    extra:s=>s.c==='c2'&&caseDone(s,'c2')?'<div class="diff"><div><b style="color:var(--warn)">And on OpenAI’s side?</b> The agent left its test sandbox through a path that was allowed, so blocking alone wouldn’t catch it. A profile could flag that upload as suspect: seen, but nothing in its config explains it.</div></div>':'' },
- { label:()=>'The solution · how it decides',
+ { part:2, label:()=>'The solution · how it decides',
    t:'Decide from evidence. Prove before it applies.',
    p:'Two questions for every path: <b>is it declared</b> in the agent’s config, and <b>is it seen</b> in a week of traffic?',
    init:()=>({k:0}),
@@ -446,7 +446,7 @@ const STEPS=[
    act:s=>['Collect the evidence','Keep what it needs','Close the rest','Flag the suspect','Ask a person','Prove it'][s.k]||'Decided and proven',
    done:s=>s.k>=6, run:s=>{ s.k++; },
    take:s=>s.k>=6?'Not a copy of the traffic. <span>A decision, proven before it applies.</span>':'' },
- { label:()=>'The solution · enforced',
+ { part:2, label:()=>'The solution · enforced',
    t:'Same incidents. Enforced.',
    p:'On Cilium, Tetragon and seccomp. Watch where each step stops.',
    init:()=>({c:'c1',c1:0,c2:0}),
@@ -457,7 +457,7 @@ const STEPS=[
    done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
    take:s=>caseDone(s,'c1')&&caseDone(s,'c2')?'The code still ran. <span>It couldn’t reach anything.</span>':caseDone(s,s.c)?CASES[s.c].againTake:'' },
- { label:()=>'The solution · summary',
+ { part:2, label:()=>'The solution · summary',
    t:'Every layer. One decision.',
    p:'The agent pod, before and after.',
    init:()=>({}),
@@ -539,11 +539,11 @@ function render(changed,fresh){
 function show(i){ stop(); at=i; ST[i]=STEPS[i].init(); render(true,false); if(watching) autoplay(); }
 function act(){ const st=STEPS[at], s=ST[at]; if(st.done(s)) return; st.run(s); if(!$('cover').hidden) return; render(false,true); }
 function inter(i,go){ const p=STEPS[i].part;
-  $('interK').textContent=ROUTE===SHORT&&p===0?`${SC.short} · short version`:p<PARTS.length?`Part ${p+1} of ${PARTS.length}`:'Next'; $('interH').innerHTML=p<PARTS.length?(HEAD[p]||PARTS[p][0]):'That’s the product. <span>Here’s where it goes next.</span>';
+  $('interK').textContent=p<PARTS.length?`Part ${p+1} of ${PARTS.length}`:'Next'; $('interH').innerHTML=p<PARTS.length?(HEAD[p]||PARTS[p][0]):'That’s the product. <span>Here’s where it goes next.</span>';
   $('road').innerHTML=PARTS.map(([n,d],j)=>`<li class="${j<p?'d':j===p?'n':''}"><span class="dot">${j<p?'✓':j+1}</span><b>${n}</b><small>${d}</small></li>`).join('');
   $('inter').classList.add('on'); const done=()=>{ stop(); $('inter').classList.remove('on'); go(); };
   $('interGo').onclick=done; if(watching) later(3200,done); }
-function goTo(i){ show(i); }
+function goTo(i){ if(STEPS[i].part!==STEPS[at].part) inter(i,()=>show(i)); else show(i); }
 function choose(id){ SC=CASES[id]; SEEN.add(id); ROUTE=SEEN.size>1?SHORT:FULL; ST=STEPS.map(s=>s.init()); if(ROUTE===SHORT) goTo(1); else show(1); }
 function autoplay(){ stop(); if(at===0){ later(2200,()=>{ if(watching) choose('c1'); }); return; }
   const tick=()=>{ if(!watching) return; const st=STEPS[at],s=ST[at]; if(!st.done(s)){ act(); later(2600,tick); } else later(3600,()=>{ if(watching&&nextOf()!=null) goTo(nextOf()); else { watching=false; render(); } }); }; later(1400,tick); }
@@ -589,7 +589,7 @@ $('cover').addEventListener('click',e=>{ if(!e.target.closest('button')) $('cove
 drawCover();
 
 if($('watch')) $('watch').onclick=()=>{ $('cover').hidden=true; watching=true; SEEN.clear(); ROUTE=FULL; ST=STEPS.map(s=>s.init()); goTo(0); };
-$('explore').onclick=()=>{ $('cover').hidden=true; watching=false; ROUTE=FULL; ST=STEPS.map(s=>s.init()); show(0); };
+$('explore').onclick=()=>{ $('cover').hidden=true; watching=false; ROUTE=FULL; ST=STEPS.map(s=>s.init()); at=0; show(0); inter(0,()=>{}); };
 render(true,false);
 if(/skip/.test(location.search)) $('cover').hidden=true;
 </script>
