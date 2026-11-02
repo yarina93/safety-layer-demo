@@ -470,7 +470,7 @@ const STEPS=[
              {k:'COHERE',c:'b',t:'<b>4 of 4</b> off-task steps blocked. The upload never left.'},
              {k:'HUGGING FACE',c:'b',t:'<b>4 of 4</b> escape steps blocked. The template still ran, inside.'},
              {k:'DROPPED',c:'b',t:'<b>0</b> needed calls. The agent kept working.'}],
-   extra:()=>`<div class="diff"><div><b>Decided, not recorded.</b> Declared and seen stays. Unused closes. Suspicious goes to a person.</div><div><b>Proven before it applies.</b> Replayed offline, rolled out in stages.</div><div><b>On the engines you already run.</b> Cilium, Tetragon and seccomp. No new agent in the pod.</div></div><p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`,
+   extra:()=>`<div class="diff"><div><b>Decided, not recorded.</b> Declared and seen stays. Unused closes. Suspicious goes to a person.</div><div><b>Proven before it applies.</b> Replayed offline, rolled out in stages.</div><div><b>On the engines you already run.</b> Cilium, Tetragon and seccomp today. Any engine that enforces policy, by design. No new agent in the pod.</div></div><p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`,
    act:()=>'Start over', done:()=>false, run:()=>{ $('cover').hidden=false; drawCover(); } }
 ];
 const FULL=[0,1,2,3,4,5]; let ROUTE=FULL;
