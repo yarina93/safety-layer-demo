@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0D14">
+<title>Safety Layer · Tour</title>
+<meta name="description" content="Zero Trust inside the cluster: least privilege for every workload, decided from evidence and proven before it applies.">
+<meta property="og:title" content="Safety Layer · The decision layer for runtime enforcement">
+<meta property="og:description" content="Zero Trust inside the cluster: least privilege for every workload, decided from evidence and proven before it applies.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+:root{--bg:#0A0D14;--panel:#10151F;--panel2:#141A25;--ink:#E9EDF5;--text:#B4BDCD;--muted:#7C879B;--dim:#4A5468;--line:#222A38;
+  --ok:#4CC38A;--bad:#E5484D;--warn:#E8A33D;--info:#7AA2F7;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-text-size-adjust:100%}
+button{font:inherit;cursor:pointer;color:inherit}
+.app{position:relative;max-width:460px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;padding:12px 16px calc(12px + env(safe-area-inset-bottom));overflow:hidden}
+@media (min-width:700px){body{display:grid;place-items:center;min-height:100vh}.app{height:min(100dvh,880px);border:1px solid var(--line);border-radius:28px}}
+
+/* header */
+.top{flex:none;display:flex;align-items:center;gap:12px;height:28px}
+.brand{display:flex;align-items:center;gap:7px;font-weight:600;font-size:14.5px;white-space:nowrap}.brand svg{width:18px;height:18px}
+.prog{flex:1;display:flex;gap:3px}.prog i{flex:1;height:3px;border-radius:2px;background:var(--line);transition:background .3s}.prog i.d{background:#5D687D}.prog i.n{background:var(--ink)}
+.chap{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:10px 0 8px;font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--info)}
+.chap em{font-style:normal;letter-spacing:0;color:var(--muted);font-weight:500}
+
+/* stage: fixed height, never moves */
+.stage{flex:none;height:clamp(200px,33dvh,290px);border:1px solid var(--line);border-radius:14px;background:#0D1119;overflow:hidden}
+.stage svg{width:100%;height:100%;display:block}
+.stage.in svg{animation:fin .35s ease}@keyframes fin{from{opacity:0}to{opacity:1}}
+
+/* caption: fixed region, scrolls inside */
+.cap{flex:1;min-height:0;overflow-y:auto;padding:14px 2px 6px;scrollbar-width:none}.cap::-webkit-scrollbar{display:none}
+.cap h1{font-size:22px;line-height:1.2;letter-spacing:-.015em;margin:0 0 6px;font-weight:700}
+.cap p.intro{font-size:15px;line-height:1.45;color:var(--text);margin:0 0 12px}
+.cap p.intro b{color:var(--ink);font-weight:600}
+.steps{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.steps li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);color:var(--muted);font-size:14px;line-height:1.4}
+.steps li .n{flex:none;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font:600 11px var(--mono);background:#1A2130;color:var(--muted);margin-top:0}
+.steps li.a .n{background:#3A1C20;color:#F08A8D}
+.steps li.r .n{background:#17233A;color:var(--info)}
+.steps li.cur{color:var(--ink)}
+.steps li .tag{flex:none;min-width:94px;height:20px;padding:0 6px;border-radius:6px;display:grid;place-items:center;font:600 10px var(--body);letter-spacing:.06em;background:#1A2130;color:var(--text)}
+.steps li.a .tag{background:#3A1C20;color:#F08A8D}.steps li.w .tag{background:#33281A;color:var(--warn)}.steps li.g .tag{background:#123222;color:var(--ok)}
+.steps li .t small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.steps li .t b{font-weight:600}
+.take{margin:12px 0 0;font-size:15px;line-height:1.45;color:var(--ink);font-weight:600}
+.take span{color:var(--muted);font-weight:400}
+.pick{display:flex;flex-direction:column;gap:8px;margin-top:4px}.pick button{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:12px 14px}
+.pick b{display:block;font-size:15px;font-weight:600;color:var(--ink)}.pick small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}.pick em{font-style:normal;margin-left:auto;color:var(--muted);font-size:18px}
+.wn rect{fill:#0F141E;stroke:#1E2633}.wn.on rect{fill:#121823;stroke:#2C3546}.wnn{font:700 30px var(--body);fill:var(--dim);letter-spacing:-.02em}.wn.on .wnn{fill:var(--ink)}.wnt{font:500 10.5px var(--body);fill:var(--text)}.wns{font:500 9px var(--body);fill:var(--muted)}.wns.b{font-weight:600;fill:#9AA4B6}
+.pk rect{fill:#10151F;stroke:#2C3546}.ph{font:600 11px var(--body);letter-spacing:.1em;fill:var(--info)}.pd{font:600 13.5px var(--body);fill:var(--ink)}.pw{font:500 11px var(--body);fill:var(--muted)}
+.fl rect{fill:#121823;stroke:#2A3445}.fl text{font:600 12px var(--body);fill:var(--ink)}.fl.r rect{stroke:var(--info)}.fl.a rect{stroke:var(--warn)}.fl.b rect{stroke:var(--ok)}.flar{stroke:var(--muted);stroke-width:1.4}
+.fls{font:500 9.5px var(--body);fill:var(--muted)}
+.flsub{font:500 11px var(--body);fill:var(--muted)}.ch2 rect{fill:#0F1F17;stroke:#1F4A33}.ch2 text{font:600 11px var(--mono);fill:var(--ok)}
+.jr rect{fill:#0F141E;stroke:#1E2633}.jh{font:600 9.5px var(--body);letter-spacing:.12em}.jr.a .jh{fill:#F08A8D}.jr.r .jh{fill:var(--info)}.jr.g .jh{fill:var(--ok)}.jr.g>rect{stroke:#1F4A33}
+.jc rect{fill:#151B27;stroke:#2C3546}.jc text{font:600 9px var(--mono);fill:var(--text)}.jt{font:500 11.5px var(--body);fill:var(--ink)}.jc.b0 rect{fill:#22151A;stroke:#6B2C32}.jc.b0 text{fill:#F08A8D}.jc.r0 rect{fill:#17233A;stroke:#34507F}.jc.r0 text{fill:var(--info)}.jr.g .jc rect{fill:#0F1F17;stroke:#2B6B48}.jr.g .jc text{fill:var(--ok)}
+.jh2{font:600 9px var(--body);letter-spacing:.12em;fill:var(--muted)}.dec1 rect{fill:#0F1F17;stroke:#2B6B48;stroke-width:1.4}.d1{font:700 12px var(--body);fill:var(--ink)}.d2{font:500 10px var(--mono);fill:var(--ok)}.jres{font:500 10.5px var(--body);fill:var(--muted)}.jc.g0 rect{fill:#0F1F17;stroke:#2B6B48}.jc.g0 text{fill:var(--ok)}
+.diff{margin-top:12px;border-top:1px solid var(--line)}.diff div{padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.4;color:var(--muted)}.diff b{color:var(--ok);font-weight:600}
+.tabs{display:flex;gap:6px;margin:0 0 10px}.tabs button{flex:1;height:34px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--muted);font-weight:600;font-size:13.5px}.tabs button.on{background:var(--panel2);color:var(--ink);border-color:#3A4558}
+.pc.b0 rect{fill:#22151A;stroke:#6B2C32}.pc.b0 text{fill:#F08A8D}
+.srcs{margin:10px 0 0;font-size:12.5px;color:var(--muted)}.srcs a{color:var(--info);text-decoration:none}
+.srcl{display:inline-block;margin-top:8px;font-size:13px;color:var(--info);text-decoration:none}
+
+/* bottom bar */
+.bar{flex:none;display:flex;gap:8px;padding-top:10px}
+.bar button{height:50px;border-radius:12px;border:1px solid var(--line);background:transparent;font-weight:600;font-size:15.5px}
+.bar .nav{width:52px;font-size:20px;color:var(--text)}.bar .nav:disabled{opacity:.3}
+.bar .act{flex:1;background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar .act.done{background:transparent;color:var(--muted);border-color:var(--line)}
+.bar .nav.go{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.mode{flex:none;height:8px;display:flex;justify-content:center;align-items:flex-end;font:500 12px var(--body);color:var(--muted)}
+.mode button{background:none;border:0;color:var(--info);font-weight:600;padding:0}
+
+/* svg */
+.nd .bg{fill:#121823;stroke:#2C3546;stroke-width:1}
+.nd text{font:600 12.5px var(--body);fill:var(--text)}.nd .sub{font:500 10.5px var(--body);fill:var(--muted)}
+.nd .gl{fill:none;stroke:#8C98AE;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.nd.att .bg{fill:#22151A;stroke:#6B2C32}.nd.att .gl{stroke:#F08A8D}
+.nd.dim{opacity:.4}
+.pod{fill:#111723;stroke:#2C3546;stroke-dasharray:4 4}
+.podl{font:600 9.5px var(--body);letter-spacing:.1em;fill:var(--muted)}
+.core .bg{fill:#151B27;stroke:var(--warn);stroke-width:1.5}.core .gl{fill:none;stroke:var(--warn);stroke-width:1.4;stroke-linejoin:round}
+.e{fill:none;stroke-width:1.6;stroke-linecap:round}
+.e.a{stroke:var(--bad)}.e.r{stroke:var(--info)}.e.ok{stroke:var(--ok)}.e.x{stroke:#3A4558;stroke-dasharray:3 4}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:dr .6s ease forwards}@keyframes dr{to{stroke-dashoffset:0}}
+.nb circle{fill:#0D1119;stroke:#3A4558}.nb text{font:600 10px var(--mono);fill:var(--text)}
+.nb.a circle{stroke:#8A3238}.nb.a text{fill:#F08A8D}
+.chip rect{fill:#22151A;stroke:#6B2C32}.chip text{font:600 10.5px var(--mono);fill:#F08A8D}
+.foot{font:600 9.5px var(--body);letter-spacing:.1em;fill:#8A4A50}
+.fadein{animation:fin .4s ease}
+.pod.on{stroke:#2B6B48;stroke-dasharray:none}.foot.ok{fill:#3E8E64}
+.xm circle{fill:#0A0D14;stroke:var(--ok);stroke-width:1.4}.xm path{stroke:var(--ok);stroke-width:1.6;stroke-linecap:round}
+.eng-l{font:600 9.5px var(--body);fill:var(--ok);letter-spacing:.02em}.eng-l.y{fill:var(--warn)}
+.chip.blk rect{fill:#0F1F17;stroke:#2B6B48}.chip.blk text{fill:#6FA98A;text-decoration:line-through}.chip.runs rect{fill:#2A2213;stroke:#6B5223}.chip.runs text{fill:var(--warn)}
+.steps li.r .tag{background:#17233A;color:var(--info)}.steps li.b .n,.steps li.b .tag{background:#123222;color:var(--ok)}.steps li.y .tag{background:#33281A;color:var(--warn)}
+.st rect{fill:#0F141E;stroke:#1E2633}.st.on rect{fill:#0F1F17;stroke:#2B6B48}.st text{font:600 10.5px var(--body);fill:var(--dim)}.st.on text{fill:var(--ok)}
+.hlr{fill:none;stroke:var(--warn);stroke-width:1.2}.hl-net line,.hl-net circle{animation:fin .5s ease}.bap .frame.done{stroke:#2B6B48}.bap .pt.g{fill:var(--ok)}
+.bap .frame{fill:#0F141E;stroke:#1E2633}.bap .h{font:600 10px var(--body);letter-spacing:.12em;fill:var(--muted)}.bap .pt{font:600 10px var(--mono);fill:#F08A8D}.bap .cnt{font:500 10px var(--body);fill:var(--muted)}
+.ba .h{font:600 9.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.ba .n{font:600 12px var(--body);fill:var(--text)}.ba .b{font:500 11.5px var(--mono);fill:#C06A6E}.ba .a{font:600 11.5px var(--mono);fill:var(--ok)}.ba rect{fill:#0F141E}
+.e.al{stroke:#5C6880}.e.ex{stroke:var(--bad);stroke-dasharray:3 4;opacity:.8}
+.pc rect{fill:#151B27;stroke:#2C3546}.pc text{font:600 11px var(--mono);fill:var(--text)}
+.pc.ok rect{fill:#123222;stroke:#2B6B48}.pc.ok text{fill:var(--ok)}.pc.b rect{fill:#22151A;stroke:#6B2C32}.pc.b text{fill:#F08A8D;text-decoration:line-through}
+.rowl{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}
+.eng rect{fill:#121823;stroke:#2C3546}.eng .en{font:600 13px var(--body);fill:var(--ink)}.eng .es{font:500 10.5px var(--body);fill:var(--muted)}.eng .z{font:600 11px var(--mono);fill:#F08A8D}
+.src rect{fill:#0F141E;stroke:#1E2633}.src text{font:600 11.5px var(--body);fill:var(--dim)}.src .ss{font:500 9.5px var(--body)}.src.on rect{fill:#17233A;stroke:#34507F}.src.on text{fill:var(--info)}.src.on .ss{fill:var(--muted)}
+.prof rect.card{fill:#111723;stroke:#2C3546}.prof .h{font:600 12px var(--body);fill:var(--ink)}.prof .rl{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.prof .rv{font:600 10.5px var(--mono);fill:var(--dim)}.prof .rv.on{fill:var(--ok)}
+.flow{stroke:#2C3546;stroke-width:1.3;fill:none}.flow.on{stroke:#34507F}
+.flag rect{fill:#2A1418;stroke:#6B2C32}.flag text{font:600 9.5px var(--body);letter-spacing:.06em;fill:#F08A8D}
+.pc.w rect{fill:#2A2213;stroke:#6B5223}.pc.w text{fill:var(--warn)}
+.rp .row rect{fill:#0F141E}.rp text{font:500 11px var(--mono);fill:var(--dim)}.rp .row.on text{fill:var(--text)}.rp .ok{fill:var(--ok)!important}.rp .bad{fill:#F08A8D!important}.rp .muted{fill:var(--muted)!important}
+.rp .row.rev{opacity:0;animation:fin .3s ease forwards}.rp .res rect{fill:#0F141E;stroke:#1E2633}.rp .res.pass rect{fill:#0F1F17;stroke:#2B6B48}.rp .res.fail rect{fill:#22151A;stroke:#6B2C32}.rp .res text{font:600 12px var(--body)}
+.why rect{fill:#0F141E;stroke:#1E2633;transition:fill .3s,stroke .3s}.why text{font:600 12px var(--body);fill:var(--dim)}.why.on rect{fill:#2A2213;stroke:#6B5223}.why.on text{fill:var(--warn)}
+
+/* cover */
+.cover{position:absolute;inset:0;z-index:5;background:var(--bg);display:flex;flex-direction:column;padding:28px 22px calc(18px + env(safe-area-inset-bottom))}.cover[hidden]{display:none}
+.cover .k{font:600 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--info)}
+.cover h1{font-size:31px;line-height:1.12;letter-spacing:-.02em;margin:12px 0 12px;font-weight:700}
+.cover .msg{font-size:16px;line-height:1.5;color:var(--text);margin:0}
+.cover .vis{flex:1;min-height:150px;display:flex;flex-direction:column;align-items:stretch;justify-content:center;margin:10px 0 12px}
+.cover .vis svg{width:100%;flex:1;min-height:0;max-height:300px}
+.cvcap{position:relative;height:20px;margin-top:6px;text-align:center;font:500 13px var(--body);color:var(--text)}.cvcap span{position:absolute;left:0;right:0;opacity:0}
+.cc1{animation:capio 2.4s ease forwards}.cc2{animation:capio 4.2s ease 2.4s forwards}.cc3{animation:fin .6s ease 6.9s forwards;color:var(--ok)}
+@keyframes capio{0%{opacity:0}12%{opacity:1}85%{opacity:1}100%{opacity:0}}
+.cover .btns{display:flex;flex-direction:column;gap:9px;opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .5s ease,transform .5s ease}.cover .btns.on{opacity:1;transform:none;pointer-events:auto}
+.cover .btns button{height:54px;border-radius:13px;font-weight:600;font-size:16px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;gap:8px}
+.cover .btns button.sec{background:transparent;border-color:var(--line);color:var(--ink)}
+.cover .btns small{font-weight:500;font-size:13px;opacity:.6}
+.cover .ft{text-align:center;font-size:12px;color:var(--muted);margin-top:12px}
+.lg{font:500 10.5px var(--body);fill:var(--muted)}
+.cv-out{animation:cvo .45s ease forwards}
+.cl-frame{fill:none;stroke:#2C3546;stroke-dasharray:4 4}.cl-l{font:600 8.5px var(--body);letter-spacing:.1em;fill:var(--muted)}.cl-e{stroke:#E5484D;stroke-width:1;opacity:.5}.cl-p{fill:#151B27;stroke:#4A5468}.cl-p.t{stroke:var(--warn);stroke-width:1.5}
+.cv-zoom{transform-box:view-box;animation:cvz .9s cubic-bezier(.4,0,.2,1) 1.68s forwards}@keyframes cvz{to{transform:scale(4);opacity:0}}
+.cv-inner{opacity:0;transform-box:view-box;animation:fin .5s ease 2.2s forwards,cvzo .8s cubic-bezier(.4,0,.2,1) 6.4s forwards}@keyframes cvzo{from{opacity:1;transform:none}to{opacity:0;transform:scale(.25)}}
+.cv-final{opacity:0;animation:fin .6s ease 6.8s forwards}.cl-x{stroke:#2C3546;stroke-width:1;stroke-dasharray:3 4}.cl-g{stroke:var(--ok);stroke-width:1.4}.cl-p.g{stroke:#2B6B48}
+.cv-out2{animation:cvo .3s ease forwards}.cv-in2{opacity:0;animation:fin .35s ease forwards}
+.cv-row{fill:none;stroke:var(--warn);stroke-width:1;opacity:0;animation:rowf 1.3s ease forwards}@keyframes rowf{0%{opacity:0}20%{opacity:.9}100%{opacity:0}}
+.cv-h{font:600 8.5px var(--body);letter-spacing:.12em;fill:var(--muted)}.cv-k{font:600 8.5px var(--body);letter-spacing:.08em;fill:var(--muted)}.cv-b{font:600 10.5px var(--mono);fill:#F08A8D}.cv-a{font:600 10.5px var(--mono);fill:var(--ok)}.cv-in{opacity:0;animation:fin .45s ease forwards}@keyframes cvo{to{opacity:0}}
+
+/* chapter screen */
+.inter{position:absolute;inset:0;z-index:4;background:var(--bg);display:flex;flex-direction:column;padding:28px 22px calc(18px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .3s}
+.inter.on{opacity:1;pointer-events:auto}
+.inter .ik{font:600 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--info);margin-top:auto}
+.inter h2{font-size:24px;line-height:1.25;letter-spacing:-.01em;margin:10px 0 26px;font-weight:700}
+.inter h2 span{color:var(--muted);font-weight:500}
+.road{list-style:none;margin:0 0 auto;padding:0}
+.road li{position:relative;padding:0 0 20px 36px;color:var(--dim)}
+.road li::before{content:'';position:absolute;left:11px;top:26px;bottom:2px;width:1.5px;background:var(--line)}
+.road li:last-child::before{display:none}
+.road .dot{position:absolute;left:0;top:0;width:23px;height:23px;border-radius:50%;border:1.5px solid var(--dim);display:grid;place-items:center;font:600 11px var(--mono)}
+.road li.d .dot{border-color:var(--ok);color:var(--ok)}.road li.d::before{background:#2B6B48}
+.road li.n .dot{border-color:var(--ink);color:var(--ink)}
+.road b{display:block;font-size:16.5px;line-height:23px;font-weight:600}
+.road li.n b{color:var(--ink)}.road li.d b{color:var(--text)}
+.road small{display:block;font-size:13px;margin-top:2px}
+.road li.n small{color:var(--text)}
+.inter .go{height:54px;border-radius:13px;border:0;background:var(--ink);color:var(--bg);font-weight:600;font-size:16px;margin-top:22px}
+
+@media (max-height:700px){.cap h1{font-size:19.5px}.cap p.intro{font-size:14px;margin-bottom:9px}.steps li{padding:7px 0;font-size:13.5px}.bar button{height:46px}.cover h1{font-size:27px}.cover .msg{font-size:15px}.inter h2{font-size:21px;margin-bottom:18px}.road li{padding-bottom:14px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0}.cv-final,.cc3{opacity:1}.cv-out,.cv-zoom,.cv-inner,.cc1,.cc2{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand"><svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.8v5.6c0 4.8 3.3 8.8 8 10.1 4.7-1.3 8-5.3 8-10.1V5.8z" fill="none" stroke="#7AA2F7" stroke-width="1.6"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#4CC38A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Safety Layer</div>
+    <div class="prog" id="prog"></div>
+  </div>
+  <div class="chap" id="chap"></div>
+  <div class="stage" id="stage"><svg id="map" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="cap" id="cap"></div>
+  <div class="bar"><button class="nav" id="back" aria-label="Back">‹</button><button class="act" id="act"></button><button class="nav" id="next" aria-label="Next">›</button></div>
+  <div class="mode" id="mode"></div>
+
+  <section class="inter" id="inter"><div class="ik" id="interK"></div><h2 id="interH"></h2><ol class="road" id="road"></ol><button class="go" id="interGo">Continue</button></section>
+
+  <section class="cover" id="cover">
+    <div class="k">Safety Layer</div>
+    <h1>Least privilege for AI agents.</h1>
+    <p class="msg">Decided from evidence. Proven before it applies. Enforced on the eBPF engines in your cluster.</p>
+    <div class="vis"><svg id="coverVis" viewBox="0 0 360 210" preserveAspectRatio="xMidYMid meet"></svg><div class="cvcap" id="cvcap"></div></div>
+    <div class="btns" id="coverBtns"><button id="explore">Start the tour <small>4 stations · about 2 min</small></button></div>
+    <div class="ft">Kubernetes · Cilium · Tetragon</div>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let timers=[]; const later=(ms,f)=>timers.push(setTimeout(f,reduce?Math.min(ms,60):ms)); const stop=()=>{ timers.forEach(clearTimeout); timers=[]; };
+
+// ---------- drawing helpers
+function glyph(t,x,y){ const g=d=>`<path class="gl" d="${d}"/>`;
+  if(t==='net') return `<circle class="gl" cx="${x}" cy="${y}" r="7"/><ellipse class="gl" cx="${x}" cy="${y}" rx="3.2" ry="7"/>`+g(`M${x-7} ${y}H${x+7}`);
+  if(t==='api') return `<circle class="gl" cx="${x}" cy="${y}" r="6.5"/><circle class="gl" cx="${x}" cy="${y}" r="2"/>`+[0,60,120,180,240,300].map(a=>{ const r=a*Math.PI/180; return g(`M${x+Math.cos(r)*2.5} ${y+Math.sin(r)*2.5}L${x+Math.cos(r)*8.5} ${y+Math.sin(r)*8.5}`); }).join('');
+  if(t==='db') return `<ellipse class="gl" cx="${x}" cy="${y-5}" rx="7" ry="2.6"/>`+g(`M${x-7} ${y-5}V${y+5}A7 2.6 0 0 0 ${x+7} ${y+5}V${y-5}`)+g(`M${x-7} ${y}A7 2.6 0 0 0 ${x+7} ${y}`);
+  if(t==='ai') return g(`M${x} ${y-7}L${x+2} ${y-2}L${x+7} ${y}L${x+2} ${y+2}L${x} ${y+7}L${x-2} ${y+2}L${x-7} ${y}L${x-2} ${y-2}Z`);
+  if(t==='pkg') return g(`M${x} ${y-7}L${x+6.5} ${y-3.5}V${y+3.5}L${x} ${y+7}L${x-6.5} ${y+3.5}V${y-3.5}Z`)+g(`M${x-6.5} ${y-3.5}L${x} ${y}L${x+6.5} ${y-3.5}M${x} ${y}V${y+7}`);
+  if(t==='doc') return `<rect class="gl" x="${x-5.5}" y="${y-7}" width="11" height="14" rx="1.5"/>`+g(`M${x-3} ${y-3}H${x+3}M${x-3} ${y}H${x+3}M${x-3} ${y+3}H${x+1}`);
+  if(t==='key') return `<circle class="gl" cx="${x-3}" cy="${y}" r="3.5"/>`+g(`M${x+.5} ${y}H${x+7.5}M${x+5} ${y}V${y+3}`);
+  return ''; }
+function node(x,y,label,sub,ic,cls=''){ return `<g class="nd ${cls}"><rect class="bg" x="${x-15}" y="${y-15}" width="30" height="30" rx="8"/>${glyph(ic,x,y)}<text x="${x}" y="${y+29}" text-anchor="middle">${label}</text>${sub?`<text x="${x}" y="${y+42}" text-anchor="middle" class="sub">${sub}</text>`:''}</g>`; }
+function exitRect(x1,y1,x2,y2,R){ const [rx,ry,rw,rh]=R; let tmin=1; const tryT=t=>{ if(t>0&&t<tmin){ const x=x1+(x2-x1)*t,y=y1+(y2-y1)*t; if(x>=rx-.1&&x<=rx+rw+.1&&y>=ry-.1&&y<=ry+rh+.1) tmin=t; } };
+  if(x2!==x1){ tryT((rx-x1)/(x2-x1)); tryT((rx+rw-x1)/(x2-x1)); } if(y2!==y1){ tryT((ry-y1)/(y2-y1)); tryT((ry+rh-y1)/(y2-y1)); } return [x1+(x2-x1)*tmin,y1+(y2-y1)*tmin]; }
+function trim(a,b,r1=19,r2=19){ const [x1,y1]=a,[x2,y2]=b,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L; return [x1+ux*r1,y1+uy*r1,x2-ux*r2,y2-uy*r2]; }
+const DEFS=`<defs>${[['a','#E5484D'],['r','#7AA2F7'],['ok','#4CC38A']].map(([c,f])=>`<marker id="m-${c}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="${f}"/></marker>`).join('')}</defs>`;
+const badge=(x,y,n,c)=>`<g class="nb ${c}"><circle cx="${x}" cy="${y}" r="8"/><text x="${x}" y="${y+3.5}" text-anchor="middle">${n}</text></g>`;
+function line(a,b,c,fresh,n){ const [x1,y1,x2,y2]=trim(a,b); let s=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" pathLength="1" class="e ${c} ${fresh?'draw':''}" marker-end="url(#m-${c})"/>`;
+  if(n) s+=`<g class="${fresh?'fadein':''}">${badge((x1+x2)/2,(y1+y2)/2,n,c)}</g>`; return s; }
+
+// ---------- the two real cases (one agent pod)
+const C1={N:{tasks:[50,56,'task','from Cohere','doc'],bucket:[310,56,'cloud bucket','in Beijing','net']},
+  chain:[
+  {from:'tasks',to:'core',c:'r',t:'Cohere gives the agent a <b>routine task</b>.',s:'Write a rule that detects malware downloads. It has a bash tool to work with.'},
+  {chip:'ls -la /tmp',c:'a',t:'Unasked, the model <b>looks around</b>: it lists /tmp.',s:'Nothing in the task needs it.'},
+  {chip:'which curl wget',c:'a',t:'It checks which <b>upload tools</b> exist.',s:'curl and wget send data out of the pod.'},
+  {chip:'cat resolv.conf',c:'a',t:'It reads the <b>DNS settings</b>.',s:'How names resolve from inside the network.'},
+  {from:'core',to:'bucket',c:'a',t:'It tries to <b>upload a file</b> to a bucket in Beijing.',s:'It was a test string, and a sandbox blocked it. In a normal pod, nothing would.'}]};
+const C2={pod:'WORKER POD',N:{att:[50,56,'AI agent','from OpenAI’s test','ai'],paste:[310,56,'paste sites','internet','net'],api:[310,138,'K8s API','','api'],meta:[310,212,'metadata','','key']},
+  chain:[
+  {from:'att',to:'core',c:'r',t:'Out of an OpenAI test sandbox, an AI agent uploads a <b>dataset config</b> to Hugging Face.',s:'A production worker pod processes it, like any upload.'},
+  {chip:'template → python',c:'a',t:'A template in the config <b>runs code inside the worker</b>.',s:'Template injection: the agent now runs Python in production.'},
+  {chip:'read SA token',c:'a',t:'It reads the pod’s <b>secrets and service-account token</b>.',s:'From environment variables and the mounted token file.'},
+  {from:'core',to:'api',c:'a',t:'It uses the token on the <b>K8s API</b>.',s:'Over the next days it reached cluster-admin and root on a node.'},
+  {from:'core',to:'meta',c:'a',t:'It takes <b>cloud credentials</b> from the metadata service.',s:'Then replays them from outside to map the cloud account.'},
+  {from:'core',to:'paste',c:'a',t:'It runs command and control through <b>paste sites</b>.',s:'Public paste, request-capture and file-drop services. About five days in all.'}]};
+const POD=[110,80,140,118], CORE=[180,104];
+const xm=(x,y)=>`<g class="xm"><circle cx="${x}" cy="${y}" r="8"/><path d="M${x-3.2} ${y-3.2}L${x+3.2} ${y+3.2}M${x+3.2} ${y-3.2}L${x-3.2} ${y+3.2}"/></g>`;
+const E1=[['r','','The task arrives.','Allowed. It’s the agent’s job.'],
+  ['b','Tetragon','The model tries to run <b>ls</b> through the shell.','Only python may start. The shell never runs.'],
+  ['b','Tetragon','It tries <b>which curl wget</b>.','No shell, so no look-around.'],
+  ['b','Tetragon','It tries to <b>read the DNS settings</b>.','Same rule: cat can’t start.'],
+  ['b','Cilium','It tries to <b>upload to the bucket</b> in Beijing.','Egress only to model-store, task queue, kb and DNS. Dropped.']];
+const E2=[['r','','The upload <b>is processed</b> as usual.','Allowed: it’s the worker’s job.'],
+  ['y','','The template still <b>runs Python in the worker</b>.','Not blocked: python is what the worker runs. The bug is in the app.'],
+  ['b','Tetragon','It tries to read the <b>service-account token</b>.','The worker never reads it, so access is denied. Secrets already in its environment stay readable.'],
+  ['b','Cilium','It tries the <b>K8s API</b>.','The worker never calls it. Dropped.'],
+  ['b','Cilium','It tries the <b>metadata service</b>.','169.254.169.254 is not in its egress. Dropped.'],
+  ['b','Cilium','It tries to reach <b>paste sites</b>.','No internet egress. Dropped.']];
+function sceneCase(C,n,fresh,E){ const [px,py,pw,ph]=POD; let s=DEFS, chips=0;
+  const LBL=!E||C.chain.filter((c,i)=>!c.chip&&E[i][0]==='b').length<=1;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod ${E?'on':''}"/><text x="180" y="${py+ph+15}" text-anchor="middle" class="podl">${C.pod||'AGENT POD'}</text>`;
+  const P=k=>k==='core'?CORE:C.N[k];
+  C.chain.forEach((st,i)=>{ if(i>=n) return; const f=fresh&&i===n-1;
+    const B=E&&E[i][0]==='b';
+    if(st.chip){ const y=128+chips*22; chips++; const w=Math.max(70,st.chip.length*6.6+14);
+      s+=`<g class="chip ${B?'blk':''} ${E&&!B?'runs':''} ${f?'fadein':''}"><rect x="${180-w/2}" y="${y}" width="${w}" height="18" rx="5"/><text x="180" y="${y+12.5}" text-anchor="middle">${st.chip}</text></g><g class="${f?'fadein':''}">${badge(180-w/2-11,y+9,i+1,'a')}${B&&LBL?`<text x="${180+w/2+6}" y="${y+12.5}" class="eng-l">✕ ${E[i][1]}</text>`:''}</g>`; return; }
+    if(B){ const [x1,y1,x2,y2]=trim(CORE,P(st.to)); const [bx,by]=exitRect(x1,y1,x2,y2,POD); s+=`<line x1="${x1}" y1="${y1}" x2="${bx}" y2="${by}" class="e a ${f?'draw':''}" pathLength="1"/><line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e x"/><g class="${f?'fadein':''}">${xm(bx,by)}${LBL?`<text x="${bx+(bx>180?12:-12)}" y="${by-10}" text-anchor="${bx>180?'start':'end'}" class="eng-l">${E[i][1]}</text>`:''}${LBL?badge((x1+bx)/2,(y1+by)/2,i+1,'a'):badge(x2-(x2-bx)*0.45,y2-(y2-by)*0.45,i+1,'a')}</g>`; return; }
+    s+=line(P(st.from),P(st.to),E?'r':st.c,f,i+1); });
+  s+=`<g class="nd core"><circle class="bg" cx="${CORE[0]}" cy="${CORE[1]}" r="16"/>${glyph('ai',CORE[0],CORE[1])}</g>`;
+  s+=Object.entries(C.N).map(([k,[x,y,l,sub,ic]])=>{ const hit=C.chain.slice(0,n).some(c=>c.from===k||c.to===k); const inb=C.chain[0].from===k; return node(x,y,l,sub,ic,hit?(inb||E?'':'att'):'dim'); }).join('');
+  s+=E?`<text x="180" y="254" text-anchor="middle" class="foot ok">ENFORCED · ${E.slice(0,n).filter(e=>e[0]==='b').length} BLOCKED · ${E.slice(0,n).filter(e=>e[0]!=='b').length} ALLOWED</text>`:`<text x="180" y="254" text-anchor="middle" class="foot">DEFAULT-ALLOW · EVERY PATH OPEN</text>`;
+  return s; }
+
+// ---------- the gap: allowed vs needed
+const GP={core:[180,88],pod:[92,58,176,158],
+  N:{store:[44,40,'model-store','db',1],tasks:[44,124,'task queue','doc',1],kb:[44,208,'kb','db',1],dns:[180,26,'kube-dns','api',1],
+     net:[316,40,'internet','net',0],api:[316,124,'K8s API','api',0],meta:[316,208,'metadata','key',0],pods:[180,226,'other pods','doc',0]}};
+function sceneGap(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/>`;
+  Object.entries(GP.N).forEach(([key,[x,y,l,ic,need]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18);
+    const c=k<1?'al':need?'ok':'ex'; s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${c}"/>`; });
+  s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
+  const chips=(y,lab,items)=>{ const W=items.map(([t])=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
+  s+=chips(108,'',[['python',k>=2?'ok':''],['shell',k>=2?'b':''],['curl',k>=2?'b':'']]);
+  s+=chips(132,'',[['/app',k>=3?'ok':''],['token',k>=3?'b':''],['~/.aws',k>=3?'b':'']]);
+  s+=chips(156,'',[['root',k>=4?'b':''],['caps',k>=4?'b':'']]);
+  s+=chips(180,'',[['AF_ALG',k>=5?'b':''],['unshare',k>=5?'b':'']]);
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,pf().lab[key]||l,'',ic,k>=1&&!need?'att':'')).join('');
+  return s; }
+
+// ---------- why it stays open
+function sceneWhy(k){ let s=DEFS;
+  [['Cilium','network policy',22],['Tetragon','runtime policy',188]].forEach(([n,sub,x])=>{ s+=`<g class="eng"><rect x="${x}" y="24" width="150" height="70" rx="12"/><text x="${x+14}" y="50" class="en">${n}</text><text x="${x+14}" y="66" class="es">installed · ${sub}</text><text x="${x+14}" y="83" class="z">0 rules enforced</text></g>`; });
+  s+=`<path d="M180 108v20" stroke="#3A4558" stroke-width="1.4"/><text x="180" y="146" text-anchor="middle" class="rowl" style="font-size:10px">WHY?</text>`;
+  ['Knowledge','Scale','Change'].forEach((t,i)=>{ const x=22+i*110; s+=`<g class="why ${i<k?'on':''}"><rect x="${x}" y="162" width="96" height="44" rx="10"/><text x="${x+48}" y="188" text-anchor="middle">${t}</text></g>`; });
+  return s; }
+
+// ---------- evidence
+function sceneEv(k){ let s=DEFS; const SRC=pf().src;
+  SRC.forEach(([n,sub],i)=>{ const y=14+i*48, on=i<k; s+=`<g class="src ${on?'on':''}"><rect x="10" y="${y}" width="122" height="40" rx="10"/><text x="22" y="${y+18}">${n}</text><text x="22" y="${y+32}" class="ss">${sub}</text></g><path d="M136 ${y+20} C 168 ${y+20}, 168 134, 196 134" class="flow ${on?'on':''}"/>`; });
+  const R=pf().rows, LY=[74,null,null,162,198,234], VY=[88,124,140,176,212,248];
+  s+=`<g class="prof"><rect class="card" x="198" y="14" width="152" height="244" rx="12"/><text x="212" y="42" class="h">${pf().prof}</text>`;
+  R.forEach(([l,v,need],i)=>{ const on=k>=need, ly=i===1&&l?110:LY[i], vy=i===1&&l?124:VY[i]; s+=`${l?`<text x="212" y="${ly}" class="rl">${l}</text>`:''}<text x="212" y="${vy}" class="rv ${on?'on':''}">${on?v:'·'}</text>`; });
+  return s+'</g>'; }
+
+// ---------- decide
+function sceneDec(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/>`;
+  Object.entries(GP.N).forEach(([key,[x,y,l,ic,need]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18);
+    if(need) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=1?'ok':'al'}"/>`;
+    else { s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k>=2?'x':'al'}"/>`; if(k>=2) s+=`<circle cx="${bx}" cy="${by}" r="6" fill="#0A0D14" stroke="#4A5468"/><path d="M${bx-2.6} ${by-2.6}L${bx+2.6} ${by+2.6}M${bx+2.6} ${by-2.6}L${bx-2.6} ${by+2.6}" stroke="#9AA4B6" stroke-width="1.3" stroke-linecap="round"/>`; } });
+  s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
+  const crow=(y,it)=>{ const W=it.map(([t])=>Math.max(42,t.length*7+12)), g=4; let x=180-(W.reduce((a,b)=>a+b,0)+g*(it.length-1))/2; it.forEach(([t,c],n)=>{ s+=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[n]}" height="19" rx="5"/><text x="${x+W[n]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[n]+g; }); };
+  const X=k>=2?'b':'';
+  const A=pf().askChip;
+  crow(108,[['python',k>=1?'ok':''],[k>=4&&A==='shell'?'shell ?':'shell',k>=4&&A==='shell'?'w':X],['curl',X]]);
+  crow(132,[['/app',k>=1?'ok':''],[k>=4&&A==='token'?'token ?':'token',k>=4&&A==='token'?'w':X],['~/.aws',X]]);
+  crow(156,[['root',X],['caps',X]]);
+  crow(180,[['AF_ALG',X],['unshare',X]]);
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,pf().lab[key]||l,'',ic,!need&&k>=2?'dim':'')).join('');
+  if(k>=3) s+=`<g class="flag fadein"><rect x="214" y="4" width="140" height="20" rx="6"/><text x="284" y="17.5" text-anchor="middle">KEPT OUT · ${pf().keptFlag}</text></g>`;
+  return s; }
+
+// ---------- prove
+function sceneProve(k){ let s=DEFS+'<g class="rp">'; const W=pf().who, RP=pf().rp.map((t,i)=>[`${W} → ${t}`,i<4?'kept':'dropped']);
+  s+=`<text x="16" y="28" class="muted" style="font-family:var(--body);font-weight:600;font-size:10px;letter-spacing:.1em">REPLAY · A WEEK OF RECORDED TRAFFIC</text>`;
+  RP.forEach(([c,r],i)=>{ const y=42+i*30, on=k>=1, miss=k===2&&i===1; const res=!on?'':miss?'would drop':r; const cl=!on?'':miss?'bad':r==='kept'?'ok':'muted';
+    s+=`<g class="row ${on?'on':''} ${on&&k===1?'rev':''}" style="animation-delay:${i*.22}s"><rect x="10" y="${y}" width="340" height="24" rx="6"/><text x="20" y="${y+16}">${c}</text><text x="340" y="${y+16}" text-anchor="end" class="${cl}">${res}</text></g>`; });
+  if(k>=1){ const pass=k!==2; s+=`<g class="res ${pass?'pass':'fail'} ${k===1?'rev':''}" style="animation-delay:1.2s;${k===1?'opacity:0;animation:fin .3s ease 1.2s forwards':''}"><rect x="10" y="202" width="340" height="40" rx="9"/><text x="180" y="227" text-anchor="middle" class="${pass?'ok':'bad'}">${pass?'PASS · every needed connection still works':'FAIL · the policy is not applied'}</text></g>`; }
+  return s+'</g>'; }
+
+// ---------- enforce in stages
+const STG=[['K8s API, metadata',['api','meta']],['Internet',['net']],['East-west',['pods']],['Inside the pod',[]]];
+function sceneStage(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS; const closed=STG.slice(0,k).flatMap(x=>x[1]);
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod ${k>=4?'on':''}"/>`;
+  Object.entries(GP.N).forEach(([key,[x,y,l,ic,need]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18);
+    if(need) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ok"/>`;
+    else if(closed.includes(key)) s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e x"/>`+xm(bx,by);
+    else s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ex"/>`; });
+  s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
+  const row=(y,items)=>{ const W=items.map(([t])=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map(([t,c],i)=>{ const r=`<g class="pc ${c}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
+  const c4=k>=4?'b':'';
+  s+=row(108,[['python','ok'],['shell',c4],['curl',c4]])+row(132,[['/app','ok'],['token',c4],['~/.aws',c4]])+row(156,[['root',c4],['caps',c4]])+row(180,[['AF_ALG',c4],['unshare',c4]]);
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic,need]])=>node(x,y,pf().lab[key]||l,'',ic,closed.includes(key)?'dim':need?'':'att')).join('');
+  return s; }
+// ---------- before and after
+const BA=[['Network','8 destinations','4 needed'],['Programs','any binary','python'],['Privileges','root possible','none'],['Kernel calls','all of them','the ones it uses'],['Case 1','upload to Beijing','blocked'],['Case 2','shell, call-out, Copy Fail','blocked'],['Needed, dropped','','0']];
+function baPanel(x0,st,after,k){ return (function(){ const panel=(x0,st,after)=>{ const C=[x0+84,130], P=[x0+28,92,112,78]; let g=`<g class="bap ${after?'aft':''}"><rect x="${x0}" y="8" width="168" height="244" rx="14" class="frame ${after&&k>=7?'done':''}"/><text x="${x0+14}" y="28" class="h">${after?'AFTER':'BEFORE'}</text>`;
+    const net=st>=1, E=[[x0+84,44,1],[x0+150,56,0],[x0+158,130,1],[x0+150,206,0],[x0+84,218,1],[x0+18,206,0],[x0+10,130,1],[x0+18,56,0]];
+    g+=`<g class="${after&&k===1?'hl-net':''}">`;
+    E.forEach(([x,y,need])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,P);
+      if(!net) g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e a" style="opacity:.75"/><circle cx="${x}" cy="${y}" r="3.5" fill="#22151A" stroke="#E5484D"/>`;
+      else if(need) g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e ok"/><circle cx="${x}" cy="${y}" r="3.5" fill="#123222" stroke="#4CC38A"/>`;
+      else g+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x"/><circle cx="${x}" cy="${y}" r="3" fill="none" stroke="#3A4558"/>`+xm(bx,by); });
+    g+='</g>';
+    g+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="10" class="pod ${after&&k>=5?'on':''}"/>`;
+    [['any binary','python only',2],['any file','own files',3],['root','no root',4],['all syscalls','few syscalls',5]].forEach(([b,a,need],r)=>{ const on=st>=need, y=P[1]+16+r*16, hl=after&&k===need;
+      if(hl) g+=`<rect x="${P[0]+6}" y="${y-11}" width="${P[2]-12}" height="15" rx="4" class="hlr"/>`;
+      g+=`<text x="${C[0]}" y="${y}" text-anchor="middle" class="pt ${on?'g':''}">${on?a:b}</text>`; });
+    const n=[st>=1?'4 paths':'8 paths', st>=2?'python':'any binary', st>=3?'no root':'root'];
+    g+=`<text x="${x0+84}" y="240" text-anchor="middle" class="cnt">${n.join(' · ')}</text>`;
+    return g+'</g>'; };
+  return panel(x0,st,after); })(); }
+function sceneBA(k){ return DEFS+baPanel(6,0,false,k)+baPanel(186,Math.min(k,5),true,k); }
+function sceneSum(){ return DEFS+baPanel(96,5,true,7); }
+
+// ---------- screens
+const CASES={
+ c1:{id:'c1',short:'case 1',name:'The model goes off-task',who:'Cohere',C:C1,E:E1,
+   t:'The model goes off-task.',p:'In its own test, Cohere ran an AI agent on a popular open-weight model. There was <b>no attacker</b> and no malicious prompt.',
+   a0:'Give it the task',take:'The model went off-task on its own. <span>You can’t fully trust a model you didn’t train.</span>',
+   src:['Cohere, Oct 2026','https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model'],
+   used:'It used a shell, curl and the internet. <span>All excess.</span>',
+   againP:'The pod is now enforced. Same model, same task: <b>watch where each step is stopped</b>.',againTake:'4 of 5 steps blocked, by two engines. <span>The model misbehaved, and nothing left the pod.</span>',
+   ba:['upload to Beijing','blocked']},
+ c2:{id:'c2',short:'case 2',name:'An AI agent breaks into production',who:'Hugging Face',C:C2,E:E2,
+   t:'An AI agent breaks into production.',p:'In July 2026, AI agents running an OpenAI evaluation escaped their sandbox and broke into Hugging Face. <b>They got in through an ordinary worker pod.</b>',
+   a0:'Upload the config',take:'Every step used access the worker never needed. <span>Hugging Face closed it afterwards, by hand.</span>',
+   src:['Hugging Face, Jul 2026','https://huggingface.co/blog/agent-intrusion-technical-timeline'],
+   used:'It used the token, the K8s API, the metadata service and the internet. <span>All excess.</span>',
+   againP:'The worker pod is now enforced. Same upload, same bug in the app: <b>watch where each step is stopped</b>.',againTake:'The code still ran. <span>It couldn’t reach anything.</span>',
+   ba:['token, K8s API, metadata, C2','blocked']}};
+const PF={
+ c1:{who:'agent',lab:{store:'model-store',tasks:'task queue',kb:'kb'},needTxt:'The model store, the task queue, the knowledge base and DNS.',
+   src:[['Agent config','model, tools, MCP'],['Model source','where it comes from'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','platform needs']],
+   prof:'Agent profile',rows:[['MODEL','model-store only',2],['NETWORK','task queue · kb',1],['','kube-dns',5],['PROGRAMS','python',4],['SHELL TOOL','declared, unused',4],['SYSCALLS','the few it uses',4]],
+   ev:[{k:'AGENT CONFIG',c:'r',t:'<b>Declares</b> its model, a task queue and kb (via MCP), and two tools: python and a shell.'},{k:'MODEL SOURCE',c:'r',t:'<b>Weights</b> come only from the internal model store.'},{k:'HUBBLE',c:'r',t:'<b>Connects</b> to the model store, task queue and kb. Nothing else in a week.'},{k:'TETRAGON',c:'r',t:'<b>Runs</b> python only, with a short list of syscalls. The shell tool was never used.'},{k:'K8S API',c:'r',t:'<b>Needs</b> DNS from the platform. Never calls the K8s API.'}],
+   needed:'Declared and seen: model store, task queue, kb and DNS.',kept:'If the model called out during learning, that call is in the traffic. It was never declared, so it never becomes a rule.',keptFlag:'cloud bucket',
+   ask:'The shell tool is declared but never used. Removing it is one approval.',askChip:'shell',miss:'the task queue',rp:['model-store','task queue','kb','kube-dns','cloud bucket'],out:'The call to the bucket drops, as decided.'},
+ c2:{who:'worker',lab:{store:'storage',tasks:'job queue',kb:'hub API'},needTxt:'Its storage, job queue, the hub API and DNS (simplified: the real dependencies aren’t public).',
+   src:[['Manifest','what it declares'],['Hubble','where it connects'],['Tetragon','what it runs'],['K8s API','platform needs']],
+   prof:'Worker profile',rows:[['NETWORK','storage · job queue',1],['','hub API',1],['','kube-dns',4],['PROGRAMS','python',3],['FILES','its own paths',3],['SYSCALLS','the few it uses',3]],
+   ev:[{k:'MANIFEST',c:'r',t:'<b>Declares</b> its storage, job queue and hub API in its config.'},{k:'HUBBLE',c:'r',t:'<b>Connects</b> to those three, plus DNS. Nothing else in a week.'},{k:'TETRAGON',c:'r',t:'<b>Runs</b> python only. Never reads the service-account token.'},{k:'K8S API',c:'r',t:'<b>Needs</b> DNS from the platform. Never calls the K8s API.'}],
+   needed:'Declared and seen: storage, job queue, hub API and DNS.',kept:'If an attacker was already inside during learning, those calls are in the traffic. They were never declared, so they never become rules.',keptFlag:'paste sites',
+   ask:'Its service-account token is mounted but never read. Removing the mount is one approval.',askChip:'token',miss:'the job queue',rp:['storage','job queue','hub API','kube-dns','paste site'],out:'The call to the paste site drops, as decided.'}};
+let SC=CASES.c1; const pf=()=>PF[(STEPS[at]&&STEPS[at].label().startsWith('Station 3'))?'c1':SC.id]; const SEEN=new Set();
+const PARTS=[['The problem','A real case · the gap · why it stays open · why now'],['How we decide','Evidence · decide · prove'],['The result','Enforce · the same case · before and after']];
+const HEAD=['AI agents already act on their own. <span>What a pod is allowed to do decides the damage.</span>','The engines exist. What’s missing is the decision. <span>Here’s how we make it.</span>','Decided from evidence, proven offline. <span>Now it goes live.</span>','That was one agent. <span>Here’s why this matters now.</span>'];
+const lst=(rows)=>rows;
+// ---------- the 4 stations
+function sceneOpen(k){ const [px,py,pw,ph]=GP.pod, C=GP.core; let s=DEFS;
+  s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" rx="14" class="pod"/>`;
+  Object.entries(GP.N).forEach(([key,[x,y]])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,GP.pod); const [,,x2,y2]=trim([bx,by],[x,y],0,18); s+=`<line x1="${bx}" y1="${by}" x2="${x2}" y2="${y2}" class="e ${k?'a':'al'}"/>`; });
+  s+=`<g class="nd core"><circle class="bg" cx="${C[0]}" cy="${C[1]}" r="15"/>${glyph('ai',C[0],C[1])}</g>`;
+  const row=(y,items)=>{ const W=items.map(t=>Math.max(42,t.length*7+12)),g=4,tot=W.reduce((a,b)=>a+b,0)+(items.length-1)*g; let x=180-tot/2; return items.map((t,i)=>{ const r=`<g class="pc ${k?'b0':''}"><rect x="${x}" y="${y}" width="${W[i]}" height="19" rx="5"/><text x="${x+W[i]/2}" y="${y+13.5}" text-anchor="middle">${t}</text></g>`; x+=W[i]+g; return r; }).join(''); };
+  s+=row(108,['any binary'])+row(132,['any file'])+row(156,['root'])+row(180,['all syscalls']);
+  s+=Object.entries(GP.N).map(([key,[x,y,l,ic]])=>node(x,y,PF.c1.lab[key]||l,'',ic,k?'att':'')).join('');
+  return s; }
+const tabs=(s)=>`<div class="tabs">${['c1','c2'].map(id=>`<button data-tab="${id}" class="${s.c===id?'on':''}">${CASES[id].who}${(s[id]||0)>=CASES[id].C.chain.length?' ✓':''}</button>`).join('')}</div>`;
+const caseDone=(s,id)=>(s[id]||0)>=CASES[id].C.chain.length;
+const STEPS=[
+ { label:()=>'Station 1 · The problem',
+   t:'Your agent is smart. Its blast radius isn’t.',
+   p:'An AI agent in Kubernetes runs with the defaults: it can reach, run and read almost anything.',
+   init:()=>({k:0}),
+   svg:s=>sceneOpen(s.k),
+   list:s=>s.k?[{k:'NETWORK',c:'a',t:'<b>8 destinations reachable.</b> Internet, K8s API, cloud metadata, every pod.'},
+              {k:'PROGRAMS',c:'a',t:'<b>Any binary can start.</b> A shell, curl, anything.'},
+              {k:'FILES',c:'a',t:'<b>Any file is readable,</b> including its service-account token.'},
+              {k:'PRIVILEGES',c:'a',t:'<b>Root is possible.</b>'},
+              {k:'SYSCALLS',c:'a',t:'<b>Every syscall is open,</b> including the ones kernel exploits need.'}]:[],
+   allSubs:true,
+   act:s=>s.k?'Blast radius shown':'Show the blast radius', done:s=>s.k>=1, run:s=>{ s.k=1; },
+   take:s=>s.k?'Smart agents act on their own. <span>What the pod allows decides the damage.</span>':'' },
+ { label:()=>'Station 2 · The pain',
+   t:'Two real incidents. Every step worked.',
+   p:'Both from 2026. Guardrails on the prompt can’t see what happens after the code runs.',
+   init:()=>({c:'c1',c1:0,c2:0}),
+   svg:(s,f)=>sceneCase(CASES[s.c].C,s[s.c],f),
+   tabs:true,
+   list:s=>CASES[s.c].C.chain.slice(0,s[s.c]),
+   act:s=>!caseDone(s,s.c)?(s[s.c]?'Next step':CASES[s.c].a0):!caseDone(s,s.c==='c1'?'c2':'c1')?`Now: ${CASES[s.c==='c1'?'c2':'c1'].who} ›`:'Both incidents shown',
+   done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
+   run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
+   take:s=>caseDone(s,s.c)?(caseDone(s,'c1')&&caseDone(s,'c2')?'No alert stopped either one. <span>Everything they needed was already allowed.</span>':CASES[s.c].take):'',
+   src:s=>caseDone(s,s.c)?CASES[s.c].src:null },
+ { label:()=>'Station 3 · The game changer',
+   t:'Decide from evidence. Prove it offline.',
+   p:'No hand-written rules, and nothing touches production until it’s proven safe.',
+   init:()=>({k:0}),
+   svg:s=>s.k<=1?sceneEv(s.k?5:0):s.k===2?sceneDec(4):sceneProve(1),
+   list:s=>[{k:'EVIDENCE',c:'r',t:'<b>Five sources, one profile.</b>',s:'Agent config (model, tools, MCP), model source, Hubble, Tetragon and the K8s API.'},
+            {k:'DECIDE',c:'g',t:'<b>Decide. Don’t just record.</b>',s:'Needed stays open. Excess closes. Seen but unexplained stays out. Unclear goes to a person.'},
+            {k:'REPLAY',c:'b',t:'<b>A week of real traffic, replayed offline.</b>',s:'Every needed call still works. If one would break, nothing is applied.'}].slice(0,s.k),
+   allSubs:true,
+   act:s=>['Collect the evidence','Decide','Replay'][s.k]||'Proven',
+   done:s=>s.k>=3, run:s=>{ s.k++; },
+   take:s=>s.k>=3?'Zero enforcement paralysis. <span>Only a proven policy reaches production.</span>':'' },
+ { label:()=>'Station 4 · The punchline',
+   t:'Same incidents. Enforced.',
+   p:'Rolled out in stages on Cilium, Tetragon and seccomp. Watch where each step stops.',
+   init:()=>({c:'c1',c1:0,c2:0}),
+   svg:(s,f)=>sceneCase(CASES[s.c].C,s[s.c],f,CASES[s.c].E),
+   tabs:true,
+   list:s=>CASES[s.c].E.slice(0,s[s.c]).map(([st,eng,t,why])=>({k:st==='b'?'BLOCKED':st==='y'?'RUNS':'ALLOWED',c:st==='b'?'b':st==='y'?'y':'r',t:t,s:(eng?`<b>${eng}:</b> `:'')+why})),
+   act:s=>!caseDone(s,s.c)?(s[s.c]?'Next step':CASES[s.c].a0):!caseDone(s,s.c==='c1'?'c2':'c1')?`Now: ${CASES[s.c==='c1'?'c2':'c1'].who} ›`:'Start over',
+   done:()=>false,
+   run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else if(!caseDone(s,s.c==='c1'?'c2':'c1')){ s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } else { $('cover').hidden=false; drawCover(); } },
+   take:s=>caseDone(s,'c1')&&caseDone(s,'c2')?'The code still ran. <span>It couldn’t reach anything.</span>':caseDone(s,s.c)?CASES[s.c].againTake:'',
+   extra:s=>caseDone(s,'c1')&&caseDone(s,'c2')?`<div class="diff"><div><b>Least privilege for AI agents.</b> Every layer, one decision: network, programs, files, privileges, syscalls.</div><div><b>Decided from evidence, proven before it applies.</b> No hand-written rules, no broken production.</div></div><p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`:'' }
+];
+const FULL=[0,1,2,3]; let ROUTE=FULL;
+
+function sceneJourney(){ let s=DEFS; const blk=SC.E.filter(e=>e[0]==='b').length, tot=SC.E.length;
+  const L=['network','programs','files','privileges','syscalls'], E=['Cilium','Tetragon','seccomp'];
+  s+=`<text x="58" y="20" text-anchor="middle" class="jh2">EVERY LAYER</text><text x="180" y="20" text-anchor="middle" class="jh2">ONE DECISION</text><text x="302" y="20" text-anchor="middle" class="jh2">ENGINES</text>`;
+  L.forEach((t,i)=>{ const y=34+i*34; s+=`<g class="jc g0"><rect x="10" y="${y}" width="96" height="24" rx="6"/><text x="58" y="${y+16}" text-anchor="middle">${t}</text></g><path d="M108 ${y+12} C 124 ${y+12}, 124 110, 132 110" class="flow on"/>`; });
+  s+=`<g class="dec1"><rect x="132" y="66" width="96" height="88" rx="12"/><text x="180" y="98" text-anchor="middle" class="d1">one profile</text><text x="180" y="114" text-anchor="middle" class="d2">evidence</text><text x="180" y="127" text-anchor="middle" class="d2">decision</text><text x="180" y="140" text-anchor="middle" class="d2">proof</text></g>`;
+  E.forEach((t,i)=>{ const y=56+i*40; s+=`<path d="M228 110 C 236 110, 236 ${y+12}, 252 ${y+12}" class="flow on"/><g class="jc r0"><rect x="252" y="${y}" width="100" height="24" rx="6"/><text x="302" y="${y+16}" text-anchor="middle">${t}</text></g>`; });
+  s+=`<text x="180" y="212" text-anchor="middle" class="jres">${SC.short}: ${blk} of ${tot} attack steps blocked · 0 needed dropped</text>`;
+  return s; }
+function endBlock(){ const o=Object.values(CASES).find(c=>!SEEN.has(c.id));
+  return `${o?`<div class="pick" style="margin-top:12px"><button data-case="${o.id}"><span><b>See ${o.short}: ${o.name.toLowerCase()}</b><small>${o.who} · 4 screens</small></span><em>›</em></button></div>`:''}<p class="take" style="font-weight:500;color:var(--muted);font-size:14px">Building with a small group of early partners.</p>`; }
+function baRows(){ return [['NETWORK','<b>8 → 4 destinations.</b> Internet, K8s API, metadata and other pods closed.','Close the network'],['PROGRAMS','<b>Any binary → python only.</b> No shell, no curl.','Lock programs'],['FILES','<b>Any file → its own.</b> No token, no cloud credentials.','Limit files'],['PRIVILEGES','<b>Root → no root.</b> No capabilities.','Drop privileges'],['SYSCALLS','<b>All → the few it uses.</b> No AF_ALG, no namespaces.','Cut syscalls'],[SC.short.toUpperCase(),`<b>${SC.ba[0]} → ${SC.ba[1]}.</b>`,`Replay ${SC.short}`],['DROPPED','<b>0</b> needed connections. The agent still works.','Check what broke']]; }
+const WN=[['58%','of organizations miss a network policy on most workloads',['Fairwinds benchmark, 2024','330,000+ workloads']],['45%','had a security incident at runtime in the last year',['Red Hat survey, 2024','600 practitioners']],['2','Linux root bugs, eight days apart, reachable from inside a pod',['Public disclosures','Apr 29 and May 7, 2026']],['40%','of enterprise apps to include AI agents by 2026',['Gartner forecast, 2025','a prediction, not a count']]];
+function sceneWhyNow(k){ let s=DEFS;
+  WN.forEach(([n,t,src],i)=>{ const x=8+(i%2)*176, y=8+Math.floor(i/2)*124, on=i<k;
+    s+=`<g class="wn ${on?'on':''}"><rect x="${x}" y="${y}" width="168" height="116" rx="12"/><text x="${x+14}" y="${y+38}" class="wnn">${on?n:'·'}</text>`;
+    if(on){ const words=t.split(' '); let line='',ly=y+54; words.forEach(w=>{ if((line+' '+w).trim().length>25){ s+=`<text x="${x+14}" y="${ly}" class="wnt">${line.trim()}</text>`; ly+=14; line=w; } else line+=' '+w; }); s+=`<text x="${x+14}" y="${ly}" class="wnt">${line.trim()}</text><text x="${x+14}" y="${y+99}" class="wns b">${src[0]}</text><text x="${x+14}" y="${y+110}" class="wns">${src[1]}</text>`; }
+    s+='</g>'; });
+  return s; }
+function scenePick(){ let s=DEFS; const B=[[20,'Case 1',['The model','goes off-task'],'Cohere · 2026','pkg'],[188,'Case 2',['An agent breaks','into production'],'Hugging Face · 2026','ai']];
+  B.forEach(([x,h,d,w,ic])=>{ s+=`<g class="pk"><rect x="${x}" y="40" width="152" height="170" rx="14"/><g class="nd att"><rect class="bg" x="${x+16}" y="58" width="30" height="30" rx="8"/>${glyph(ic,x+31,73)}</g><text x="${x+16}" y="120" class="ph">${h}</text><text x="${x+16}" y="142" class="pd">${d[0]}</text><text x="${x+16}" y="160" class="pd">${d[1]}</text><text x="${x+16}" y="190" class="pw">${w}</text></g>`; });
+  return s; }
+function sceneNext(){ let s=DEFS; const F=[['Evidence','r','5 sources'],['Decide','a','keep · close'],['Prove','b','replay first'],['Enforce','b','in stages']];
+  F.forEach(([t,c,sub],i)=>{ const x=10+i*86; s+=`<g class="fl ${c}"><rect x="${x}" y="70" width="82" height="54" rx="10"/><text x="${x+41}" y="94" text-anchor="middle">${t}</text><text x="${x+41}" y="112" text-anchor="middle" class="fls">${sub}</text></g>`; });
+  s+=`<text x="180" y="160" text-anchor="middle" class="flsub">on open-source eBPF engines</text>`;
+  [['Cilium',40,80],['Tetragon',128,92],['seccomp',228,92]].forEach(([t,x,w])=>{ s+=`<g class="ch2"><rect x="${x}" y="176" width="${w}" height="26" rx="7"/><text x="${x+w/2}" y="193" text-anchor="middle">${t}</text></g>`; });
+  return s; }
+
+// ---------- engine
+let at=0, ST=STEPS.map(s=>s.init()), watching=false;
+const pos=()=>ROUTE.indexOf(at), nextOf=()=>ROUTE[pos()+1], prevOf=()=>ROUTE[pos()-1];
+const val=(v,s)=>typeof v==='function'?v(s):v;
+function render(changed,fresh){
+  const st=STEPS[at], s=ST[at];
+  $('prog').innerHTML=ROUTE.map((_,i)=>`<i class="${i<pos()?'d':i===pos()?'n':''}"></i>`).join('');
+  $('chap').innerHTML=`<span>${val(st.label)}</span><em>${pos()+1} / ${ROUTE.length}</em>`;
+  $('map').innerHTML=st.svg(s,fresh);
+  if(changed){ const g=$('stage'); g.classList.remove('in'); void g.offsetWidth; g.classList.add('in'); }
+  const L=st.list?st.list(s):[], tk=st.take?st.take(s):'', src=typeof st.src==='function'?st.src(s):st.src;
+  $('cap').innerHTML=`<h1>${val(st.t)}</h1><p class="intro">${val(st.p)}</p>${st.tabs?tabs(s):''}${st.extraFirst&&st.extra?st.extra():''}${L.length?`<ol class="steps">${L.map((x,i)=>`<li class="${x.c} ${i===L.length-1||!st.take||st.allSubs?'cur':''}">${x.k?`<span class="tag">${x.k}</span>`:`<span class="n">${i+1}</span>`}<span class="t">${x.t}${(i===L.length-1||!st.take||st.allSubs)&&x.s?`<small>${x.s}</small>`:''}</span></li>`).join('')}</ol>`:''}${tk?`<p class="take">${tk}</p>`:''}${!st.extraFirst&&st.extra?st.extra(s):''}${src&&tk?`<a class="srcl" href="${src[1]}" target="_blank" rel="noopener">Source: ${src[0]} ↗</a>`:''}`;
+  $('cap').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ const id=b.dataset.tab; s.c=id; s[id]=Math.max(s[id],1); render(true,false); });
+  $('cap').querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{ watching=false; stop(); choose(b.dataset.case); });
+  const c=$('cap'); if(changed) c.scrollTop=0; if(fresh){ const cur=c.querySelector('li.cur:last-of-type'), tkk=c.querySelector('.take'), el=tkk||cur; if(el){ const over=el.offsetTop+el.offsetHeight-c.clientHeight+8; if(over>0) c.scrollTo({top:over,behavior:reduce?'auto':'smooth'}); } }
+  const a=$('act'); a.textContent=st.act(s); const pick=false; a.disabled=pick||st.done(s); a.classList.toggle('done',pick||st.done(s));
+  $('back').disabled=pos()<=0; $('next').disabled=nextOf()==null; $('next').classList.toggle('go',!pick&&st.done(s)&&!watching&&nextOf()!=null);
+  $('mode').innerHTML='';
+  if($('pause')) $('pause').onclick=()=>{ watching=false; stop(); render(); };
+  if($('play')) $('play').onclick=()=>{ watching=true; autoplay(); render(); };
+}
+function show(i){ stop(); at=i; ST[i]=STEPS[i].init(); render(true,false); if(watching) autoplay(); }
+function act(){ const st=STEPS[at], s=ST[at]; if(st.done(s)) return; st.run(s); if(!$('cover').hidden) return; render(false,true); }
+function inter(i,go){ const p=STEPS[i].part;
+  $('interK').textContent=ROUTE===SHORT&&p===0?`${SC.short} · short version`:p<PARTS.length?`Part ${p+1} of ${PARTS.length}`:'Next'; $('interH').innerHTML=p<PARTS.length?(HEAD[p]||PARTS[p][0]):'That’s the product. <span>Here’s where it goes next.</span>';
+  $('road').innerHTML=PARTS.map(([n,d],j)=>`<li class="${j<p?'d':j===p?'n':''}"><span class="dot">${j<p?'✓':j+1}</span><b>${n}</b><small>${d}</small></li>`).join('');
+  $('inter').classList.add('on'); const done=()=>{ stop(); $('inter').classList.remove('on'); go(); };
+  $('interGo').onclick=done; if(watching) later(3200,done); }
+function goTo(i){ show(i); }
+function choose(id){ SC=CASES[id]; SEEN.add(id); ROUTE=SEEN.size>1?SHORT:FULL; ST=STEPS.map(s=>s.init()); if(ROUTE===SHORT) goTo(1); else show(1); }
+function autoplay(){ stop(); if(at===0){ later(2200,()=>{ if(watching) choose('c1'); }); return; }
+  const tick=()=>{ if(!watching) return; const st=STEPS[at],s=ST[at]; if(!st.done(s)){ act(); later(2600,tick); } else later(3600,()=>{ if(watching&&nextOf()!=null) goTo(nextOf()); else { watching=false; render(); } }); }; later(1400,tick); }
+$('act').onclick=()=>{ if(watching){ watching=false; stop(); } act(); };
+$('next').onclick=()=>{ watching=false; stop(); if(nextOf()!=null) goTo(nextOf()); };
+$('back').onclick=()=>{ if(pos()>0){ watching=false; show(prevOf()); } };
+
+// ---------- cover visual: the cluster, into one workload, every layer closes, back out to the whole cluster
+let coverT=null;
+function drawCover(){ let s=DEFS;
+  const G=[]; for(let r=0;r<3;r++) for(let c=0;c<4;c++) G.push([60+c*80,42+r*62]);
+  const T=5, tgt=G[T];
+  const mesh=[]; for(let a=0;a<G.length;a++) for(let b=a+1;b<G.length;b++){ const [x1,y1]=G[a],[x2,y2]=G[b]; if(Math.hypot(x2-x1,y2-y1)<130) mesh.push([a,b]); }
+  const pods=(cls)=>G.map(([x,y],i)=>`<rect x="${x-14}" y="${y-11}" width="28" height="22" rx="5" class="cl-p ${cls} ${i===T&&cls!=='g'?'t':''}"/>`).join('');
+  // phase 1: everything reaches everything
+  let cl=`<g class="cv-zoom" style="transform-origin:${tgt[0]}px ${tgt[1]}px"><rect x="14" y="8" width="332" height="194" rx="14" class="cl-frame"/>`;
+  mesh.forEach(([a,b])=>{ cl+=`<line x1="${G[a][0]}" y1="${G[a][1]}" x2="${G[b][0]}" y2="${G[b][1]}" class="cl-e"/>`; });
+  cl+=pods('')+`</g>`;
+  // phase 2: inside one workload
+  const P=[86,20,188,170], C=[180,105];
+  let inn=`<g class="cv-inner" style="transform-origin:180px 105px">`;
+  const ends=[[18,34,1],[18,105,1],[18,176,0],[342,34,0],[342,105,1],[342,176,0],[180,8,0],[180,202,1]];
+  ends.forEach(([x,y,need])=>{ const [bx,by]=exitRect(C[0],C[1],x,y,P); const t=3.04;
+    inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e a cv-out" style="animation-delay:${t}s"/><circle cx="${x}" cy="${y}" r="3.5" fill="#22151A" stroke="#E5484D" class="cv-out" style="animation-delay:${t}s"/>`;
+    if(need) inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e ok cv-in" style="animation-delay:${t}s"/><circle cx="${x}" cy="${y}" r="4" fill="#123222" stroke="#4CC38A" class="cv-in" style="animation-delay:${t}s"/>`;
+    else inn+=`<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" class="e x cv-in" style="animation-delay:${t}s"/><g class="cv-in" style="animation-delay:${t}s"><circle cx="${bx}" cy="${by}" r="5.5" fill="#0A0D14" stroke="#4CC38A"/><path d="M${bx-2.3} ${by-2.3}L${bx+2.3} ${by+2.3}M${bx+2.3} ${by-2.3}L${bx-2.3} ${by+2.3}" stroke="#4CC38A" stroke-width="1.3" stroke-linecap="round"/></g>`; });
+  inn+=`<rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="#111723" stroke="#4A5468"/><rect x="${P[0]}" y="${P[1]}" width="${P[2]}" height="${P[3]}" rx="12" fill="none" stroke="#2B6B48" stroke-width="1.5" class="cv-in" style="animation-delay:5.8s"/>`;
+  inn+=`<text x="180" y="${P[1]+19}" text-anchor="middle" class="cv-h">ONE WORKLOAD</text>`;
+  [['NETWORK','8 open','4 needed',3.04],['PROGRAMS','any binary','python',3.68],['FILES','any file','own files',4.24],['PRIVILEGES','root','none',4.8],['SYSCALLS','all','only used',5.3]].forEach(([l,b,a,t],r)=>{ const y=P[1]+44+r*24;
+    inn+=`<rect x="${P[0]+6}" y="${y-14}" width="${P[2]-12}" height="20" rx="5" class="cv-row" style="animation-delay:${t}s"/>`;
+    inn+=`<text x="${P[0]+14}" y="${y}" class="cv-k">${l}</text><text x="${P[0]+P[2]-14}" y="${y}" text-anchor="end" class="cv-b cv-out2" style="animation-delay:${t}s">${b}</text><text x="${P[0]+P[2]-14}" y="${y}" text-anchor="end" class="cv-a cv-in2" style="animation-delay:${t+0.3}s">${a}</text>`; });
+  inn+=`</g>`;
+  // phase 3: back out, the whole cluster
+  const keep=[[0,1],[1,5],[5,6],[6,10],[2,3],[4,8],[9,10],[7,11]];
+  let fin=`<g class="cv-final"><rect x="14" y="8" width="332" height="194" rx="14" class="cl-frame"/>`;
+  mesh.forEach(([a,b])=>{ fin+=`<line x1="${G[a][0]}" y1="${G[a][1]}" x2="${G[b][0]}" y2="${G[b][1]}" class="cl-x"/>`; });
+  keep.forEach(([a,b])=>{ fin+=`<line x1="${G[a][0]}" y1="${G[a][1]}" x2="${G[b][0]}" y2="${G[b][1]}" class="cl-g"/>`; });
+  fin+=pods('g')+`</g>`;
+  $('coverVis').innerHTML=s+cl+inn+fin;
+  $('cvcap').innerHTML=`<span class="cc1">A cluster where everything can reach everything</span><span class="cc2">Inside one workload</span><span class="cc3">Only what it needs, on every layer</span>`;
+  const btn=$('coverBtns'); btn.classList.remove('on'); clearTimeout(coverT); coverT=setTimeout(()=>btn.classList.add('on'),reduce?0:8400); }
+$('cover').addEventListener('click',e=>{ if(!e.target.closest('button')) $('coverBtns').classList.add('on'); });
+drawCover();
+
+if($('watch')) $('watch').onclick=()=>{ $('cover').hidden=true; watching=true; SEEN.clear(); ROUTE=FULL; ST=STEPS.map(s=>s.init()); goTo(0); };
+$('explore').onclick=()=>{ $('cover').hidden=true; watching=false; ROUTE=FULL; ST=STEPS.map(s=>s.init()); show(0); };
+render(true,false);
+if(/skip/.test(location.search)) $('cover').hidden=true;
+</script>
+</body>
+</html>
