@@ -493,6 +493,7 @@ const STEPS=[
             {k:'PROOF',c:'g',t:'<b>Proven before it went live.</b>',s:'Each stage passed rehearsal, replay, and five minutes of log-only Watching on the cluster first. Nothing the agent needs was dropped.'}].slice(0,s.k),
    act:s=>s.k<LAB.length?(s.k?'Next attempt':'Run the attack'):s.k===LAB.length?'How was it proven?':'Shown',
    done:s=>s.k>LAB.length, run:s=>{ s.k++; },
+   extra:s=>s.k>LAB.length?`<p class="srcs"><a href="lab.html" target="_blank" rel="noopener">See the whole lab run: collect, profile, prove, enforce ›</a></p>`:'',
    take:s=>s.k>LAB.length?'Five of five attempts blocked. <span>The agent kept doing its job.</span>':'' },
  { part:2, name:'Summary', label:()=>'The solution · summary',
    t:'What changed.',
