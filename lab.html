@@ -65,7 +65,7 @@ td{padding:8px 10px;border-bottom:1px solid #1B2230;vertical-align:top}tr.new td
   <aside class="side">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.8v5.6c0 4.8 3.3 8.8 8 10.1 4.7-1.3 8-5.3 8-10.1V5.8z" fill="none" stroke="#7AA2F7" stroke-width="1.6"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#4CC38A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Safety Layer</div>
     <div class="sec">CLUSTER · LAB</div>
-    <a data-v="overview">Overview</a><a data-v="workload" class="on">Harden: agents/agent</a><a data-v="policies">Policies <small id="npol"></small></a><a data-v="activity">Activity <small id="nact"></small></a>
+    <a data-v="overview">Overview</a><a data-v="workload" class="on">Secure the agent</a><a data-v="policies">Policies <small id="npol"></small></a><a data-v="activity">Activity <small id="nact"></small></a>
     <div class="sec">NAMESPACES</div><div id="nss"></div>
     <div class="foot" id="foot"></div>
   </aside>
@@ -82,7 +82,7 @@ const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"]/g,
 const ATT=[['read-token','Read the ServiceAccount token','files',6],['reach-kubernetes-api','Reach the Kubernetes API','network',1],['reach-other-namespace','Reach another namespace','network',1],['run-shell','Run a shell','programs',4],['send-data-out','Send data out','network',2]];
 const EVM={'read-token':e=>/serviceaccount/.test(e.what),'run-shell':e=>e.engine==='tetragon'&&/bin\//.test(e.what),'reach-kubernetes-api':e=>/apiserver/.test(e.what),'reach-other-namespace':e=>/^monitoring\//.test(e.what),'send-data-out':e=>/\.(com|net|org)$/.test(e.what)};
 const VB={OPEN:'b-ok',ASK:'b-warn',SUSPECT:'b-bad',CLOSE:'b-dim'};
-const STEP=['Discover','Collect','Profile','Decide','Harden','Verify'];
+const STEP=['Discover','Collect','Profile','Decide','Prove & enforce','Verify'];
 const T0=Date.now(); let view='workload'; const ACT=[]; const log=(k,t)=>{ ACT.unshift({t:new Date().toTimeString().slice(0,8),k,txt:t}); };
 const st={step:0,reached:0,attack0:0,collected:0,decided:{},stage:{},verify:0,filter:'all'};
 const wait=ms=>new Promise(r=>setTimeout(r,ms)), toast=t=>{ $('toast').textContent=t; $('toast').classList.add('on'); setTimeout(()=>$('toast').classList.remove('on'),2200); };
@@ -107,7 +107,7 @@ function discover(){ const net=D.profile.filter(r=>r.layer==='network');
    <div class="card"><h3>Attack simulation <span class="badge b-bad">poisoned task → run_code</span></h3><p class="ev" style="margin:0 0 10px">An attacker poisons a task in the queue; the agent runs its code through its own run_code tool. Run it against the agent as it is today.</p>
      <div class="log" id="alog">${attackLog('before',st.attack0)}</div>
      <div class="actions"><button class="btn red" id="att" ${st.attack0>=ATT.length?'disabled':''}>Run attack simulation</button>${st.attack0>=ATT.length?'<span class="note">5 of 5 succeeded</span>':''}</div></div></div>
-  <div class="actions">${st.attack0>=ATT.length?next('Start hardening: collect'):'<span class="note">Run the simulation to see what an attacker gets today.</span>'}</div>`; }
+  <div class="actions">${st.attack0>=ATT.length?next('Start securing it: collect'):'<span class="note">Run the simulation to see what an attacker gets today.</span>'}</div>`; }
 function attackLog(which,n){ const A=D.attack[which]; return ATT.slice(0,n).map(([k,t,l,s])=>{ const r=A[k]||{}, e=(D.attack.engine||[]).find(EVM[k]);
   return `<div>${r.ok?'<span class="bad">✗ SUCCEEDED</span>':'<span class="ok">✓ BLOCKED  </span>'}  ${esc(t)} <span class="mut">- ${esc(r.detail)}</span>${!r.ok&&e&&which==='after'?`<br><span class="mut">     ${e.engine==='cilium'?'cilium':'tetragon'}: ${esc(e.action)} · ${esc(e.why)} · ${esc(e.what.replace(/\/\.\.[^/]+/,''))}</span>`:''}</div>`; }).join('')||'<span class="mut">$ waiting for a run</span>'; }
 async function runAttack(which,key){ const b=document.querySelector(which==='before'?'#att':'#att2'); b.disabled=true;
@@ -135,10 +135,10 @@ function decide(){ const q=D.profile.filter(r=>r.view==='SUSPECT'||r.view==='ASK
     <td>${a?`<span class="badge ${a==='close'?'b-dim':'b-ok'}">${a==='close'?'closed':'kept open'}</span>`:`<button class="btn" data-d="${i}" data-a="${r.view==='SUSPECT'?'close':'keep'}" style="height:30px">${r.view==='SUSPECT'?'Keep closed':'Keep open'}</button>`}</td></tr>`; }).join('')}</table>
   <div class="actions"><button class="btn" id="all" ${n>=q.length?'disabled':''}>Accept all suggestions</button></div></div>
   <div class="card" style="margin-top:14px"><h3>Answered before <span class="badge b-info">decisions/agents.yaml</span></h3><p class="ev" style="margin:0">ConfigMap <span class="mono">agent-code</span> is not read by the product. A person checked it: the code takes every address from mcp.json - no address of its own. This lets Stage 2 close the internet.</p></div>
-  <div class="actions">${n>=q.length?next('Harden'):'<span class="note">Answer the questions to continue.</span>'}</div>`; }
+  <div class="actions">${n>=q.length?next('Prove & enforce'):'<span class="note">Answer the questions to continue.</span>'}</div>`; }
 // ---------- 5 Harden ----------
 const ST_ORDER=['proposed','rehearsal','replay','watching','enforced'];
-function harden(){ return `<h2>Harden</h2><p class="lead">One stage at a time. Each is proven three times before it is enforced: rehearsal on the cards, replay on real recordings, and Watching on the cluster in log-only mode (Cilium audit, Tetragon monitor). You approve each one.</p>
+function harden(){ return `<h2>Prove & enforce</h2><p class="lead">One stage at a time. Each is proven three times before it is enforced: rehearsal on the cards, replay on real recordings, and Watching on the cluster in log-only mode (Cilium audit, Tetragon monitor). You approve each one.</p>
   ${D.stages.map((s,i)=>{ const cur=st.stage[i]||'proposed', ix=ST_ORDER.indexOf(cur), ok=s.proof.verdict==='PASS';
     return `<div class="card stagecard" style="margin-bottom:12px"><div class="sn ${cur==='enforced'?'on':''}">${s.k}</div><div><h3 style="justify-content:flex-start">${esc(s.name)} <span class="badge b-dim">${esc(s.engine)}</span>${cur==='enforced'?'<span class="badge b-ok">enforced</span>':cur==='watching'?'<span class="badge b-warn">watching · log-only</span>':''}</h3>
       <div class="ev">Closes ${esc(s.closes)}. Policies: ${s.policies.map(p=>`<a data-pol="${esc(p.name)}" class="mono" style="cursor:pointer">${esc(p.name)}</a>`).join(' · ')}</div>
@@ -176,7 +176,7 @@ function policiesView(){ const two=st.stage[D.stages.findIndex(x=>x.k===2)]==='e
   <div class="grid" style="grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)"><div class="card"><table><tr><th>Policy</th><th>Kind</th><th>Stage</th><th>Status</th></tr>${all.map(p=>`<tr style="cursor:pointer" data-pol="${esc(p.name)}"><td class="mono ink">${esc(p.name)}</td><td class="ev">${esc(p.kind)}</td><td>${p.stage}</td><td><span class="badge ${p.state==='enforced'?'b-ok':p.state==='watching'?'b-warn':'b-dim'}">${p.state==='enforced'?'enforced':p.state==='replaced'?'replaced by stage 2':p.state==='proposed'?'proposed':'proving'}</span></td></tr>`).join('')}</table></div>
   <div class="card"><h3><span class="mono">${esc(sel.name)}</span><span class="badge b-info">${esc(sel.kind)}</span></h3><div class="yaml" style="max-height:62vh">${esc(sel.yaml)}</div></div></div>`; }
 function activityView(){ return `<h2>Activity</h2><p class="lead">Everything that happened in this session, newest first - collection, proofs, approvals, and what the engines recorded during the attack.</p>
-  <div class="card">${ACT.length?`<table><tr><th>Time</th><th>Event</th></tr>${ACT.map(a=>`<tr><td class="mono mut">${a.t}</td><td><span class="badge ${a.k==='ok'?'b-ok':a.k==='bad'?'b-bad':a.k==='warn'?'b-warn':'b-info'}" style="margin-right:8px">${a.k==='ok'?'ok':a.k==='bad'?'attack':a.k==='warn'?'decision':'info'}</span>${esc(a.txt)}</td></tr>`).join('')}</table>`:'<p class="ev" style="margin:0">Nothing yet. Start with Harden: agents/agent.</p>'}</div>`; }
+  <div class="card">${ACT.length?`<table><tr><th>Time</th><th>Event</th></tr>${ACT.map(a=>`<tr><td class="mono mut">${a.t}</td><td><span class="badge ${a.k==='ok'?'b-ok':a.k==='bad'?'b-bad':a.k==='warn'?'b-warn':'b-info'}" style="margin-right:8px">${a.k==='ok'?'ok':a.k==='bad'?'attack':a.k==='warn'?'decision':'info'}</span>${esc(a.txt)}</td></tr>`).join('')}</table>`:'<p class="ev" style="margin:0">Nothing yet. Start with Secure the agent.</p>'}</div>`; }
 function overviewView(){ const enf=Object.values(st.stage).filter(x=>x==='enforced').length;
   return `<h2>Overview</h2><p class="lead">The lab cluster: k3s on two nodes, Cilium 1.20 and Tetragon. This page follows one namespace, ${esc(D.namespace)}.</p>
   <div class="grid g4">${[['Workloads',D.workloads.length,D.workloads.map(w=>w.name).join(' · ')],['Stages enforced',`${enf} / ${D.stages.length}`,'network, programs, files'],['Policies written',D.stages.reduce((a,s)=>a+s.policies.length,0),'Cilium and Tetragon'],['Attack attempts blocked',st.verify>=ATT.length?`${ATT.filter(([k])=>!(D.attack.after[k]||{}).ok).length} / ${ATT.length}`:'-','after hardening']].map(([k,v,x])=>`<div class="card kpi"><span>${k}</span><b>${v}</b><span>${esc(x)}</span></div>`).join('')}</div>
