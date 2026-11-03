@@ -362,6 +362,16 @@ function sceneBA(k){ return DEFS+baPanel(6,0,false,k)+baPanel(186,Math.min(k,5),
 function sceneSum(){ return DEFS+baPanel(96,5,true,7); }
 
 // ---------- screens
+// Proven in the lab (2026-11-03): the agent end to end, real results from the ebpf-lab repo (results/attacks/,
+// Confluence SL "Lab / 2026-11-03 Agent end to end"). Not the demo's numbers: the lab's own.
+const LAB=[['Read the K8s token','ok','EACCES','files'],['Reach the K8s API','ok','timed out','network'],['Reach another namespace','ok','timed out','network'],['Run a shell','ok','EPERM','programs'],['Send data out','ok','unreachable','network']];
+const LABP=[['Rehearsal','on the cards'],['Replay','on real recordings'],['Watching','log-only, 5 minutes']];
+function sceneLab(k){ let s=DEFS+'<g class="rp">';
+  s+=`<text x="12" y="20" class="muted" style="font:600 9.5px var(--body);letter-spacing:.1em">POISONED TASK → RUN_CODE</text><text x="232" y="20" class="muted" style="font:600 9.5px var(--body);letter-spacing:.1em">BEFORE</text><text x="292" y="20" class="muted" style="font:600 9.5px var(--body);letter-spacing:.1em">AFTER</text>`;
+  LAB.forEach(([t,b,a],i)=>{ const y=32+i*30, on=i<k;
+    s+=`<g class="row ${on?'on':''}"><rect x="6" y="${y}" width="348" height="24" rx="6"/><text x="14" y="${y+16}">${t}</text><text x="232" y="${y+16}" class="bad">${b}</text>${on?`<text x="292" y="${y+16}" class="ok">blocked</text>`:''}</g>`; });
+  if(k>LAB.length){ LABP.forEach(([t,d],i)=>{ const x=6+i*118; s+=`<g class="res pass"><rect x="${x}" y="190" width="112" height="56" rx="8"/><text x="${x+10}" y="210" class="ok">${t} ✓</text><text x="${x+10}" y="230" style="font:500 8.5px var(--body)" class="muted">${d}</text></g>`; }); }
+  return s+'</g>'; }
 const CASES={
  c1:{id:'c1',short:'case 1',name:'The model goes off-task',who:'Cohere',C:C1,E:E1,
    t:'The model goes off-task.',p:'In its own test, Cohere ran an AI agent on a popular open-weight model. There was <b>no attacker</b> and no malicious prompt.',
@@ -474,6 +484,16 @@ const STEPS=[
    done:s=>caseDone(s,'c1')&&caseDone(s,'c2'),
    run:s=>{ if(!caseDone(s,s.c)) s[s.c]++; else { s.c=s.c==='c1'?'c2':'c1'; s[s.c]=Math.max(s[s.c],1); } },
    take:s=>caseDone(s,'c1')&&caseDone(s,'c2')?'The code still ran. <span>It couldn’t reach anything.</span>':caseDone(s,s.c)?CASES[s.c].againTake:'' },
+ { part:2, name:'Proven in the lab', label:()=>'The solution · proven in the lab',
+   t:'Not a mock-up. It ran.',
+   p:'A real AI agent in our lab: it reads its tools from an MCP config. An attacker poisons a task, and the agent runs the attacker’s code through its own <b>run_code</b> tool.',
+   init:()=>({k:0}),
+   svg:s=>sceneLab(s.k),
+   list:s=>[...LAB.map(([t,b,a,l])=>({k:'BLOCKED',c:'b',t:`<b>${t}.</b>`,s:`Before: it worked${t==='Run a shell'?', as root':''}. After: ${a}, by the ${l} layer.`})),
+            {k:'PROOF',c:'g',t:'<b>Proven before it went live.</b>',s:'Each stage passed rehearsal, replay, and five minutes of log-only Watching on the cluster first. Nothing the agent needs was dropped.'}].slice(0,s.k),
+   act:s=>s.k<LAB.length?(s.k?'Next attempt':'Run the attack'):s.k===LAB.length?'How was it proven?':'Shown',
+   done:s=>s.k>LAB.length, run:s=>{ s.k++; },
+   take:s=>s.k>LAB.length?'Five of five attempts blocked. <span>The agent kept doing its job.</span>':'' },
  { part:2, name:'Summary', label:()=>'The solution · summary',
    t:'What changed.',
    p:'Both incidents, replayed on the enforced pods.',
@@ -486,7 +506,7 @@ const STEPS=[
    take:()=>'Every layer. One decision. <span>Least privilege, decided from evidence.</span>',
    act:()=>'Start over', done:()=>false, run:()=>{ $('cover').hidden=false; drawCover(); } }
 ];
-const FULL=[0,1,2,3,4,5]; let ROUTE=FULL;
+const FULL=[0,1,2,3,4,5,6]; let ROUTE=FULL;
 function sceneResult(){ let s=DEFS;
   const T=[['8','attack steps','blocked','#4CC38A','#0F1F17','#2B6B48'],['0','needed calls','dropped','#4CC38A','#0F1F17','#2B6B48'],['1','step still ran','inside the pod','#E8A33D','#2A2213','#6B5223']];
   T.forEach(([n,a,b,ink,bg,st],i)=>{ const x=8+i*118; s+=`<rect x="${x}" y="10" width="108" height="122" rx="12" fill="${bg}" stroke="${st}"/><text x="${x+14}" y="62" style="font:700 38px var(--body)" fill="${ink}" data-count="${n}">${n}</text><text x="${x+14}" y="92" style="font:600 11.5px var(--body)" fill="#E6EAF2">${a}</text><text x="${x+14}" y="108" style="font:500 11px var(--body)" fill="#8C96A8">${b}</text>`; });
