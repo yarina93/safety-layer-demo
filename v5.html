@@ -175,24 +175,24 @@ button{font:inherit;cursor:pointer;color:inherit}
 /* computer screen (screen sharing): the picture on the left, the story on the right, full screen */
 @media (min-width:1100px) and (min-height:600px){
   body{display:block;min-height:0}
-  .app{max-width:none;height:100vh;height:100dvh;border:none;border-radius:0;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(420px,1fr);
-       grid-template-rows:auto auto minmax(0,1fr) auto auto;column-gap:36px;padding:26px 44px 24px}
-  .top{grid-column:1/-1;height:34px}.brand{font-size:17px}.brand svg{width:22px;height:22px}
+  .app{max-width:none;height:100vh;height:100dvh;border:none;border-radius:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(400px,1fr);
+       grid-template-rows:auto auto minmax(0,1fr) auto auto;column-gap:32px;padding:20px 40px 20px;max-width:1500px;margin:0 auto}
+  .top{grid-column:1/-1;height:30px}.brand{font-size:15.5px}.brand svg{width:22px;height:22px}
   .chap{grid-column:1/-1;font-size:13px;margin:14px 0 14px}
   .stage{grid-column:1;grid-row:3/6;height:auto;min-height:0;border-radius:20px;display:grid;place-items:center;padding:28px}
-  .stage svg{width:100%;height:100%;max-width:640px;max-height:min(62vh,470px)}
+  .stage svg{width:100%;height:100%;max-width:500px;max-height:min(52vh,390px)}
   .cap{grid-column:2;grid-row:3;min-height:0;overflow:auto;padding-top:6px}
-  .cap h1{font-size:30px;margin-bottom:10px}.cap p.intro{font-size:18px;margin-bottom:16px}
-  .steps li{font-size:16.5px;padding:12px 0;gap:14px}.steps li .t small{font-size:14.5px}
-  .steps li .tag{min-width:108px;height:24px;font-size:11px}.steps li .n{width:24px;height:24px;font-size:12px}
-  .take{font-size:18px;margin-top:16px}.srcs,.srcl{font-size:14px}.pick b{font-size:17px}.pick small{font-size:14px}
+  .cap h1{font-size:25px;margin-bottom:8px}.cap p.intro{font-size:16px;margin-bottom:14px}
+  .steps li{font-size:15px;padding:10px 0;gap:12px}.steps li .t small{font-size:13.5px}
+  .steps li .tag{min-width:100px;height:22px;font-size:10.5px}.steps li .n{width:24px;height:24px;font-size:12px}
+  .take{font-size:16px;margin-top:14px}.srcs,.srcl{font-size:14px}.pick b{font-size:17px}.pick small{font-size:14px}
   .bar{grid-column:2;grid-row:4}.mode{grid-column:2;grid-row:5}
-  .bar button{height:56px;font-size:17px}
+  .bar button{height:50px;font-size:15.5px}
   .cover,.inter{align-items:center;text-align:center;padding:56px 60px 40px}
   .cover>*,.inter>*{width:100%;max-width:960px;margin-left:auto;margin-right:auto}
-  .cover h1{font-size:54px;margin:16px auto}.cover .msg{font-size:21px}.cover .k{font-size:13px}
-  .cover .vis svg{max-height:440px}.cover .btns{max-width:440px}
-  .inter h2{font-size:40px}
+  .cover h1{font-size:44px;margin:14px auto}.cover .msg{font-size:18px}.cover .k{font-size:13px}
+  .cover .vis svg{max-height:360px}.cover .btns{max-width:440px}
+  .inter h2{font-size:34px}
   .inter .road{max-width:560px;text-align:left}
   .inter .go{max-width:440px}
 }
