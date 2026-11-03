@@ -196,6 +196,7 @@ button{font:inherit;cursor:pointer;color:inherit}
   .inter .road{max-width:560px;text-align:left}
   .inter .go{max-width:440px}
 }
+.tryit{display:block;margin-top:14px;padding:14px 16px;border-radius:12px;background:#0F2219;border:1px solid #2B6B48;text-decoration:none}.tryit b{display:block;color:#4CC38A;font-size:16px}.tryit span{display:block;color:var(--text);font-size:13.5px;margin-top:3px}
 </style>
 </head>
 <body>
@@ -518,7 +519,7 @@ const STEPS=[
             {k:'PROOF',c:'g',t:'<b>Proven before it went live.</b>',s:'Each stage passed rehearsal, replay, and five minutes of log-only Watching on the cluster first. Nothing the agent needs was dropped.'}].slice(0,s.k),
    act:s=>s.k<LAB.length?(s.k?'Next attempt':'Run the attack'):s.k===LAB.length?'How was it proven?':'Shown',
    done:s=>s.k>LAB.length, run:s=>{ s.k++; },
-   extra:s=>s.k>LAB.length?`<p class="srcs"><a href="lab.html" target="_blank" rel="noopener">See the whole lab run: collect, profile, prove, enforce ›</a></p>`:'',
+   extra:s=>s.k>LAB.length?`<p class="srcs"><a href="lab.html" target="_blank" rel="noopener">Try it yourself on the real lab run ›</a></p>`:'',
    take:s=>s.k>LAB.length?'Five of five attempts blocked. <span>The agent kept doing its job.</span>':'' },
  { part:2, name:'Summary', label:()=>'The solution · summary',
    t:'What changed.',
@@ -530,6 +531,7 @@ const STEPS=[
              {k:'NOT SOLVED',c:'y',t:'<b>The bug and the model are still there.</b>',s:'The template still ran Python in the worker, and secrets already in its environment stay readable. We limit the damage. We don’t fix the code.'}],
    allSubs:true,
    take:()=>'Every layer. One decision. <span>Least privilege, decided from evidence.</span>',
+   extra:()=>`<a class="tryit" href="lab.html" target="_blank" rel="noopener"><b>Now try it yourself ›</b><span>Harden the agent step by step on the real lab run: collect, profile, decide, prove, enforce - then attack it.</span></a>`,
    act:()=>'Start over', done:()=>false, run:()=>{ $('cover').hidden=false; drawCover(); } }
 ];
 const FULL=[0,1,2,3,4,5,6]; let ROUTE=FULL;
