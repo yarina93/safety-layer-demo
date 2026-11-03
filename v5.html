@@ -175,12 +175,17 @@ button{font:inherit;cursor:pointer;color:inherit}
 /* computer screen (screen sharing): the picture on the left, the story on the right, full screen */
 @media (min-width:1100px) and (min-height:600px){
   body{display:block;min-height:0}
-  .app{max-width:none;height:100vh;height:100dvh;border:none;border-radius:0;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(380px,1fr);
+  .app{max-width:none;height:100vh;height:100dvh;border:none;border-radius:0;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(420px,1fr);
        grid-template-rows:auto auto minmax(0,1fr) auto auto;column-gap:36px;padding:26px 44px 24px}
   .top{grid-column:1/-1;height:34px}.brand{font-size:17px}.brand svg{width:22px;height:22px}
   .chap{grid-column:1/-1;font-size:13px;margin:14px 0 14px}
-  .stage{grid-column:1;grid-row:3/6;height:auto;min-height:0;border-radius:20px}
-  .cap{grid-column:2;grid-row:3;min-height:0;overflow:auto;font-size:17px}
+  .stage{grid-column:1;grid-row:3/6;height:auto;min-height:0;border-radius:20px;display:grid;place-items:center;padding:28px}
+  .stage svg{width:100%;height:100%;max-width:640px;max-height:min(62vh,470px)}
+  .cap{grid-column:2;grid-row:3;min-height:0;overflow:auto;padding-top:6px}
+  .cap h1{font-size:30px;margin-bottom:10px}.cap p.intro{font-size:18px;margin-bottom:16px}
+  .steps li{font-size:16.5px;padding:12px 0;gap:14px}.steps li .t small{font-size:14.5px}
+  .steps li .tag{min-width:108px;height:24px;font-size:11px}.steps li .n{width:24px;height:24px;font-size:12px}
+  .take{font-size:18px;margin-top:16px}.srcs,.srcl{font-size:14px}.pick b{font-size:17px}.pick small{font-size:14px}
   .bar{grid-column:2;grid-row:4}.mode{grid-column:2;grid-row:5}
   .bar button{height:56px;font-size:17px}
   .cover,.inter{align-items:center;text-align:center;padding:56px 60px 40px}
@@ -188,6 +193,8 @@ button{font:inherit;cursor:pointer;color:inherit}
   .cover h1{font-size:54px;margin:16px auto}.cover .msg{font-size:21px}.cover .k{font-size:13px}
   .cover .vis svg{max-height:440px}.cover .btns{max-width:440px}
   .inter h2{font-size:40px}
+  .inter .road{max-width:560px;text-align:left}
+  .inter .go{max-width:440px}
 }
 </style>
 </head>
@@ -646,7 +653,7 @@ function drawCover(){ let s=DEFS;
   fin+=pods('g')+`</g>`;
   $('coverVis').innerHTML=s+cl+inn+fin;
   $('cvcap').innerHTML=`<span class="cc1">A cluster where everything can reach everything</span><span class="cc2">Inside one workload</span><span class="cc3">Only what it needs, on every layer</span>`;
-  const btn=$('coverBtns'); btn.classList.remove('on'); clearTimeout(coverT); coverT=setTimeout(()=>btn.classList.add('on'),reduce?0:8400); }
+  const btn=$('coverBtns'); btn.classList.remove('on'); clearTimeout(coverT); coverT=setTimeout(()=>btn.classList.add('on'),0); }   // Start is there from the first second
 $('cover').addEventListener('click',e=>{ if(!e.target.closest('button')) $('coverBtns').classList.add('on'); });
 drawCover();
 

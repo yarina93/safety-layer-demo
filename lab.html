@@ -53,6 +53,7 @@ svg text{font-family:var(--body)}
 .res small{display:block;color:var(--muted);font:500 11px var(--mono);margin-top:2px}
 .big{font-size:20px;color:var(--ink);margin:18px 0 0;line-height:1.4}.big span{color:var(--muted)}
 @media (min-width:1100px){.wrap{max-width:1180px;padding:28px 40px 70px}body{font-size:17px}.sub{font-size:17px}h2{font-size:30px}.chip{font-size:12.5px}}
+.eng3{grid-template-columns:1fr auto 1.4fr}
 footer{margin-top:50px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;line-height:1.6}
 </style>
 </head>
@@ -89,6 +90,7 @@ footer{margin-top:50px;font-size:12.5px;color:var(--muted);border-top:1px solid 
     <p class="sub">An attacker poisons a task in the queue. The agent does what agents do: it runs the code through its own <span class="mono">run_code</span> tool. That code tries five things.</p>
     <div class="grid g2"><div class="card"><svg class="att" id="before" viewBox="0 0 340 300"></svg></div><div class="card"><svg class="att" id="after" viewBox="0 0 340 300"></svg></div></div>
     <div class="card" style="margin-top:12px"><div class="res" id="res"></div></div>
+    <div class="card" style="margin-top:12px" id="engine"></div>
     <p class="big" id="verdict"></p></section>
 
   <footer id="foot"></footer>
@@ -647,7 +649,44 @@ const D={
     "detail": "<urlopen error [Errno 101] Network is unreachable>"
    }
   },
-  "when": "20261103-1906"
+  "when": "20261103-2000",
+  "engine": [
+   {
+    "engine": "cilium",
+    "action": "dropped",
+    "what": "example.com",
+    "why": "POLICY_DENIED",
+    "count": 12
+   },
+   {
+    "engine": "cilium",
+    "action": "dropped",
+    "what": "monitoring/kps-grafana",
+    "why": "POLICY_DENIED",
+    "count": 6
+   },
+   {
+    "engine": "cilium",
+    "action": "dropped",
+    "what": "reserved:host,reserved:kube-apiserver",
+    "why": "POLICY_DENIED",
+    "count": 6
+   },
+   {
+    "engine": "tetragon",
+    "action": "override",
+    "what": "/run/secrets/kubernetes.io/serviceaccount/..2026_11_03_19_51_28.3128399515/token",
+    "why": "stage6-agent",
+    "count": 1
+   },
+   {
+    "engine": "tetragon",
+    "action": "override",
+    "what": "/usr/bin/dash",
+    "why": "stage4-agent",
+    "count": 2
+   }
+  ]
  }
 };
 const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -697,6 +736,10 @@ function scene(after){ const A=D.attack[after?'after':'before']; let s=`<defs><m
 $('before').innerHTML=scene(false); $('after').innerHTML=scene(true);
 $('res').innerHTML=`<span class="h">ATTEMPT</span><span class="h">BEFORE</span><span class="h">AFTER</span>`+STEPS.map(([k,t,l,st])=>{ const b=D.attack.before[k]||{}, a=D.attack.after[k]||{};
   return `<span>${t}<small>${esc(a.detail||'')}</small></span><span class="${b.ok?'ok':'bl'}">${b.ok?'worked':'blocked'}</span><span class="${a.ok?'ok':'bl'}">${a.ok?'worked':'blocked'} · ${l}</span>`; }).join('');
+// the engines' own record: which engine stopped each attempt, and which policy
+const EVM={'read-token':e=>/serviceaccount/.test(e.what),'run-shell':e=>e.engine==='tetragon'&&/bin\//.test(e.what),'reach-kubernetes-api':e=>/apiserver|host/.test(e.what),'reach-other-namespace':e=>/monitoring|\//.test(e.what)&&!/apiserver|serviceaccount|bin/.test(e.what),'send-data-out':e=>/\.(com|net|org)/.test(e.what)};
+$('engine').innerHTML=(D.attack.engine||[]).length?`<div class="k" style="margin-bottom:10px">What the engines recorded during the attack</div><div class="res eng3"><span class="h">ATTEMPT</span><span class="h">ENGINE</span><span class="h">RECORD</span>`+STEPS.map(([k,t])=>{ const e=(D.attack.engine||[]).find(EVM[k]);
+  return e?`<span>${t}</span><span class="bl" style="text-transform:capitalize">${esc(e.engine)}</span><span class="mono">${esc(e.action)} · ${esc(e.why)}<small>${esc(e.what.replace(/\/\.\.[^/]+/,''))} · ${e.count}×</small></span>`:''; }).join('')+`</div>`:'';
 const nb=STEPS.filter(([k])=>!(D.attack.after[k]||{}).ok).length;
 $('verdict').innerHTML=`${nb} of ${STEPS.length} attempts blocked. <span>The agent kept doing its job - nothing it needs was dropped.</span>`;
 const w=D.attack.when||''; $('foot').innerHTML=`Lab run ${w.slice(0,4)}-${w.slice(4,6)}-${w.slice(6,8)}, ${w.slice(9,11)}:${w.slice(11,13)} UTC · k3s on two nodes (Ubuntu 6.8, Rocky 10) · Cilium 1.20 · Tetragon · Watching: ${D.watching.flows} flows in ${D.watching.minutes} minutes · <a href="./">Back to the tour</a>`;
