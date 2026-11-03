@@ -2,767 +2,175 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0A0D14">
-<title>Safety Layer · The agent, in the lab</title>
-<meta name="description" content="Step by step on a real lab run: an AI agent, its profile, the decisions, hardening with proof, and the same attack before and after.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0B0F17">
+<title>Safety Layer · agents / agent</title>
+<meta name="description" content="The Safety Layer product on a real lab run: harden an AI agent step by step - discover, collect, profile, decide, harden with proof, verify.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
-:root{--bg:#0A0D14;--panel:#10151F;--panel2:#141A25;--ink:#E9EDF5;--text:#B4BDCD;--muted:#7C879B;--dim:#4A5468;--line:#222A38;
-  --ok:#4CC38A;--bad:#E5484D;--warn:#E8A33D;--info:#7AA2F7;--vio:#C6A4F5;--body:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);-webkit-text-size-adjust:100%}
+:root{--bg:#0B0F17;--side:#0E131D;--panel:#121826;--panel2:#161D2C;--ink:#E9EDF5;--text:#B9C2D2;--muted:#7C879B;--dim:#4A5468;--line:#232B3A;
+  --ok:#4CC38A;--okbg:#0F2219;--bad:#F07178;--badbg:#2A1519;--warn:#E8A33D;--warnbg:#2A2112;--info:#7AA2F7;--infobg:#131D33;--vio:#C6A4F5;--viobg:#1D1630;
+  --body:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.5 var(--body)}
 button{font:inherit;cursor:pointer;color:inherit}a{color:var(--info);text-decoration:none}
-.app{max-width:470px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
-.top{flex:none;display:flex;align-items:center;gap:12px;height:30px}
-.brand{display:flex;align-items:center;gap:7px;font-weight:600;font-size:14.5px;color:var(--ink);white-space:nowrap}.brand svg{width:18px;height:18px}
-.live{font:600 10px var(--body);letter-spacing:.08em;color:var(--ok);border:1px solid #2B6B48;background:#0F1F17;padding:3px 8px;border-radius:99px;white-space:nowrap}
-.prog{flex:1;display:flex;gap:3px}.prog i{flex:1;height:3px;border-radius:2px;background:var(--line)}.prog i.d{background:#5D687D}.prog i.n{background:var(--ink)}
-.chap{flex:none;display:flex;justify-content:space-between;margin:10px 0 8px;font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--info)}.chap em{font-style:normal;color:var(--muted);letter-spacing:0}
-.stage{flex:none;height:clamp(210px,36dvh,300px);border:1px solid var(--line);border-radius:14px;background:#0D1119;overflow:hidden;display:grid;place-items:center}
-.stage svg{width:100%;height:100%;display:block}
-.cap{flex:1;min-height:0;overflow-y:auto;padding:14px 2px 6px}
-.cap h1{color:var(--ink);font-size:22px;line-height:1.2;margin:0 0 6px}
-.cap p.intro{font-size:15px;line-height:1.45;margin:0 0 12px}.cap p.intro b{color:var(--ink)}
-.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.rows li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.4;animation:fin .35s ease}
-.rows li .tag{flex:none;min-width:92px;height:20px;padding:0 6px;border-radius:6px;display:grid;place-items:center;font:600 10px var(--body);letter-spacing:.06em}
-.c-ok .tag{background:#123222;color:var(--ok)}.c-bad .tag{background:#3A1C20;color:#F08A8D}.c-warn .tag{background:#33281A;color:var(--warn)}.c-info .tag{background:#17233A;color:var(--info)}.c-dim .tag{background:#1A2130;color:var(--muted)}.c-vio .tag{background:#1D1630;color:var(--vio)}
-.rows li b{color:var(--ink);font-weight:600}.rows li small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}.rows .mono{font-family:var(--mono);font-size:12px}
-.take{margin:12px 0 0;font-size:15px;line-height:1.45;color:var(--ink);font-weight:600}.take span{color:var(--muted);font-weight:400}
-.bar{flex:none;display:flex;gap:8px;padding-top:10px}
-.bar button{height:50px;border-radius:12px;border:1px solid var(--line);background:transparent;font-weight:600;font-size:15.5px}
-.bar .nav{width:52px;font-size:20px}.bar .nav:disabled{opacity:.3}
-.bar .act{flex:1;background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.shell{display:grid;grid-template-columns:220px 1fr;height:100vh}
+.side{background:var(--side);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink);padding:4px 8px 16px}.logo svg{width:20px;height:20px}
+.side .sec{font:600 10.5px var(--body);letter-spacing:.1em;color:var(--dim);padding:12px 8px 4px}
+.side a{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;color:var(--text)}
+.side a.on{background:var(--panel2);color:var(--ink)}.side a small{font-size:11px;color:var(--muted)}
+.side .foot{margin-top:auto;font-size:11.5px;color:var(--muted);padding:8px;line-height:1.5}
+.main{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.head{display:flex;align-items:center;gap:14px;padding:14px 28px;border-bottom:1px solid var(--line)}
+.crumb{color:var(--muted)}.crumb b{color:var(--ink);font-size:17px}
+.badge{font:600 11px var(--body);padding:3px 9px;border-radius:99px;border:1px solid}
+.b-ok{color:var(--ok);background:var(--okbg);border-color:#1E4632}.b-bad{color:var(--bad);background:var(--badbg);border-color:#5A2A30}.b-warn{color:var(--warn);background:var(--warnbg);border-color:#4D3A17}.b-info{color:var(--info);background:var(--infobg);border-color:#2B3E66}.b-dim{color:var(--muted);background:var(--panel2);border-color:var(--line)}.b-vio{color:var(--vio);background:var(--viobg);border-color:#3D2E5C}
+.head .sp{flex:1}.head .run{font-size:12px;color:var(--muted)}
+.steps{display:flex;gap:6px;padding:14px 28px;border-bottom:1px solid var(--line);overflow-x:auto}
+.steps button{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);white-space:nowrap;font-weight:600}
+.steps button i{font-style:normal;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:12px;background:var(--panel2)}
+.steps button.done{color:var(--text)}.steps button.done i{background:var(--okbg);color:var(--ok)}
+.steps button.cur{border-color:var(--info);color:var(--ink);background:var(--infobg)}.steps button.cur i{background:var(--info);color:#0B0F17}
+.steps button:disabled{opacity:.45;cursor:not-allowed}
+.body{flex:1;overflow-y:auto;padding:22px 28px 40px}
+h2{color:var(--ink);font-size:21px;margin:0 0 4px}.lead{color:var(--muted);margin:0 0 18px;max-width:900px}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h3{margin:0 0 10px;color:var(--ink);font-size:14px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.kpi b{display:block;font-size:28px;color:var(--ink);line-height:1.1}.kpi span{font-size:12.5px;color:var(--muted)}
+.btn{height:38px;padding:0 16px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.btn.pri{background:var(--info);border-color:var(--info);color:#0B0F17}.btn.go{background:var(--ok);border-color:var(--ok);color:#0B0F17}.btn.red{background:var(--bad);border-color:var(--bad);color:#0B0F17}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:flex;gap:10px;align-items:center;margin:16px 0}.actions .note{color:var(--muted);font-size:12.5px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font:600 11px var(--body);letter-spacing:.06em;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);text-transform:uppercase}
+td{padding:8px 10px;border-bottom:1px solid #1B2230;vertical-align:top}tr.new td{animation:fin .4s ease}
+.mono{font-family:var(--mono);font-size:12.5px}.mut{color:var(--muted)}.ink{color:var(--ink)}
+.log{background:#080B11;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:12.5px/1.7 var(--mono);color:var(--text);max-height:260px;overflow:auto}
+.log .ok{color:var(--ok)}.log .bad{color:var(--bad)}.log .warn{color:var(--warn)}.log .mut{color:var(--muted)}
+.filters{display:flex;gap:6px;margin-bottom:10px}.filters button{padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:12.5px;font-weight:600}.filters button.on{color:var(--ink);border-color:var(--info)}
+.ev{font-size:12px;color:var(--muted)}
+.stagecard{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start}
+.sn{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-weight:700;background:var(--panel2);color:var(--muted)}.sn.on{background:var(--ok);color:#0B0F17}
+.proofs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.yaml{white-space:pre;font:11.5px/1.5 var(--mono);color:var(--text);background:#080B11;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:10px;max-height:180px;overflow:auto}
 @keyframes fin{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
-.cover{position:fixed;inset:0;z-index:5;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px 22px}
-.cover[hidden]{display:none}.cover .k{font:600 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--ok)}
-.cover h2{color:var(--ink);font-size:32px;line-height:1.12;margin:14px 0 12px;max-width:820px}.cover p{font-size:16px;line-height:1.5;max-width:640px;margin:0 0 22px}
-.cover .road{list-style:none;margin:0 0 26px;padding:0;text-align:left;font-size:14.5px;line-height:2}.cover .road b{color:var(--ink);font-family:var(--mono);margin-right:10px}
-.cover button{height:54px;padding:0 40px;border-radius:13px;font-weight:600;font-size:16px;border:1px solid var(--ink);background:var(--ink);color:var(--bg)}
-.cover .ft{margin-top:16px;font-size:12.5px;color:var(--muted)}
-svg text{font-family:var(--body)}
-@media (min-width:1100px) and (min-height:600px){
-  .app{max-width:none;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(420px,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;column-gap:36px;padding:26px 44px 24px}
-  .top{grid-column:1/-1;height:34px}.brand{font-size:17px}.chap{grid-column:1/-1;font-size:13px;margin:14px 0}
-  .stage{grid-column:1;grid-row:3/5;height:auto;min-height:0;border-radius:20px;padding:24px}
-  .stage svg{max-width:680px;max-height:min(64vh,500px)}
-  .cap{grid-column:2;grid-row:3;padding-top:4px}.cap h1{font-size:30px;margin-bottom:10px}.cap p.intro{font-size:18px;margin-bottom:16px}
-  .rows li{font-size:16px;padding:11px 0;gap:14px}.rows li small{font-size:14px}.rows li .tag{min-width:104px;height:23px;font-size:11px}.rows .mono{font-size:13px}
-  .take{font-size:18px}.bar{grid-column:2;grid-row:4}.bar button{height:56px;font-size:17px}
-  .cover h2{font-size:52px}.cover p{font-size:20px}.cover .road{font-size:17px}
-}
+.toast{position:fixed;right:22px;bottom:22px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--ink);font-size:13px;opacity:0;transition:opacity .3s}.toast.on{opacity:1}
+@media (max-width:900px){.shell{grid-template-columns:1fr}.side{display:none}.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g2{grid-template-columns:1fr}.head,.steps,.body{padding-left:14px;padding-right:14px}}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="top"><div class="brand"><svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.8v5.6c0 4.8 3.3 8.8 8 10.1 4.7-1.3 8-5.3 8-10.1V5.8z" fill="none" stroke="#7AA2F7" stroke-width="1.6"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#4CC38A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Safety Layer</div><div class="prog" id="prog"></div><span class="live">REAL LAB RUN</span></div>
-  <div class="chap" id="chap"></div>
-  <div class="stage"><svg id="map" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid meet"></svg></div>
-  <div class="cap" id="cap"></div>
-  <div class="bar"><button class="nav" id="back" aria-label="Back">‹</button><button class="act" id="act"></button><button class="nav" id="next" aria-label="Next">›</button></div>
+<div class="shell">
+  <aside class="side">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.8v5.6c0 4.8 3.3 8.8 8 10.1 4.7-1.3 8-5.3 8-10.1V5.8z" fill="none" stroke="#7AA2F7" stroke-width="1.6"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#4CC38A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Safety Layer</div>
+    <div class="sec">CLUSTER · LAB</div>
+    <a>Overview</a><a class="on">Workloads <small id="nwl"></small></a><a>Policies</a><a>Activity</a>
+    <div class="sec">NAMESPACES</div><div id="nss"></div>
+    <div class="foot" id="foot"></div>
+  </aside>
+  <main class="main">
+    <div class="head"><span class="crumb">Workloads / <span id="ns"></span> / <b>agent</b></span><span class="badge b-vio">AI agent</span><span id="state"></span><span class="sp"></span><span class="run" id="run"></span></div>
+    <div class="steps" id="steps"></div>
+    <div class="body" id="body"></div>
+  </main>
 </div>
-<section class="cover" id="cover">
-  <div class="k">Real lab run</div>
-  <h2>One AI agent. Hardened step by step.</h2>
-  <p id="cvp"></p>
-  <ol class="road"><li><b>1</b>The cluster before - and the attack works</li><li><b>2</b>Collect and build the profile</li><li><b>3</b>Decide</li><li><b>4</b>Harden, with proof</li><li><b>5</b>The same attack, after</li></ol>
-  <button id="start">Start</button>
-  <div class="ft"><a href="./">← The tour</a></div>
-</section>
+<div class="toast" id="toast"></div>
 <script>
-const D={
- "namespace": "agents",
- "workloads": [
-  {
-   "name": "agent",
-   "image": "python:3.12-slim"
-  },
-  {
-   "name": "model-store",
-   "image": "python:3.12-slim"
-  },
-  {
-   "name": "task-queue",
-   "image": "python:3.12-slim"
-  },
-  {
-   "name": "kb",
-   "image": "python:3.12-slim"
-  }
- ],
- "tools": [
-  {
-   "name": "kb",
-   "kind": "remote",
-   "target": "http://kb.agents.svc.cluster.local:8080/mcp"
-  },
-  {
-   "name": "tasks",
-   "kind": "remote",
-   "target": "http://task-queue.agents.svc.cluster.local:8080/mcp"
-  },
-  {
-   "name": "models",
-   "kind": "remote",
-   "target": "http://model-store.agents.svc.cluster.local:8080/mcp"
-  },
-  {
-   "name": "summarize",
-   "kind": "local",
-   "target": "python3 /app/tools/summarize.py"
-  },
-  {
-   "name": "run_code",
-   "kind": "local",
-   "target": "python3 /app/tools/run_code.py"
-  }
- ],
- "model": "https://api.openai.com/v1/chat/completions",
- "sources": [
-  {
-   "name": "Kubernetes manifests",
-   "kind": "configuration",
-   "what": "4 Deployments, Services, ConfigMaps, security settings"
-  },
-  {
-   "name": "MCP config (mcp.json)",
-   "kind": "configuration",
-   "what": "5 tools and the model the agent calls"
-  },
-  {
-   "name": "Image facts",
-   "kind": "configuration",
-   "what": "every program in each image, and its links"
-  },
-  {
-   "name": "Hubble",
-   "kind": "observed",
-   "what": "8355 flows, with DNS names"
-  },
-  {
-   "name": "Tetragon - programs",
-   "kind": "observed",
-   "what": "1 programs seen in the agent"
-  },
-  {
-   "name": "Tetragon - files and kernel calls",
-   "kind": "observed",
-   "what": "1169 file opens, 0 risky calls"
-  }
- ],
- "profile": [
-  {
-   "layer": "network",
-   "how": "connect",
-   "what": "agents/kb:8080/TCP",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config): tool server kb = http://kb.agents.svc.cluster.local:8080/mcp"
-  },
-  {
-   "layer": "network",
-   "how": "connect",
-   "what": "agents/model-store:8080/TCP",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config): tool server models = http://model-store.agents.svc.cluster.local:8080/mcp"
-  },
-  {
-   "layer": "network",
-   "how": "connect",
-   "what": "agents/task-queue:8080/TCP",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config): tool server tasks = http://task-queue.agents.svc.cluster.local:8080/mcp"
-  },
-  {
-   "layer": "network",
-   "how": "connect",
-   "what": "api.openai.com:443/TCP",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config): model = https://api.openai.com/v1/chat/completions"
-  },
-  {
-   "layer": "network",
-   "how": "connect",
-   "what": "dns:53/UDP",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "platform rule: every pod resolves names"
-  },
-  {
-   "layer": "programs",
-   "how": "exec",
-   "what": "/usr/local/bin/python3",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "command: python3 /app/agent.py"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/group",
-   "state": "Anomaly",
-   "view": "SUSPECT",
-   "needed": false,
-   "seen": true,
-   "why": null
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/passwd",
-   "state": "Anomaly",
-   "view": "SUSPECT",
-   "needed": false,
-   "seen": true,
-   "why": null
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/proc/filesystems",
-   "state": "Anomaly",
-   "view": "SUSPECT",
-   "needed": false,
-   "seen": true,
-   "why": null
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/proc/sys",
-   "state": "Anomaly",
-   "view": "SUSPECT",
-   "needed": false,
-   "seen": true,
-   "why": null
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/run/secrets/kubernetes.io/serviceaccount",
-   "state": "Anomaly",
-   "view": "SUSPECT",
-   "needed": false,
-   "seen": true,
-   "why": null
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/usr/bin",
-   "state": "Anomaly",
-   "view": "SUSPECT",
-   "needed": false,
-   "seen": true,
-   "why": null
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/usr/share",
-   "state": "Anomaly",
-   "view": "SUSPECT",
-   "needed": false,
-   "seen": true,
-   "why": null
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/app/agent.py",
-   "state": "Unobserved need",
-   "view": "ASK",
-   "needed": true,
-   "seen": false,
-   "why": "command names it: /app/agent.py (ConfigMap agent-code)"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/dev",
-   "state": "Unobserved need",
-   "view": "ASK",
-   "needed": true,
-   "seen": false,
-   "why": "platform rule: standard devices (null, urandom)"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/mcp",
-   "state": "Unobserved need",
-   "view": "ASK",
-   "needed": true,
-   "seen": false,
-   "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config)"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/lib",
-   "state": "Unobserved need",
-   "view": "ASK",
-   "needed": true,
-   "seen": false,
-   "why": "platform rule: every program loads shared libraries"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/proc/self",
-   "state": "Unobserved need",
-   "view": "ASK",
-   "needed": true,
-   "seen": false,
-   "why": "platform rule: a process reads itself"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/app/tools/run_code.py",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "command names it: /app/tools/run_code.py (ConfigMap agent-code)"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/app/tools/summarize.py",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "command names it: /app/tools/summarize.py (ConfigMap agent-code)"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/gai.conf",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "platform rule: every pod resolves names"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/host.conf",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "platform rule: every pod resolves names"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/hosts",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "platform rule: every pod resolves names"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/ld.so.cache",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "platform rule: every program loads shared libraries"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/nsswitch.conf",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "platform rule: every pod resolves names"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/resolv.conf",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "platform rule: every pod resolves names"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/etc/ssl",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "TLS certificates: the workload calls an https address"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/usr/lib",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "platform rule: every program loads shared libraries"
-  },
-  {
-   "layer": "files",
-   "how": "open",
-   "what": "/usr/local",
-   "state": "Confirmed",
-   "view": "OPEN",
-   "needed": true,
-   "seen": true,
-   "why": "runtime of /usr/local/bin/python3.12: its install folder (program need)"
-  },
-  {
-   "layer": "kernel",
-   "how": "call",
-   "what": "mount",
-   "state": "Excess",
-   "view": "CLOSE",
-   "needed": false,
-   "seen": false,
-   "why": "the pod has no SYS_ADMIN capability and is not privileged"
-  },
-  {
-   "layer": "kernel",
-   "how": "call",
-   "what": "unshare",
-   "state": "Excess",
-   "view": "CLOSE",
-   "needed": false,
-   "seen": false,
-   "why": "the pod has no SYS_ADMIN capability and is not privileged"
-  },
-  {
-   "layer": "kernel",
-   "how": "call",
-   "what": "setns",
-   "state": "Excess",
-   "view": "CLOSE",
-   "needed": false,
-   "seen": false,
-   "why": "the pod has no SYS_ADMIN capability and is not privileged"
-  },
-  {
-   "layer": "kernel",
-   "how": "call",
-   "what": "ptrace",
-   "state": "Excess",
-   "view": "CLOSE",
-   "needed": false,
-   "seen": false,
-   "why": "the pod has no SYS_PTRACE capability and is not privileged"
-  },
-  {
-   "layer": "kernel",
-   "how": "call",
-   "what": "bpf",
-   "state": "Excess",
-   "view": "CLOSE",
-   "needed": false,
-   "seen": false,
-   "why": "the pod has no BPF capability and is not privileged"
-  },
-  {
-   "layer": "kernel",
-   "how": "call",
-   "what": "load a kernel module",
-   "state": "Excess",
-   "view": "CLOSE",
-   "needed": false,
-   "seen": false,
-   "why": "the pod has no SYS_MODULE capability and is not privileged"
-  },
-  {
-   "layer": "kernel",
-   "how": "call",
-   "what": "setuid",
-   "state": "Excess",
-   "view": "CLOSE",
-   "needed": false,
-   "seen": false,
-   "why": "the pod has no SETUID capability and is not privileged"
-  }
- ],
- "stages": [
-  {
-   "k": 1,
-   "name": "Isolate the namespace",
-   "engine": "Cilium",
-   "closes": "Kubernetes API, other namespaces",
-   "proof": {
-    "verdict": "PASS",
-    "lines": [
-     "**PASS** - 2026-11-03",
-     "dress rehearsal found no problem: every need and every seen connection stays allowed, every policy selects a workload, S2 PASS"
-    ]
-   },
-   "watching": true
-  },
-  {
-   "k": 2,
-   "name": "Allow only needed websites",
-   "engine": "Cilium",
-   "closes": "the internet, except api.openai.com",
-   "proof": {
-    "verdict": "PASS",
-    "lines": [
-     "**PASS** - 2026-11-03",
-     "dress rehearsal found no problem: every need and every seen connection stays allowed, every policy selects a workload, S2 PASS"
-    ]
-   },
-   "watching": true
-  },
-  {
-   "k": 4,
-   "name": "Allow only known programs",
-   "engine": "Tetragon",
-   "closes": "every program but python3",
-   "proof": {
-    "verdict": "PASS",
-    "lines": [
-     "Rehearsal on the cards: PASS",
-     "Replay: not run (no recording given)",
-     "**Checker: PASS**"
-    ]
-   },
-   "watching": true
-  },
-  {
-   "k": 6,
-   "name": "Limit file access",
-   "engine": "Tetragon",
-   "closes": "the ServiceAccount token",
-   "proof": {
-    "verdict": "PASS",
-    "lines": [
-     "**Checker: PASS**"
-    ]
-   },
-   "watching": true
-  }
- ],
- "watching": {
-  "minutes": 5,
-  "flows": 1856,
-  "text": [
-   "Cilium (Stages 1-2, audit): PASS - no flow would be dropped",
-   "Tetragon (Stages 4, 6, monitor): PASS - nothing would be stopped"
-  ]
- },
- "attack": {
-  "before": {
-   "read-token": {
-    "ok": true,
-    "detail": "1166 bytes"
-   },
-   "reach-kubernetes-api": {
-    "ok": true,
-    "detail": "connected"
-   },
-   "reach-other-namespace": {
-    "ok": true,
-    "detail": "monitoring/grafana:80"
-   },
-   "run-shell": {
-    "ok": true,
-    "detail": "uid=0(root) gid=0(root) groups=0(root)"
-   },
-   "send-data-out": {
-    "ok": true,
-    "detail": "example.com answered 405"
-   }
-  },
-  "after": {
-   "read-token": {
-    "ok": false,
-    "detail": "[Errno 13] Permission denied: '/var/run/secrets/kubernetes.io/serviceaccount/token'"
-   },
-   "reach-kubernetes-api": {
-    "ok": false,
-    "detail": "timed out"
-   },
-   "reach-other-namespace": {
-    "ok": false,
-    "detail": "timed out"
-   },
-   "run-shell": {
-    "ok": false,
-    "detail": "[Errno 1] Operation not permitted: 'sh'"
-   },
-   "send-data-out": {
-    "ok": false,
-    "detail": "<urlopen error [Errno 101] Network is unreachable>"
-   }
-  },
-  "when": "20261103-2000",
-  "engine": [
-   {
-    "engine": "cilium",
-    "action": "dropped",
-    "what": "example.com",
-    "why": "POLICY_DENIED",
-    "count": 12
-   },
-   {
-    "engine": "cilium",
-    "action": "dropped",
-    "what": "monitoring/kps-grafana",
-    "why": "POLICY_DENIED",
-    "count": 6
-   },
-   {
-    "engine": "cilium",
-    "action": "dropped",
-    "what": "reserved:host,reserved:kube-apiserver",
-    "why": "POLICY_DENIED",
-    "count": 6
-   },
-   {
-    "engine": "tetragon",
-    "action": "override",
-    "what": "/run/secrets/kubernetes.io/serviceaccount/..2026_11_03_19_51_28.3128399515/token",
-    "why": "stage6-agent",
-    "count": 1
-   },
-   {
-    "engine": "tetragon",
-    "action": "override",
-    "what": "/usr/bin/dash",
-    "why": "stage4-agent",
-    "count": 2
-   }
-  ]
- }
-};
+const D={"namespace": "agents", "job": "The agent: every 20 s a round - a task, the model (outside the cluster), and tools the round chooses, as a model would: the knowledge base often, the model store sometimes, summarize sometimes, run_code rarely (1 in 10).", "workloads": [{"name": "agent", "image": "python:3.12-slim"}, {"name": "model-store", "image": "python:3.12-slim"}, {"name": "task-queue", "image": "python:3.12-slim"}, {"name": "kb", "image": "python:3.12-slim"}], "tools": [{"name": "kb", "kind": "remote", "target": "http://kb.agents.svc.cluster.local:8080/mcp"}, {"name": "tasks", "kind": "remote", "target": "http://task-queue.agents.svc.cluster.local:8080/mcp"}, {"name": "models", "kind": "remote", "target": "http://model-store.agents.svc.cluster.local:8080/mcp"}, {"name": "summarize", "kind": "local", "target": "python3 /app/tools/summarize.py"}, {"name": "run_code", "kind": "local", "target": "python3 /app/tools/run_code.py"}], "model": "https://api.openai.com/v1/chat/completions", "sources": [{"name": "Kubernetes manifests", "kind": "configuration", "what": "4 Deployments, Services, ConfigMaps, security settings"}, {"name": "MCP config (mcp.json)", "kind": "configuration", "what": "5 tools and the model the agent calls"}, {"name": "Image facts", "kind": "configuration", "what": "every program in each image, and its links"}, {"name": "Hubble", "kind": "observed", "what": "8355 flows, with DNS names"}, {"name": "Tetragon - programs", "kind": "observed", "what": "1 programs seen in the agent"}, {"name": "Tetragon - files and kernel calls", "kind": "observed", "what": "1169 file opens, 0 risky calls"}], "profile": [{"layer": "network", "how": "connect", "what": "agents/kb:8080/TCP", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config): tool server kb = http://kb.agents.svc.cluster.local:8080/mcp"}, {"layer": "network", "how": "connect", "what": "agents/model-store:8080/TCP", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config): tool server models = http://model-store.agents.svc.cluster.local:8080/mcp"}, {"layer": "network", "how": "connect", "what": "agents/task-queue:8080/TCP", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config): tool server tasks = http://task-queue.agents.svc.cluster.local:8080/mcp"}, {"layer": "network", "how": "connect", "what": "api.openai.com:443/TCP", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config): model = https://api.openai.com/v1/chat/completions"}, {"layer": "network", "how": "connect", "what": "dns:53/UDP", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "platform rule: every pod resolves names"}, {"layer": "programs", "how": "exec", "what": "/usr/local/bin/python3", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "command: python3 /app/agent.py"}, {"layer": "files", "how": "open", "what": "/etc/group", "state": "Anomaly", "view": "SUSPECT", "needed": false, "seen": true, "why": null}, {"layer": "files", "how": "open", "what": "/etc/passwd", "state": "Anomaly", "view": "SUSPECT", "needed": false, "seen": true, "why": null}, {"layer": "files", "how": "open", "what": "/proc/filesystems", "state": "Anomaly", "view": "SUSPECT", "needed": false, "seen": true, "why": null}, {"layer": "files", "how": "open", "what": "/proc/sys", "state": "Anomaly", "view": "SUSPECT", "needed": false, "seen": true, "why": null}, {"layer": "files", "how": "open", "what": "/run/secrets/kubernetes.io/serviceaccount", "state": "Anomaly", "view": "SUSPECT", "needed": false, "seen": true, "why": null}, {"layer": "files", "how": "open", "what": "/usr/bin", "state": "Anomaly", "view": "SUSPECT", "needed": false, "seen": true, "why": null}, {"layer": "files", "how": "open", "what": "/usr/share", "state": "Anomaly", "view": "SUSPECT", "needed": false, "seen": true, "why": null}, {"layer": "files", "how": "open", "what": "/app/agent.py", "state": "Unobserved need", "view": "ASK", "needed": true, "seen": false, "why": "command names it: /app/agent.py (ConfigMap agent-code)"}, {"layer": "files", "how": "open", "what": "/dev", "state": "Unobserved need", "view": "ASK", "needed": true, "seen": false, "why": "platform rule: standard devices (null, urandom)"}, {"layer": "files", "how": "open", "what": "/etc/mcp", "state": "Unobserved need", "view": "ASK", "needed": true, "seen": false, "why": "MCP config /etc/mcp/mcp.json (ConfigMap mcp-config)"}, {"layer": "files", "how": "open", "what": "/lib", "state": "Unobserved need", "view": "ASK", "needed": true, "seen": false, "why": "platform rule: every program loads shared libraries"}, {"layer": "files", "how": "open", "what": "/proc/self", "state": "Unobserved need", "view": "ASK", "needed": true, "seen": false, "why": "platform rule: a process reads itself"}, {"layer": "files", "how": "open", "what": "/app/tools/run_code.py", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "command names it: /app/tools/run_code.py (ConfigMap agent-code)"}, {"layer": "files", "how": "open", "what": "/app/tools/summarize.py", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "command names it: /app/tools/summarize.py (ConfigMap agent-code)"}, {"layer": "files", "how": "open", "what": "/etc/gai.conf", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "platform rule: every pod resolves names"}, {"layer": "files", "how": "open", "what": "/etc/host.conf", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "platform rule: every pod resolves names"}, {"layer": "files", "how": "open", "what": "/etc/hosts", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "platform rule: every pod resolves names"}, {"layer": "files", "how": "open", "what": "/etc/ld.so.cache", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "platform rule: every program loads shared libraries"}, {"layer": "files", "how": "open", "what": "/etc/nsswitch.conf", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "platform rule: every pod resolves names"}, {"layer": "files", "how": "open", "what": "/etc/resolv.conf", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "platform rule: every pod resolves names"}, {"layer": "files", "how": "open", "what": "/etc/ssl", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "TLS certificates: the workload calls an https address"}, {"layer": "files", "how": "open", "what": "/usr/lib", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "platform rule: every program loads shared libraries"}, {"layer": "files", "how": "open", "what": "/usr/local", "state": "Confirmed", "view": "OPEN", "needed": true, "seen": true, "why": "runtime of /usr/local/bin/python3.12: its install folder (program need)"}, {"layer": "kernel", "how": "call", "what": "mount", "state": "Excess", "view": "CLOSE", "needed": false, "seen": false, "why": "the pod has no SYS_ADMIN capability and is not privileged"}, {"layer": "kernel", "how": "call", "what": "unshare", "state": "Excess", "view": "CLOSE", "needed": false, "seen": false, "why": "the pod has no SYS_ADMIN capability and is not privileged"}, {"layer": "kernel", "how": "call", "what": "setns", "state": "Excess", "view": "CLOSE", "needed": false, "seen": false, "why": "the pod has no SYS_ADMIN capability and is not privileged"}, {"layer": "kernel", "how": "call", "what": "ptrace", "state": "Excess", "view": "CLOSE", "needed": false, "seen": false, "why": "the pod has no SYS_PTRACE capability and is not privileged"}, {"layer": "kernel", "how": "call", "what": "bpf", "state": "Excess", "view": "CLOSE", "needed": false, "seen": false, "why": "the pod has no BPF capability and is not privileged"}, {"layer": "kernel", "how": "call", "what": "load a kernel module", "state": "Excess", "view": "CLOSE", "needed": false, "seen": false, "why": "the pod has no SYS_MODULE capability and is not privileged"}, {"layer": "kernel", "how": "call", "what": "setuid", "state": "Excess", "view": "CLOSE", "needed": false, "seen": false, "why": "the pod has no SETUID capability and is not privileged"}], "stages": [{"k": 1, "name": "Isolate the namespace", "engine": "Cilium", "closes": "Kubernetes API, other namespaces", "proof": {"verdict": "PASS", "lines": ["**PASS** - 2026-11-03", "dress rehearsal found no problem: every need and every seen connection stays allowed, every policy selects a workload, S2 PASS"]}, "watching": true}, {"k": 2, "name": "Allow only needed websites", "engine": "Cilium", "closes": "the internet, except api.openai.com", "proof": {"verdict": "PASS", "lines": ["**PASS** - 2026-11-03", "dress rehearsal found no problem: every need and every seen connection stays allowed, every policy selects a workload, S2 PASS"]}, "watching": true}, {"k": 4, "name": "Allow only known programs", "engine": "Tetragon", "closes": "every program but python3", "proof": {"verdict": "PASS", "lines": ["Rehearsal on the cards: PASS", "Replay: not run (no recording given)", "**Checker: PASS**"]}, "watching": true}, {"k": 6, "name": "Limit file access", "engine": "Tetragon", "closes": "the ServiceAccount token", "proof": {"verdict": "PASS", "lines": ["**Checker: PASS**"]}, "watching": true}], "watching": {"minutes": 5, "flows": 1856, "text": ["Cilium (Stages 1-2, audit): PASS - no flow would be dropped", "Tetragon (Stages 4, 6, monitor): PASS - nothing would be stopped"]}, "attack": {"before": {"read-token": {"ok": true, "detail": "1166 bytes"}, "reach-kubernetes-api": {"ok": true, "detail": "connected"}, "reach-other-namespace": {"ok": true, "detail": "monitoring/grafana:80"}, "run-shell": {"ok": true, "detail": "uid=0(root) gid=0(root) groups=0(root)"}, "send-data-out": {"ok": true, "detail": "example.com answered 405"}}, "after": {"read-token": {"ok": false, "detail": "[Errno 13] Permission denied: '/var/run/secrets/kubernetes.io/serviceaccount/token'"}, "reach-kubernetes-api": {"ok": false, "detail": "timed out"}, "reach-other-namespace": {"ok": false, "detail": "timed out"}, "run-shell": {"ok": false, "detail": "[Errno 1] Operation not permitted: 'sh'"}, "send-data-out": {"ok": false, "detail": "<urlopen error [Errno 101] Network is unreachable>"}}, "when": "20261103-2000", "engine": [{"engine": "cilium", "action": "dropped", "what": "example.com", "why": "POLICY_DENIED", "count": 12}, {"engine": "cilium", "action": "dropped", "what": "monitoring/kps-grafana", "why": "POLICY_DENIED", "count": 6}, {"engine": "cilium", "action": "dropped", "what": "reserved:host,reserved:kube-apiserver", "why": "POLICY_DENIED", "count": 6}, {"engine": "tetragon", "action": "override", "what": "/run/secrets/kubernetes.io/serviceaccount/..2026_11_03_19_51_28.3128399515/token", "why": "stage6-agent", "count": 1}, {"engine": "tetragon", "action": "override", "what": "/usr/bin/dash", "why": "stage4-agent", "count": 2}]}};
 const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const RED='#E5484D',GRN='#4CC38A',BLU='#7AA2F7',VIO='#C6A4F5',DIM='#4A5468',BOX='#141A25',EDGE='#2C3546';
-const ATT=[['read-token','Read the K8s token','files',6],['reach-kubernetes-api','Reach the K8s API','network',1],['reach-other-namespace','Reach another namespace','network',1],['run-shell','Run a shell','programs',4],['send-data-out','Send data out','network',2]];
+const ATT=[['read-token','Read the ServiceAccount token','files',6],['reach-kubernetes-api','Reach the Kubernetes API','network',1],['reach-other-namespace','Reach another namespace','network',1],['run-shell','Run a shell','programs',4],['send-data-out','Send data out','network',2]];
 const EVM={'read-token':e=>/serviceaccount/.test(e.what),'run-shell':e=>e.engine==='tetragon'&&/bin\//.test(e.what),'reach-kubernetes-api':e=>/apiserver/.test(e.what),'reach-other-namespace':e=>/^monitoring\//.test(e.what),'send-data-out':e=>/\.(com|net|org)$/.test(e.what)};
-const agent=D.workloads.find(w=>w.name==='agent');
-$('cvp').innerHTML=`The <b>${esc(D.namespace)}</b> namespace in our lab: ${D.workloads.length} workloads, an agent on <span style="font-family:var(--mono)">${esc(agent.image)}</span> with ${D.tools.length} MCP tools. Every number you will see is read from the run.`;
-const box=(x,y,w,h,t,s,st={})=>`<g opacity="${st.op??1}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9" fill="${st.fill||BOX}" stroke="${st.stroke||EDGE}" stroke-width="${st.sw||1}"/><text x="${x+w/2}" y="${y+(s?h/2-2:h/2+4)}" text-anchor="middle" fill="${st.ink||'#E9EDF5'}" font-size="${st.fs||11.5}" font-weight="600">${t}</text>${s?`<text x="${x+w/2}" y="${y+h/2+12}" text-anchor="middle" fill="${st.sub||'#7C879B'}" font-size="9">${s}</text>`:''}</g>`;
-const arrow=(x1,y1,x2,y2,c,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="1.6" ${dash?'stroke-dasharray="4 3"':''} marker-end="url(#m${c.slice(1)})"/>`;
-const DEFS=`<defs>${[RED,GRN,BLU,DIM].map(c=>`<marker id="m${c.slice(1)}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="${c}"/></marker>`).join('')}</defs>`;
-const xm=(x,y)=>`<g transform="translate(${x},${y})"><circle r="8" fill="#0F1F17" stroke="${GRN}"/><path d="M-3 -3L3 3M3 -3L-3 3" stroke="${GRN}" stroke-width="1.6"/></g>`;
-function attackScene(k,after){ let s=DEFS+box(14,100,96,60,'agent','run_code',{fill:'#1D1630',stroke:VIO,fs:13})+`<text x="14" y="22" fill="${after?GRN:RED}" font-size="11" font-weight="700" letter-spacing="1.4">${after?'AFTER':'BEFORE'} · POISONED TASK</text>`;
-  ATT.forEach(([key,t,l,st],i)=>{ const y=42+i*44, on=i<k, r=D.attack[after?'after':'before'][key]||{};
-    s+=box(196,y-15,150,30,t,'',{op:on?1:.35,stroke:on&&r.ok?'#6B2C32':EDGE,ink:on&&r.ok?'#F08A8D':on?'#7C879B':'#7C879B',fs:10.5});
-    if(on&&r.ok) s+=arrow(110,130,194,y,RED);
-    if(on&&!r.ok){ const yy=130+(y-130)*.55; s+=arrow(110,130,148,yy,DIM,1)+xm(156,yy)+`<text x="168" y="${yy-9}" fill="${GRN}" font-size="8.5" font-weight="600">stage ${st}</text>`; } });
-  return s; }
-// ---------- the steps ----------
-const S=[
- { ch:'1 · The cluster before', t:'An agent, wide open.',
-   p:`The agent takes tasks from a queue, calls a model outside the cluster, and runs the tools named in its MCP config - one of them runs code. <b>No policy selects it.</b>`,
-   n:1, act:()=>'Look at the agent',
-   rows:()=>[{c:'vio',k:'AGENT',t:`<b>${D.tools.length} tools in mcp.json</b>`,s:D.tools.map(x=>x.name).join(' · ')}],
-   svg:()=>{ let s=DEFS+box(120,95,120,60,'agent','reads mcp.json',{fill:'#1D1630',stroke:VIO,fs:14})+box(12,30,92,40,'task queue','',{stroke:'#6B2C32',ink:'#F08A8D'})+arrow(104,52,120,110,RED,1);
-     D.tools.filter(t=>t.kind==='remote').forEach((t,i)=>{ s+=box(110+i*48,200,44,30,t.name,'',{fs:9.5})+arrow(180,155,132+i*48,198,BLU); });
-     s+=box(262,30,88,40,'the model','',{})+arrow(240,110,262,55,BLU)+box(262,190,88,40,'anything','internet · K8s API',{stroke:'#6B2C32'})+arrow(240,140,262,205,RED); return s; } },
- { ch:'1 · The cluster before', t:'An attacker poisons a task.',
-   p:'The task carries code. The agent does what agents do: it runs it through its own <b>run_code</b> tool. The code tries five things.',
-   n:ATT.length, act:k=>k?'Next attempt':'Run the attack',
-   rows:k=>ATT.slice(0,k).map(([key,t])=>{ const r=D.attack.before[key]||{}; return {c:'bad',k:'IT WORKED',t:`<b>${t}.</b>`,s:`<span class="mono">${esc(r.detail)}</span>`}; }),
-   svg:k=>attackScene(k,false),
-   take:k=>k>=ATT.length?'5 of 5 worked. <span>The token, the API, other namespaces, a root shell, data out.</span>':'' },
- { ch:'2 · Collect', t:'Read what is written. Watch what happens.',
-   p:'No new agent in the cluster. The product reads the configuration the team already wrote, and uses the engines already running - Hubble and Tetragon - to watch.',
-   n:D.sources.length, act:k=>k<D.sources.length?`Read ${D.sources[k].name}`:'',
-   rows:k=>D.sources.slice(0,k).map(x=>({c:x.kind==='observed'?'vio':'info',k:x.kind==='observed'?'WATCHED':'CONFIG',t:`<b>${esc(x.name)}</b>`,s:esc(x.what)})),
-   svg:k=>{ let s=DEFS+box(220,105,128,52,'agent profile','4 layers',{fill:'#0F1F17',stroke:k>=D.sources.length?GRN:EDGE,fs:13});
-     D.sources.forEach((x,i)=>{ const y=16+i*40, on=i<k; s+=box(10,y,150,30,esc(x.name.replace(' (mcp.json)','').replace('Tetragon - ','Tetragon: ')),'',{op:on?1:.3,stroke:on?(x.kind==='observed'?VIO:BLU):EDGE,fs:9.5}); if(on) s+=arrow(160,y+15,218,131,x.kind==='observed'?VIO:BLU); }); return s; },
-   take:k=>k>=D.sources.length?'Six sources, one profile. <span>Every row keeps its evidence.</span>':'' },
- { ch:'2 · Build the profile', t:'One profile, four layers.',
-   p:'Each row crosses two questions: <b>is it needed</b> (from the configuration) and <b>was it seen</b> (from watching).',
-   n:4, act:k=>['Network','Programs','Files','Kernel calls'][k]?`Show ${['network','programs','files','kernel calls'][k]}`:'',
-   rows:k=>['network','programs','files','kernel'].slice(0,k).map(l=>{ const rs=D.profile.filter(r=>r.layer===l), c=rs.reduce((a,r)=>(a[r.view]=(a[r.view]||0)+1,a),{});
-     return {c:'info',k:l.toUpperCase(),t:`<b>${rs.length} rows</b> · ${Object.entries(c).map(([v,n])=>`${n} ${v.toLowerCase()}`).join(' · ')}`,s:`<span class="mono">${rs.slice(0,4).map(r=>esc(r.what.replace(/^agent:/,''))).join('  ·  ')}${rs.length>4?'  …':''}</span>`}; }),
-   svg:k=>{ const L=['network','programs','files','kernel'], COL={OPEN:GRN,ASK:'#E8A33D',SUSPECT:'#F08A8D',CLOSE:DIM}; let s='';
-     L.forEach((l,i)=>{ const x=8+i*88, on=i<k, rs=D.profile.filter(r=>r.layer===l);
-       s+=`<g opacity="${on?1:.3}"><rect x="${x}" y="12" width="82" height="236" rx="10" fill="#0F141E" stroke="${EDGE}"/><text x="${x+41}" y="32" text-anchor="middle" fill="#E9EDF5" font-size="11" font-weight="600">${l}</text>`;
-       rs.slice(0,24).forEach((r,j)=>{ s+=`<rect x="${x+8+(j%3)*23}" y="${44+Math.floor(j/3)*24}" width="19" height="17" rx="4" fill="${COL[r.view]}" opacity=".85"><title>${esc(r.what)} - ${esc(r.state)}</title></rect>`; }); s+='</g>'; });
-     return s; },
-   take:k=>k>=4?'Green open · amber ask · red suspect · grey close. <span>Built from the run, not typed.</span>':'' },
- { ch:'3 · Decide', t:'Needed stays. Seen is not trusted.',
-   p:'The product decides from the evidence. A person decides what is unclear.',
-   n:4, act:k=>['What stays','What is suspect','What closes','What a person decides'][k]||'',
-   rows:k=>{ const oai=D.profile.find(r=>/api.openai/.test(r.what)), tok=D.profile.find(r=>/serviceaccount/.test(r.what)), sus=D.profile.filter(r=>r.view==='SUSPECT'), ask=D.profile.filter(r=>r.view==='ASK'), cl=D.profile.filter(r=>r.view==='CLOSE');
-     return [{c:'ok',k:'OPEN',t:`<b>${esc(oai&&oai.what)}</b> - needed and seen.`,s:esc(oai&&oai.why)},
-      {c:'bad',k:'SUSPECT',t:`<b>${sus.length} rows seen that nothing needs</b> - among them the token.`,s:`<span class="mono">${sus.map(r=>esc(r.what)).slice(0,4).join(' · ')}</span>`},
-      {c:'dim',k:'CLOSE',t:`<b>Nothing needs it:</b> the internet beyond the model, the K8s API, other namespaces, every other program, ${cl.length} risky kernel calls.`},
-      {c:'warn',k:'ASK',t:`<b>${ask.length} needed, not seen yet</b> - kept open, never closed by guess.`,s:'And one question answered by a person: the agent’s code ConfigMap holds no address of its own.'}].slice(0,k); },
-   svg:k=>{ const C=[[GRN,'OPEN'],['#F08A8D','SUSPECT'],[DIM,'CLOSE'],['#E8A33D','ASK']]; let s='';
-     C.forEach(([c,t],i)=>{ const on=i<k, n=D.profile.filter(r=>r.view===t).length; s+=`<g opacity="${on?1:.3}"><rect x="${20+(i%2)*170}" y="${20+Math.floor(i/2)*118}" width="150" height="104" rx="12" fill="#0F141E" stroke="${c}"/><text x="${95+(i%2)*170}" y="${66+Math.floor(i/2)*118}" text-anchor="middle" fill="${c}" font-size="30" font-weight="700">${n}</text><text x="${95+(i%2)*170}" y="${92+Math.floor(i/2)*118}" text-anchor="middle" fill="#B4BDCD" font-size="11" font-weight="600" letter-spacing="1.2">${t}</text></g>`; });
-     return s; },
-   take:k=>k>=4?'Recording copies the past. <span>Deciding removes what does not belong.</span>':'' },
- { ch:'4 · Harden', t:'Four stages. Each proven three times.',
-   p:'For each stage: <b>rehearsal</b> on the cards, <b>replay</b> on real recordings, then <b>Watching</b> - log-only on the cluster (Cilium audit, Tetragon monitor). Then a person approves, and it is enforced.',
-   n:D.stages.length, act:k=>k<D.stages.length?`Stage ${D.stages[k].k}`:'',
-   rows:k=>D.stages.slice(0,k).map(s=>({c:'ok',k:`STAGE ${s.k}`,t:`<b>${esc(s.name)}</b> - closes ${esc(s.closes)}.`,s:`${esc(s.engine)} · rehearsal ${s.proof.verdict==='PASS'?'✓':'✗'} · replay ${s.proof.verdict==='PASS'?'✓':'✗'} · watching ${s.watching?'✓':'✗'} · enforced`})),
-   svg:k=>{ let s=''; const P=['rehearsal','replay','watching','enforced'];
-     D.stages.forEach((st,i)=>{ const y=14+i*60, on=i<k; s+=`<g opacity="${on?1:.3}"><rect x="8" y="${y}" width="344" height="50" rx="10" fill="#0F141E" stroke="${on?'#2B6B48':EDGE}"/><rect x="18" y="${y+12}" width="26" height="26" rx="7" fill="${on?GRN:EDGE}"/><text x="31" y="${y+30}" text-anchor="middle" fill="#0A0D14" font-size="13" font-weight="700">${st.k}</text><text x="52" y="${y+21}" fill="#E9EDF5" font-size="9.5" font-weight="600">${esc(st.name)}</text><text x="52" y="${y+37}" fill="#7C879B" font-size="9">${esc(st.engine)}</text>`;
-       P.forEach((p,j)=>{ const ok=j<2?st.proof.verdict==='PASS':j===2?st.watching:true; s+=`<rect x="${200+j*38}" y="${y+26}" width="35" height="17" rx="5" fill="${ok?'#0F1F17':'#22151A'}" stroke="${ok?'#1E4632':'#6B2C32'}"/><text x="${217.5+j*38}" y="${y+37.5}" text-anchor="middle" fill="${ok?GRN:'#F08A8D'}" font-size="7">${p}</text>`; }); s+='</g>'; });
-     return s; },
-   take:k=>k>=D.stages.length?`Watching: ${D.watching.flows} flows in ${D.watching.minutes} minutes, nothing would be dropped. <span>Then enforced.</span>`:'' },
- { ch:'5 · The same attack, after', t:'Same poisoned task. Same code.',
-   p:'The agent still takes the task and runs it. This time each attempt meets an enforced stage - and the engines record it.',
-   n:ATT.length, act:k=>k?'Next attempt':'Run the attack again',
-   rows:k=>ATT.slice(0,k).map(([key,t,l,st])=>{ const r=D.attack.after[key]||{}, e=(D.attack.engine||[]).find(EVM[key]);
-     return {c:r.ok?'bad':'ok',k:r.ok?'IT WORKED':'BLOCKED',t:`<b>${t}.</b> Stage ${st}, ${l}.`,s:e?`${e.engine==='cilium'?'Cilium':'Tetragon'}: <span class="mono">${esc(e.action)} · ${esc(e.why)}</span>`:`<span class="mono">${esc(r.detail)}</span>`}; }),
-   svg:k=>attackScene(k,true),
-   take:k=>{ const nb=ATT.filter(([key])=>!(D.attack.after[key]||{}).ok).length; return k>=ATT.length?`${nb} of ${ATT.length} blocked. <span>The agent kept doing its job.</span>`:''; } },
- { ch:'Summary', t:'From open to least privilege, on a real cluster.',
-   p:'Read from evidence, decided, proven three times, enforced on Cilium and Tetragon - and checked with a real attack.',
-   n:0, act:()=>'Start over',
-   rows:()=>[{c:'bad',k:'BEFORE',t:'<b>5 of 5 attempts worked.</b>'},{c:'ok',k:'AFTER',t:`<b>${ATT.filter(([key])=>!(D.attack.after[key]||{}).ok).length} of 5 blocked.</b> Nothing the agent needs was dropped.`},
-     {c:'info',k:'RUN',t:`Lab run ${(D.attack.when||'').replace(/(\d{4})(\d\d)(\d\d)-(\d\d)(\d\d)/,'$1-$2-$3 $4:$5')} UTC`,s:'k3s on two nodes · Cilium 1.20 · Tetragon · <a href="./">back to the tour</a>'}],
-   svg:()=>attackScene(ATT.length,true) }];
-let at=0, k=0;
-function render(){ const s=S[at];
-  $('prog').innerHTML=S.map((_,i)=>`<i class="${i<at?'d':i===at?'n':''}"></i>`).join('');
-  $('chap').innerHTML=`<span>${esc(s.ch)}</span><em>${at+1} / ${S.length}</em>`;
-  $('map').innerHTML=s.svg(k);
-  const rows=s.rows(k)||[];
-  $('cap').innerHTML=`<h1>${s.t}</h1><p class="intro">${s.p}</p>${rows.length?`<ul class="rows">${rows.map(r=>`<li class="c-${r.c}"><span class="tag">${r.k}</span><span>${r.t}${r.s?`<small>${r.s}</small>`:''}</span></li>`).join('')}</ul>`:''}${s.take&&s.take(k)?`<p class="take">${s.take(k)}</p>`:''}`;
-  $('cap').scrollTop=$('cap').scrollHeight;
-  const done=k>=s.n; $('act').textContent=done?(at<S.length-1?`Next: ${S[at+1].ch.replace(/^\d · /,'')} ›`:s.act(k)):s.act(k);
-  $('back').disabled=at===0&&k===0; }
-$('act').onclick=()=>{ const s=S[at]; if(k<s.n){ k++; } else if(at<S.length-1){ at++; k=0; } else { at=0; k=0; $('cover').hidden=false; } render(); };
-$('next').onclick=()=>{ if(at<S.length-1){ at++; k=0; render(); } };
-$('back').onclick=()=>{ if(k>0) k--; else if(at>0){ at--; k=S[at].n; } render(); };
-$('start').onclick=()=>{ $('cover').hidden=true; at=0; k=0; render(); };
-document.addEventListener('keydown',e=>{ if($('cover').hidden&&(e.key==='ArrowRight'||e.key===' ')){ e.preventDefault(); $('act').click(); } if(e.key==='ArrowLeft') $('back').click(); });
-render();
+const VB={OPEN:'b-ok',ASK:'b-warn',SUSPECT:'b-bad',CLOSE:'b-dim'};
+const STEP=['Discover','Collect','Profile','Decide','Harden','Verify'];
+const T0=Date.now(); const st={step:0,reached:0,attack0:0,collected:0,decided:{},stage:{},verify:0,filter:'all'};
+const wait=ms=>new Promise(r=>setTimeout(r,ms)), toast=t=>{ $('toast').textContent=t; $('toast').classList.add('on'); setTimeout(()=>$('toast').classList.remove('on'),2200); };
+const w=(D.attack.when||'').replace(/(\d{4})(\d\d)(\d\d)-(\d\d)(\d\d)/,'$1-$2-$3 $4:$5');
+$('ns').textContent=D.namespace; $('run').textContent=`Lab run ${w} UTC · data from the run`; $('nwl').textContent=D.workloads.length;
+$('nss').innerHTML=`<a class="on">${esc(D.namespace)} <small>${D.workloads.length}</small></a>`;
+$('foot').innerHTML=`k3s · 2 nodes<br>Cilium 1.20 · Tetragon<br><a href="./">← The tour</a>`;
+function header(){ const enforced=Object.values(st.stage).filter(x=>x==='enforced').length;
+  $('state').innerHTML=enforced?`<span class="badge b-ok">${enforced} of ${D.stages.length} stages enforced</span>`:`<span class="badge b-bad">No policy selects it</span>`;
+  $('steps').innerHTML=STEP.map((s,i)=>`<button class="${i<st.reached?'done':''} ${i===st.step?'cur':''}" ${i>st.reached?'disabled':''} data-s="${i}"><i>${i<st.reached?'✓':i+1}</i>${s}</button>`).join('');
+  $('steps').querySelectorAll('button').forEach(b=>b.onclick=()=>{ st.step=+b.dataset.s; draw(); }); }
+function next(label){ return `<button class="btn pri" id="nx">${label} ›</button>`; }
+function bindNext(){ const b=$('nx'); if(b) b.onclick=()=>{ st.step++; st.reached=Math.max(st.reached,st.step); draw(); $('body').scrollTop=0; }; }
+// ---------- 1 Discover ----------
+function discover(){ const net=D.profile.filter(r=>r.layer==='network');
+  return `<h2>Discover</h2><p class="lead">What the agent is, and what it can do today. Nothing is enforced on it yet.</p>
+  <div class="grid g4">${[['Workloads',D.workloads.length,'in '+D.namespace],['MCP tools',D.tools.length,D.tools.map(t=>t.name).join(' · ')],['Policies',0,'no Cilium or Tetragon policy selects it'],['Exposure','all','internet, K8s API, every program, every file']].map(([k,v,s])=>`<div class="card kpi"><span>${k}</span><b>${v}</b><span>${esc(s)}</span></div>`).join('')}</div>
+  <div class="card" style="margin-top:14px"><h3>What this agent does <span class="badge b-vio">its job</span></h3><p style="margin:0;color:var(--text)">${esc(D.job)}</p>
+   <p class="ev" style="margin:8px 0 0">It reads its tools from <span class="mono">/etc/mcp/mcp.json</span>. The task queue is outside its control - whoever can write a task can put code in it.</p></div>
+  <div class="grid g2" style="margin-top:14px">
+   <div class="card"><h3>The agent's MCP config <span class="badge b-info">mcp.json</span></h3><table><tr><th>Tool</th><th>Kind</th><th>Target</th></tr>${D.tools.map(t=>`<tr><td class="ink">${esc(t.name)}</td><td>${t.kind}</td><td class="mono">${esc(t.target.replace(/^https?:\/\//,''))}</td></tr>`).join('')}<tr><td class="ink">model</td><td>remote</td><td class="mono">${esc((D.model||'').replace(/^https?:\/\//,''))}</td></tr></table></div>
+   <div class="card"><h3>Attack simulation <span class="badge b-bad">poisoned task → run_code</span></h3><p class="ev" style="margin:0 0 10px">An attacker poisons a task in the queue; the agent runs its code through its own run_code tool. Run it against the agent as it is today.</p>
+     <div class="log" id="alog">${attackLog('before',st.attack0)}</div>
+     <div class="actions"><button class="btn red" id="att" ${st.attack0>=ATT.length?'disabled':''}>Run attack simulation</button>${st.attack0>=ATT.length?'<span class="note">5 of 5 succeeded</span>':''}</div></div></div>
+  <div class="actions">${st.attack0>=ATT.length?next('Start hardening: collect'):'<span class="note">Run the simulation to see what an attacker gets today.</span>'}</div>`; }
+function attackLog(which,n){ const A=D.attack[which]; return ATT.slice(0,n).map(([k,t,l,s])=>{ const r=A[k]||{}, e=(D.attack.engine||[]).find(EVM[k]);
+  return `<div>${r.ok?'<span class="bad">✗ SUCCEEDED</span>':'<span class="ok">✓ BLOCKED  </span>'}  ${esc(t)} <span class="mut">- ${esc(r.detail)}</span>${!r.ok&&e&&which==='after'?`<br><span class="mut">     ${e.engine==='cilium'?'cilium':'tetragon'}: ${esc(e.action)} · ${esc(e.why)} · ${esc(e.what.replace(/\/\.\.[^/]+/,''))}</span>`:''}</div>`; }).join('')||'<span class="mut">$ waiting for a run</span>'; }
+async function runAttack(which,key){ const b=document.querySelector(which==='before'?'#att':'#att2'); b.disabled=true;
+  for(let i=st[key];i<ATT.length;i++){ st[key]=i+1; $(which==='before'?'alog':'alog2').innerHTML=attackLog(which,st[key]); await wait(650); } draw(); }
+// ---------- 2 Collect ----------
+function collect(){ return `<h2>Collect</h2><p class="lead">The product reads what the team already wrote and watches with the engines already running. No new agent in the cluster.</p>
+  <div class="card"><table><tr><th>Source</th><th>Kind</th><th>Read</th><th>Status</th></tr>${D.sources.map((x,i)=>`<tr class="${i<st.collected?'new':''}"><td class="ink">${esc(x.name)}</td><td><span class="badge ${x.kind==='observed'?'b-vio':'b-info'}">${x.kind==='observed'?'watched':'configuration'}</span></td><td>${i<st.collected?esc(x.what):'<span class="mut">-</span>'}</td><td>${i<st.collected?'<span class="badge b-ok">done</span>':'<span class="badge b-dim">pending</span>'}</td></tr>`).join('')}</table></div>
+  <div class="actions"><button class="btn pri" id="col" ${st.collected>=D.sources.length?'disabled':''}>Collect from all sources</button>${st.collected>=D.sources.length?next('Build the profile'):''}</div>`; }
+async function runCollect(){ $('col').disabled=true; for(let i=st.collected;i<D.sources.length;i++){ st.collected=i+1; $('body').innerHTML=collect(); bind(); await wait(450); } draw(); }
+// ---------- 3 Profile ----------
+function profile(){ const L=['all','network','programs','files','kernel'], rows=D.profile.filter(r=>st.filter==='all'||r.layer===st.filter);
+  const c=v=>D.profile.filter(r=>r.view===v).length;
+  return `<h2>Profile</h2><p class="lead">Every row crosses two questions: is it needed (from the configuration) and was it seen (from watching). Every row keeps its evidence.</p>
+  <div class="grid g4">${[['Open','OPEN','needed'],['Ask','ASK','needed, not seen yet'],['Suspect','SUSPECT','seen, nothing needs it'],['Close','CLOSE','nothing needs it']].map(([k,v,s])=>`<div class="card kpi"><span><span class="badge ${VB[v]}">${k}</span></span><b>${c(v)}</b><span>${s}</span></div>`).join('')}</div>
+  <div class="card" style="margin-top:14px"><div class="filters">${L.map(l=>`<button class="${st.filter===l?'on':''}" data-f="${l}">${l} ${l==='all'?D.profile.length:D.profile.filter(r=>r.layer===l).length}</button>`).join('')}</div>
+  <table><tr><th>Layer</th><th>What</th><th>Needed</th><th>Seen</th><th>State</th><th>Evidence</th></tr>${rows.map(r=>`<tr><td>${r.layer}</td><td class="mono ink">${esc(r.what.replace(/^agent:/,''))}</td><td>${r.needed?'yes':'-'}</td><td>${r.seen?'yes':'-'}</td><td><span class="badge ${VB[r.view]}">${r.view}</span></td><td class="ev">${esc(r.why||'')}</td></tr>`).join('')}</table></div>
+  <div class="actions">${next('Review the decisions')}</div>`; }
+// ---------- 4 Decide ----------
+function decide(){ const q=D.profile.filter(r=>r.view==='SUSPECT'||r.view==='ASK'), n=Object.keys(st.decided).length;
+  return `<h2>Decide</h2><p class="lead">What is needed stays open. What nothing needs closes. What was seen but is not needed, and what is needed but not seen yet, waits for a person.</p>
+  <div class="card"><h3>Questions for you <span class="badge b-warn">${q.length-n} open</span></h3><table><tr><th>What</th><th>Why it is here</th><th>State</th><th>Your answer</th></tr>${q.map((r,i)=>{ const a=st.decided[i];
+    return `<tr><td class="mono ink">${esc(r.what)}</td><td class="ev">${r.view==='SUSPECT'?'seen in the recording; nothing in the configuration needs it':'needed by the configuration; not seen yet'}${r.why?` - ${esc(r.why)}`:''}</td><td><span class="badge ${VB[r.view]}">${r.view}</span></td>
+    <td>${a?`<span class="badge ${a==='close'?'b-dim':'b-ok'}">${a==='close'?'closed':'kept open'}</span>`:`<button class="btn" data-d="${i}" data-a="${r.view==='SUSPECT'?'close':'keep'}" style="height:30px">${r.view==='SUSPECT'?'Keep closed':'Keep open'}</button>`}</td></tr>`; }).join('')}</table>
+  <div class="actions"><button class="btn" id="all" ${n>=q.length?'disabled':''}>Accept all suggestions</button></div></div>
+  <div class="card" style="margin-top:14px"><h3>Answered before <span class="badge b-info">decisions/agents.yaml</span></h3><p class="ev" style="margin:0">ConfigMap <span class="mono">agent-code</span> is not read by the product. A person checked it: the code takes every address from mcp.json - no address of its own. This lets Stage 2 close the internet.</p></div>
+  <div class="actions">${n>=q.length?next('Harden'):'<span class="note">Answer the questions to continue.</span>'}</div>`; }
+// ---------- 5 Harden ----------
+const ST_ORDER=['proposed','rehearsal','replay','watching','enforced'];
+function harden(){ return `<h2>Harden</h2><p class="lead">One stage at a time. Each is proven three times before it is enforced: rehearsal on the cards, replay on real recordings, and Watching on the cluster in log-only mode (Cilium audit, Tetragon monitor). You approve each one.</p>
+  ${D.stages.map((s,i)=>{ const cur=st.stage[i]||'proposed', ix=ST_ORDER.indexOf(cur), ok=s.proof.verdict==='PASS';
+    return `<div class="card stagecard" style="margin-bottom:12px"><div class="sn ${cur==='enforced'?'on':''}">${s.k}</div><div><h3 style="justify-content:flex-start">${esc(s.name)} <span class="badge b-dim">${esc(s.engine)}</span>${cur==='enforced'?'<span class="badge b-ok">enforced</span>':cur==='watching'?'<span class="badge b-warn">watching · log-only</span>':''}</h3>
+      <div class="ev">Closes ${esc(s.closes)}.</div>
+      <div class="proofs">${[['rehearsal','Rehearsal on the cards',ok],['replay','Replay on recordings',ok],['watching',`Watching ${D.watching.minutes} min · ${D.watching.flows} flows · nothing would drop`,s.watching]].map(([k,t,p],j)=>ix>j?`<span class="badge ${p?'b-ok':'b-bad'}">${p?'✓':'✗'} ${t}</span>`:`<span class="badge b-dim">${t}</span>`).join('')}</div></div>
+      <div>${cur==='enforced'?'':ix<3?`<button class="btn" data-p="${i}">Run the proof</button>`:`<button class="btn go" data-e="${i}">Approve & enforce</button>`}</div></div>`; }).join('')}
+  <div class="log" id="hlog">${hlog.join('<br>')||'<span class="mut">$ no stage run yet</span>'}</div>
+  <div class="actions">${D.stages.every((s,i)=>st.stage[i]==='enforced')?next('Verify with the attack'):'<span class="note">Prove and enforce every stage to continue.</span>'}</div>`; }
+let hlog=[];
+async function runProof(i){ const s=D.stages[i]; for(const p of ['rehearsal','replay','watching']){ st.stage[i]=p; hlog.push(`<span class="mut">[stage ${s.k}]</span> ${p}${p==='watching'?` - ${s.engine==='Cilium'?'Cilium PolicyAuditMode on the agents endpoints':'Tetragon policy-mode monitor'}`:''} … <span class="ok">PASS</span>`); draw(); await wait(500); } }
+function enforce(i){ const s=D.stages[i]; st.stage[i]='enforced'; hlog.push(`<span class="mut">[stage ${s.k}]</span> approved · applied ${s.engine==='Cilium'?'CiliumNetworkPolicy':'TracingPolicyNamespaced (enforce)'} <span class="ok">✓</span>`); toast(`Stage ${s.k} enforced`); draw(); }
+// ---------- 6 Verify ----------
+function verify(){ const nb=ATT.filter(([k])=>!(D.attack.after[k]||{}).ok).length;
+  return `<h2>Verify</h2><p class="lead">The same poisoned task, the same code - now against the hardened agent. The engines record every stop.</p>
+  <div class="grid g2"><div class="card"><h3>Before <span class="badge b-bad">5 of 5 succeeded</span></h3><div class="log">${attackLog('before',ATT.length)}</div></div>
+  <div class="card"><h3>After ${st.verify>=ATT.length?`<span class="badge b-ok">${nb} of 5 blocked</span>`:''}</h3><div class="log" id="alog2">${attackLog('after',st.verify)}</div><div class="actions"><button class="btn red" id="att2" ${st.verify>=ATT.length?'disabled':''}>Run attack simulation</button></div></div></div>
+  ${st.verify>=ATT.length?`<div class="card" style="margin-top:14px"><h3>Result</h3><table><tr><th>Attempt</th><th>Before</th><th>After</th><th>Stopped by</th></tr>${ATT.map(([k,t,l,s])=>{ const e=(D.attack.engine||[]).find(EVM[k]); return `<tr><td class="ink">${t}</td><td><span class="badge b-bad">succeeded</span></td><td><span class="badge ${(D.attack.after[k]||{}).ok?'b-bad':'b-ok'}">${(D.attack.after[k]||{}).ok?'succeeded':'blocked'}</span></td><td class="ev">Stage ${s} · ${l}${e?` · ${esc(e.engine)} ${esc(e.action)} (${esc(e.why)})`:''}</td></tr>`; }).join('')}</table>
+  <p class="ev" style="margin:12px 0 0">The agent kept working during and after: its tasks, the model, kb, model-store and its tools - nothing it needs was dropped.</p></div>
+  ${(()=>{ const sec=Math.round((Date.now()-T0)/1000), q=Object.keys(st.decided).length, auto=D.profile.length-D.profile.filter(r=>r.view==='SUSPECT'||r.view==='ASK').length;
+    return `<div class="card" style="margin-top:14px"><h3>What it took <span class="badge b-info">summary</span></h3><div class="grid g4">
+      <div class="kpi"><span>Your time</span><b>${Math.floor(sec/60)}m ${sec%60}s</b><span>from discover to verified</span></div>
+      <div class="kpi"><span>Your decisions</span><b>${q+1}</b><span>${q} questions + 1 ConfigMap checked</span></div>
+      <div class="kpi"><span>Your approvals</span><b>${D.stages.length}</b><span>one per stage, each after its proof</span></div>
+      <div class="kpi"><span>Decided for you</span><b>${auto}</b><span>of ${D.profile.length} profile rows, from the evidence</span></div></div>
+      <p class="ev" style="margin:12px 0 0">Machine time in the lab: one recording of each kind (network, programs, files) and ${D.watching.minutes} minutes of log-only Watching before enforcement. No policy was written by hand.</p></div>`; })()}`:''}`; }
+function draw(){ header(); $('body').innerHTML=[discover,collect,profile,decide,harden,verify][st.step](); bind(); bindNext(); }
+function bind(){ const q=s=>document.querySelector(s);
+  if(q('#att')) q('#att').onclick=()=>runAttack('before','attack0');
+  if(q('#att2')) q('#att2').onclick=()=>runAttack('after','verify');
+  if(q('#col')) q('#col').onclick=runCollect;
+  document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{ st.filter=b.dataset.f; draw(); });
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{ st.decided[b.dataset.d]=b.dataset.a; draw(); });
+  if(q('#all')) q('#all').onclick=()=>{ D.profile.filter(r=>r.view==='SUSPECT'||r.view==='ASK').forEach((r,i)=>{ if(!st.decided[i]) st.decided[i]=r.view==='SUSPECT'?'close':'keep'; }); draw(); };
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>runProof(+b.dataset.p));
+  document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>enforce(+b.dataset.e)); bindNext(); }
+draw();
 </script>
 </body>
 </html>
