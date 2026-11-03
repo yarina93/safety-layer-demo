@@ -33,6 +33,10 @@ button{font:inherit;cursor:pointer;color:inherit}a{color:var(--info);text-decora
 .steps button.done{color:var(--text)}.steps button.done i{background:var(--okbg);color:var(--ok)}
 .steps button.cur{border-color:var(--info);color:var(--ink);background:var(--infobg)}.steps button.cur i{background:var(--info);color:#0B0F17}
 .steps button:disabled{opacity:.45;cursor:not-allowed}
+.guide{display:flex;align-items:center;gap:16px;padding:12px 28px;border-bottom:1px solid var(--line);background:#0F1522}
+.guide .gk{font:600 11px var(--body);letter-spacing:.08em;color:var(--info);white-space:nowrap}
+.guide .gt{flex:1;color:var(--ink);font-size:14.5px}.guide .gt span{color:var(--muted)}
+.guide .gd{color:var(--ok);font-weight:600}
 .body{flex:1;overflow-y:auto;padding:22px 28px 40px}
 h2{color:var(--ink);font-size:21px;margin:0 0 4px}.lead{color:var(--muted);margin:0 0 18px;max-width:900px}
 .grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -72,6 +76,7 @@ td{padding:8px 10px;border-bottom:1px solid #1B2230;vertical-align:top}tr.new td
   <main class="main">
     <div class="head"><span class="crumb">Workloads / <span id="ns"></span> / <b>agent</b></span><span class="badge b-vio">AI agent</span><span id="state"></span><span class="sp"></span><span class="run" id="run"></span></div>
     <div class="steps" id="steps"></div>
+    <div class="guide" id="guide"></div>
     <div class="body" id="body"></div>
   </main>
 </div>
@@ -82,7 +87,14 @@ const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"]/g,
 const ATT=[['read-token','Read the ServiceAccount token','files',6],['reach-kubernetes-api','Reach the Kubernetes API','network',1],['reach-other-namespace','Reach another namespace','network',1],['run-shell','Run a shell','programs',4],['send-data-out','Send data out','network',2]];
 const EVM={'read-token':e=>/serviceaccount/.test(e.what),'run-shell':e=>e.engine==='tetragon'&&/bin\//.test(e.what),'reach-kubernetes-api':e=>/apiserver/.test(e.what),'reach-other-namespace':e=>/^monitoring\//.test(e.what),'send-data-out':e=>/\.(com|net|org)$/.test(e.what)};
 const VB={OPEN:'b-ok',ASK:'b-warn',SUSPECT:'b-bad',CLOSE:'b-dim'};
-const STEP=['Discover','Collect','Profile','Decide','Prove & enforce','Verify'];
+const STEP=['See the risk','Collect','Build the profile','Decide','Prove & enforce','Verify'];
+const GUIDE=[
+ ['See what an attacker can do today.','Run the attack simulation on the agent as it is.',()=>st.attack0>=ATT.length],
+ ['Read the configuration, watch the agent.','Click "Collect from all sources".',()=>st.collected>=D.sources.length],
+ ['See every need, and where it comes from.','Look through the profile - filter by layer. Nothing to click.',()=>true],
+ ['Answer what the product cannot decide alone.','Answer each question, or accept all suggestions.',()=>Object.keys(st.decided).length>=D.profile.filter(r=>r.view==='SUSPECT'||r.view==='ASK').length],
+ ['Close what is not needed - proven first.','For each stage: "Run the proof", then "Approve & enforce".',()=>D.stages.every((x,i)=>st.stage[i]==='enforced')],
+ ['Attack again. Check it is blocked.','Run the attack simulation on the secured agent.',()=>st.verify>=ATT.length]];
 const T0=Date.now(); let view='workload'; const ACT=[]; const log=(k,t)=>{ ACT.unshift({t:new Date().toTimeString().slice(0,8),k,txt:t}); };
 const st={step:0,reached:0,attack0:0,collected:0,decided:{},stage:{},verify:0,filter:'all'};
 const wait=ms=>new Promise(r=>setTimeout(r,ms)), toast=t=>{ $('toast').textContent=t; $('toast').classList.add('on'); setTimeout(()=>$('toast').classList.remove('on'),2200); };
@@ -93,12 +105,19 @@ $('foot').innerHTML=`k3s · 2 nodes<br>Cilium 1.20 · Tetragon<br><a href="./">�
 function header(){ const enforced=Object.values(st.stage).filter(x=>x==='enforced').length;
   $('state').innerHTML=enforced?`<span class="badge b-ok">${enforced} of ${D.stages.length} stages enforced</span>`:`<span class="badge b-bad">No policy selects it</span>`;
   $('steps').innerHTML=STEP.map((s,i)=>`<button class="${i<st.reached?'done':''} ${i===st.step?'cur':''}" ${i>st.reached?'disabled':''} data-s="${i}"><i>${i<st.reached?'✓':i+1}</i>${s}</button>`).join('');
-  $('steps').querySelectorAll('button').forEach(b=>b.onclick=()=>{ st.step=+b.dataset.s; draw(); }); }
-function next(label){ return `<button class="btn pri" id="nx">${label} ›</button>`; }
+  $('steps').querySelectorAll('button').forEach(b=>b.onclick=()=>{ st.step=+b.dataset.s; draw(); });
+  const g=GUIDE[st.step], done=g[2]();
+  const A=['Run attack simulation','Collect from all sources',null,'Accept all suggestions','Prove & enforce the next stage','Run attack simulation'][st.step];
+  $('guide').innerHTML=`<span class="gk">STEP ${st.step+1} OF ${STEP.length}</span><span class="gt">${g[0]} <span>${done?'':g[1]}</span>${done?' <span class="gd">✓ Done</span>':''}</span>${!done&&A?`<button class="btn ${st.step===0||st.step===5?'red':'pri'}" id="gact">${A}</button>`:''}${done&&st.step<STEP.length-1?`<button class="btn pri" id="gnx">Next: ${STEP[st.step+1]} ›</button>`:''}`;
+  if($('gact')) $('gact').onclick=async()=>{ $('gact').disabled=true; const q=x=>document.querySelector(x);
+    if(st.step===0) runAttack('before','attack0'); else if(st.step===1) runCollect(); else if(st.step===3) q('#all').click(); else if(st.step===5) runAttack('after','verify');
+    else if(st.step===4){ const i=D.stages.findIndex((x,j)=>st.stage[j]!=='enforced'); if(i>=0){ await runProof(i); enforce(i); } } };
+  if($('gnx')) $('gnx').onclick=()=>{ st.step++; st.reached=Math.max(st.reached,st.step); draw(); $('body').scrollTop=0; }; }
+function next(label){ return `<button class="btn pri" id="nx">${label.replace(/^Next: /,'Next: ')} ›</button>`; }
 function bindNext(){ const b=$('nx'); if(b) b.onclick=()=>{ st.step++; st.reached=Math.max(st.reached,st.step); draw(); $('body').scrollTop=0; }; }
 // ---------- 1 Discover ----------
 function discover(){ const net=D.profile.filter(r=>r.layer==='network');
-  return `<h2>Discover</h2><p class="lead">What the agent is, and what it can do today. Nothing is enforced on it yet.</p>
+  return `<h2>See the risk</h2><p class="lead">The agent as it runs today: what it does, the tools it may use, and what an attacker gets if a task is poisoned.</p>
   <div class="grid g4">${[['Workloads',D.workloads.length,'in '+D.namespace],['MCP tools',D.tools.length,D.tools.map(t=>t.name).join(' · ')],['Policies',0,'no Cilium or Tetragon policy selects it'],['Exposure','all','internet, K8s API, every program, every file']].map(([k,v,s])=>`<div class="card kpi"><span>${k}</span><b>${v}</b><span>${esc(s)}</span></div>`).join('')}</div>
   <div class="card" style="margin-top:14px"><h3>What this agent does <span class="badge b-vio">its job</span></h3><p style="margin:0;color:var(--text)">${esc(D.job)}</p>
    <p class="ev" style="margin:8px 0 0">It reads its tools from <span class="mono">/etc/mcp/mcp.json</span>. The task queue is outside its control - whoever can write a task can put code in it.</p></div>
@@ -107,7 +126,7 @@ function discover(){ const net=D.profile.filter(r=>r.layer==='network');
    <div class="card"><h3>Attack simulation <span class="badge b-bad">poisoned task → run_code</span></h3><p class="ev" style="margin:0 0 10px">An attacker poisons a task in the queue; the agent runs its code through its own run_code tool. Run it against the agent as it is today.</p>
      <div class="log" id="alog">${attackLog('before',st.attack0)}</div>
      <div class="actions"><button class="btn red" id="att" ${st.attack0>=ATT.length?'disabled':''}>Run attack simulation</button>${st.attack0>=ATT.length?'<span class="note">5 of 5 succeeded</span>':''}</div></div></div>
-  <div class="actions">${st.attack0>=ATT.length?next('Start securing it: collect'):'<span class="note">Run the simulation to see what an attacker gets today.</span>'}</div>`; }
+  <div class="actions">${st.attack0>=ATT.length?next('Next: Collect'):'<span class="note">Run the simulation to see what an attacker gets today.</span>'}</div>`; }
 function attackLog(which,n){ const A=D.attack[which]; return ATT.slice(0,n).map(([k,t,l,s])=>{ const r=A[k]||{}, e=(D.attack.engine||[]).find(EVM[k]);
   return `<div>${r.ok?'<span class="bad">✗ SUCCEEDED</span>':'<span class="ok">✓ BLOCKED  </span>'}  ${esc(t)} <span class="mut">- ${esc(r.detail)}</span>${!r.ok&&e&&which==='after'?`<br><span class="mut">     ${e.engine==='cilium'?'cilium':'tetragon'}: ${esc(e.action)} · ${esc(e.why)} · ${esc(e.what.replace(/\/\.\.[^/]+/,''))}</span>`:''}</div>`; }).join('')||'<span class="mut">$ waiting for a run</span>'; }
 async function runAttack(which,key){ const b=document.querySelector(which==='before'?'#att':'#att2'); b.disabled=true;
@@ -117,16 +136,16 @@ async function runAttack(which,key){ const b=document.querySelector(which==='bef
 // ---------- 2 Collect ----------
 function collect(){ return `<h2>Collect</h2><p class="lead">The product reads what the team already wrote and watches with the engines already running. No new agent in the cluster.</p>
   <div class="card"><table><tr><th>Source</th><th>Kind</th><th>Read</th><th>Status</th></tr>${D.sources.map((x,i)=>`<tr class="${i<st.collected?'new':''}"><td class="ink">${esc(x.name)}</td><td><span class="badge ${x.kind==='observed'?'b-vio':'b-info'}">${x.kind==='observed'?'watched':'configuration'}</span></td><td>${i<st.collected?esc(x.what):'<span class="mut">-</span>'}</td><td>${i<st.collected?'<span class="badge b-ok">done</span>':'<span class="badge b-dim">pending</span>'}</td></tr>`).join('')}</table></div>
-  <div class="actions"><button class="btn pri" id="col" ${st.collected>=D.sources.length?'disabled':''}>Collect from all sources</button>${st.collected>=D.sources.length?next('Build the profile'):''}</div>`; }
+  <div class="actions"><button class="btn pri" id="col" ${st.collected>=D.sources.length?'disabled':''}>Collect from all sources</button>${st.collected>=D.sources.length?next('Next: Build the profile'):''}</div>`; }
 async function runCollect(){ $('col').disabled=true; for(let i=st.collected;i<D.sources.length;i++){ st.collected=i+1; log('info',`Collected: ${D.sources[i].name} - ${D.sources[i].what}`); $('body').innerHTML=collect(); bind(); await wait(450); } log('info',`Profile built: ${D.profile.length} rows on 4 layers`); draw(); }
 // ---------- 3 Profile ----------
 function profile(){ const L=['all','network','programs','files','kernel'], rows=D.profile.filter(r=>st.filter==='all'||r.layer===st.filter);
   const c=v=>D.profile.filter(r=>r.view===v).length;
-  return `<h2>Profile</h2><p class="lead">Every row crosses two questions: is it needed (from the configuration) and was it seen (from watching). Every row keeps its evidence.</p>
+  return `<h2>Build the profile</h2><p class="lead">Every row crosses two questions: is it needed (from the configuration) and was it seen (from watching). Every row keeps its evidence.</p>
   <div class="grid g4">${[['Open','OPEN','needed'],['Ask','ASK','needed, not seen yet'],['Suspect','SUSPECT','seen, nothing needs it'],['Close','CLOSE','nothing needs it']].map(([k,v,s])=>`<div class="card kpi"><span><span class="badge ${VB[v]}">${k}</span></span><b>${c(v)}</b><span>${s}</span></div>`).join('')}</div>
   <div class="card" style="margin-top:14px"><div class="filters">${L.map(l=>`<button class="${st.filter===l?'on':''}" data-f="${l}">${l} ${l==='all'?D.profile.length:D.profile.filter(r=>r.layer===l).length}</button>`).join('')}</div>
   <table><tr><th>Layer</th><th>What</th><th>Needed</th><th>Seen</th><th>State</th><th>Evidence</th></tr>${rows.map(r=>`<tr><td>${r.layer}</td><td class="mono ink">${esc(r.what.replace(/^agent:/,''))}</td><td>${r.needed?'yes':'-'}</td><td>${r.seen?'yes':'-'}</td><td><span class="badge ${VB[r.view]}">${r.view}</span></td><td class="ev">${esc(r.why||'')}</td></tr>`).join('')}</table></div>
-  <div class="actions">${next('Review the decisions')}</div>`; }
+  <div class="actions">${next('Next: Decide')}</div>`; }
 // ---------- 4 Decide ----------
 function decide(){ const q=D.profile.filter(r=>r.view==='SUSPECT'||r.view==='ASK'), n=Object.keys(st.decided).length;
   return `<h2>Decide</h2><p class="lead">What is needed stays open. What nothing needs closes. What was seen but is not needed, and what is needed but not seen yet, waits for a person.</p>
@@ -135,7 +154,7 @@ function decide(){ const q=D.profile.filter(r=>r.view==='SUSPECT'||r.view==='ASK
     <td>${a?`<span class="badge ${a==='close'?'b-dim':'b-ok'}">${a==='close'?'closed':'kept open'}</span>`:`<button class="btn" data-d="${i}" data-a="${r.view==='SUSPECT'?'close':'keep'}" style="height:30px">${r.view==='SUSPECT'?'Keep closed':'Keep open'}</button>`}</td></tr>`; }).join('')}</table>
   <div class="actions"><button class="btn" id="all" ${n>=q.length?'disabled':''}>Accept all suggestions</button></div></div>
   <div class="card" style="margin-top:14px"><h3>Answered before <span class="badge b-info">decisions/agents.yaml</span></h3><p class="ev" style="margin:0">ConfigMap <span class="mono">agent-code</span> is not read by the product. A person checked it: the code takes every address from mcp.json - no address of its own. This lets Stage 2 close the internet.</p></div>
-  <div class="actions">${n>=q.length?next('Prove & enforce'):'<span class="note">Answer the questions to continue.</span>'}</div>`; }
+  <div class="actions">${n>=q.length?next('Next: Prove & enforce'):'<span class="note">Answer the questions to continue.</span>'}</div>`; }
 // ---------- 5 Harden ----------
 const ST_ORDER=['proposed','rehearsal','replay','watching','enforced'];
 function harden(){ return `<h2>Prove & enforce</h2><p class="lead">One stage at a time. Each is proven three times before it is enforced: rehearsal on the cards, replay on real recordings, and Watching on the cluster in log-only mode (Cilium audit, Tetragon monitor). You approve each one.</p>
@@ -145,7 +164,7 @@ function harden(){ return `<h2>Prove & enforce</h2><p class="lead">One stage at 
       <div class="proofs">${[['rehearsal','Rehearsal on the cards',ok],['replay','Replay on recordings',ok],['watching',`Watching ${D.watching.minutes} min · ${D.watching.flows} flows · nothing would drop`,s.watching]].map(([k,t,p],j)=>ix>j?`<span class="badge ${p?'b-ok':'b-bad'}">${p?'✓':'✗'} ${t}</span>`:`<span class="badge b-dim">${t}</span>`).join('')}</div></div>
       <div>${cur==='enforced'?'':ix<3?`<button class="btn" data-p="${i}">Run the proof</button>`:`<button class="btn go" data-e="${i}">Approve & enforce</button>`}</div></div>`; }).join('')}
   <div class="log" id="hlog">${hlog.join('<br>')||'<span class="mut">$ no stage run yet</span>'}</div>
-  <div class="actions">${D.stages.every((s,i)=>st.stage[i]==='enforced')?next('Verify with the attack'):'<span class="note">Prove and enforce every stage to continue.</span>'}</div>`; }
+  <div class="actions">${D.stages.every((s,i)=>st.stage[i]==='enforced')?next('Next: Verify'):'<span class="note">Prove and enforce every stage to continue.</span>'}</div>`; }
 let hlog=[];
 async function runProof(i){ const s=D.stages[i]; for(const p of ['rehearsal','replay','watching']){ st.stage[i]=p; log('ok',`Stage ${s.k} ${p}: PASS`); hlog.push(`<span class="mut">[stage ${s.k}]</span> ${p}${p==='watching'?` - ${s.engine==='Cilium'?'Cilium PolicyAuditMode on the agents endpoints':'Tetragon policy-mode monitor'}`:''} … <span class="ok">PASS</span>`); draw(); await wait(500); } }
 function enforce(i){ const s=D.stages[i]; st.stage[i]='enforced'; log('ok',`Stage ${s.k} approved and enforced: ${s.policies.map(p=>p.name).join(', ')}`); hlog.push(`<span class="mut">[stage ${s.k}]</span> approved · applied ${s.engine==='Cilium'?'CiliumNetworkPolicy':'TracingPolicyNamespaced (enforce)'} <span class="ok">✓</span>`); toast(`Stage ${s.k} enforced`); draw(); }
@@ -165,8 +184,7 @@ function verify(){ const nb=ATT.filter(([k])=>!(D.attack.after[k]||{}).ok).lengt
       <p class="ev" style="margin:12px 0 0">Machine time in the lab: one recording of each kind (network, programs, files) and ${D.watching.minutes} minutes of log-only Watching before enforcement. No policy was written by hand.</p></div>`; })()}`:''}`; }
 function draw(){ document.querySelectorAll('.side [data-v]').forEach(a=>a.classList.toggle('on',a.dataset.v===view));
   $('npol').textContent=D.stages.reduce((a,s)=>a+s.policies.length,0); $('nact').textContent=ACT.length||'';
-  $('steps').style.display=view==='workload'?'':'none';
-  header(); if(view!=='workload') $('steps').style.display='none';
+  header(); $('steps').style.display=$('guide').style.display=view==='workload'?'':'none';
   $('body').innerHTML=view==='workload'?[discover,collect,profile,decide,harden,verify][st.step]():view==='policies'?policiesView():view==='activity'?activityView():overviewView(); bind(); bindNext(); }
 let polSel=null;
 function policiesView(){ const two=st.stage[D.stages.findIndex(x=>x.k===2)]==='enforced';

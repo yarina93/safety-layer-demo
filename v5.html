@@ -175,17 +175,17 @@ button{font:inherit;cursor:pointer;color:inherit}
 /* computer screen (screen sharing): the picture on the left, the story on the right, full screen */
 @media (min-width:1100px) and (min-height:600px){
   body{display:block;min-height:0}
-  .app{max-width:none;height:100vh;height:100dvh;border:none;border-radius:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(400px,1fr);
+  .app{max-width:none;height:100vh;height:100dvh;border:none;border-radius:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(460px,1.05fr);
        grid-template-rows:auto auto minmax(0,1fr) auto auto;column-gap:32px;padding:20px 40px 20px;max-width:1500px;margin:0 auto}
   .top{grid-column:1/-1;height:30px}.brand{font-size:15.5px}.brand svg{width:22px;height:22px}
   .chap{grid-column:1/-1;font-size:13px;margin:14px 0 14px}
   .stage{grid-column:1;grid-row:3/6;height:auto;min-height:0;border-radius:20px;display:grid;place-items:center;padding:28px}
   .stage svg{width:100%;height:100%;max-width:500px;max-height:min(52vh,390px)}
   .cap{grid-column:2;grid-row:3;min-height:0;overflow:auto;padding-top:6px}
-  .cap h1{font-size:25px;margin-bottom:8px}.cap p.intro{font-size:16px;margin-bottom:14px}
-  .steps li{font-size:15px;padding:10px 0;gap:12px}.steps li .t small{font-size:13.5px}
-  .steps li .tag{min-width:100px;height:22px;font-size:10.5px}.steps li .n{width:24px;height:24px;font-size:12px}
-  .take{font-size:16px;margin-top:14px}.srcs,.srcl{font-size:14px}.pick b{font-size:17px}.pick small{font-size:14px}
+  .cap h1{font-size:30px;margin-bottom:10px}.cap p.intro{font-size:18px;margin-bottom:16px}
+  .steps li{font-size:17px;padding:12px 0;gap:14px}.steps li .t small{font-size:15px}
+  .steps li .tag{min-width:110px;height:25px;font-size:11.5px}.steps li .n{width:24px;height:24px;font-size:12px}
+  .take{font-size:18.5px;margin-top:16px}.srcs,.srcl{font-size:15px}.pick b{font-size:17px}.pick small{font-size:14px}
   .bar{grid-column:2;grid-row:4}.mode{grid-column:2;grid-row:5}
   .bar button{height:50px;font-size:15.5px}
   .cover,.inter{align-items:center;text-align:center;padding:56px 60px 40px}
@@ -534,7 +534,7 @@ const STEPS=[
    extra:()=>`<a class="tryit" href="lab.html" target="_blank" rel="noopener"><b>Now try it yourself ›</b><span>Harden the agent step by step on the real lab run: collect, profile, decide, prove, enforce - then attack it.</span></a>`,
    act:()=>'Start over', done:()=>false, run:()=>{ $('cover').hidden=false; drawCover(); } }
 ];
-const FULL=[0,1,2,3,4,5,6]; let ROUTE=FULL;
+const FULL=[0,1,2,3,4,6]; let ROUTE=FULL;   // 5 (proven in the lab) is left out: the summary links to lab.html
 function sceneResult(){ let s=DEFS;
   const T=[['8','attack steps','blocked','#4CC38A','#0F1F17','#2B6B48'],['0','needed calls','dropped','#4CC38A','#0F1F17','#2B6B48'],['1','step still ran','inside the pod','#E8A33D','#2A2213','#6B5223']];
   T.forEach(([n,a,b,ink,bg,st],i)=>{ const x=8+i*118; s+=`<rect x="${x}" y="10" width="108" height="122" rx="12" fill="${bg}" stroke="${st}"/><text x="${x+14}" y="62" style="font:700 38px var(--body)" fill="${ink}" data-count="${n}">${n}</text><text x="${x+14}" y="92" style="font:600 11.5px var(--body)" fill="#E6EAF2">${a}</text><text x="${x+14}" y="108" style="font:500 11px var(--body)" fill="#8C96A8">${b}</text>`; });
